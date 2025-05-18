@@ -1,0 +1,30 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: adn-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=yourStrong(!)Password
+    ports:
+      - "11433:1433"
+    volumes:
+      - sqlvolume:/var/opt/mssql
+
+  adntester.api:
+    build:
+      context: .
+      dockerfile: ADNTester.Api/Dockerfile
+    container_name: adn-api
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./https:/app/https:ro
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DockerConnection=Server=sqlserver;Database=ADNTesterDb;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;
+      - CERT_PASSWORD=MySecurePassword123!
+volumes:
+  sqlvolume:
