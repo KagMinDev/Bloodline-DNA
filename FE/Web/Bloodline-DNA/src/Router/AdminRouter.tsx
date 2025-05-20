@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import Dashboard from '../features/admin/screens/Dashboard';
+import Dashboard from '../features/admin/pages/Dashboard';
 import Sidebar from '../features/admin/components/Sidebar';
 
 export default function AdminRouter() {

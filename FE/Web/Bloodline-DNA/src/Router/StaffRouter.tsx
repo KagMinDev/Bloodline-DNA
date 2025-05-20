@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import Dashboard from '../features/staff/screen/Dashboard';
+import Dashboard from '../features/staff/pages/Dashboard';
 import Sidebar from '../features/staff/components/Sidebar';
 
 export default function StaffRouter() {
