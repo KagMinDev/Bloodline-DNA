@@ -1,9 +1,8 @@
-import React from 'react'
 
-function Dashboard() {
+function DashboardStaff() {
   return (
-    <div>Dashboard</div>
+    <div>DashboardStaff</div>
   )
 }
 
-export default Dashboard
+export default DashboardStaff

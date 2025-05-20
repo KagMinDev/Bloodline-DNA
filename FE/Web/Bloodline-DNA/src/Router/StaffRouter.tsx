@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import Dashboard from '../features/staff/screen/Dashboard';
+import { DashboardStaff } from '../features';
 import Sidebar from '../features/staff/components/Sidebar';
 
 export default function StaffRouter() {
@@ -8,8 +8,8 @@ export default function StaffRouter() {
             <Sidebar />
             <div className="flex-1">
                 <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="/" element={<DashboardStaff />} />
+                    <Route path="staff-dashboard" element={<DashboardStaff />} />
                     <Route path="*" element={<h1>404</h1>} />
                 </Routes>
             </div>

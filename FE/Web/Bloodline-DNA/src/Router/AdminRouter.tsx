@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
-import Dashboard from '../features/admin/screens/Dashboard';
+import { DashboardAdmin } from '../features';
 import Sidebar from '../features/admin/components/Sidebar';
 
 export default function AdminRouter() {
@@ -8,7 +8,7 @@ export default function AdminRouter() {
             <Sidebar />
             <div className="flex-1">
                 <Routes>
-                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/" element={<DashboardAdmin />} />
                     <Route path="*" element={<h1>404</h1>} />
                 </Routes>
             </div>
