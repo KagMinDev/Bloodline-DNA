@@ -20,18 +20,18 @@ interface SidebarDataType {
 const SidebarData: SidebarDataType[] = [
   {
     icon: FaChartBar,
-    heading: 'Quản lí đơn xét nghiệm',
-    href: '/staff/ordertest'
+    heading: 'Thống kê',
+    href: '/manager/dashboard'
   },
   {
     icon: BiCategory,
     heading: 'Quản lí danh mục',
-    href: '/staff/collectTest',
+    href: '/manager/category',
   },
   {
     icon: TbShoppingCartCog,
     heading: 'Quản lí sản phẩm',
-    href: '/staff/testhistory',
+    href: '/manager/products'
   },
   
 ];
@@ -49,7 +49,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className='flex h-screen w-64 flex-col bg-[#1F2B6C] shadow-lg'>
+    <div className='flex h-screen w-64 flex-col bg-[#5f9ea0] shadow-lg'>
       <div className="flex flex-col items-center mb-6">
           <img
             src={logoSidebar}
@@ -72,8 +72,8 @@ const Sidebar = () => {
                     onClick={() => toggleDropdown(item.heading)}
                     className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${
                       pathname.startsWith(item.href)
-                        ? 'bg-[#BFD2F8] font-bold text-[#1F2B6C]'
-                        : 'text-white hover:bg-[#BFD2F8] hover:text-[#1F2B6C]'
+                        ? 'bg-[#EDEBDF] font-bold text-[#325343]'
+                        : 'text-white hover:bg-[#EDEBDF] hover:text-[#325343]'
                     }`}
                   >
                     <div className='flex items-center'>
@@ -96,8 +96,8 @@ const Sidebar = () => {
                             <div
                               className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
                                 pathname === child.href
-                                  ? 'bg-[#BFD2F8] font-bold text-[#1F2B6C]'
-                                  : 'text-white hover:bg-[#BFD2F8] hover:text-[#1F2B6C]'
+                                  ? 'bg-[#EDEBDF] font-bold text-[#325343]'
+                                  : 'text-white hover:bg-[#EDEBDF] hover:text-[#325343]'
                               }`}
                             >
                               <div className='mr-3 text-lg'>
@@ -116,8 +116,8 @@ const Sidebar = () => {
                   <div
                     className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
                       pathname === item.href
-                        ? 'bg-[#BFD2F8] font-bold text-[#1F2B6C]'
-                        : 'text-white hover:bg-[#BFD2F8] hover:text-[#1F2B6C]'
+                        ? 'bg-[#EDEBDF] font-bold text-[#325343]'
+                        : 'text-white hover:bg-[#EDEBDF] hover:text-[#325343]'
                     }`}
                   >
                     <div className='mr-3 text-lg'>
@@ -133,7 +133,7 @@ const Sidebar = () => {
       </nav>
       <div className='px-4 py-6'>
         <Link to='/'>
-          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#BFD2F8] hover:text-[#1F2B6C]'>
+          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#EDEBDF] hover:text-[#325343]'>
             Đăng xuất
           </button>
         </Link>
