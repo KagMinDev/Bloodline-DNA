@@ -1,37 +1,40 @@
-import { WechatWorkOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from "antd";
-import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
+import { Heart, Mail, Shield, Unlock, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Loading, { ButtonLoading } from "../../../components/Loading";
-import type { Login } from "../types/auth.types";
+import Loading from "../../../components/Loading";
+import { emailRules } from "../../../utils/validators/auth";
 
-const LoginForm: React.FC = () => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+interface ForgotPasswordData {
+  Email: string;
+}
+
+const ForgotPassword: React.FC = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleLogin = async (data: Login) => {
+  // Handle forgot password request
+  const handleForgotPassword = async (values: ForgotPasswordData) => {
     setLoading(true);
     try {
-      // Giả lập dữ liệu đăng nhập để kiểm tra loading mà không cần API
-      console.log("Dữ liệu giả:", data);
+      // Giả lập gửi yêu cầu đặt lại mật khẩu để kiểm tra loading
+      console.log("Dữ liệu giả:", values);
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Giả lập thời gian chờ 1.5s
       // Nếu muốn dùng API thực, bỏ comment đoạn dưới và comment đoạn trên
       /*
       const response = await axios.post(
-        "http://localhost:5000/api/users/login",
-        data
+        "http://localhost:5000/api/users/forgot-password",
+        values
       );
-      console.log("Đăng nhập thành công:", response.data);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      console.log("Yêu cầu đặt lại mật khẩu thành công:", response.data);
       */
+      form.resetFields(); // Xóa form sau khi gửi thành công
     } catch (error) {
-      console.error("Đăng nhập thất bại:", error);
+      console.error("Gửi yêu cầu thất bại:", error);
       form.setFields([
         {
-          name: "PasswordHash",
-          errors: ["Đăng nhập thất bại, vui lòng kiểm tra lại"],
+          name: "Email",
+          errors: ["Gửi yêu cầu thất bại, vui lòng kiểm tra lại"],
         },
       ]);
     } finally {
@@ -149,28 +152,24 @@ const LoginForm: React.FC = () => {
             </div>
           </div>
 
-          <h1 className="mb-4 text-4xl font-bold">Hệ Thống Y Tế Thông Minh</h1>
+          <h1 className="mb-4 text-4xl font-bold">Khôi Phục Tài Khoản</h1>
           <p className="mb-8 text-xl text-blue-100">
-          Dịch vụ xét nghiệm ADN huyết thống
+            Lấy lại quyền truy cập hệ thống y tế của bạn
           </p>
 
           {/* Features */}
-          <div className="pt-8 mt-8 space-y-4 border-t border-white/20">
+          <div className="space-y-4">
             <div className="flex items-center justify-center space-x-3 text-blue-100">
-              <Shield size={18} />
+              <Shield size={20} />
               <span>Bảo mật thông tin tuyệt đối</span>
             </div>
             <div className="flex items-center justify-center space-x-3 text-blue-100">
-              <Heart size={18} />
-              <span>Theo dõi sức khỏe 24/7</span>
+              <Heart size={20} />
+              <span>Hỗ trợ khôi phục nhanh chóng</span>
             </div>
             <div className="flex items-center justify-center space-x-3 text-blue-100">
-              <Users size={18} />
-              <span>Đội ngũ bác sĩ chuyên nghiệp</span>
-            </div>
-            <div className="flex items-center justify-center space-x-3 text-blue-100">
-              <WechatWorkOutlined size={20} />
-              <span>Hỏi đáp nhanh 24h cùng chatbotAI</span>
+              <Users size={20} />
+              <span>Đội ngũ hỗ trợ 24/7</span>
             </div>
           </div>
         </div>
@@ -181,109 +180,72 @@ const LoginForm: React.FC = () => {
         <div className="absolute w-8 h-8 rounded-full top-1/3 right-8 bg-white/15"></div>
       </div>
 
-      {/* Right Side - Login Form */}
+      {/* Right Side - Forgot Password Form */}
       <div className="flex items-center justify-center flex-1 p-8 bg-white">
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="mb-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
-              <Lock size={24} className="text-blue-600" />
+              <Unlock size={24} className="text-blue-600" />
             </div>
-            <h2 className="mb-2 text-3xl font-bold text-gray-800">Đăng Nhập</h2>
+            <h2 className="mb-2 text-3xl font-bold text-gray-800">
+              Quên Mật Khẩu
+            </h2>
             <p className="text-gray-600">
-              Truy cập vào hệ thống quản lý y tế của bạn
+              Nhập email để nhận hướng dẫn đặt lại mật khẩu
             </p>
           </div>
 
-          {/* Login Form */}
+          {/* Forgot Password Form */}
           <Form
             form={form}
             layout="vertical"
-            onFinish={handleLogin}
+            onFinish={handleForgotPassword}
             className="space-y-6"
             disabled={loading}
+            requiredMark={false}
           >
             <Form.Item
               label={
                 <span className="text-sm font-semibold text-gray-700">
-                  Địa chỉ Email
+                  Địa chỉ Email <span className="text-red-500">*</span>
                 </span>
               }
               name="Email"
-              rules={[
-                { required: true, message: "Vui lòng nhập email" },
-                { type: "email", message: "Email không hợp lệ" },
-              ]}
+              rules={emailRules}
             >
               <Input
                 size="large"
                 placeholder="Nhập email của bạn"
                 prefix={<Mail size={15} className="mr-0.5 text-gray-400" />}
-                className="text-xs border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500 custom-placeholder"
-              />
-            </Form.Item>
-
-            <Form.Item
-              label={
-                <span className="text-sm font-semibold text-gray-700">
-                  Mật Khẩu
-                </span>
-              }
-              name="PasswordHash"
-              rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
-            >
-              <Input
-                size="large"
-                type={showPassword ? "text" : "password"}
-                placeholder="Nhập mật khẩu của bạn"
-                prefix={<Lock size={15} className="text-gray-400 mr-0.5" />}
-                suffix={
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 transition-colors cursor-pointer hover:text-blue-600"
-                  >
-                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                  </span>
-                }
                 className="border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500"
               />
             </Form.Item>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-1.5">
-                <input
-                  type="checkbox"
-                  className="text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-600">Ghi nhớ đăng nhập</span>
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-              >
-                Quên mật khẩu?
-              </Link>
-            </div>
 
             <Form.Item className="mb-6">
               <Button
                 type="primary"
                 htmlType="submit"
-                loading={loading}
                 size="large"
+                loading={loading}
                 className="w-full py-3 text-base font-semibold transition-all bg-blue-600 border-none rounded-lg shadow-lg hover:bg-blue-700 hover:shadow-xl"
               >
-                {loading ? (
-                  <ButtonLoading message="Đang đăng nhập..." />
-                ) : (
-                  "Đăng Nhập Hệ Thống"
-                )}
+                {loading ? "Đang xử lý..." : "Gửi Yêu Cầu"}
               </Button>
             </Form.Item>
           </Form>
 
           {/* Footer */}
           <div className="text-center">
+            <p className="mb-4 text-sm text-gray-600">
+              Quay lại{" "}
+              <Link
+                to="/login"
+                className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                Đăng nhập
+              </Link>
+            </p>
             <p className="mb-4 text-sm text-gray-600">
               Chưa có tài khoản?{" "}
               <Link
@@ -297,8 +259,6 @@ const LoginForm: React.FC = () => {
               <span>Hỗ trợ 24/7</span>
               <span>•</span>
               <span>Bảo mật SSL</span>
-              <span>•</span>
-              <span>HIPAA Compliant</span>
             </div>
           </div>
         </div>
@@ -306,7 +266,7 @@ const LoginForm: React.FC = () => {
       {loading && (
         <Loading
           fullScreen={true}
-          message="Đang xác thực thông tin đăng nhập..."
+          message="Đang gửi yêu cầu đặt lại mật khẩu..."
           size="large"
           color="blue"
         />
@@ -315,4 +275,4 @@ const LoginForm: React.FC = () => {
   );
 };
 
-export default LoginForm;
+export default ForgotPassword
