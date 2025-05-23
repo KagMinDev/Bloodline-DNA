@@ -16,9 +16,10 @@ export const emailRules: Rule[] = [
 // Quy tắc xác thực cho trường số điện thoại
 export const phoneRules: Rule[] = [
   { required: true, message: "Vui lòng nhập số điện thoại" },
-  { 
-    pattern: /^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 
-    message: "Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng số điện thoại Việt Nam" 
+  {
+    pattern: /^(0|\+84)[3|5|7|8|9][0-9]{8}$/,
+    message:
+      "Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng số điện thoại Việt Nam",
   },
 ];
 
@@ -31,15 +32,16 @@ export const addressRules: Rule[] = [
 // Quy tắc xác thực cho trường mật khẩu
 export const passwordRules: Rule[] = [
   { required: true, message: "Vui lòng nhập mật khẩu" },
-  { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" },
-  { 
+  {
     pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/,
-    message: "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ và số" 
+    message: "Mật khẩu phải có ít nhất 6 ký tự và bao gồm cả chữ cái và số",
   },
 ];
 
 // Hàm tạo quy tắc xác thực cho trường xác nhận mật khẩu
-export const createConfirmPasswordValidator = (getFieldValue: (field: string) => StoreValue): Rule => ({
+export const createConfirmPasswordValidator = (
+  getFieldValue: (field: string) => StoreValue
+): Rule => ({
   validator: (_: RuleObject, value: string) => {
     if (!value) {
       return Promise.reject("Vui lòng xác nhận mật khẩu");

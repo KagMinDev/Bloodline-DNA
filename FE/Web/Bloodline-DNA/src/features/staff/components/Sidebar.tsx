@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { BiCategory } from "react-icons/bi";
 import {
-  FaChartBar,
   FaAngleDown,
   FaAngleRight,
+  FaChartBar,
 } from 'react-icons/fa';
-import { BiCategory } from "react-icons/bi";
 import { TbShoppingCartCog } from "react-icons/tb";
+import { Link, useLocation } from 'react-router-dom';
 
 import logoSidebar from '../../../assets/logo.png';
 
@@ -62,7 +62,7 @@ const Sidebar = () => {
           />
           <h2 className="text-3xl font-bold text-white">Quản lí</h2>
         </div>
-      <nav className='scrollbar-hide flex-1 overflow-y-auto px-6 py-6'>
+      <nav className='flex-1 px-6 py-6 overflow-y-auto scrollbar-hide'>
         <ul className='space-y-2'>
           {SidebarData.map(item => (
             <li key={item.heading}>
@@ -89,7 +89,7 @@ const Sidebar = () => {
                     )}
                   </div>
                   {openDropdown[item.heading] && (
-                    <ul className='ml-2 mt-1 space-y-1'>
+                    <ul className='mt-1 ml-2 space-y-1'>
                       {item.children.map(child => (
                         <li key={child.heading}>
                           <Link to={child.href}>
@@ -131,6 +131,7 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
+      
       <div className='px-4 py-6'>
         <Link to='/'>
           <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#EDEBDF] hover:text-[#325343]'>
