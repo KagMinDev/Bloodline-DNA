@@ -1,15 +1,15 @@
 import { WechatOutlined, WechatWorkOutlined } from "@ant-design/icons";
 import { Button, Input, Spin } from "antd";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { XCircle } from "lucide-react";
 import { useState } from "react";
 
-const Chatbot: React.FC = () => {
+const ChatbotAI: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
     {
       sender: "bot",
-      text: "👋 Chào bạn! Tôi là trợ lý hỗ trợ xét nghiệm ADN. Bạn cần giúp gì?",
+      text: "👋 Chào bạn! Tôi là trợ lý hỗ trợ tư vấn về dịch vụ xét nghiệm ADN huyết thống. Bạn cần tìm hiểu gì?",
     },
   ]);
   const [inputText, setInputText] = useState("");
@@ -19,38 +19,29 @@ const Chatbot: React.FC = () => {
 
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
+
+    // Thêm tin nhắn người dùng
     setMessages((prev) => [...prev, { sender: "user", text: inputText }]);
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/api/openai", {
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "Bạn là một chatbot hỗ trợ khách hàng về xét nghiệm ADN huyết thống. Trả lời bằng tiếng Việt, chuyên nghiệp, thân thiện, và cung cấp thông tin chính xác liên quan đến xét nghiệm ADN.",
-          },
-          {
-            role: "user",
-            content: inputText,
-          },
-        ],
-        max_tokens: 150,
-        temperature: 0.7,
+      const response = await axios.post("http://localhost:5000/api/openai", {
+        message: inputText,
+        history: messages,
       });
 
-      const botReply = response.data.choices[0].message.content;
+      const botReply = response.data.reply;
       setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
     } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "bot",
-          text: "❗Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
-        },
-      ]);
+      // Gõ err là AxiosError hoặc unknown
+      const error = err as AxiosError<{ error?: string; details?: string }>;
+      console.error("Lỗi gọi backend:", error.response?.data || error.message);
+
+      // Xử lý lỗi chi tiết
+      const errorMessage = error.response?.data?.details
+        ? `Lỗi: ${error.response.data.details}`
+        : "❗Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.";
+      setMessages((prev) => [...prev, { sender: "bot", text: errorMessage }]);
     } finally {
       setIsLoading(false);
       setInputText("");
@@ -73,16 +64,16 @@ const Chatbot: React.FC = () => {
           width: "60px",
         }}
       >
-        <WechatWorkOutlined size={24} />
+        <WechatWorkOutlined style={{ fontSize: 24 }} />
       </Button>
 
       {isChatOpen && (
-        <div className="fixed bottom-24 right-6 w-80 h-[500px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border border-gray-200">
+        <div className="fixed bottom-26 right-9 w-[360px] h-[500px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border-gray-200">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 text-white bg-blue-600 rounded-t-xl">
-            <div className="flex items-center gap-2">
-              <WechatOutlined style={{ fontSize: 20}} />
-              <span className="text-base font-medium">Chat hỗ trợ DNA</span>
+          <div className="flex items-center justify-between px-4 py-3 text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-t-xl shadow-[0_4px_20px_rgba(0,123,255,0.3)] border-b-2 border-blue-800">
+          <div className="flex items-center gap-2">
+              <WechatOutlined style={{ fontSize: 20 }} />
+              <span className="text-base font-medium">Chat tư vấn ADN huyết thống</span>
             </div>
             <Button
               onClick={toggleChat}
@@ -122,7 +113,7 @@ const Chatbot: React.FC = () => {
           </div>
 
           {/* Input area */}
-          <div className="p-3 bg-white border-t">
+          <div className="p-3 bg-white border-gray-200 border-t-1">
             <div className="flex gap-2">
               <Input
                 placeholder="Nhập câu hỏi..."
@@ -147,4 +138,4 @@ const Chatbot: React.FC = () => {
   );
 };
 
-export default Chatbot;
+export default ChatbotAI;
