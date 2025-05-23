@@ -1,7 +1,6 @@
-import { WechatOutlined, WechatWorkOutlined } from "@ant-design/icons";
+import { CloseOutlined, WechatOutlined, WechatWorkOutlined } from "@ant-design/icons";
 import { Button, Input, Spin } from "antd";
 import axios, { AxiosError } from "axios";
-import { XCircle } from "lucide-react";
 import { useState } from "react";
 
 const ChatbotAI: React.FC = () => {
@@ -71,13 +70,16 @@ const ChatbotAI: React.FC = () => {
         <div className="fixed bottom-26 right-9 w-[360px] h-[500px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border-gray-200">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 text-white bg-gradient-to-r from-blue-600 to-blue-500 rounded-t-xl shadow-[0_4px_20px_rgba(0,123,255,0.3)] border-b-2 border-blue-800">
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <WechatOutlined style={{ fontSize: 20 }} />
-              <span className="text-base font-medium">Chat tư vấn ADN huyết thống</span>
+              <span className="text-base font-medium">
+                Chat tư vấn ADN huyết thống
+              </span>
             </div>
             <Button
+              size="small"
               onClick={toggleChat}
-              icon={<XCircle size={20} />}
+              icon={<CloseOutlined size={18} />}
               className="hover:bg-blue-700"
             />
           </div>
