@@ -13,7 +13,8 @@ import {
 import { AiFillStar } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { Footer, Header } from "../../components";
-import "./custom-styles.css"; // Thêm dòng này vào đầu file component
+import Chatbot from "../chatbotAI/components/ChatbotAI";
+import "./custom-styles.css";
 
 const { Panel } = Collapse;
 
@@ -253,6 +254,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
       <section className="py-20 text-white bg-gradient-to-br from-blue-600 to-blue-800">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <h2 className="mb-12 text-3xl font-bold text-center">
@@ -369,7 +371,7 @@ const HomePage: React.FC = () => {
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
                       <AiFillStar key={i} className="text-xl text-yellow-400" />
                     ))}
-                  </div>{" "}
+                  </div>
                   <p className="mb-4 text-base leading-relaxed text-gray-200">
                     "{testimonial.content}"
                   </p>
@@ -614,6 +616,11 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Chatbot */}
+      <div className="fixed bottom-0 right-0 p-4">
+        <Chatbot />
+      </div>
 
       {/* Footer */}
       <Footer />
