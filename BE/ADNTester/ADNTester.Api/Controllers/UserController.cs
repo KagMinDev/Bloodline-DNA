@@ -1,11 +1,12 @@
 ﻿using ADNTester.BO.DTOs.User;
 using ADNTester.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ADNTester.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/user")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -17,6 +18,7 @@ namespace ADNTester.Api.Controllers
         }
 
         // GET: api/User
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
