@@ -10,10 +10,10 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react";
+import { AiFillStar } from "react-icons/ai";
 import { Link } from "react-router-dom";
-import { Autoplay, Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
 import { Footer, Header } from "../../components";
+import "./custom-styles.css"; // Thêm dòng này vào đầu file component
 
 const { Panel } = Collapse;
 
@@ -259,50 +259,132 @@ const HomePage: React.FC = () => {
             Khách hàng nói gì về chúng tôi
           </h2>
 
-          <Swiper
-            modules={[Autoplay, Pagination]}
-            autoplay={{ delay: 300, disableOnInteraction: false }}
-            loop={true}
-            pagination={{ clickable: true }}
-            spaceBetween={30}
-            slidesPerView={1} // mobile default
-            breakpoints={{
-              768: { slidesPerView: 2 },
-              1024: { slidesPerView: 3 },
-            }}
-            className="!overflow-visible"
-          >
-            {[
-              {
-                content:
-                  "Dịch vụ rất chuyên nghiệp, kết quả nhanh và bảo mật. Tôi đã xác định được quan hệ huyết thống một cách dễ dàng.",
-                name: "Nguyễn Văn A",
-                location: "Hà Nội",
-              },
-              {
-                content:
-                  "Đội ngũ hỗ trợ rất nhiệt tình, giải đáp mọi thắc mắc. Kết quả chính xác và đáng tin cậy.",
-                name: "Trần Thị B",
-                location: "TP. HCM",
-              },
-              {
-                content:
-                  "Quy trình đơn giản, tôi chỉ cần đặt lịch và nhận kết quả qua email. Rất tiện lợi!",
-                name: "Lê Văn C",
-                location: "Đà Nẵng",
-              },
-            ].map((testimonial, index) => (
-              <SwiperSlide key={index} className="h-full">
-                <div className="h-full p-6 mx-2 rounded-lg bg-white/10 backdrop-blur-sm">
-                  <p className="mb-4 text-gray-200">"{testimonial.content}"</p>
-                  <p className="font-semibold">{testimonial.name}</p>
-                  <p className="text-sm text-gray-300">
-                    {testimonial.location}
+          {/* Auto-scrolling testimonials */}
+          <div className="relative overflow-hidden testimonial-container">
+            <div className="flex gap-6 auto-scroll-container">
+              {/* First set of testimonials */}
+              {[
+                {
+                  content:
+                    "Dịch vụ rất chuyên nghiệp, kết quả nhanh và bảo mật. Tôi đã xác định được quan hệ huyết thống một cách dễ dàng.",
+                  name: "Nguyễn Văn A",
+                  location: "Hà Nội",
+                  rating: 5,
+                },
+                {
+                  content:
+                    "Đội ngũ hỗ trợ rất nhiệt tình, giải đáp mọi thắc mắc. Kết quả chính xác và đáng tin cậy.",
+                  name: "Trần Thị B",
+                  location: "TP. HCM",
+                  rating: 4.5,
+                },
+                {
+                  content:
+                    "Quy trình đơn giản, tôi chỉ cần đặt lịch và nhận kết quả qua email. Rất tiện lợi!",
+                  name: "Lê Văn C",
+                  location: "Đà Nẵng",
+                  rating: 5,
+                },
+                {
+                  content:
+                    "Rất hài lòng với dịch vụ. Nhân viên tận tình, kết quả chính xác và nhanh chóng.",
+                  name: "Võ Thị D",
+                  location: "Cần Thơ",
+                  rating: 4,
+                },
+                {
+                  content:
+                    "Công nghệ hiện đại, quy trình minh bạch. Tôi cảm thấy yên tâm khi sử dụng dịch vụ.",
+                  name: "Hoàng Văn E",
+                  location: "Hải Phòng",
+                  rating: 5,
+                },
+              ].map((testimonial, index) => (
+                <div
+                  key={`first-${index}`}
+                  className="testimonial-card flex-shrink-0 p-6 rounded-lg bg-white/10 backdrop-blur-sm w-80 min-h-[200px] flex flex-col justify-between"
+                >
+                  <div className="flex mb-2">
+                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      <AiFillStar key={i} className="text-xl text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="mb-4 text-base leading-relaxed text-gray-200">
+                    "{testimonial.content}"
                   </p>
+                  <div className="mt-auto">
+                    <p className="font-semibold text-white">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-sm text-gray-300">
+                      {testimonial.location}
+                    </p>
+                  </div>
                 </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+              ))}
+
+              {/* Duplicate set for seamless loop */}
+              {[
+                {
+                  content:
+                    "Dịch vụ rất chuyên nghiệp, kết quả nhanh và bảo mật. Tôi đã xác định được quan hệ huyết thống một cách dễ dàng.",
+                  name: "Nguyễn Văn A",
+                  location: "Hà Nội",
+                  rating: 5,
+                },
+                {
+                  content:
+                    "Đội ngũ hỗ trợ rất nhiệt tình, giải đáp mọi thắc mắc. Kết quả chính xác và đáng tin cậy.",
+                  name: "Trần Thị B",
+                  location: "TP. HCM",
+                  rating: 4.5,
+                },
+                {
+                  content:
+                    "Quy trình đơn giản, tôi chỉ cần đặt lịch và nhận kết quả qua email. Rất tiện lợi!",
+                  name: "Lê Văn C",
+                  location: "Đà Nẵng",
+                  rating: 5,
+                },
+                {
+                  content:
+                    "Rất hài lòng với dịch vụ. Nhân viên tận tình, kết quả chính xác và nhanh chóng.",
+                  name: "Võ Thị D",
+                  location: "Cần Thơ",
+                  rating: 4,
+                },
+                {
+                  content:
+                    "Công nghệ hiện đại, quy trình minh bạch. Tôi cảm thấy yên tâm khi sử dụng dịch vụ.",
+                  name: "Hoàng Văn E",
+                  location: "Hải Phòng",
+                  rating: 5,
+                },
+              ].map((testimonial, index) => (
+                <div
+                  key={`second-${index}`}
+                  className="testimonial-card flex-shrink-0 p-6 rounded-lg bg-white/10 backdrop-blur-sm w-80 min-h-[200px] flex flex-col justify-between"
+                >
+                  <div className="flex mb-2">
+                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+                      <AiFillStar key={i} className="text-xl text-yellow-400" />
+                    ))}
+                  </div>{" "}
+                  <p className="mb-4 text-base leading-relaxed text-gray-200">
+                    "{testimonial.content}"
+                  </p>
+                  <div className="mt-auto">
+                    <p className="font-semibold text-white">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-sm text-gray-300">
+                      {testimonial.location}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
