@@ -2,7 +2,7 @@ import { WechatWorkOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from "antd";
 import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Loading, { ButtonLoading } from "../../../components/Loading";
 import type { Login } from "../types/auth.types";
 
@@ -10,6 +10,7 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (data: Login) => {
     setLoading(true);
@@ -26,6 +27,8 @@ const LoginForm: React.FC = () => {
       console.log("Đăng nhập thành công:", response.data);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       */
+      navigate("/");
+
     } catch (error) {
       console.error("Đăng nhập thất bại:", error);
       form.setFields([
