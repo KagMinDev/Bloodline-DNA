@@ -131,6 +131,7 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
+      
       <div className='px-4 py-6'>
         <Link to='/'>
           <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#EDEBDF] hover:text-[#325343]'>
