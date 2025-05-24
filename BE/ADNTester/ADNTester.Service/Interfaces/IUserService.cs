@@ -1,4 +1,5 @@
 ﻿using ADNTester.BO.DTOs.User;
+using ADNTester.BO.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,8 @@ namespace ADNTester.Service.Interfaces
     public interface IUserService
     {
         Task<IEnumerable<UserDto>> GetAllAsync();
-        Task<UserDto?> GetByIdAsync(string id);
-        Task<UserDto> CreateAsync(CreateUserDto dto);
-        Task<bool> UpdateAsync(UpdateUserDto dto);
-        Task<bool> DeleteAsync(string id);
+        Task<User> GetByIdAsync(string id);
+
+        Task<bool> UpdateProfileAsync(string id, UpdateProfileDto dto);
     }
 }

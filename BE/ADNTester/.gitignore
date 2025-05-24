@@ -237,6 +237,7 @@ ClientBin/
 *.dbproj.schemaview
 *.jfm
 *.pfx
+!https/*.pfx
 *.publishsettings
 orleans.codegen.cs
 
@@ -358,6 +359,5 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-
 # Fody - auto-generated XML schema
 FodyWeavers.xsd

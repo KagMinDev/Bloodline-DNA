@@ -17,6 +17,8 @@ namespace ADNTester.Service
         {
             // Đăng ký các Service
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IJwtTokenService, JwtTokenService>();
             // Thêm các service khác tương tự
 
             // Đăng ký AutoMapper (nếu chưa đăng ký ở Program.cs)
