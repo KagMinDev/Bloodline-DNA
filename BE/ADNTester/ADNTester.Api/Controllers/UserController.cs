@@ -1,8 +1,12 @@
-﻿using ADNTester.BO.DTOs.User;
+﻿using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.User;
 using ADNTester.Service.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace ADNTester.Api.Controllers
 {
@@ -11,10 +15,12 @@ namespace ADNTester.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         // GET: api/User
@@ -26,54 +32,42 @@ namespace ADNTester.Api.Controllers
             return Ok(users);
         }
 
-        // GET: api/User/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        /// <summary>
+        /// Lấy thông tin người dùng hiện tại.
+        /// </summary>
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetMyProfile()
         {
-            var user = await _userService.GetByIdAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userService.GetByIdAsync(userId!);
             if (user == null)
-                return NotFound();
+                return NotFound(new ApiResponse<string>($"Không tìm thấy người dùng có id: {userId}", HttpCodes.NotFound));
 
-            return Ok(user);
+            var profile = _mapper.Map<UserProfileDto>(user);
+            return Ok(new ApiResponse<UserProfileDto>(profile, "Thông tin người dùng truy vấn thành công"));
         }
-
-        // POST: api/User
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateUserDto dto)
+        /// <summary>
+        /// Cập nhật thông tin người dùng hiện tại.
+        /// </summary>
+        [HttpPut("me")]
+        [Authorize]
+        public async Task<IActionResult> UpdateMyProfile([FromBody] UpdateProfileDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userService.GetByIdAsync(userId!);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse<string>($"Không tìm thấy người dùng có id: {userId}", HttpCodes.NotFound));
+            }    
+            var result = await _userService.UpdateProfileAsync( userId, dto);
+            if (result)
+            {
+                return Ok(new ApiResponse<string>("Cập nhật thông tin thành công"));
+            }
 
-            var createdUser = await _userService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = createdUser.Id }, createdUser);
-        }
-
-        // PUT: api/User/{id}
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] UpdateUserDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (id != dto.Id)
-                return BadRequest("ID không khớp");
-
-            var success = await _userService.UpdateAsync(dto);
-            if (!success)
-                return NotFound();
-
-            return NoContent();
-        }
-
-        // DELETE: api/User/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(string id)
-        {
-            var success = await _userService.DeleteAsync(id);
-            if (!success)
-                return NotFound();
-
-            return NoContent();
+            return BadRequest(new ApiResponse<string>("Cập nhật thông tin thất bại"));
+            
         }
     }
 }

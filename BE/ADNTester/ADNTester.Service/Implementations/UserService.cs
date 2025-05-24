@@ -28,45 +28,41 @@ namespace ADNTester.Service.Implementations
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        public async Task<UserDto?> GetByIdAsync(string id)
+        public async Task<User> GetByIdAsync(string id)
         {
             var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
-            return user == null ? null : _mapper.Map<UserDto>(user);
+            return user;
         }
 
-        public async Task<UserDto> CreateAsync(CreateUserDto dto)
+        public async Task<bool> UpdateProfileAsync(string id, UpdateProfileDto dto)
         {
-            var user = _mapper.Map<User>(dto);
+            await _unitOfWork.BeginTransactionAsync(); //  Bắt đầu transaction
 
-            // TODO: Hash password here before saving user.PasswordHash = Hash(dto.Password)
-            // user.PasswordHash = SomeHashingFunction(dto.Password);
+            try
+            {
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
+                if (user == null)
+                {
+                    await _unitOfWork.RollbackAsync(); //  Rollback nếu không tìm thấy user
+                    return false;
+                }
 
-            await _unitOfWork.UserRepository.AddAsync(user);
-            await _unitOfWork.SaveChangesAsync();
-            return _mapper.Map<UserDto>(user);
-        }
+                user.Phone = dto.Phone;
+                user.FullName = dto.FullName;
+                user.Address = dto.Address;
 
-        public async Task<bool> UpdateAsync(UpdateUserDto dto)
-        {
-            var user = await _unitOfWork.UserRepository.GetByIdAsync(dto.Id);
-            if (user == null)
-                return false;
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.SaveChangesAsync();
 
-            // Cập nhật các trường cần thiết
-            _mapper.Map(dto, user);
+                await _unitOfWork.CommitAsync(); // Commit nếu thành công
 
-            _unitOfWork.UserRepository.Update(user);
-            return await _unitOfWork.SaveChangesAsync() > 0;
-        }
-
-        public async Task<bool> DeleteAsync(string id)
-        {
-            var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
-            if (user == null)
-                return false;
-
-            _unitOfWork.UserRepository.Remove(user);
-            return await _unitOfWork.SaveChangesAsync() > 0;
+                return true;
+            }
+            catch (Exception)
+            {
+                await _unitOfWork.RollbackAsync(); //  Rollback nếu có exception
+                throw;
+            }
         }
     }
 }
