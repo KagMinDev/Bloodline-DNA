@@ -8,11 +8,13 @@ namespace ADNTester.BO.Enums
 {
     public enum BookingStatus
     {
-        Pending,
-        KitSent,
-        SampleReceived,
-        Testing,
-        Completed,
-        Cancelled
+        Pending = 0,
+        KitSend = 1,
+        Confirmed = 2,
+        Completed = 3,
+        Cancelled = 4,
+        SampleRecived = 5,
+        Testing = 6
+
     }
 }

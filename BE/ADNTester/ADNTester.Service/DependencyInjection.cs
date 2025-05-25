@@ -19,9 +19,18 @@ namespace ADNTester.Service
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IJwtTokenService, JwtTokenService>();
-            // Thêm các service khác tương tự
+            services.AddScoped<ITestServiceService, TestServiceService>();
+            services.AddScoped<ITestBookingService, TestBookingService>();
+            services.AddScoped<IServicePriceService, ServicePriceService>();
+            services.AddScoped<IBlogService, BlogService>();
+            services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<ITestKitService, TestKitService>();
+            services.AddScoped<ITestResultService, TestResultService>();
+            services.AddScoped<ITestSampleService, TestSampleService>();
 
-            // Đăng ký AutoMapper (nếu chưa đăng ký ở Program.cs)
+
+
+            // Đăng ký AutoMapper
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
             return services;
