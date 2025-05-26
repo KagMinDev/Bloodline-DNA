@@ -27,6 +27,7 @@ namespace ADNTester.Service
             services.AddScoped<ITestKitService, TestKitService>();
             services.AddScoped<ITestResultService, TestResultService>();
             services.AddScoped<ITestSampleService, TestSampleService>();
+            services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 
 

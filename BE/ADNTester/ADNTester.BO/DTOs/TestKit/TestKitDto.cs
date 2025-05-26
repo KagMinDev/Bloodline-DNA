@@ -1,3 +1,4 @@
+using ADNTester.BO.DTOs.TestSample;
 using System;
 using System.Collections.Generic;
 

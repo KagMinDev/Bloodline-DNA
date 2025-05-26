@@ -1,6 +1,7 @@
 using ADNTester.BO.Enums;
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace ADNTester.BO.DTOs
 {
@@ -13,8 +14,6 @@ namespace ADNTester.BO.DTOs
         public BlogStatus Status { get; set; }
         public string AuthorId { get; set; }
         public string AuthorName { get; set; }
-        public List<string> TagIds { get; set; }
-        public List<string> TagNames { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
@@ -23,10 +22,18 @@ namespace ADNTester.BO.DTOs
     {
         public string Title { get; set; }
         public string Content { get; set; }
+        public IFormFile ThumbnailURL { get; set; }
+        public BlogStatus Status { get; set; }
+        public string AuthorId { get; set; }
+    }
+
+    public class CreateBlogWithUrlDto
+    {
+        public string Title { get; set; }
+        public string Content { get; set; }
         public string ThumbnailURL { get; set; }
         public BlogStatus Status { get; set; }
         public string AuthorId { get; set; }
-        public List<string> TagIds { get; set; }
     }
 
     public class UpdateBlogDto
@@ -36,6 +43,5 @@ namespace ADNTester.BO.DTOs
         public string Content { get; set; }
         public string ThumbnailURL { get; set; }
         public BlogStatus Status { get; set; }
-        public List<string> TagIds { get; set; }
     }
 } 

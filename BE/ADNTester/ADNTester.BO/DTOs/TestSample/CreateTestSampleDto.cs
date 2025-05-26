@@ -12,5 +12,6 @@ namespace ADNTester.BO.DTOs.TestSample
         public SampleType SampleType { get; set; }
         public string CollectedById { get; set; }
         public DateTime? CollectedAt { get; set; }
+        public DateTime? LabReceivedAt { get; set; }
     }
 } 

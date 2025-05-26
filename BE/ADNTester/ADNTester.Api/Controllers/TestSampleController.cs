@@ -1,4 +1,4 @@
-using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.TestSample;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

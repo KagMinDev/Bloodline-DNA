@@ -1,4 +1,5 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.TestSample;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

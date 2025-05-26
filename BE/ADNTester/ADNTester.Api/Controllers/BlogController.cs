@@ -1,5 +1,6 @@
 using ADNTester.BO.DTOs;
 using ADNTester.Service.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,10 +12,12 @@ namespace ADNTester.API.Controllers
     public class BlogController : ControllerBase
     {
         private readonly IBlogService _blogService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public BlogController(IBlogService blogService)
+        public BlogController(IBlogService blogService, ICloudinaryService cloudinaryService)
         {
             _blogService = blogService;
+            _cloudinaryService = cloudinaryService;
         }
 
         [HttpGet]
@@ -34,14 +37,33 @@ namespace ADNTester.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<string>> Create([FromBody] CreateBlogDto dto)
+        public async Task<ActionResult<string>> Create([FromForm] CreateBlogDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-                var id = await _blogService.CreateAsync(dto);
+                var blogWithUrl = new CreateBlogWithUrlDto
+                {
+                    Title = dto.Title,
+                    Content = dto.Content,
+                    Status = dto.Status,
+                    AuthorId = dto.AuthorId,
+                   
+                };
+
+                if (dto.ThumbnailURL != null)
+                {
+                    var thumbnailUrl = await _cloudinaryService.UploadImageAsync(dto.ThumbnailURL, "Image/Thumbnail");
+                    if (!string.IsNullOrEmpty(thumbnailUrl))
+                    {
+                        blogWithUrl.ThumbnailURL = thumbnailUrl;
+                    }
+                }
+
+                var id = await _blogService.CreateAsync(blogWithUrl);
+
                 return CreatedAtAction(nameof(GetById), new { id }, id);
             }
             catch (System.Exception ex)

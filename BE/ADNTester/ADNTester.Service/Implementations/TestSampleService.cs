@@ -1,4 +1,5 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.TestSample;
 using ADNTester.BO.Entities;
 using ADNTester.Repository.Interfaces;
 using ADNTester.Service.Interfaces;

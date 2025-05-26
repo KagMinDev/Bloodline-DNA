@@ -5,7 +5,6 @@ using ADNTester.Service.Interfaces;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ADNTester.Service.Implementations
@@ -33,27 +32,14 @@ namespace ADNTester.Service.Implementations
             return blog == null ? null : _mapper.Map<BlogDto>(blog);
         }
 
-        public async Task<string> CreateAsync(CreateBlogDto dto)
+        public async Task<string> CreateAsync(CreateBlogWithUrlDto dto)
         {
             // Validate author exists
             var author = await _unitOfWork.UserRepository.GetByIdAsync(dto.AuthorId);
             if (author == null)
                 throw new Exception("Author not found");
 
-            // Validate tags exist
-            if (dto.TagIds != null && dto.TagIds.Any())
-            {
-                foreach (var tagId in dto.TagIds)
-                {
-                    var tag = await _unitOfWork.TagRepository.GetByIdAsync(tagId);
-                    if (tag == null)
-                        throw new Exception($"Tag with id {tagId} not found");
-                }
-            }
-
             var blog = _mapper.Map<Blog>(dto);
-            blog.Tags = dto.TagIds?.Select(tagId => new BlogTag { TagId = tagId }).ToList();
-
             await _unitOfWork.IBlogRepository.AddAsync(blog);
             await _unitOfWork.SaveChangesAsync();
             return blog.Id;
@@ -65,26 +51,7 @@ namespace ADNTester.Service.Implementations
             if (blog == null)
                 return false;
 
-            // Validate tags exist
-            if (dto.TagIds != null && dto.TagIds.Any())
-            {
-                foreach (var tagId in dto.TagIds)
-                {
-                    var tag = await _unitOfWork.TagRepository.GetByIdAsync(tagId);
-                    if (tag == null)
-                        throw new Exception($"Tag with id {tagId} not found");
-                }
-            }
-
             _mapper.Map(dto, blog);
-
-            // Update tags
-            if (dto.TagIds != null)
-            {
-                blog.Tags.Clear();
-                blog.Tags = dto.TagIds.Select(tagId => new BlogTag { TagId = tagId }).ToList();
-            }
-
             _unitOfWork.IBlogRepository.Update(blog);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
