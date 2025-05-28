@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ForgotPassword, Login, Register } from "../features";
-import HomePage from "../features/home/HomePage";
+import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import StaffRouter from "./StaffRouter";
 

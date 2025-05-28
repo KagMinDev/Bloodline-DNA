@@ -192,7 +192,10 @@ export default StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
-  },
+    marginBottom: 12,
+    marginTop: 6,
+    paddingBottom: 20,
+    },
   footerText: {
     fontSize: 14,
     color: '#6B7280',

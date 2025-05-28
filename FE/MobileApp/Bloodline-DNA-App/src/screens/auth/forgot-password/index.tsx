@@ -2,13 +2,13 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -186,7 +186,7 @@ const ForgotPasswordScreen: React.FC = () => {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Quay lại{' '}
+            Quay lại{'   '}
             <Text
               style={styles.loginLink}
               onPress={() => navigation.navigate('Login')}
@@ -195,7 +195,7 @@ const ForgotPasswordScreen: React.FC = () => {
             </Text>
           </Text>
           <Text style={styles.footerText}>
-            Chưa có tài khoản?{' '}
+            Chưa có tài khoản?{'   '}
             <Text
               style={styles.registerLink}
               onPress={() => navigation.navigate('Register')}

@@ -2,12 +2,12 @@ import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Animated,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Animated,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -241,7 +241,6 @@ const LoginScreen: React.FC = () => {
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => {
-                console.log("Navigating to Register");
                 navigation.navigate("Register");
               }}
             >

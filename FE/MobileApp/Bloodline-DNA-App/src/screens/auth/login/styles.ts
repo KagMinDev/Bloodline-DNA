@@ -209,15 +209,18 @@ export default StyleSheet.create({
   },
   footer: {
     alignItems: 'center',
+    marginBottom: 12,
+    marginTop: 6,
+    paddingBottom: 20,
   },
   footerText: {
     fontSize: 14,
     color: '#6B7280',
-    marginBottom: 12,
   },
   registerLink: {
     color: '#2563EB',
     fontWeight: '600',
+    marginLeft: 10,
   },
   footerLinks: {
     flexDirection: 'row',
@@ -227,6 +230,7 @@ export default StyleSheet.create({
     fontSize: 12,
     color: '#6B7280',
     marginHorizontal: 8,
+    marginTop: 6,
   },
   loadingOverlay: {
     position: 'absolute',

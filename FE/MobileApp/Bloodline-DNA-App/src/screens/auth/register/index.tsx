@@ -2,13 +2,13 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Animated,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -330,7 +330,7 @@ const RegisterScreen: React.FC = () => {
                 <Icon name="lock" size={15} color="#9CA3AF" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Nhập mật khẩu của bạn"
+                  placeholder="Nhập mật khẩu"
                   placeholderTextColor="#9CA3AF"
                   value={password}
                   onChangeText={(text) => {
@@ -358,7 +358,7 @@ const RegisterScreen: React.FC = () => {
                 <Icon name="lock" size={15} color="#9CA3AF" style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Nhập lại mật khẩu của bạn"
+                  placeholder="Nhập lại mật khẩu"
                   placeholderTextColor="#9CA3AF"
                   value={confirmPassword}
                   onChangeText={(text) => {
@@ -416,7 +416,7 @@ const RegisterScreen: React.FC = () => {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Đã có tài khoản?{' '}
+            Đã có tài khoản?{'    '}
             <Text
               style={styles.loginLink}
               onPress={() => navigation.navigate('Login')}
