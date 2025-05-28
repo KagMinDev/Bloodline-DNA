@@ -5,13 +5,13 @@ const { width, height } = Dimensions.get('window');
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F0FDF4',
+    backgroundColor: '#F0F9FF',
   },
   contentContainer: {
     flexGrow: 1,
   },
   leftContainer: {
-    backgroundColor: '#059669',
+    backgroundColor: '#2563EB',
     padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
@@ -48,18 +48,18 @@ export default StyleSheet.create({
     position: 'absolute',
     width: 24,
     height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     left: 28,
     top: 18,
   },
-  activityIcon: {
+  heartIcon: {
     position: 'absolute',
     top: -8,
     right: -8,
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#60A5FA',
+    backgroundColor: '#4ADE80',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -72,52 +72,24 @@ export default StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#D1FAE5',
+    color: '#BFDBFE',
     textAlign: 'center',
     marginBottom: 24,
   },
-  benefitsContainer: {
+  featuresContainer: {
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.2)',
   },
-  benefitItem: {
+  featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 8,
   },
-  benefitText: {
-    color: '#D1FAE5',
+  featureText: {
+    color: '#BFDBFE',
     marginLeft: 8,
     fontSize: 14,
-  },
-  trustContainer: {
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-  },
-  trustText: {
-    fontSize: 12,
-    color: '#D1FAE5',
-    marginBottom: 8,
-  },
-  trustStats: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  trustNumber: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginHorizontal: 8,
-  },
-  trustLabel: {
-    fontSize: 10,
-    color: '#fff',
-    opacity: 0.8,
-    marginHorizontal: 8,
   },
   decorCircle: {
     position: 'absolute',
@@ -135,11 +107,11 @@ export default StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
-  userPlusIcon: {
+  unlockIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#DCFCE7',
+    backgroundColor: '#DBEAFE',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -162,13 +134,6 @@ export default StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
-  inputRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  inputHalf: {
-    width: '48%',
-  },
   label: {
     fontSize: 14,
     fontWeight: '600',
@@ -176,7 +141,7 @@ export default StyleSheet.create({
     marginBottom: 8,
   },
   required: {
-    color: '#F87171',
+    color: '#EF4444',
     fontSize: 12,
   },
   inputWrapper: {
@@ -204,33 +169,8 @@ export default StyleSheet.create({
     color: '#EF4444',
     marginTop: 4,
   },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  checkbox: {
-    width: 16,
-    height: 16,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  checkboxChecked: {
-    backgroundColor: '#059669',
-    borderColor: '#059669',
-  },
-  checkboxLabel: {
-    fontSize: 14,
-    color: '#6B7280',
-  },
-  linkText: {
-    color: '#059669',
-    textDecorationLine: 'underline',
-  },
-  registerButton: {
-    backgroundColor: '#059669',
+  submitButton: {
+    backgroundColor: '#2563EB',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -243,9 +183,9 @@ export default StyleSheet.create({
     elevation: 5,
   },
   disabledButton: {
-    backgroundColor: '#6EE7B7',
+    backgroundColor: '#93C5FD',
   },
-  registerButtonText: {
+  submitButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
@@ -259,7 +199,11 @@ export default StyleSheet.create({
     marginBottom: 12,
   },
   loginLink: {
-    color: '#059669',
+    color: '#2563EB',
+    fontWeight: '600',
+  },
+  registerLink: {
+    color: '#2563EB',
     fontWeight: '600',
   },
   footerLinks: {
