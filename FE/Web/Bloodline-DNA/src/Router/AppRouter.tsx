@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { NotFound } from "../components";
 import { ForgotPassword, Login, Register } from "../features";
 import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
@@ -16,6 +17,9 @@ const App: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         
         <Route path="/" element={<HomePage />} />
+
+        {/* Not found */}
+        <Route path="*" element={<NotFound />} />
 
         {/* Các route khác */}
         <Route path="/staff/*" element={<StaffRouter />} />
