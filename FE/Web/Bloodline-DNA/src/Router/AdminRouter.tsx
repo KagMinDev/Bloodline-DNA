@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
+import { NotFound } from '../components';
 import { DashboardAdmin } from '../features';
 import Sidebar from '../features/admin/components/Sidebar';
 
@@ -9,7 +10,7 @@ export default function AdminRouter() {
             <div className="flex-1">
                 <Routes>
                     <Route path="/" element={<DashboardAdmin />} />
-                    <Route path="*" element={<h1>404</h1>} />
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
         </div>

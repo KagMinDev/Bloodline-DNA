@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom';
+import { NotFound } from '../components';
 import { DashboardStaff } from '../features';
 import Sidebar from '../features/staff/components/Sidebar';
 
@@ -10,7 +11,7 @@ export default function StaffRouter() {
                 <Routes>
                     <Route path="/" element={<DashboardStaff />} />
                     <Route path="staff-dashboard" element={<DashboardStaff />} />
-                    <Route path="*" element={<h1>404</h1>} />
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
         </div>
