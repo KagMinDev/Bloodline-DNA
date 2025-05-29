@@ -1,5 +1,8 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.User;
 using ADNTester.Service.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -24,7 +27,7 @@ namespace ADNTester.API.Controllers
         public async Task<ActionResult<IEnumerable<BlogDto>>> GetAll()
         {
             var blogs = await _blogService.GetAllAsync();
-            return Ok(blogs);
+            return Ok(new ApiResponse<IEnumerable<BlogDto>>(blogs, "Lấy danh sách blog thành công"));
         }
 
         [HttpGet("{id}")]
@@ -32,15 +35,15 @@ namespace ADNTester.API.Controllers
         {
             var blog = await _blogService.GetByIdAsync(id);
             if (blog == null)
-                return NotFound();
-            return Ok(blog);
+                return NotFound(new ApiResponse<string>("Không tìm thấy blog", 404));
+            return Ok(new ApiResponse<BlogDto>(blog, "Thông tin Blog"));
         }
 
         [HttpPost]
         public async Task<ActionResult<string>> Create([FromForm] CreateBlogDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ApiResponse<string>("Dữ liệu không hợp lệ", 400));
 
             try
             {
@@ -50,7 +53,6 @@ namespace ADNTester.API.Controllers
                     Content = dto.Content,
                     Status = dto.Status,
                     AuthorId = dto.AuthorId,
-                   
                 };
 
                 if (dto.ThumbnailURL != null)
@@ -64,11 +66,11 @@ namespace ADNTester.API.Controllers
 
                 var id = await _blogService.CreateAsync(blogWithUrl);
 
-                return CreatedAtAction(nameof(GetById), new { id }, id);
+                return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo blog thành công", 201));
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new ApiResponse<string>(ex.Message, 400));
             }
         }
 
@@ -76,21 +78,21 @@ namespace ADNTester.API.Controllers
         public async Task<IActionResult> Update(string id, [FromBody] UpdateBlogDto dto)
         {
             if (id != dto.Id)
-                return BadRequest();
+                return BadRequest(new ApiResponse<string>("Id không khớp", 400));
 
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ApiResponse<string>("Dữ liệu không hợp lệ", 400));
 
             try
             {
                 var success = await _blogService.UpdateAsync(dto);
                 if (!success)
-                    return NotFound();
-                return NoContent();
+                    return NotFound(new ApiResponse<string>("Không tìm thấy blog để cập nhật", 404));
+                return Ok(new ApiResponse<string>(dto.Id, "Cập nhật blog thành công"));
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new ApiResponse<string>(ex.Message, 400));
             }
         }
 
@@ -99,9 +101,9 @@ namespace ADNTester.API.Controllers
         {
             var success = await _blogService.DeleteAsync(id);
             if (!success)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy blog để xóa", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(id, "Xóa blog thành công"));
         }
     }
 } 

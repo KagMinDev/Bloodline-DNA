@@ -1,4 +1,5 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.Common;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,14 +24,14 @@ namespace ADNTester.Api.Controllers
         public async Task<ActionResult<IEnumerable<PriceServiceDto>>> GetAll()
         {
             var prices = await _servicePriceService.GetAllAsync();
-            return Ok(prices);
+            return Ok(new ApiResponse<IEnumerable<PriceServiceDto>>(prices, "Lấy danh sách giá dịch vụ thành công"));
         }
 
         [HttpGet("service/{serviceId}")]
         public async Task<ActionResult<IEnumerable<PriceServiceDto>>> GetByServiceId(string serviceId)
         {
             var prices = await _servicePriceService.GetByServiceIdAsync(serviceId);
-            return Ok(prices);
+            return Ok(new ApiResponse<IEnumerable<PriceServiceDto>>(prices, "Lấy danh sách giá theo dịch vụ thành công"));
         }
 
         [HttpGet("{id}")]
@@ -38,16 +39,16 @@ namespace ADNTester.Api.Controllers
         {
             var price = await _servicePriceService.GetByIdAsync(id);
             if (price == null)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy giá dịch vụ", 404));
 
-            return Ok(price);
+            return Ok(new ApiResponse<PriceServiceDto>(price, "Thông tin giá dịch vụ"));
         }
 
         [HttpPost]
         public async Task<ActionResult<string>> Create(CreatePriceServiceDto dto)
         {
             var id = await _servicePriceService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, id);
+            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo giá dịch vụ thành công", 201));
         }
 
         [HttpPut]
@@ -55,9 +56,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _servicePriceService.UpdateAsync(dto);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy giá dịch vụ để cập nhật", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(dto.Id, "Cập nhật giá dịch vụ thành công"));
         }
 
         [HttpDelete("{id}")]
@@ -65,9 +66,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _servicePriceService.DeleteAsync(id);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy giá dịch vụ để xóa", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(id, "Xóa giá dịch vụ thành công"));
         }
     }
 } 
