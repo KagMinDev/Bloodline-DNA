@@ -15,6 +15,7 @@
 	  <PackageReference Include="CloudinaryDotNet" Version="1.27.5" />
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="MailKit" Version="4.12.1" />
   </ItemGroup>
 
 </Project>
