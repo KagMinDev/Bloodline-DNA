@@ -1,4 +1,5 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.Common;
 using ADNTester.BO.DTOs.TestKit;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -24,7 +25,7 @@ namespace ADNTester.Api.Controllers
         public async Task<ActionResult<IEnumerable<TestKitDto>>> GetAll()
         {
             var testKits = await _testKitService.GetAllAsync();
-            return Ok(testKits);
+            return Ok(new ApiResponse<IEnumerable<TestKitDto>>(testKits, "Lấy danh sách kit xét nghiệm thành công"));
         }
 
         [HttpGet("{id}")]
@@ -32,16 +33,16 @@ namespace ADNTester.Api.Controllers
         {
             var testKit = await _testKitService.GetByIdAsync(id);
             if (testKit == null)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy kit xét nghiệm", 404));
 
-            return Ok(testKit);
+            return Ok(new ApiResponse<TestKitDto>(testKit, "Thông tin kit xét nghiệm"));
         }
 
         [HttpPost]
         public async Task<ActionResult<string>> Create(CreateTestKitDto dto)
         {
             var id = await _testKitService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, id);
+            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo kit xét nghiệm thành công", 201));
         }
 
         [HttpPut]
@@ -49,9 +50,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _testKitService.UpdateAsync(dto);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy kit xét nghiệm để cập nhật", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(dto.Id, "Cập nhật kit xét nghiệm thành công"));
         }
 
         [HttpDelete("{id}")]
@@ -59,9 +60,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _testKitService.DeleteAsync(id);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy kit xét nghiệm để xóa", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(id, "Xóa kit xét nghiệm thành công"));
         }
     }
 } 
