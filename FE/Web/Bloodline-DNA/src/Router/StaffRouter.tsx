@@ -1,17 +1,20 @@
 import { Route, Routes } from 'react-router-dom';
-import { NotFound } from '../components';
-import { DashboardStaff } from '../features';
+import Ordertest from '../features/staff/pages/Ordertest';
 import Sidebar from '../features/staff/components/Sidebar';
+import CollectTest from '../features/staff/pages/CollectTest';
+import TestHistory from '../features/staff/pages/TestHistory';
 
 export default function StaffRouter() {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-[#FCFEFE]">
             <Sidebar />
             <div className="flex-1">
                 <Routes>
-                    <Route path="/" element={<DashboardStaff />} />
-                    <Route path="staff-dashboard" element={<DashboardStaff />} />
-                    <Route path="*" element={<NotFound />} />
+                    <Route path="/" element={<Ordertest />} />
+                    <Route path="ordertest" element={<Ordertest />} />
+                    <Route path="collectTest" element={<CollectTest />} />
+                    <Route path="testhistory" element={<TestHistory />} />
+                    <Route path="*" element={<h1>404</h1>} />
                 </Routes>
             </div>
         </div>
