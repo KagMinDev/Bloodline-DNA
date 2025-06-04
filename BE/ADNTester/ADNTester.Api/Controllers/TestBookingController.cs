@@ -1,4 +1,4 @@
-using ADNTester.BO.DTOs;
+﻿using ADNTester.BO.DTOs;
 using ADNTester.BO.DTOs.Common;
 using ADNTester.BO.DTOs.TestBooking;
 using ADNTester.BO.DTOs.TestKit;
@@ -35,17 +35,27 @@ namespace ADNTester.Api.Controllers
         public async Task<ActionResult<IEnumerable<TestBookingDto>>> GetAll()
         {
             var bookings = await _testBookingService.GetAllAsync();
-            return Ok(new ApiResponse<IEnumerable<TestBookingDto>>(bookings, "L?y danh s�ch ??t l?ch th�nh c�ng"));
+            return Ok(new ApiResponse<IEnumerable<TestBookingDto>>(bookings, "Lấy danh sách đặt lịch thành công"));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<TestBookingDto>> GetById(string id)
+        public async Task<ActionResult<TestBookingDetailDto>> GetById(string id)
         {
             var booking = await _testBookingService.GetByIdAsync(id);
             if (booking == null)
-                return NotFound(new ApiResponse<string>("Kh�ng t�m th?y ??t l?ch", 404));
+                return NotFound(new ApiResponse<string>("Không tìm thấy booking trên", 404));
 
-            return Ok(new ApiResponse<TestBookingDto>(booking, "Th�ng tin ??t l?ch"));
+            return Ok(new ApiResponse<TestBookingDetailDto>(booking, "Thông tin booking"));
+        }
+
+        [HttpGet("completed")]
+        public async Task<ActionResult<IEnumerable<TestBookingDto>>> GetBookingComplete()
+        {
+            var bookings = await _testBookingService.GetCompletedBookingsAsync();
+            if (bookings == null || !bookings.Any())
+                return NotFound(new ApiResponse<string>("Không tìm thấy Booking đã hoàn thành", 404));
+
+            return Ok(new ApiResponse<IEnumerable<TestBookingDto>>(bookings, "Thông tin Booking"));
         }
 
         [HttpPost]
@@ -54,7 +64,7 @@ namespace ADNTester.Api.Controllers
             try
             {
                 var bookingId = await _testBookingService.CreateWithTestKitAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = bookingId }, new ApiResponse<string>(bookingId, "T?o ??t l?ch th�nh c�ng", 201));
+                return CreatedAtAction(nameof(GetById), new { id = bookingId }, new ApiResponse<string>(bookingId, "Tạo Booking thành công", 200));
             }
             catch (Exception ex)
             {
@@ -67,9 +77,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _testBookingService.UpdateAsync(dto);
             if (!result)
-                return NotFound(new ApiResponse<string>("Kh�ng t�m th?y ??t l?ch ?? c?p nh?t", 404));
+                return NotFound(new ApiResponse<string>("Không tìm thấy đặt lịch để cập nhật", 404));
 
-            return Ok(new ApiResponse<string>(dto.Id, "C?p nh?t ??t l?ch th�nh c�ng"));
+            return Ok(new ApiResponse<string>(dto.Id, "Cập nhật đặt lịch thành công"));
         }
 
         [HttpDelete("{id}")]
@@ -77,18 +87,19 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _testBookingService.DeleteAsync(id);
             if (!result)
-                return NotFound(new ApiResponse<string>("Kh�ng t�m th?y ??t l?ch ?? x�a", 404));
+                return NotFound(new ApiResponse<string>("Không tìm thấy đặt lịch để xóa", 404));
 
-            return Ok(new ApiResponse<string>(id, "X�a ??t l?ch th�nh c�ng"));
+            return Ok(new ApiResponse<string>(id, "Xóa đặt lịch thành công"));
         }
-        [HttpPut("{bookingId}")]
+
+        [HttpPut("{bookingId}/status")]
         public async Task<IActionResult> UpdateStatus(string bookingId, BookingStatus newStatus)
         {
-            var result = await _testBookingService.UpdateBookingStatusAsync(bookingId,newStatus);
+            var result = await _testBookingService.UpdateBookingStatusAsync(bookingId, newStatus);
             if (!result)
-                return NotFound(new ApiResponse<string>("Kh�ng t�m th?y ??t l?ch ?? c?p nh?t", 404));
+                return NotFound(new ApiResponse<string>("Không tìm thấy đặt lịch để cập nhật", 404));
 
-            return Ok(new ApiResponse<string>(bookingId, "C?p nh?t ??t l?ch th�nh c�ng"));
+            return Ok(new ApiResponse<string>(bookingId, "Cập nhật đặt lịch thành công"));
         }
     }
 } 
