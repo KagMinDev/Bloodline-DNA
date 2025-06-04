@@ -10,6 +10,7 @@ export default function AdminRouter() {
             <div className="flex-1">
                 <Routes>
                     <Route path="/" element={<DashboardAdmin />} />
+                    <Route path="/users" element={<UserManager />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
