@@ -16,11 +16,20 @@ const Header: React.FC = () => {
 
         {/* Navigation */}
         <nav className="hidden md:flex space-x-8">
-          <a href="#features" className="text-gray-600 hover:text-blue-600 transition-colors">
+        <a href="/" className="text-gray-600 hover:text-blue-600 transition-colors">
+            Trang chủ
+          </a>
+          <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">
+            Về chúng tôi
+          </a>
+          <a href="/services" className="text-gray-600 hover:text-blue-600 transition-colors">
             Dịch vụ
           </a>
           <a href="#about" className="text-gray-600 hover:text-blue-600 transition-colors">
-            Về chúng tôi
+            Các Bác Sĩ
+          </a>
+          <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">
+            Tin tức
           </a>
           <a href="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">
             Liên hệ

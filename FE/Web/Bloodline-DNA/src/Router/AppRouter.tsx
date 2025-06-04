@@ -5,6 +5,8 @@ import { ForgotPassword, Login, Register } from "../features";
 import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import StaffRouter from "./StaffRouter";
+import { Services } from "../features/services/pages/Services";
+import { DetailServices } from "../features/services/pages/DetailServices";
 
 
 const App: React.FC = () => {
@@ -17,6 +19,8 @@ const App: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         
         <Route path="/" element={<HomePage />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/:id" element={<DetailServices />} />
 
         {/* Not found */}
         <Route path="*" element={<NotFound />} />
