@@ -41,10 +41,26 @@ namespace ADNTester.Service.Implementations
             return _mapper.Map<IEnumerable<TestBookingDto>>(bookings);
         }
 
-        public async Task<TestBookingDto> GetByIdAsync(string id)
+        public async Task<TestBookingDetailDto> GetByIdAsync(string id)
         {
             var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(id);
-            return booking == null ? null : _mapper.Map<TestBookingDto>(booking);
+            if (booking == null)
+                return null;
+
+            
+            booking.Client = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+            return _mapper.Map<TestBookingDetailDto>(booking);
+        }
+
+        public async Task<TestBookingDetailDto> GetBookingDetailByIdAsync(string id)
+        {
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(id);
+            if (booking == null)
+                return null;
+
+           
+            booking.Client = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+            return _mapper.Map<TestBookingDetailDto>(booking);
         }
 
         public async Task<string> CreateAsync(CreateTestBookingDto dto)
@@ -116,6 +132,13 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.TestBookingRepository.Remove(booking);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<TestBookingDto>> GetCompletedBookingsAsync()
+        {
+            var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
+            var completedBookings = bookings.Where(b => b.Status == BookingStatus.Completed);
+            return _mapper.Map<IEnumerable<TestBookingDto>>(completedBookings);
         }
 
         public async Task<bool> UpdateBookingStatusAsync(string bookingId, BookingStatus newStatus)
