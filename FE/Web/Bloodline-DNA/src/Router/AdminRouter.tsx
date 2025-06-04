@@ -11,6 +11,8 @@ export default function AdminRouter() {
                 <Routes>
                     <Route path="/" element={<DashboardAdmin />} />
                     <Route path="/users" element={<UserManager />} />
+
+                    {/* Not found */}
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>

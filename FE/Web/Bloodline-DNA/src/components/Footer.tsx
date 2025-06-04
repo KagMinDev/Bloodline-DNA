@@ -8,33 +8,51 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           {/* Logo & About */}
           <div>
-            <h2 className="mb-4 text-2xl font-bold text-blue-800">ADN Huyết Thống</h2>
+            <h2 className="mb-4 text-2xl font-bold text-blue-800">
+              ADN Huyết Thống
+            </h2>
             <p className="text-sm leading-relaxed text-gray-600">
-              Nền tảng xét nghiệm ADN huyết thống chuyên nghiệp, bảo mật và nhanh chóng – đồng hành cùng bạn trong hành trình xác định quan hệ gia đình.
+              Nền tảng xét nghiệm ADN huyết thống chuyên nghiệp, bảo mật và
+              nhanh chóng – đồng hành cùng bạn trong hành trình xác định quan hệ
+              gia đình.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-blue-700">Liên kết nhanh</h3>
+            <h3 className="mb-4 text-lg font-semibold text-blue-700">
+              Liên kết nhanh
+            </h3>
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
-                <Link to="/login" className="transition-colors hover:text-blue-600">
+                <Link
+                  to="/login"
+                  className="transition-colors hover:text-blue-600"
+                >
                   Đăng nhập
                 </Link>
               </li>
               <li>
-                <Link to="/register" className="transition-colors hover:text-blue-600">
+                <Link
+                  to="/register"
+                  className="transition-colors hover:text-blue-600"
+                >
                   Đăng ký
                 </Link>
               </li>
               <li>
-                <Link to="/forgot-password" className="transition-colors hover:text-blue-600">
+                <Link
+                  to="/forgot-password"
+                  className="transition-colors hover:text-blue-600"
+                >
                   Quên mật khẩu
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="transition-colors hover:text-blue-600">
+                <Link
+                  to="/contact"
+                  className="transition-colors hover:text-blue-600"
+                >
                   Liên hệ hỗ trợ
                 </Link>
               </li>
@@ -43,7 +61,9 @@ const Footer: React.FC = () => {
 
           {/* Contact Info */}
           <div>
-            <h3 className="mb-4 text-lg font-semibold text-blue-700">Liên hệ</h3>
+            <h3 className="mb-4 text-lg font-semibold text-blue-700">
+              Liên hệ
+            </h3>
             <ul className="space-y-3 text-sm text-gray-600">
               <li className="flex items-start gap-2">
                 <Mail className="text-blue-500" size={16} />
@@ -51,7 +71,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-start gap-2">
                 <Phone className="text-blue-500" size={16} />
-                <span>+84 342 555 702</span>
+                <span>+ 84 342 555 702</span>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="text-blue-500" size={16} />
@@ -63,7 +83,14 @@ const Footer: React.FC = () => {
 
         {/* Bottom */}
         <div className="pt-8 mt-12 text-sm text-center text-gray-500 border-t border-gray-200">
-          © 2025 ADN Huyết Thống. Bảo mật – Chính xác – Chuyên nghiệp.
+          © 2025 ADN Huyết Thống.
+          <p className="flex justify-center gap-4 pt-2">
+            <span>Bảo mật</span>
+            <span>–</span>
+            <span>Chính xác</span>
+            <span>–</span>
+            <span>Chuyên nghiệp</span>
+          </p>
         </div>
       </div>
     </footer>

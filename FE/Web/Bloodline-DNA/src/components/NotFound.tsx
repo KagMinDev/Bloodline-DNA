@@ -1,8 +1,17 @@
 import { Button } from "antd";
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import Loading from "./Loading";
 
 const NotFound: React.FC = () => {
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleBackToHome = () => {
+    setLoading(true);
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1000); // Simulate a delay for the loading effect
+  };
+
   const DNAIcon = () => (
     <div className="relative w-16 h-16 md:w-24 md:h-24">
       <svg
@@ -138,16 +147,23 @@ const NotFound: React.FC = () => {
           Rất tiếc, trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
           Hãy quay lại trang chủ để tiếp tục khám phá.
         </p>
-        <Link to="/">
-          <Button
-            type="primary"
-            size="large"
-            className="px-6 py-3 transition-all duration-300 bg-blue-600 border-none shadow-lg hover:bg-blue-700 hover:shadow-xl"
-          >
-            Quay lại Trang chủ
-          </Button>
-        </Link>
+        <Button
+          onClick={handleBackToHome}
+          type="primary"
+          size="large"
+          className="px-6 py-3 transition-all duration-300 bg-blue-600 border-none shadow-lg hover:bg-blue-700 hover:shadow-xl"
+        >
+          Quay lại Trang chủ
+        </Button>
       </div>
+      {loading && (
+        <Loading
+          fullScreen={true}
+          message="Đang quay về trang chủ..."
+          size="large"
+          color="blue"
+        />
+      )}
     </div>
   );
 };

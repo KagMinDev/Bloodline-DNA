@@ -1,5 +1,5 @@
 
-function DashboardAdmin() {
+const DashboardAdmin = () => {
   return (
     <div>Dashboard</div>
   )
