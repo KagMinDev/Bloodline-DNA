@@ -7,8 +7,8 @@ import AdminRouter from "./AdminRouter";
 import StaffRouter from "./StaffRouter";
 import { Services } from "../features/services/pages/Services";
 import { DetailServices } from "../features/services/pages/DetailServices";
-
-
+import { Doctors } from "../features/services/pages/Doctors";
+import { Contacts } from "../features/services/pages/Contacts";
 const App: React.FC = () => {
   return (
     <Router>
@@ -21,6 +21,8 @@ const App: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<DetailServices />} />
+        <Route path="/doctors" element={<Doctors />} />
+        <Route path="/contacts" element={<Contacts />} />
 
         {/* Not found */}
         <Route path="*" element={<NotFound />} />
