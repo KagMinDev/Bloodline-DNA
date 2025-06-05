@@ -8,7 +8,7 @@ const initialUsers: User[] = [
 
 const UserMangement = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
-
+  
   return (
     <div style={{ padding: 24 }}>
       <h2>Quản lý người dùng</h2>
