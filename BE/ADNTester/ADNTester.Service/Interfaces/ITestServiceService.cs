@@ -11,5 +11,6 @@ namespace ADNTester.Service.Interfaces
         Task<string> CreateAsync(CreateTestServiceDto dto);
         Task<bool> UpdateAsync(UpdateTestServiceDto dto);
         Task<bool> DeleteAsync(string id);
+       
     }
 } 
