@@ -24,8 +24,8 @@ const SidebarData: SidebarDataType[] = [
   },
   {
     icon: BiCategory,
-    heading: 'Quản lí danh mục',
-    href: '/admin/category',
+    heading: 'Quản lí người dùng',
+    href: '/admin/users',
   },
   {
     icon: TbShoppingCartCog,
