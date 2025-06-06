@@ -1,7 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 import { NotFound } from '../components';
-import { DashboardAdmin } from '../features';
 import Sidebar from '../features/admin/components/Sidebar';
+import UserMangement from '../features/admin/pages/UserMangement';
+import Dashboard from '../features/admin/pages/Dashboard';
 
 export default function AdminRouter() {
     return (
@@ -9,8 +10,8 @@ export default function AdminRouter() {
             <Sidebar />
             <div className="flex-1">
                 <Routes>
-                    <Route path="/" element={<DashboardAdmin />} />
-                    <Route path="/users" element={<UserManager />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/users" element={<UserMangement />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
