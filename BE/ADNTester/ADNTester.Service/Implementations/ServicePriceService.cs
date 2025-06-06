@@ -1,4 +1,4 @@
-using ADNTester.BO.DTOs;
+﻿using ADNTester.BO.DTOs;
 using ADNTester.BO.Entities;
 using ADNTester.Repository.Interfaces;
 using ADNTester.Service.Interfaces;
@@ -66,6 +66,30 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.ServicePriceRepository.Remove(price);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+        public async Task<IEnumerable<PriceServiceDto>> GetLatestEffectivePricesAsync()
+        {
+            var prices = await _unitOfWork.ServicePriceRepository.GetAllAsync();
+
+            // Nhóm các giá theo ServiceId và lấy giá có EffectiveFrom gần nhất cho mỗi service
+            var latestPrices = prices
+                .GroupBy(p => p.ServiceId)
+                .Select(g => g.OrderByDescending(p => p.EffectiveFrom).First())
+                .Where(p => p.EffectiveTo == null || p.EffectiveTo > DateTime.UtcNow);
+
+            // Lấy thông tin TestService cho mỗi price
+            var pricesWithService = new List<ServicePrice>();
+            foreach (var price in latestPrices)
+            {
+                var service = await _unitOfWork.TestServiceRepository.GetByIdAsync(price.ServiceId);
+                if (service != null)
+                {
+                    price.Service = service;
+                    pricesWithService.Add(price);
+                }
+            }
+
+            return _mapper.Map<IEnumerable<PriceServiceDto>>(pricesWithService);
         }
     }
 } 

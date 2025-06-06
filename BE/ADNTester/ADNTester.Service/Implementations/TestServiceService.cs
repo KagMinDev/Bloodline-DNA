@@ -120,5 +120,7 @@ namespace ADNTester.Service.Implementations
             _unitOfWork.TestServiceRepository.Remove(service);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
+
+       
     }
 } 

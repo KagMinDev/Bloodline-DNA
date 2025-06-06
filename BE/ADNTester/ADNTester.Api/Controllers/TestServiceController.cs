@@ -1,5 +1,6 @@
 using ADNTester.BO.DTOs;
 using ADNTester.BO.DTOs.Common;
+using ADNTester.Service.Implementations;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,5 +64,7 @@ namespace ADNTester.Api.Controllers
 
             return Ok(new ApiResponse<string>(id, "Xóa dịch vụ xét nghiệm thành công"));
         }
+
+       
     }
 } 

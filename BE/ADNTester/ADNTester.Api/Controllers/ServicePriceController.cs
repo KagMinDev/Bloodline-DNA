@@ -70,5 +70,11 @@ namespace ADNTester.Api.Controllers
 
             return Ok(new ApiResponse<string>(id, "Xóa giá dịch vụ thành công"));
         }
+        [HttpGet("latest")]
+        public async Task<ActionResult<IEnumerable<PriceServiceDto>>> GetLatestEffectivePrices()
+        {
+            var prices = await _servicePriceService.GetLatestEffectivePricesAsync();
+            return Ok(new ApiResponse<IEnumerable<PriceServiceDto>>(prices, "Lấy danh sách giá dịch vụ hiện tại thành công"));
+        }
     }
 } 
