@@ -247,4 +247,18 @@ export default StyleSheet.create({
     fontSize: 16,
     marginTop: 12,
   },
+  inputError: {
+    borderColor: '#EF4444',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#EF4444',
+    marginTop: 4,
+  },
+  required: {
+    color: "#F87171",
+    fontSize: 12,
+    marginRight: 4,
+    marginTop: 3,
+  },
 });
