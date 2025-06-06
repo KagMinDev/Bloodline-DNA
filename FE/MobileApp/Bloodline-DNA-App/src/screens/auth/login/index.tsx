@@ -20,6 +20,8 @@ const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [emailError, setEmailError] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // DNA animation
@@ -35,7 +37,35 @@ const LoginScreen: React.FC = () => {
     ).start();
   }, []);
 
+  const validateInputs = (): boolean => {
+    let isValid = true;
+    setEmailError("");
+    setPasswordError("");
+
+    if (!email.trim()) {
+      setEmailError("Vui lòng nhập địa chỉ email");
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Địa chỉ email không hợp lệ");
+      isValid = false;
+    }
+
+    if (!password.trim()) {
+      setPasswordError("Vui lòng nhập mật khẩu");
+      isValid = false;
+    } else if (password.length < 6) {
+      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
   const handleLogin = async (data: Login) => {
+    if (!validateInputs()) {
+      return;
+    }
+
     setLoading(true);
     try {
       console.log("Dữ liệu giả:", data);
@@ -43,6 +73,7 @@ const LoginScreen: React.FC = () => {
       navigation.navigate("Main");
     } catch (error) {
       console.error("Đăng nhập thất bại:", error);
+      setEmailError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
     } finally {
       setLoading(false);
     }
@@ -154,7 +185,10 @@ const LoginScreen: React.FC = () => {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Địa chỉ Email</Text>
+            <View style={{ flexDirection: "row"}}>
+              <Text style={styles.required}>*</Text>
+              <Text style={styles.label}>Địa chỉ Email</Text>
+            </View>
             <View style={styles.inputWrapper}>
               <Icon
                 name="email"
@@ -163,20 +197,29 @@ const LoginScreen: React.FC = () => {
                 style={styles.inputIcon}
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, emailError && styles.inputError]}
                 placeholder="Nhập email của bạn"
                 placeholderTextColor="#9CA3AF"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setEmailError("");
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!loading}
               />
             </View>
+            {emailError ? (
+              <Text style={styles.errorText}>{emailError}</Text>
+            ) : null}
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Mật Khẩu</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={styles.required}>*</Text>
+              <Text style={styles.label}>Mật Khẩu</Text>
+            </View>
             <View style={styles.inputWrapper}>
               <Icon
                 name="lock"
@@ -185,11 +228,14 @@ const LoginScreen: React.FC = () => {
                 style={styles.inputIcon}
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, passwordError && styles.inputError]}
                 placeholder="Nhập mật khẩu của bạn"
                 placeholderTextColor="#9CA3AF"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setPasswordError("");
+                }}
                 secureTextEntry={!showPassword}
                 editable={!loading}
               />
@@ -204,6 +250,9 @@ const LoginScreen: React.FC = () => {
                 />
               </TouchableOpacity>
             </View>
+            {passwordError ? (
+              <Text style={styles.errorText}>{passwordError}</Text>
+            ) : null}
           </View>
 
           <View style={styles.formOptions}>

@@ -12,5 +12,6 @@ namespace ADNTester.Service.Interfaces
         Task<string> CreateAsync(CreatePriceServiceDto dto);
         Task<bool> UpdateAsync(UpdatePriceServiceDto dto);
         Task<bool> DeleteAsync(string id);
+        Task<IEnumerable<PriceServiceDto>> GetLatestEffectivePricesAsync();
     }
 } 

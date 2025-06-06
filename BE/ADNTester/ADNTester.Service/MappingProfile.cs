@@ -40,7 +40,9 @@ namespace ADNTester.Service
 
             #region ServicePrice Mapping
             CreateMap<ServicePrice, PriceServiceDto>()
-                .ForMember(dest => dest.CollectionMethod, opt => opt.MapFrom(src => src.CollectionMethod.ToString()));
+                
+                .ForMember(dest => dest.CollectionMethod, opt => opt.MapFrom(src => src.CollectionMethod.ToString()))
+                .ForMember(dest => dest.TestServiceInfor, opt => opt.MapFrom(src => src.Service));
             CreateMap<CreatePriceServiceDto, ServicePrice>();
             CreateMap<UpdatePriceServiceDto, ServicePrice>();
             #endregion
