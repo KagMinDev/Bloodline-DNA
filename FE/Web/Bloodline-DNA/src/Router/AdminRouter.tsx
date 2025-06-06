@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { NotFound } from '../components';
-import { DashboardAdmin } from '../features';
+import { DashboardAdmin, UserManager } from '../features';
 import Sidebar from '../features/admin/components/Sidebar';
 
 export default function AdminRouter() {

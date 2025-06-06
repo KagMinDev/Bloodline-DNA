@@ -6,7 +6,7 @@ const initialUsers: User[] = [
   { id: 2, name: 'Trần Thị B', email: 'b@gmail.com', role: 'Nhân viên', status: 'Đã khóa' },
 ];
 
-const UserMangement = () => {
+const UserManager = () => {
   const [users, setUsers] = useState<User[]>(initialUsers);
   
   return (
@@ -44,4 +44,4 @@ const UserMangement = () => {
   );
 }
 
-export default UserMangement;
+export default UserManager;
