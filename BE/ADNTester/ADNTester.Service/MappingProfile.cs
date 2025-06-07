@@ -57,6 +57,7 @@ namespace ADNTester.Service
             CreateMap<TestKit, TestKitDto>();
             CreateMap<CreateTestKitDto, TestKit>();
             CreateMap<UpdateTestKitDto, TestKit>();
+            CreateMap<TestKit, TestKitDetailDto>();
             #endregion
 
             #region TestResult Mapping
@@ -67,8 +68,12 @@ namespace ADNTester.Service
 
             #region TestSample Mapping
             CreateMap<TestSample, TestSampleDto>()
-                .ForMember(dest => dest.SampleType, opt => opt.MapFrom(src => src.SampleType.ToString()))
-                .ForMember(dest => dest.RelationshipToSubject, opt => opt.MapFrom(src => src.RelationshipToSubject.ToString()));
+                .ForMember(dest => dest.RelationshipToSubject, opt => opt.MapFrom(src => src.RelationshipToSubject.ToString()))
+                .ForMember(dest => dest.SampleType, opt => opt.MapFrom(src => src.SampleType.ToString()));
+
+            CreateMap<TestSample, TestSampleDetailDto>()
+                .ForMember(dest => dest.RelationshipToSubject, opt => opt.MapFrom(src => src.RelationshipToSubject.ToString()))
+                .ForMember(dest => dest.SampleType, opt => opt.MapFrom(src => src.SampleType.ToString()));
             CreateMap<CreateTestSampleDto, TestSample>();
             CreateMap<UpdateTestSampleDto, TestSample>();
             #endregion
@@ -78,14 +83,16 @@ namespace ADNTester.Service
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
             CreateMap<TestBooking, TestBookingDetailDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client));
+                .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client))
+                .ForMember(dest => dest.TestService, opt => opt.MapFrom(src => src.TestService));
             CreateMap<CreateTestBookingDto, TestBooking>();
             CreateMap<UpdateTestBookingDto, TestBooking>();
             #endregion
 
             #region Blog Mappings
             CreateMap<Blog, BlogDto>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.FullName));
             CreateMap<CreateBlogWithUrlDto, Blog>();
             CreateMap<UpdateBlogDto, Blog>();
             #endregion

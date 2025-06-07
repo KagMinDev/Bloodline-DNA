@@ -101,5 +101,16 @@ namespace ADNTester.Api.Controllers
 
             return Ok(new ApiResponse<string>(bookingId, "Cập nhật đặt lịch thành công"));
         }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<TestBookingDetailDto>>> GetBookingByUserId(string userId)
+        {
+            var bookings = await _testBookingService.GetBookingByUserId(userId);
+            if (bookings == null || !bookings.Any())
+            {
+                return NotFound("No bookings found for this user");
+            }
+            return Ok(bookings);
+        }
     }
 } 

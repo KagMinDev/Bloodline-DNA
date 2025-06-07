@@ -1,11 +1,10 @@
 using System;
 using ADNTester.BO.DTOs.TestKit;
-using ADNTester.BO.DTOs.User;
 using ADNTester.BO.Enums;
 
 namespace ADNTester.BO.DTOs.TestSample
 {
-    public class TestSampleDto
+    public class TestSampleDetailDto
     {
         public string Id { get; set; }
         public string KitId { get; set; }
@@ -18,6 +17,6 @@ namespace ADNTester.BO.DTOs.TestSample
         public DateTime? LabReceivedAt { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public TestKitDto Kit { get; set; }
+        public TestKitDetailDto Kit { get; set; }
     }
 } 

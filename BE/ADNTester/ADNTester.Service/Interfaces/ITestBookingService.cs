@@ -16,5 +16,6 @@ namespace ADNTester.Service.Interfaces
         Task<bool> DeleteAsync(string id);
         Task<bool> UpdateBookingStatusAsync(string bookingId, BookingStatus newStatus);
         Task<IEnumerable<TestBookingDto>> GetCompletedBookingsAsync();
+        Task<IEnumerable<TestBookingDetailDto>> GetBookingByUserId(string userId);
     }
 } 
