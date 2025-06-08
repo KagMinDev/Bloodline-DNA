@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import ErrorBoundary from "../../../components/common/error-boundary";
+import { PageLoading } from "../../../components/common/loading";
 import { Login } from "../../../types/auth/auth.types";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
 import styles from "./styles";
@@ -21,6 +23,7 @@ const LoginScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string>("");
   const [passwordError, setPasswordError] = useState<string>("");
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
   // DNA animation for the illustration
@@ -80,6 +83,11 @@ const LoginScreen: React.FC = () => {
 
   return (
     <>
+      {loading && (
+        <ErrorBoundary>
+          <PageLoading message="Đang xác thực thông tin đăng nhập..." />
+        </ErrorBoundary>
+      )}
       <KeyboardAwareScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -185,7 +193,7 @@ const LoginScreen: React.FC = () => {
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <View style={{ flexDirection: "row"}}>
+              <View style={{ flexDirection: "row" }}>
                 <Text style={styles.required}>*</Text>
                 <Text style={styles.label}>Địa chỉ Email</Text>
               </View>
@@ -257,8 +265,14 @@ const LoginScreen: React.FC = () => {
 
             <View style={styles.formOptions}>
               <View style={styles.checkboxContainer}>
-                <TouchableOpacity>
-                  <View style={styles.checkbox} />
+                <TouchableOpacity
+                  onPress={() => setRememberMe(!rememberMe)}
+                >
+                  <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
+                    {rememberMe && (
+                      <Icon name="check" size={14} color="#fff" />
+                    )}
+                  </View>
                 </TouchableOpacity>
                 <Text style={styles.checkboxLabel}>Ghi nhớ đăng nhập</Text>
               </View>

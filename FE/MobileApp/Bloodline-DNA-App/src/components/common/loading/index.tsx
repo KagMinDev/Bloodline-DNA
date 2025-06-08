@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { Modal, Text, View } from "react-native";
 import Animated, {
-    Easing,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat,
-    withTiming,
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
 } from "react-native-reanimated";
 import Svg, { Circle, G, Line, Path } from "react-native-svg";
 import styles from "./styles";
@@ -23,26 +23,26 @@ const Loading: React.FC<LoadingProps> = ({
   fullScreen = false,
   color = "blue",
 }) => {
-  // Size configurations
+  // Cấu hình kích thước
   const sizeConfig = {
     small: { container: { width: 32, height: 32 }, text: { fontSize: 12 } },
     medium: { container: { width: 64, height: 64 }, text: { fontSize: 16 } },
     large: { container: { width: 96, height: 96 }, text: { fontSize: 18 } },
   };
 
-  // Color configurations
+  // Cấu hình màu sắc
   const colorConfig = {
     blue: "#2563EB",
     green: "#16A34A",
     white: "#FFFFFF",
   };
 
-  // Animation values
+  // Giá trị animation
   const rotation = useSharedValue(0);
   const pulse = useSharedValue(1);
   const fade = useSharedValue(0.4);
 
-  // Animation setup
+  // Thiết lập animation
   useEffect(() => {
     rotation.value = withRepeat(
       withTiming(360, { duration: 3000, easing: Easing.linear }),
@@ -73,26 +73,38 @@ const Loading: React.FC<LoadingProps> = ({
     );
   }, [rotation, pulse, fade]);
 
-  // Animated styles
-  const animatedStrand1Style = useAnimatedStyle(() => ({
-    transform: [{ rotateY: `${rotation.value}deg` }],
-  }));
-  const animatedStrand2Style = useAnimatedStyle(() => ({
-    transform: [{ rotateY: `${-rotation.value}deg` }],
-  }));
-  const animatedGlowStyle = useAnimatedStyle(() => ({
-    opacity: pulse.value,
-    transform: [{ scale: pulse.value }],
-  }));
-  const animatedConnectingStyle = useAnimatedStyle(() => ({
-    opacity: fade.value,
-  }));
+  // Animated styles với mảng phụ thuộc
+  const animatedStrand1Style = useAnimatedStyle(
+    () => ({
+      transform: [{ rotateY: `${rotation.value}deg` }],
+    }),
+    [rotation]
+  );
+  const animatedStrand2Style = useAnimatedStyle(
+    () => ({
+      transform: [{ rotateY: `${-rotation.value}deg` }],
+    }),
+    [rotation]
+  );
+  const animatedGlowStyle = useAnimatedStyle(
+    () => ({
+      opacity: pulse.value,
+      transform: [{ scale: pulse.value }],
+    }),
+    [pulse]
+  );
+  const animatedConnectingStyle = useAnimatedStyle(
+    () => ({
+      opacity: fade.value,
+    }),
+    [fade]
+  );
 
   const DNAIcon = () => (
-    <View style={[styles.container, sizeConfig[size].container]}>
-      <Svg width="100%" height="100%" viewBox="0 0 24 24">
+    <View style={[styles.iconContainer, sizeConfig[size].container]}>
+      <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none">
         <Animated.View style={animatedGlowStyle}>
-          {/* Left DNA Strand */}
+          {/* Chuỗi ADN bên trái */}
           <Animated.View style={animatedStrand1Style}>
             <G>
               <Path
@@ -109,7 +121,7 @@ const Loading: React.FC<LoadingProps> = ({
             </G>
           </Animated.View>
 
-          {/* Right DNA Strand */}
+          {/* Chuỗi ADN bên phải */}
           <Animated.View style={animatedStrand2Style}>
             <G>
               <Path
@@ -126,7 +138,7 @@ const Loading: React.FC<LoadingProps> = ({
             </G>
           </Animated.View>
 
-          {/* Connecting Lines */}
+          {/* Đường nối */}
           <Animated.View style={animatedConnectingStyle}>
             <G>
               <Line
@@ -176,11 +188,12 @@ const Loading: React.FC<LoadingProps> = ({
     </View>
   );
 
-  // Full screen loading overlay
+  // Lớp phủ loading toàn màn hình với nền mờ
   if (fullScreen) {
     return (
       <Modal transparent={true} animationType="fade" visible={true}>
         <View style={styles.fullScreen}>
+          <View style={styles.backdrop} />
           <View style={styles.content}>
             <DNAIcon />
             {message && (
@@ -188,7 +201,7 @@ const Loading: React.FC<LoadingProps> = ({
                 style={[
                   styles.text,
                   sizeConfig[size].text,
-                  { color: colorConfig[color] },
+                  { color: colorConfig[color], marginTop: 10 },
                 ]}
               >
                 {message}
@@ -200,7 +213,7 @@ const Loading: React.FC<LoadingProps> = ({
     );
   }
 
-  // Inline loading component
+  // Component loading nội tuyến
   return (
     <View style={styles.inline}>
       <DNAIcon />
@@ -209,7 +222,7 @@ const Loading: React.FC<LoadingProps> = ({
           style={[
             styles.text,
             sizeConfig[size].text,
-            { color: colorConfig[color] },
+            { color: colorConfig[color], marginTop: 10 },
           ]}
         >
           {message}
@@ -219,7 +232,7 @@ const Loading: React.FC<LoadingProps> = ({
   );
 };
 
-// Additional Loading Components
+// Các component Loading bổ sung
 export const PageLoading: React.FC<{ message?: string }> = ({
   message = "Đang tải trang...",
 }) => <Loading size="large" message={message} fullScreen={true} color="blue" />;
