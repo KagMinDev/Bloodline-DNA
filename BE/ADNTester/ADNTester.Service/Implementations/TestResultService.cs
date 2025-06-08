@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Linq;
+using ADNTester.BO.DTOs.User;
 
 namespace ADNTester.Service.Implementations
 {
@@ -206,6 +208,32 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.TestResultRepository.Remove(testResult);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<TestResultDetailDto>> GetTestResultsByUserIdAsync(string userId)
+        {
+            var testResults = await _unitOfWork.TestResultRepository.GetAllAsync();
+            var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
+            
+            // Get user's bookings
+            var userBookings = bookings.Where(b => b.ClientId == userId).ToList();
+            
+            // Get test results for user's bookings
+            var userTestResults = testResults
+                .Where(tr => userBookings.Any(b => b.Id == tr.TestBookingId))
+                .ToList();
+
+            // Load booking and user data for each test result
+            foreach (var result in userTestResults)
+            {
+                result.TestBooking = userBookings.FirstOrDefault(b => b.Id == result.TestBookingId);
+                if (result.TestBooking != null)
+                {
+                    result.TestBooking.Client = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+                }
+            }
+            
+            return _mapper.Map<IEnumerable<TestResultDetailDto>>(userTestResults);
         }
     }
 } 

@@ -8,6 +8,7 @@ using ADNTester.BO.Entities;
 using ADNTester.BO.Enums;
 using AutoMapper;
 using System.Linq;
+using ADNTester.BO.DTOs.Feedback;
 
 namespace ADNTester.Service
 {
@@ -51,6 +52,9 @@ namespace ADNTester.Service
             CreateMap<Feedback, FeedbackDto>();
             CreateMap<CreateFeedbackDto, Feedback>();
             CreateMap<UpdateFeedbackDto, Feedback>();
+            CreateMap<Feedback, FeedbackDetailDto>()
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.User)).
+                ForMember(dest => dest.Service, opt => opt.MapFrom(src => src.TestService));
             #endregion
 
             #region TestKit Mapping
@@ -64,6 +68,8 @@ namespace ADNTester.Service
             CreateMap<TestResult, TestResultDto>();
             CreateMap<CreateTestResultDto, TestResult>();
             CreateMap<UpdateTestResultDto, TestResult>();
+            CreateMap<TestResult, TestResultDetailDto>()
+                .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.TestBooking.Client));
             #endregion
 
             #region TestSample Mapping

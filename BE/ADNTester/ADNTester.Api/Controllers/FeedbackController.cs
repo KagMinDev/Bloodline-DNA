@@ -1,5 +1,7 @@
 using ADNTester.BO.DTOs;
 using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.Feedback;
+using ADNTester.BO.Entities;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +37,20 @@ namespace ADNTester.Api.Controllers
                 return NotFound(new ApiResponse<string>("Không tìm thấy feedback", 404));
 
             return Ok(new ApiResponse<FeedbackDto>(feedback, "Thông tin feedback"));
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<FeedbackDetailDto>>> GetByUserId(string userId)
+        {
+            var feedbacks = await _feedbackService.GetFeedbacksByUserIdAsync(userId);
+            return Ok(new ApiResponse<IEnumerable<FeedbackDetailDto>>(feedbacks, "Thông tin feedback"));
+        }
+
+        [HttpGet("service/{serviceId}")]
+        public async Task<ActionResult<IEnumerable<FeedbackDetailDto>>> GetByServiceId(string serviceId)
+        {
+            var feedbacks = await _feedbackService.GetFeedbacksByServiceIdAsync(serviceId);
+            return Ok(new ApiResponse<IEnumerable<FeedbackDetailDto>>(feedbacks, "Thông tin feedback"));
         }
 
         [HttpPost]
