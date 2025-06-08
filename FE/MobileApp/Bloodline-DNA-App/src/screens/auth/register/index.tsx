@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import ErrorBoundary from '../../../components/common/error-boundary';
+import { PageLoading } from '../../../components/common/loading';
 import { Register } from '../../../types/auth/auth.types';
 import { RootStackParamList } from '../../../types/root-stack/stack.types';
 import styles from './styles';
@@ -125,7 +127,7 @@ const RegisterScreen: React.FC = () => {
       console.log('Dữ liệu giả:', registerData);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       // @ts-ignore
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     } catch (error) {
       console.error('Đăng ký thất bại:', error);
       setErrors((prev) => ({
@@ -139,6 +141,13 @@ const RegisterScreen: React.FC = () => {
   };
 
   return (
+    <>
+        {loading && (
+        <ErrorBoundary>
+          <PageLoading message="Đang tạo tài khoản..." />
+        </ErrorBoundary>
+      )}
+
     <KeyboardAwareScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
@@ -441,6 +450,7 @@ const RegisterScreen: React.FC = () => {
         </View>
       )}
     </KeyboardAwareScrollView>
+    </>
   );
 };
 
