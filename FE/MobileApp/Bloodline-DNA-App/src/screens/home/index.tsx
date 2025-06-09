@@ -1,0 +1,39 @@
+import React from "react";
+import { ScrollView, View } from "react-native";
+import Footer from "../../components/common/footer";
+import BlogSection from "./components/blog-section";
+import CTASection from "./components/CTA-section";
+import FAQSection from "./components/FAQ-section";
+import FeaturesSection from "./components/features-section";
+import Header from "./components/header";
+import HeroSection from "./components/hero-section";
+import ProcessSection from "./components/process-section";
+import TeamSection from "./components/team-section";
+import TestimonialsSection from "./components/testimonials-section";
+import TrustSection from "./components/trust-section";
+import styles from "./styles";
+
+const HomePageScreen: React.FC = () => {
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Header />
+        <HeroSection />
+        <FeaturesSection />
+        <ProcessSection />
+        <TestimonialsSection />
+        <TeamSection />
+        <FAQSection />
+        <BlogSection />
+        <TrustSection />
+        <CTASection />
+        <Footer />
+      </ScrollView>
+      <View style={styles.chatbotContainer}>
+        <ChatbotAI />
+      </View>
+    </View>
+  );
+};
+
+export default HomePageScreen;

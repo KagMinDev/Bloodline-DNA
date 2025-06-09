@@ -1,20 +1,43 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "Node16",
-    "lib": ["dom", "esnext"],
+    "lib": ["esnext"],
     "jsx": "react-native",
-    "moduleResolution": "node16",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "strict": true,
-    "noEmit": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["expo"]
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "~/*": ["./*"]
+    },
+    "types": [
+      "node",
+      "react",
+      "react-native"
+    ]
   },
-  "exclude": ["node_modules"],
-  "extends": "expo/tsconfig.base"
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "App.tsx",
+    "index.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__mocks__/*",
+    "**/__tests__/*",
+    "**/__fixtures__/*",
+    "**/android/*",
+    "**/ios/*"
+  ]
 }

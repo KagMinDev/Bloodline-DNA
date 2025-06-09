@@ -1,5 +1,5 @@
+import { Lock, MoreVertical, Pencil, Unlock } from 'lucide-react';
 import { useState } from 'react';
-import { MoreVertical, Pencil, Lock, Unlock } from 'lucide-react';
 import type { User } from '../types/UserManager';
 
 const initialUsers: User[] = [
@@ -26,35 +26,35 @@ function UserMangement() {
   };
 
   return (
-    <div className="p-10 bg-gradient-to-br from-blue-50 to-white min-h-screen">
+    <div className="min-h-screen p-10 bg-gradient-to-br from-blue-50 to-white">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center justify-between mb-6">
           <h2 className="text-3xl font-bold text-blue-700">Quản lý người dùng</h2>
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow transition">
+          <button className="flex items-center gap-2 px-4 py-2 text-white transition bg-blue-600 shadow rounded-xl hover:bg-blue-700">
             + Thêm người dùng
           </button>
         </div>
 
-        <div className="overflow-x-auto relative z-0 rounded-xl shadow-lg border border-blue-100 bg-white">
-          <table className="min-w-full text-sm text-left relative z-0">
+        <div className="relative z-0 overflow-x-auto bg-white border border-blue-100 shadow-lg rounded-xl">
+          <table className="relative z-0 min-w-full text-sm text-left">
             <thead>
-              <tr className="bg-blue-100 text-blue-700 uppercase text-xs tracking-wider">
-                <th className="py-3 px-5">ID</th>
-                <th className="py-3 px-5">Họ tên</th>
-                <th className="py-3 px-5">Email</th>
-                <th className="py-3 px-5">Vai trò</th>
-                <th className="py-3 px-5">Trạng thái</th>
-                <th className="py-3 px-5 text-center">Hành động</th>
+              <tr className="text-xs tracking-wider text-blue-700 uppercase bg-blue-100">
+                <th className="px-5 py-3">ID</th>
+                <th className="px-5 py-3">Họ tên</th>
+                <th className="px-5 py-3">Email</th>
+                <th className="px-5 py-3">Vai trò</th>
+                <th className="px-5 py-3">Trạng thái</th>
+                <th className="px-5 py-3 text-center">Hành động</th>
               </tr>
             </thead>
             <tbody>
               {users.map((user) => (
-                <tr key={user.id} className="border-b hover:bg-blue-50 transition relative">
-                  <td className="py-3 px-5">{user.id}</td>
-                  <td className="py-3 px-5 font-medium">{user.name}</td>
-                  <td className="py-3 px-5">{user.email}</td>
-                  <td className="py-3 px-5">{user.role}</td>
-                  <td className="py-3 px-5">
+                <tr key={user.id} className="relative transition border-b hover:bg-blue-50">
+                  <td className="px-5 py-3">{user.id}</td>
+                  <td className="px-5 py-3 font-medium">{user.name}</td>
+                  <td className="px-5 py-3">{user.email}</td>
+                  <td className="px-5 py-3">{user.role}</td>
+                  <td className="px-5 py-3">
                     <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full
                       ${user.status === 'Hoạt động' 
                         ? 'bg-green-100 text-green-700' 
@@ -62,9 +62,11 @@ function UserMangement() {
                       {user.status}
                     </span>
                   </td>
-                  <td className="py-3 px-5 text-center relative">
+                  <td className="relative px-5 py-3 text-center">
                     <button
-                      className="p-2 hover:bg-blue-100 rounded-full"
+                      type="button"
+                      title="Thêm hành động"
+                      className="p-2 rounded-full hover:bg-blue-100"
                       onClick={() =>
                         setOpenMenuId(openMenuId === user.id ? null : user.id)
                       }
@@ -73,20 +75,20 @@ function UserMangement() {
                     </button>
 
                     {openMenuId === user.id && (
-                      <div className="absolute right-5 z-10 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
+                      <div className="absolute z-10 w-48 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg right-5">
                         <button
                           onClick={() => {
                             alert(`Chỉnh sửa: ${user.name}`);
                             setOpenMenuId(null);
                           }}
-                          className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm"
+                          className="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-100"
                         >
                           <Pencil size={16} />
                           Chỉnh sửa tài khoản
                         </button>
                         <button
                           onClick={() => toggleUserStatus(user.id)}
-                          className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm"
+                          className="flex items-center w-full gap-2 px-4 py-2 text-sm hover:bg-gray-100"
                         >
                           {user.status === 'Hoạt động' ? (
                             <>
@@ -107,7 +109,7 @@ function UserMangement() {
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-center py-6 text-gray-500">
+                  <td colSpan={6} className="py-6 text-center text-gray-500">
                     Không có người dùng nào.
                   </td>
                 </tr>
