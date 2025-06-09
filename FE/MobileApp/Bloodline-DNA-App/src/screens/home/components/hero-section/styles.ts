@@ -3,10 +3,14 @@ import { Dimensions, StyleSheet } from "react-native";
 const { width } = Dimensions.get("window"); // Lấy kích thước
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   container: {
-    paddingVertical: 80, // Tương tự py-20 md:py-24
+    paddingVertical: 35, // Tương tự py-20 md:py-24
     paddingHorizontal: 16, // Tương tự px-4 sm:px-6 lg:px-8
-    backgroundColor: "#FFFFFF",
   },
   content: {
     flexDirection: width > 768 ? "row" : "column", // md:flex-row
@@ -24,7 +28,6 @@ const styles = StyleSheet.create({
     fontSize: width > 768 ? 36 : 28, // text-3xl md:text-4xl lg:text-5xl
     fontWeight: "700", // font-bold
     color: "#1F2937", // text-gray-800
-    lineHeight: 1.2, // leading-tight
     marginBottom: 24, // mb-6
     textAlign: width > 768 ? "left" : "center",
   },

@@ -17,13 +17,15 @@ import styles from "./styles";
 const HomePageScreen: React.FC = () => {
   return (
     <View style={styles.container}>
+      {/* Header cố định */}
+      <Header />
+
+      {/* Nội dung cuộn, thêm paddingTop để tránh che header */}
       <ScrollView
-        contentContainerStyle={styles.contentContainer}
-        // Chỉ cho phép cuộn dọc
+        contentContainerStyle={[styles.contentContainer]} // 80 là chiều cao header
         horizontal={false}
         alwaysBounceVertical={true}
       >
-        <Header />
         <HeroSection />
         <FeaturesSection />
         <ProcessSection />
@@ -35,6 +37,7 @@ const HomePageScreen: React.FC = () => {
         <CTASection />
         <Footer />
       </ScrollView>
+
       <View style={styles.chatbotContainer}>
         <ChatbotAI />
       </View>
