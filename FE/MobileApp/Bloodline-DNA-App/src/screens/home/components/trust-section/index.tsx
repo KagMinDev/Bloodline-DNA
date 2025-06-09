@@ -1,10 +1,14 @@
 import React from "react";
-import { Dimensions, Text, View } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
+import { Dimensions, ImageBackground, Text, View } from "react-native";
 import { TrustIndicator } from "../../../../types/home/home.types";
 import { styles } from "./styles";
 
 const { width } = Dimensions.get("window");
+
+// Bạn có thể tạo 1 hình gradient đơn giản hoặc dùng link online
+const gradientImage = {
+  uri: "https://png.pngtree.com/png-vector/20241017/ourlarge/pngtree-professional-doctor-isolated-on-transparent-background-png-image_14106014.png",
+};
 
 const indicators: TrustIndicator[] = [
   { value: "10K+", label: "Khách hàng" },
@@ -14,9 +18,10 @@ const indicators: TrustIndicator[] = [
 
 const TrustSection: React.FC = () => {
   return (
-    <LinearGradient
-      colors={["#2563EB", "#1E40AF"]} // from-blue-600 to-blue-800
+    <ImageBackground
+      source={gradientImage}
       style={styles.container}
+      resizeMode="cover"
     >
       <View style={styles.content}>
         <Text style={styles.title}>Được tin tưởng bởi</Text>
@@ -34,7 +39,7 @@ const TrustSection: React.FC = () => {
           ))}
         </View>
       </View>
-    </LinearGradient>
+    </ImageBackground>
   );
 };
 

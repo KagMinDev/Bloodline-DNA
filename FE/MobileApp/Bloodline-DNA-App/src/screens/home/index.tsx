@@ -1,6 +1,7 @@
 import React from "react";
 import { ScrollView, View } from "react-native";
 import Footer from "../../components/common/footer";
+import ChatbotAI from "../chatbotAI";
 import BlogSection from "./components/blog-section";
 import CTASection from "./components/CTA-section";
 import FAQSection from "./components/FAQ-section";
@@ -16,7 +17,12 @@ import styles from "./styles";
 const HomePageScreen: React.FC = () => {
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        // Chỉ cho phép cuộn dọc
+        horizontal={false}
+        alwaysBounceVertical={true}
+      >
         <Header />
         <HeroSection />
         <FeaturesSection />

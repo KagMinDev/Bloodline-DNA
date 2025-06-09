@@ -1,41 +1,50 @@
-import { Dimensions, StyleSheet } from "react-native";
-
-const { width } = Dimensions.get("window");
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   container: {
-    paddingVertical: 48, // py-12 md:py-16
+    backgroundColor: "#2563EB", // Màu chính
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  // Tạo hiệu ứng gradient bằng pseudo-element
+  containerGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#1E40AF', // Màu gradient
+    opacity: 0.7,
   },
   content: {
-    paddingHorizontal: 16, // px-4 sm:px-6 lg:px-8
-    maxWidth: 1280, // max-w-7xl
-    width: "100%",
-    alignSelf: "center",
+    zIndex: 1,
   },
   title: {
-    fontSize: width >= 768 ? 30 : 24, // text-2xl md:text-3xl
-    fontWeight: "700", // font-bold
-    color: "#FFFFFF", // text-white
-    textAlign: "center",
-    marginBottom: 32, // mb-8
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   indicatorsContainer: {
-    alignItems: "center",
-    gap: 24, // gap-6
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
   indicator: {
-    flex: 1, // flex-1
-    alignItems: "center",
-    paddingVertical: 8,
+    alignItems: 'center',
+    marginVertical: 10,
+    marginHorizontal: 20,
   },
   value: {
-    fontSize: width >= 768 ? 40 : 32, // text-4xl md:text-5xl
-    fontWeight: "700", // font-bold
-    color: "#FFFFFF", // text-white
-    marginBottom: 8, // mb-2
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
   label: {
-    fontSize: width >= 768 ? 18 : 16, // text-base md:text-lg
-    color: "#FFFFFF", // text-white
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 16,
   },
 });

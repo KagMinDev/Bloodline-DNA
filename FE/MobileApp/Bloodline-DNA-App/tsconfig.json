@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["esnext"],
+    "lib": [
+      "esnext"
+    ],
     "jsx": "react-native",
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -15,8 +17,12 @@
     "noEmit": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "~/*": ["./*"]
+      "@/*": [
+        "src/*"
+      ],
+      "~/*": [
+        "./*"
+      ]
     },
     "types": [
       "node",
@@ -27,8 +33,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts",
     "App.tsx",
     "index.js"
   ],
@@ -39,5 +43,6 @@
     "**/__fixtures__/*",
     "**/android/*",
     "**/ios/*"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

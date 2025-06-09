@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import {
   Dimensions,
-  FlatList,
+  ScrollView,
   Text,
   View
 } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
+// import LinearGradient from "react-native-linear-gradient"; // Temporarily disabled
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Testimonial } from "../../../../types/home/home.types";
 import { styles } from "./styles";
@@ -83,7 +83,7 @@ const TestimonialCard: React.FC<{
 );
 
 const TestimonialsSection: React.FC = () => {
-  const flatListRef = useRef<FlatList>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
   const data = [...testimonials, ...testimonials]; // Lặp lại để cuộn vô hạn
 
   // Cuộn tự động
@@ -94,8 +94,8 @@ const TestimonialsSection: React.FC = () => {
       if (scrollOffset >= data.length * width * 0.8) {
         scrollOffset = 0; // Reset về đầu
       }
-      flatListRef.current?.scrollToOffset({
-        offset: scrollOffset,
+      scrollViewRef.current?.scrollTo({
+        x: scrollOffset,
         animated: true,
       });
     }, 3000); // Cuộn mỗi 3 giây
@@ -104,27 +104,29 @@ const TestimonialsSection: React.FC = () => {
   }, [data.length]);
 
   return (
-    <LinearGradient
-      colors={["#2563EB", "#1E40AF"]} // from-blue-600 to-blue-800
-      style={styles.container}
+    <View
+      style={[styles.container, { backgroundColor: "#2563EB" }]} // Fallback solid color
     >
       <View style={styles.content}>
         <Text style={styles.title}>Khách hàng nói gì về chúng tôi</Text>
-        <FlatList
-          ref={flatListRef}
-          data={data}
-          keyExtractor={(_, index) => index.toString()}
+        <ScrollView
+          ref={scrollViewRef}
           horizontal
           showsHorizontalScrollIndicator={false}
-          renderItem={({ item, index }) => (
-            <TestimonialCard testimonial={item} index={index} />
-          )}
           snapToInterval={width * 0.8} // Snap theo chiều rộng thẻ
           decelerationRate="fast"
           contentContainerStyle={styles.listContainer}
-        />
+        >
+          {data.map((item, index) => (
+            <TestimonialCard 
+              key={index} 
+              testimonial={item} 
+              index={index} 
+            />
+          ))}
+        </ScrollView>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 

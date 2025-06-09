@@ -40,15 +40,15 @@ const posts: BlogPost[] = [
 
 const BlogSection: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-
-  // Tính số cột dựa trên chiều rộng màn hình
   const numColumns = width > 1024 ? 3 : width > 768 ? 2 : 1;
 
+  // Giải pháp 1: Sử dụng scrollEnabled={false} (nếu có ScrollView cha)
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Tin tức & Kiến thức về ADN</Text>
         <FlatList
+          scrollEnabled={false} /* Quan trọng: Tắt scroll khi có ScrollView cha */
           data={posts}
           keyExtractor={(item) => item.id}
           numColumns={numColumns}
@@ -62,7 +62,7 @@ const BlogSection: React.FC = () => {
               <Text style={styles.readMore}>Đọc thêm →</Text>
             </TouchableOpacity>
           )}
-          key={numColumns.toString()} // Cập nhật key khi số cột thay đổi
+          key={numColumns.toString()}
           columnWrapperStyle={
             numColumns > 1 ? styles.columnWrapper : undefined
           }
@@ -70,6 +70,6 @@ const BlogSection: React.FC = () => {
       </View>
     </View>
   );
-};
+}
 
 export default BlogSection;

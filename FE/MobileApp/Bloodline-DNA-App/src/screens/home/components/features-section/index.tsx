@@ -8,23 +8,22 @@ const { width } = Dimensions.get("window");
 
 const features: Feature[] = [
   {
-    icon: "shield-check", // Thay ShieldCheck
+    icon: "shield-check",
     title: "Độ chính xác 99.99%",
-    description:
-      "Công nghệ phân tích ADN tiên tiến đảm bảo kết quả đáng tin cậy.",
+    description: "Công nghệ phân tích ADN tiên tiến đảm bảo kết quả đáng tin cậy.",
   },
   {
-    icon: "lock", // Thay Lock
+    icon: "lock",
     title: "Bảo mật tuyệt đối",
     description: "Dữ liệu được mã hóa, tuân thủ tiêu chuẩn bảo mật quốc tế.",
   },
   {
-    icon: "rocket", // Thay Rocket
+    icon: "rocket",
     title: "Kết quả nhanh chóng",
     description: "Nhận kết quả trong 3-5 ngày làm việc, hỗ trợ giao tận nơi.",
   },
   {
-    icon: "account-group", // Thay Users
+    icon: "account-group",
     title: "Hỗ trợ chuyên gia",
     description: "Đội ngũ tư vấn 24/7, giải đáp mọi thắc mắc về xét nghiệm.",
   },
@@ -41,6 +40,7 @@ const FeaturesSection: React.FC = () => {
           Vì sao chọn dịch vụ xét nghiệm ADN của chúng tôi?
         </Text>
         <FlatList
+          scrollEnabled={false}
           data={features}
           keyExtractor={(_, index) => index.toString()}
           numColumns={numColumns}
@@ -56,7 +56,7 @@ const FeaturesSection: React.FC = () => {
               <Text style={styles.featureDescription}>{item.description}</Text>
             </View>
           )}
-          key={numColumns.toString()} // Cập nhật key khi số cột thay đổi
+          key={numColumns.toString()}
           columnWrapperStyle={
             numColumns > 1 ? styles.columnWrapper : undefined
           }
