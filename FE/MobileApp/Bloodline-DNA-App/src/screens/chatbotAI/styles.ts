@@ -15,10 +15,10 @@ export const styles = StyleSheet.create({
   },
   chatContainer: {
     position: "absolute",
-    bottom: 100,
+    bottom: 90,
     right: 20,
-    width: 360,
-    height: 500,
+    width: 320,
+    height: 450,
     backgroundColor: "#fff",
     borderRadius: 20,
     overflow: "hidden",

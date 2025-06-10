@@ -1,13 +1,16 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
 import React, { useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
   Easing,
+  Pressable,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import styles from "./styles";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -24,13 +27,12 @@ const navItems = [
 
 const Header: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
-  // Khởi tạo menu ở ngoài màn hình bên phải (dịch sang phải bằng MENU_WIDTH)
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
 
   const openMenu = () => {
     setMenuVisible(true);
     Animated.timing(slideAnim, {
-      toValue: 0, // menu trượt vào sát bên phải màn hình
+      toValue: 0,
       duration: 300,
       easing: Easing.out(Easing.ease),
       useNativeDriver: true,
@@ -39,7 +41,7 @@ const Header: React.FC = () => {
 
   const closeMenu = () => {
     Animated.timing(slideAnim, {
-      toValue: MENU_WIDTH, // menu trượt ra ngoài bên phải màn hình
+      toValue: MENU_WIDTH,
       duration: 300,
       easing: Easing.in(Easing.ease),
       useNativeDriver: true,
@@ -55,39 +57,36 @@ const Header: React.FC = () => {
   };
 
   const onSelectMenu = (screen: string) => {
-    // Thực hiện chuyển màn hình
     console.log("Chọn menu:", screen);
     closeMenu();
   };
 
+  const getIconName = (screen: string) => {
+    switch (screen) {
+      case "Home":
+        return "home-outline";
+      case "About":
+        return "information-outline";
+      case "Services":
+        return "briefcase-outline";
+      case "Doctors":
+        return "stethoscope";
+      case "News":
+        return "newspaper-variant-outline";
+      case "Contact":
+        return "phone-outline";
+      default:
+        return "menu";
+    }
+  };
+
   return (
     <View style={{ zIndex: 100 }}>
-      {/* Header bar */}
-      <View
-        style={{
-          height: 80,
-          top: 12,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 16,
-        }}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Icon style={{
-            borderRadius: 50,
-            backgroundColor: "#007bff",
-          }} name="dna" size={24} color="#fff" />
-          <Text
-            style={{
-              color: "#007bff",
-              fontSize: 18,
-              fontWeight: "bold",
-              marginLeft: 8,
-            }}
-          >
-            ADN Huyết Thống
-          </Text>
+      {/* Header Bar */}
+      <View style={styles.header}>
+        <View style={styles.logoContainer}>
+          <Icon style={styles.logoIcon} name="dna" size={24} color="#fff" />
+          <Text style={styles.logoText}>ADN Huyết Thống</Text>
         </View>
 
         <TouchableOpacity onPress={toggleMenu}>
@@ -99,44 +98,51 @@ const Header: React.FC = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Menu trượt ra từ bên phải */}
+      {/* Overlay mờ nền */}
+      {menuVisible && (
+        <Pressable style={styles.overlay} onPress={closeMenu} />
+      )}
+
+      {/* Menu trượt */}
       {menuVisible && (
         <Animated.View
-          style={{
-            position: "absolute",
-            top: 80,
-            right: 0,
-            width: MENU_WIDTH,
-            height: SCREEN_HEIGHT - 60,
-            backgroundColor: "#fff",
-            paddingVertical: 20,
-            paddingHorizontal: 16,
-            transform: [{ translateX: slideAnim }],
-            zIndex: 999,
-            shadowColor: "#000",
-            shadowOffset: { width: -2, height: 0 },
-            shadowOpacity: 0.3,
-            shadowRadius: 5,
-            elevation: 5,
-          }}
+          style={[
+            styles.menuContainer,
+            { transform: [{ translateX: slideAnim }] },
+          ]}
         >
+          <View style={styles.menuHeader}>
+            <Icon name="account-circle" size={60} color="#007bff" />
+            <Text style={styles.menuWelcome}>Xin chào!</Text>
+          </View>
+
           {navItems.map((item) => (
             <TouchableOpacity
               key={item.label}
               onPress={() => onSelectMenu(item.screen)}
-              style={{
-                paddingVertical: 15,
-                borderBottomWidth: 1,
-                borderBottomColor: "#ddd",
-              }}
+              style={styles.menuItem}
             >
-              <Text style={{ fontSize: 18, color: "#333" }}>{item.label}</Text>
+              <Icon
+                name={getIconName(item.screen)}
+                size={18}
+                color="#007bff"
+                style={{ marginRight: 12 }}
+              />
+              <Text style={styles.menuItemText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
+          <TouchableOpacity
+            onPress={() => console.log("Đăng xuất")}
+            style={styles.logoutButton}
+          >
+            <Text style={styles.logoutButtonText}>Đăng xuất</Text>
+            <AntDesign name="logout" size={12} color="#ff4d4d" />
+          </TouchableOpacity>
         </Animated.View>
       )}
     </View>
   );
 };
+
 
 export default Header;

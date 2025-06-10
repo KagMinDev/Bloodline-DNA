@@ -12,6 +12,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import ErrorBoundary from "../../../components/common/error-boundary";
 import { PageLoading } from "../../../components/common/loading";
+import { useAuth } from "../../../context/auth/AuthContext"; // Import hàm login từ
 import { Login } from "../../../types/auth/auth.types";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
 import styles from "./styles";
@@ -25,6 +26,7 @@ const LoginScreen: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { login } = useAuth();
 
   // DNA animation for the illustration
   const rotation = useState(new Animated.Value(0))[0];
@@ -63,7 +65,7 @@ const LoginScreen: React.FC = () => {
     return isValid;
   };
 
-  const handleLogin = async (data: Login) => {
+const handleLogin = async (data: Login) => {
     if (!validateInputs()) {
       return;
     }
@@ -72,7 +74,12 @@ const LoginScreen: React.FC = () => {
     try {
       console.log("Dữ liệu giả:", data);
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      navigation.navigate("Main");
+      
+      // Giả lập token từ API
+      const fakeToken = "fake-jwt-token";
+      await login(fakeToken); // Sử dụng hàm login từ useAuth()
+      
+      // Navigation sẽ tự động xử lý bởi AppRouter dựa trên isLoggedIn
     } catch (error) {
       console.error("Đăng nhập thất bại:", error);
       setEmailError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");

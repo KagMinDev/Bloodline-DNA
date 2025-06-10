@@ -1,3 +1,5 @@
+// AppRouter.tsx
+import { useAuth } from "@/context/auth/AuthContext";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -10,7 +12,7 @@ import {
   RootStackParamList,
 } from "../types/root-stack/stack.types";
 
-// Placeholder screens for bottom tabs
+// ... (giữ nguyên các component Placeholder screens)
 const ProfileScreen: React.FC = () => (
   <View
     style={{
@@ -89,20 +91,31 @@ const MainTabs: React.FC = () => {
   );
 };
 
-// Root Stack Navigator - FIXED VERSION
 const AppRouter: React.FC = () => {
+  const { isLoggedIn, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
-    <Stack.Navigator
-      screenOptions={{ headerShown: false }}
-      initialRouteName="Login"
-    >
-      {/* Move all auth screens to root level */}
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen name="Main" component={MainTabs} />
-    </Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isLoggedIn ? (
+          <Stack.Screen name="Main" component={MainTabs} />
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+          </>
+        )}
+      </Stack.Navigator>
   );
+
 };
 
 export default AppRouter;
