@@ -1,22 +1,26 @@
-import {
-  ActivityIcon,
-  AwardIcon,
-  BabyIcon,
-  BrainIcon,
+import React, { useEffect, useState, useRef } from "react";
+import { 
+  ArrowRightIcon, 
+  StarIcon, 
+  PhoneIcon, 
   CalendarIcon,
+  MapPinIcon,
+  GraduationCapIcon,
+  UserIcon,
+  FilterIcon,
+  SearchIcon,
   CheckCircleIcon,
   ClockIcon,
-  EyeIcon,
-  GraduationCapIcon,
-  HeartIcon,
-  MapPinIcon,
-  SearchIcon,
-  StarIcon,
+  AwardIcon,
   StethoscopeIcon,
-  UserIcon,
+  HeartIcon,
+  EyeIcon,
+  BrainIcon,
+  BabyIcon,
+  ActivityIcon
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { Footer, Header } from "../../../components";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,8 +28,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent } from "../components/ui/Card";
+import { Header } from "../../../components";
+import { Footer } from "../../../components";
 
 interface Doctor {
   id: number;
@@ -66,38 +70,38 @@ export const Doctors = (): React.JSX.Element => {
       id: "all",
       name: "Tất Cả",
       icon: <UserIcon className="w-5 h-5" />,
-      count: 12,
+      count: 12
     },
     {
       id: "cardiology",
       name: "Tim Mạch",
       icon: <HeartIcon className="w-5 h-5" />,
-      count: 3,
+      count: 3
     },
     {
-      id: "ophthalmology",
+      id: "ophthalmology", 
       name: "Mắt",
       icon: <EyeIcon className="w-5 h-5" />,
-      count: 2,
+      count: 2
     },
     {
       id: "neurology",
       name: "Thần Kinh",
       icon: <BrainIcon className="w-5 h-5" />,
-      count: 2,
+      count: 2
     },
     {
       id: "pediatrics",
       name: "Nhi Khoa",
       icon: <BabyIcon className="w-5 h-5" />,
-      count: 2,
+      count: 2
     },
     {
       id: "general",
       name: "Đa Khoa",
       icon: <StethoscopeIcon className="w-5 h-5" />,
-      count: 3,
-    },
+      count: 3
+    }
   ];
 
   const doctors: Doctor[] = [
@@ -113,17 +117,11 @@ export const Doctors = (): React.JSX.Element => {
       rating: 4.9,
       reviews: 234,
       price: "500.000đ",
-      about:
-        "Chuyên gia hàng đầu về tim mạch với hơn 15 năm kinh nghiệm điều trị các bệnh lý tim mạch phức tạp.",
+      about: "Chuyên gia hàng đầu về tim mạch với hơn 15 năm kinh nghiệm điều trị các bệnh lý tim mạch phức tạp.",
       languages: ["Tiếng Việt", "English"],
       availableHours: "8:00 - 17:00",
-      services: [
-        "Khám tim mạch",
-        "Siêu âm tim",
-        "Điện tâm đồ",
-        "Can thiệp mạch vành",
-      ],
-      featured: true,
+      services: ["Khám tim mạch", "Siêu âm tim", "Điện tâm đồ", "Can thiệp mạch vành"],
+      featured: true
     },
     {
       id: 2,
@@ -137,16 +135,11 @@ export const Doctors = (): React.JSX.Element => {
       rating: 4.8,
       reviews: 189,
       price: "400.000đ",
-      about:
-        "Bác sĩ chuyên khoa mắt với kinh nghiệm phong phú trong điều trị các bệnh lý về mắt.",
+      about: "Bác sĩ chuyên khoa mắt với kinh nghiệm phong phú trong điều trị các bệnh lý về mắt.",
       languages: ["Tiếng Việt"],
       availableHours: "8:00 - 16:30",
-      services: [
-        "Khám mắt tổng quát",
-        "Phẫu thuật cận thị",
-        "Điều trị đục thủy tinh thể",
-      ],
-      featured: false,
+      services: ["Khám mắt tổng quát", "Phẫu thuật cận thị", "Điều trị đục thủy tinh thể"],
+      featured: false
     },
     {
       id: 3,
@@ -160,17 +153,11 @@ export const Doctors = (): React.JSX.Element => {
       rating: 4.9,
       reviews: 312,
       price: "600.000đ",
-      about:
-        "Chuyên gia thần kinh hàng đầu với nhiều công trình nghiên cứu được công nhận quốc tế.",
+      about: "Chuyên gia thần kinh hàng đầu với nhiều công trình nghiên cứu được công nhận quốc tế.",
       languages: ["Tiếng Việt", "English", "日本語"],
       availableHours: "9:00 - 17:00",
-      services: [
-        "Khám thần kinh",
-        "Điều trị đau đầu",
-        "Chẩn đoán động kinh",
-        "Tư vấn tâm lý",
-      ],
-      featured: true,
+      services: ["Khám thần kinh", "Điều trị đau đầu", "Chẩn đoán động kinh", "Tư vấn tâm lý"],
+      featured: true
     },
     {
       id: 4,
@@ -184,17 +171,11 @@ export const Doctors = (): React.JSX.Element => {
       rating: 4.7,
       reviews: 156,
       price: "350.000đ",
-      about:
-        "Bác sĩ nhi khoa tận tâm, chuyên điều trị các bệnh lý ở trẻ em từ sơ sinh đến 16 tuổi.",
+      about: "Bác sĩ nhi khoa tận tâm, chuyên điều trị các bệnh lý ở trẻ em từ sơ sinh đến 16 tuổi.",
       languages: ["Tiếng Việt", "English"],
       availableHours: "8:00 - 17:00",
-      services: [
-        "Khám nhi tổng quát",
-        "Tiêm chủng",
-        "Dinh dưỡng trẻ em",
-        "Tư vấn phát triển",
-      ],
-      featured: false,
+      services: ["Khám nhi tổng quát", "Tiêm chủng", "Dinh dưỡng trẻ em", "Tư vấn phát triển"],
+      featured: false
     },
     {
       id: 5,
@@ -208,17 +189,11 @@ export const Doctors = (): React.JSX.Element => {
       rating: 4.6,
       reviews: 198,
       price: "300.000đ",
-      about:
-        "Bác sĩ đa khoa giàu kinh nghiệm, chuyên khám và điều trị các bệnh lý nội khoa thường gặp.",
+      about: "Bác sĩ đa khoa giàu kinh nghiệm, chuyên khám và điều trị các bệnh lý nội khoa thường gặp.",
       languages: ["Tiếng Việt"],
       availableHours: "7:30 - 16:00",
-      services: [
-        "Khám nội tổng quát",
-        "Điều trị tiểu đường",
-        "Cao huyết áp",
-        "Tư vấn sức khỏe",
-      ],
-      featured: false,
+      services: ["Khám nội tổng quát", "Điều trị tiểu đường", "Cao huyết áp", "Tư vấn sức khỏe"],
+      featured: false
     },
     {
       id: 6,
@@ -232,26 +207,20 @@ export const Doctors = (): React.JSX.Element => {
       rating: 4.8,
       reviews: 267,
       price: "550.000đ",
-      about:
-        "Chuyên gia tim mạch nữ hàng đầu, đặc biệt trong lĩnh vực tim mạch can thiệp.",
+      about: "Chuyên gia tim mạch nữ hàng đầu, đặc biệt trong lĩnh vực tim mạch can thiệp.",
       languages: ["Tiếng Việt", "English"],
       availableHours: "8:30 - 17:30",
-      services: [
-        "Khám tim mạch nữ",
-        "Phẫu thuật tim",
-        "Can thiệp mạch",
-        "Tư vấn tim thai",
-      ],
-      featured: true,
-    },
+      services: ["Khám tim mạch nữ", "Phẫu thuật tim", "Can thiệp mạch", "Tư vấn tim thai"],
+      featured: true
+    }
   ];
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
-
+    
     const timer = setTimeout(() => setIsVisible(true), 100);
-
+    
     return () => {
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(timer);
@@ -260,111 +229,115 @@ export const Doctors = (): React.JSX.Element => {
 
   useEffect(() => {
     let filtered = doctors;
-
+    
     if (selectedSpecialization !== "all") {
-      filtered = filtered.filter(
-        (doctor) => doctor.specialization === selectedSpecialization
-      );
+      filtered = filtered.filter(doctor => doctor.specialization === selectedSpecialization);
     }
-
+    
     if (searchTerm) {
-      filtered = filtered.filter(
-        (doctor) =>
-          doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          doctor.specialization
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          doctor.services.some((service) =>
-            service.toLowerCase().includes(searchTerm.toLowerCase())
-          )
+      filtered = filtered.filter(doctor => 
+        doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        doctor.services.some(service => service.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-
+    
     setFilteredDoctors(filtered);
   }, [selectedSpecialization, searchTerm]);
 
   const getSpecializationName = (spec: string) => {
-    const specialization = specializations.find((s) => s.id === spec);
+    const specialization = specializations.find(s => s.id === spec);
     return specialization ? specialization.name : spec;
   };
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="relative w-full max-w-none">
+      <div className="w-full max-w-none relative">
         {/* Header */}
-        <div className="fixed z-50 w-full">
+        <div className="relative z-50">
           <Header />
         </div>
 
-        {/* Hero Section */}
-        <section className="relative w-full h-[200px] md:h-[350] lg:h-[350px] overflow-hidden">
-          {/* Background with parallax */}
-          <div
-            className="absolute inset-0 w-full h-full transition-transform duration-75 ease-out"
-            style={{
-              backgroundImage: `url("https://i.ibb.co/S4f76rCX/snapedit-1749107627900.png")`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              transform: `translateY(${scrollY * 0.5}px)`,
-            }}
-          />
+        {/* Hero Section - Medical Style */}
+        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+          {/* Medical Pattern Background */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="medical-cross-doctors" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <rect x="8" y="4" width="4" height="12" fill="white"/>
+                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#medical-cross-doctors)" />
+            </svg>
+          </div>
 
-          <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-transparent" />
-
-          {/* Content */}
-          <div
-            className={`absolute mt-15 top-1/2 left-8 md:left-12 lg:left-16 xl:left-20 -translate-y-1/2 transition-all duration-1000 ease-out ${
-              isVisible
-                ? "opacity-100 translate-x-0"
-                : "opacity-0 -translate-x-10"
-            }`}
-          >
-            {/* Breadcrumb */}
-            <div>
-              <Breadcrumb>
-                <BreadcrumbList className="text-slate-600">
-                  <BreadcrumbItem>
-                    <BreadcrumbLink
-                      href="/"
-                      className="text-black transition-colors duration-200 hover:text-blue-800"
-                    >
-                      Trang Chủ
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-black" />
-                  <BreadcrumbItem>
-                    <span className="font-semibold text-blue-800">
-                      Đội Ngũ Bác Sĩ
-                    </span>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+          {/* Decorative Medical Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating medical icons */}
+            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
+              <StethoscopeIcon className="w-8 h-8 text-white/60" />
             </div>
+            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
+              <UserIcon className="w-6 h-6 text-white/60" />
+            </div>
+            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
+              <AwardIcon className="w-7 h-7 text-white/60" />
+            </div>
+          </div>
 
-            {/* Title - Enhanced with gradient colors */}
-            <h1 className="text-5xl font-bold leading-tight text-transparent md:text-6xl lg:text-7xl xl:text-8xl bg-gradient-to-r from-blue-900 via-blue-700 to-blue-600 bg-clip-text">
-              Đội Ngũ Bác Sĩ
-            </h1>
-            <p className="w-full text-xl italic leading-relaxed text-gray-500 md:text-base">
-              "Hãy gặp gỡ và lắng nghe chia sẻ từ các chuyên gia y tế hàng đầu,
-              những người có nhiều năm kinh nghiệm trong ngành, luôn tận tâm
-              mang đến giải pháp chăm sóc sức khỏe <br /> toàn diện và cập nhật kiến
-              thức y khoa mới nhất để phục vụ cộng đồng."{" "}
-            </p>
+          {/* Content Container */}
+          <div className="relative z-10 h-full flex items-center">
+            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+              <div className={`transition-all duration-1000 ease-out ${
+                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+              }`}>
+                {/* Breadcrumb */}
+                <div className="mb-6">
+                  <Breadcrumb>
+                    <BreadcrumbList className="text-white/90">
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                          Trang Chủ
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <span className="text-[#00D4FF] font-semibold">Đội Ngũ Bác Sĩ</span>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+
+                {/* Title */}
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                  Đội Ngũ Bác Sĩ
+                  <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                    Chuyên Gia Hàng Đầu
+                  </span>
+                </h1>
+
+                {/* Description */}
+                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                  Gặp gỡ các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm và trình độ chuyên môn cao.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Search and Filter Section */}
-        <section className="py-12 bg-white border-b border-gray-200 md:py-16">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+        <section className="py-12 md:py-16 bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
             {/* Search Bar */}
             <div className="mb-8">
               <div className="relative max-w-2xl mx-auto">
-                <SearchIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
+                <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm bác sĩ, chuyên khoa..."
-                  className="w-full py-4 pl-12 pr-4 text-lg transition-colors duration-200 border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none"
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none transition-colors duration-200"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -379,19 +352,17 @@ export const Doctors = (): React.JSX.Element => {
                   onClick={() => setSelectedSpecialization(spec.id)}
                   className={`flex items-center px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-300 text-sm md:text-base font-medium ${
                     selectedSpecialization === spec.id
-                      ? "bg-blue-900 !text-white shadow-lg"
-                      : "bg-blue-50 text-blue-900 hover:bg-blue-100"
+                      ? 'bg-blue-900 !text-white shadow-lg'
+                      : 'bg-blue-50 text-blue-900 hover:bg-blue-100'
                   }`}
                 >
                   {spec.icon}
                   <span className="ml-2">{spec.name}</span>
-                  <span
-                    className={`ml-2 px-2 py-1 rounded-full text-xs ${
-                      selectedSpecialization === spec.id
-                        ? "bg-white/20 text-white"
-                        : "bg-blue-200 text-blue-800"
-                    }`}
-                  >
+                  <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
+                    selectedSpecialization === spec.id
+                      ? 'bg-white/20 text-white'
+                      : 'bg-blue-200 text-blue-800'
+                  }`}>
                     {spec.count}
                   </span>
                 </button>
@@ -401,164 +372,121 @@ export const Doctors = (): React.JSX.Element => {
         </section>
 
         {/* Doctors Grid */}
-        <section className="py-16 md:py-20 lg:py-24 bg-gray-50">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+        <section className="py-16 md:py-20 lg:py-24 bg-blue-50">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
             {/* Results Info */}
             <div className="mb-8">
               <p className="text-lg text-slate-600">
-                Tìm thấy{" "}
-                <span className="font-semibold text-blue-900">
-                  {filteredDoctors.length}
-                </span>{" "}
-                bác sĩ
+                Tìm thấy <span className="font-semibold text-blue-900">{filteredDoctors.length}</span> bác sĩ
                 {selectedSpecialization !== "all" && (
-                  <span>
-                    {" "}
-                    trong chuyên khoa{" "}
-                    <span className="font-semibold text-blue-900">
-                      {getSpecializationName(selectedSpecialization)}
-                    </span>
-                  </span>
+                  <span> trong chuyên khoa <span className="font-semibold text-blue-900">{getSpecializationName(selectedSpecialization)}</span></span>
                 )}
               </p>
             </div>
 
             {/* Featured Doctors */}
-            {filteredDoctors.some((doctor) => doctor.featured) && (
+            {filteredDoctors.some(doctor => doctor.featured) && (
               <div className="mb-12">
-                <h2 className="mb-8 text-2xl font-bold text-blue-900 md:text-3xl">
-                  Bác Sĩ Nổi Bật
-                </h2>
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-3">
-                  {filteredDoctors
-                    .filter((doctor) => doctor.featured)
-                    .map((doctor) => (
-                      <Card
-                        key={doctor.id}
-                        className="relative overflow-hidden transition-all duration-500 bg-white border-0 group hover:shadow-2xl hover:-translate-y-2"
-                      >
-                        {/* Featured Badge */}
-                        <div className="absolute z-10 px-3 py-1 text-sm font-semibold text-yellow-900 bg-yellow-400 rounded-full top-4 right-4">
-                          ⭐ Nổi Bật
+                <h2 className="text-2xl md:text-3xl font-bold text-blue-900 mb-8">Bác Sĩ Nổi Bật</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {filteredDoctors.filter(doctor => doctor.featured).map((doctor) => (
+                    <Card key={doctor.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-0 relative">
+                      {/* Featured Badge */}
+                      <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold z-10">
+                        ⭐ Nổi Bật
+                      </div>
+                      
+                      <div className="relative h-64 overflow-hidden">
+                        <img 
+                          src={doctor.image}
+                          alt={doctor.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      </div>
+                      
+                      <CardContent className="p-6">
+                        <div className="mb-4">
+                          <h3 className="text-xl font-bold text-blue-900 mb-1 group-hover:text-blue-700 transition-colors duration-300">
+                            {doctor.name}
+                          </h3>
+                          <p className="text-blue-600 font-semibold text-sm mb-1">{doctor.title}</p>
+                          <p className="text-blue-600 font-medium">{getSpecializationName(doctor.specialization)}</p>
                         </div>
 
-                        <div className="relative h-64 overflow-hidden">
-                          <img
-                            src={doctor.image}
-                            alt={doctor.name}
-                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                          />
-                          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent group-hover:opacity-100"></div>
+                        <div className="space-y-2 mb-4 text-sm">
+                          <div className="flex items-center text-slate-600">
+                            <GraduationCapIcon className="w-4 h-4 mr-2 text-blue-500" />
+                            {doctor.experience}
+                          </div>
+                          <div className="flex items-center text-slate-600">
+                            <MapPinIcon className="w-4 h-4 mr-2 text-blue-500" />
+                            {doctor.location}
+                          </div>
+                          <div className="flex items-center text-slate-600">
+                            <ClockIcon className="w-4 h-4 mr-2 text-blue-500" />
+                            {doctor.availableHours}
+                          </div>
                         </div>
 
-                        <CardContent className="p-6">
-                          <div className="mb-4">
-                            <h3 className="mb-1 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
-                              {doctor.name}
-                            </h3>
-                            <p className="mb-1 text-sm font-semibold text-blue-600">
-                              {doctor.title}
-                            </p>
-                            <p className="font-medium text-blue-600">
-                              {getSpecializationName(doctor.specialization)}
-                            </p>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center">
+                            <StarIcon className="w-5 h-5 text-yellow-400 fill-current" />
+                            <span className="ml-1 font-semibold text-gray-800">{doctor.rating}</span>
+                            <span className="ml-1 text-slate-500 text-sm">({doctor.reviews})</span>
                           </div>
-
-                          <div className="mb-4 space-y-2 text-sm">
-                            <div className="flex items-center text-slate-600">
-                              <GraduationCapIcon className="w-4 h-4 mr-2 text-blue-500" />
-                              {doctor.experience}
-                            </div>
-                            <div className="flex items-center text-slate-600">
-                              <MapPinIcon className="w-4 h-4 mr-2 text-blue-500" />
-                              {doctor.location}
-                            </div>
-                            <div className="flex items-center text-slate-600">
-                              <ClockIcon className="w-4 h-4 mr-2 text-blue-500" />
-                              {doctor.availableHours}
-                            </div>
+                          <div className="text-right">
+                            <span className="text-lg font-bold text-blue-900">{doctor.price}</span>
+                            <p className="text-xs text-slate-500">/ lần khám</p>
                           </div>
+                        </div>
 
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center">
-                              <StarIcon className="w-5 h-5 text-yellow-400 fill-current" />
-                              <span className="ml-1 font-semibold text-gray-800">
-                                {doctor.rating}
-                              </span>
-                              <span className="ml-1 text-sm text-slate-500">
-                                ({doctor.reviews})
-                              </span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-lg font-bold text-blue-900">
-                                {doctor.price}
-                              </span>
-                              <p className="text-xs text-slate-500">
-                                / lần khám
-                              </p>
-                            </div>
-                          </div>
+                        <p className="text-slate-600 text-sm mb-4 line-clamp-2">
+                          {doctor.about}
+                        </p>
 
-                          <p className="mb-4 text-sm text-slate-600 line-clamp-2">
-                            {doctor.about}
-                          </p>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            <Button className="bg-blue-900 hover:bg-blue-800 !text-white text-sm py-2">
-                              <CalendarIcon className="w-4 h-4 mr-1" />
-                              Đặt Lịch
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2"
-                            >
-                              Xem Chi Tiết
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                        <div className="grid grid-cols-1 gap-2">
+                          <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
+                            Xem Chi Tiết
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               </div>
             )}
 
             {/* All Doctors */}
             <div>
-              <h2 className="mb-8 text-2xl font-bold text-blue-900 md:text-3xl">
-                {filteredDoctors.some((doctor) => doctor.featured)
-                  ? "Tất Cả Bác Sĩ"
-                  : "Danh Sách Bác Sĩ"}
+              <h2 className="text-2xl md:text-3xl font-bold text-blue-900 mb-8">
+                {filteredDoctors.some(doctor => doctor.featured) ? "Tất Cả Bác Sĩ" : "Danh Sách Bác Sĩ"}
               </h2>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
                 {filteredDoctors.map((doctor) => (
-                  <Card
-                    key={doctor.id}
-                    className="overflow-hidden transition-all duration-300 bg-white border-0 group hover:shadow-xl hover:-translate-y-2"
-                  >
+                  <Card key={doctor.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white border-0">
                     <div className="relative h-48 overflow-hidden">
-                      <img
+                      <img 
                         src={doctor.image}
                         alt={doctor.name}
-                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                       {doctor.featured && (
-                        <div className="absolute px-2 py-1 text-xs font-semibold text-yellow-900 bg-yellow-400 rounded-full top-2 right-2">
+                        <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
                           ⭐
                         </div>
                       )}
                     </div>
-
+                    
                     <CardContent className="p-4">
                       <div className="mb-3">
-                        <h3 className="mb-1 text-lg font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700 line-clamp-1">
+                        <h3 className="text-lg font-bold text-blue-900 mb-1 group-hover:text-blue-700 transition-colors duration-300 line-clamp-1">
                           {doctor.name}
                         </h3>
-                        <p className="text-sm font-medium text-blue-600">
-                          {getSpecializationName(doctor.specialization)}
-                        </p>
+                        <p className="text-blue-600 font-medium text-sm">{getSpecializationName(doctor.specialization)}</p>
                       </div>
 
-                      <div className="mb-3 space-y-1 text-xs">
+                      <div className="space-y-1 mb-3 text-xs">
                         <div className="flex items-center text-slate-600">
                           <GraduationCapIcon className="w-3 h-3 mr-1 text-blue-500" />
                           {doctor.experience}
@@ -572,20 +500,15 @@ export const Doctors = (): React.JSX.Element => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
                           <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 text-sm font-semibold text-gray-800">
-                            {doctor.rating}
-                          </span>
+                          <span className="ml-1 font-semibold text-gray-800 text-sm">{doctor.rating}</span>
                         </div>
-                        <span className="text-sm font-bold text-blue-900">
-                          {doctor.price}
-                        </span>
+                        <span className="text-sm font-bold text-blue-900">{doctor.price}</span>
                       </div>
 
                       <div className="grid grid-cols-1 gap-2">
-                        <Button className="bg-blue-900 hover:bg-blue-800 !text-white text-xs py-2">
-                          <CalendarIcon className="w-3 h-3 mr-1" />
-                          Đặt Lịch
-                        </Button>
+                      <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
+                            Xem Chi Tiết
+                          </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -594,15 +517,11 @@ export const Doctors = (): React.JSX.Element => {
 
               {/* No Results */}
               {filteredDoctors.length === 0 && (
-                <div className="py-16 text-center">
-                  <UserIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                  <h3 className="mb-2 text-xl font-semibold text-slate-600">
-                    Không tìm thấy bác sĩ
-                  </h3>
-                  <p className="text-slate-500">
-                    Vui lòng thử lại với từ khóa khác hoặc thay đổi bộ lọc
-                  </p>
-                  <Button
+                <div className="text-center py-16">
+                  <UserIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-slate-600 mb-2">Không tìm thấy bác sĩ</h3>
+                  <p className="text-slate-500">Vui lòng thử lại với từ khóa khác hoặc thay đổi bộ lọc</p>
+                  <Button 
                     onClick={() => {
                       setSelectedSpecialization("all");
                       setSearchTerm("");
@@ -618,66 +537,48 @@ export const Doctors = (): React.JSX.Element => {
         </section>
 
         {/* Why Choose Our Doctors */}
-        <section className="py-16 bg-white md:py-20">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            <div className="mb-12 text-center md:mb-16">
-              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
+        <section className="py-16 md:py-20 bg-white">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+            <div className="text-center mb-12 md:mb-16">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
                 Tại Sao Chọn Bác Sĩ Của Chúng Tôi?
               </h2>
-              <p className="max-w-3xl mx-auto text-lg leading-relaxed text-slate-600">
-                Đội ngũ bác sĩ chuyên nghiệp với nhiều năm kinh nghiệm và được
-                đào tạo bài bản
+              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                Đội ngũ bác sĩ chuyên nghiệp với nhiều năm kinh nghiệm và được đào tạo bài bản
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="text-center group">
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                   <AwardIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-blue-900">
-                  Chuyên Gia Hàng Đầu
-                </h3>
-                <p className="text-slate-600">
-                  Các bác sĩ được đào tạo tại những trường đại học y khoa uy tín
-                </p>
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Chuyên Gia Hàng Đầu</h3>
+                <p className="text-slate-600">Các bác sĩ được đào tạo tại những trường đại học y khoa uy tín</p>
               </div>
 
               <div className="text-center group">
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                   <HeartIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-blue-900">
-                  Tận Tâm Chăm Sóc
-                </h3>
-                <p className="text-slate-600">
-                  Luôn đặt sức khỏe và sự hài lòng của bệnh nhân lên hàng đầu
-                </p>
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Tận Tâm Chăm Sóc</h3>
+                <p className="text-slate-600">Luôn đặt sức khỏe và sự hài lòng của bệnh nhân lên hàng đầu</p>
               </div>
 
               <div className="text-center group">
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                   <ActivityIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-blue-900">
-                  Công Nghệ Hiện Đại
-                </h3>
-                <p className="text-slate-600">
-                  Sử dụng trang thiết bị y tế tiên tiến nhất cho chẩn đoán chính
-                  xác
-                </p>
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Công Nghệ Hiện Đại</h3>
+                <p className="text-slate-600">Sử dụng trang thiết bị y tế tiên tiến nhất cho chẩn đoán chính xác</p>
               </div>
 
               <div className="text-center group">
-                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
+                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
                   <CheckCircleIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="mb-2 text-xl font-bold text-blue-900">
-                  Kinh Nghiệm Phong Phú
-                </h3>
-                <p className="text-slate-600">
-                  Nhiều năm kinh nghiệm điều trị thành công hàng nghìn ca bệnh
-                </p>
+                <h3 className="text-xl font-bold text-blue-900 mb-2">Kinh Nghiệm Phong Phú</h3>
+                <p className="text-slate-600">Nhiều năm kinh nghiệm điều trị thành công hàng nghìn ca bệnh</p>
               </div>
             </div>
           </div>
@@ -685,20 +586,19 @@ export const Doctors = (): React.JSX.Element => {
 
         {/* CTA Section */}
         <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-r from-blue-900 to-blue-700">
-          <div className="container max-w-4xl px-4 mx-auto text-center md:px-6 lg:px-8">
-            <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl text-center">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
               Sẵn Sàng Đặt Lịch Khám?
             </h2>
-            <p className="mb-8 text-xl leading-relaxed text-white/90">
-              Liên hệ ngay với chúng tôi để được tư vấn và đặt lịch khám với bác
-              sĩ phù hợp
+            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+              Liên hệ ngay với chúng tôi để được tư vấn và đặt lịch khám với bác sĩ phù hợp
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button className="bg-white text-blue-900 hover:bg-blue-50 hover:text-blue-900 px-8 py-4 rounded-full text-lg font-semibold">
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 Đặt Lịch Khám
               </Button>
-              {/* <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
+              {/* <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 rounded-full text-lg">
                 <PhoneIcon className="w-5 h-5 mr-2" />
                 Hotline: 1900-xxxx
               </Button> */}
@@ -713,4 +613,4 @@ export const Doctors = (): React.JSX.Element => {
       </div>
     </div>
   );
-};
+}; 
