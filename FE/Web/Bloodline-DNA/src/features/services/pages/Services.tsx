@@ -1,16 +1,15 @@
 import React from "react";
+import { Footer, Header } from "../../../components";
 import { ContactSection } from "../sections/ContactSection/ContactSection";
 import { ServicesHeaderSection } from "../sections/ServicesHeaderSection/ServicesHeaderSection";
 import { ServicesSection } from "../sections/ServicesSection/ServicesSection";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
 
 export const Services = (): React.JSX.Element => {
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header with proper spacing */}
-        <div className="relative z-50">
+        <div className="fixed z-50 w-full">
           <Header />
         </div>
 
