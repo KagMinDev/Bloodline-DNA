@@ -150,54 +150,77 @@ export const Contacts = (): React.JSX.Element => {
           <Header />
         </div>
 
-        {/* Hero Section */}
-        <section className="relative w-full h-[250px] md:h-[300px] lg:h-[350px] overflow-hidden">
-          {/* Background with parallax */}
-          <div 
-            className="absolute inset-0 w-full h-full transition-transform duration-75 ease-out"
-            style={{
-              backgroundImage: `url("https://i.ibb.co/S4f76rCX/snapedit-1749107627900.png")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              transform: `translateY(${scrollY * 0.5}px)`,
-            }}
-          />
-          
-          <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/75 to-white/65" />
+        {/* Hero Section - Medical Style */}
+        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+          {/* Medical Pattern Background */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="medical-cross-contact" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <rect x="8" y="4" width="4" height="12" fill="white"/>
+                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#medical-cross-contact)" />
+            </svg>
+          </div>
 
-          {/* Content */}
-          <div className={`absolute top-1/2 left-8 md:left-12 lg:left-16 xl:left-20 -translate-y-1/2 transition-all duration-1000 ease-out ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-          }`}>
-            {/* Breadcrumb */}
-            <div className="mb-4">
-              <Breadcrumb>
-                <BreadcrumbList className="text-slate-600">
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-slate-600 hover:text-blue-800 transition-colors duration-200">
-                      Trang Chủ
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-slate-400" />
-                  <BreadcrumbItem>
-                    <span className="text-blue-800 font-semibold">Liên Hệ</span>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+          {/* Decorative Medical Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating medical icons */}
+            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
+              <PhoneIcon className="w-8 h-8 text-white/60" />
             </div>
+            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
+              <MailIcon className="w-6 h-6 text-white/60" />
+            </div>
+            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
+              <HeadphonesIcon className="w-7 h-7 text-white/60" />
+            </div>
+          </div>
 
-            {/* Title - Enhanced with gradient colors */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-600 bg-clip-text text-transparent leading-tight mb-4">
-              Liên Hệ
-            </h1>
-            {/* <p className="text-xl md:text-2xl text-slate-600 leading-relaxed max-w-2xl">
-              Chúng tôi luôn sẵn sàng hỗ trợ và tư vấn cho bạn
-            </p> */}
+          {/* Content Container */}
+          <div className="relative z-10 h-full flex items-center">
+            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+              <div className={`transition-all duration-1000 ease-out ${
+                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+              }`}>
+                {/* Breadcrumb */}
+                <div className="mb-6">
+                  <Breadcrumb>
+                    <BreadcrumbList className="text-white/90">
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                          Trang Chủ
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <span className="text-[#00D4FF] font-semibold">Liên Hệ</span>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+
+                {/* Title */}
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                  Liên Hệ Với Chúng Tôi
+                  <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                    Hỗ Trợ 24/7
+                  </span>
+                </h1>
+
+                {/* Description */}
+                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                  Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn mọi lúc với đội ngũ chăm sóc khách hàng chuyên nghiệp.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Contact Form & Contact Info */}
-        <section className="py-16 md:py-20 lg:py-24 bg-gray-50">
+        <section className="py-16 md:py-20 lg:py-24 bg-white">
           <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
               {/* Contact Form */}
@@ -513,28 +536,6 @@ export const Contacts = (): React.JSX.Element => {
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-r from-blue-900 to-blue-700">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Cần Hỗ Trợ Khẩn Cấp?
-            </h2>
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
-              Đội ngũ y bác sĩ của chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-blue-900 hover:bg-blue-50 hover:text-blue-900 px-8 py-4 rounded-full text-lg font-semibold">
-                <PhoneIcon className="w-5 h-5 mr-2" />
-                Gọi Ngay
-              </Button>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 rounded-full text-lg">
-                <MessageSquareIcon className="w-5 h-5 mr-2" />
-                Chat Trực Tuyến
-              </Button>
             </div>
           </div>
         </section>
