@@ -221,106 +221,110 @@ export const Blogs = (): React.JSX.Element => {
           <Header />
         </div>
 
-        {/* Hero Section */}
-        <section className="relative w-full h-[250px] md:h-[300px] lg:h-[350px] overflow-hidden">
-          {/* Background with parallax */}
-          <div 
-            className="absolute inset-0 w-full h-full transition-transform duration-75 ease-out"
-            style={{
-              backgroundImage: `url("https://i.ibb.co/S4f76rCX/snapedit-1749107627900.png")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              transform: `translateY(${scrollY * 0.5}px)`,
-            }}
-          />
-          
-          {/* Enhanced gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-blue-800/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 via-transparent to-transparent" />
-
-          {/* Floating particles effect */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-20 left-20 w-3 h-3 bg-blue-400/30 rounded-full animate-bounce" style={{animationDelay: '0s', animationDuration: '3s'}}></div>
-            <div className="absolute top-40 right-32 w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
-            <div className="absolute bottom-40 left-40 w-4 h-4 bg-blue-300/20 rounded-full animate-bounce" style={{animationDelay: '2s', animationDuration: '5s'}}></div>
-            <div className="absolute top-60 right-20 w-2 h-2 bg-white/30 rounded-full animate-bounce" style={{animationDelay: '0.5s', animationDuration: '3.5s'}}></div>
+        {/* Hero Section - Medical Style */}
+        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+          {/* Medical Pattern Background */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="medical-cross-blog" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <rect x="8" y="4" width="4" height="12" fill="white"/>
+                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#medical-cross-blog)" />
+            </svg>
           </div>
 
-          {/* Content */}
-          <div className={`absolute top-1/2 left-8 md:left-12 lg:left-16 xl:left-20 -translate-y-1/2 transition-all duration-1000 ease-out ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-          }`}>
-            {/* Breadcrumb */}
-            <div className="mb-6">
-              <Breadcrumb>
-                <BreadcrumbList className="text-white/90">
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200 drop-shadow-sm">
-                      Trang Chủ
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-white/70" />
-                  <BreadcrumbItem>
-                    <span className="text-blue-800 font-semibold">Blog Y Tế</span>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+          {/* Decorative Medical Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating medical icons */}
+            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
+              <BookmarkIcon className="w-8 h-8 text-white/60" />
             </div>
+            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
+              <TrendingUpIcon className="w-6 h-6 text-white/60" />
+            </div>
+            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
+              <HeartIcon className="w-7 h-7 text-white/60" />
+            </div>
+          </div>
 
-            {/* Title with enhanced styling */}
-            <div className="relative">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-600 bg-clip-text text-transparent leading-tight mb-4">
-                Blog Y Tế
-              </h1>
-              <div className="absolute -inset-1 bg-gradient-to-r from-green-600/20 via-green-400/10 to-transparent blur-xl -z-10"></div>
+          {/* Content Container */}
+          <div className="relative z-10 h-full flex items-center">
+            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+              <div className={`transition-all duration-1000 ease-out ${
+                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+              }`}>
+                {/* Breadcrumb */}
+                <div className="mb-6">
+                  <Breadcrumb>
+                    <BreadcrumbList className="text-white/90">
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                          Trang Chủ
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <span className="text-[#00D4FF] font-semibold">Blog Y Tế</span>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+
+                {/* Title */}
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                  Blog Y Tế
+                  <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                    Kiến Thức Sức Khỏe
+                  </span>
+                </h1>
+
+                {/* Description */}
+                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                  Khám phá những bài viết chuyên sâu về sức khỏe, y học và lối sống khỏe mạnh từ đội ngũ chuyên gia.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Search and Filter Section */}
-        <section className="py-16 md:py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+        <section className="py-12 md:py-16 bg-white border-b border-gray-200">
           <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
             {/* Search Bar */}
-            <div className="mb-12">
-              <div className="relative max-w-3xl mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl blur-xl"></div>
-                <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border-2 border-gray-300">
-                  <SearchIcon className="absolute left-6 top-1/2 transform -translate-y-1/2 text-blue-500 w-6 h-6" />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm bài viết, tác giả, chủ đề... 🔍"
-                    className="w-full pl-16 pr-6 py-5 text-lg bg-transparent border-0 focus:outline-none placeholder-slate-500"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+            <div className="mb-8">
+              <div className="relative max-w-2xl mx-auto">
+                <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm bài viết, tác giả, chủ đề..."
+                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
             </div>
 
             {/* Category Filter */}
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-              {categories.map((category, index) => (
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+              {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`group relative flex items-center px-6 md:px-8 py-3 md:py-4 rounded-2xl transition-all duration-500 text-sm md:text-base font-semibold transform hover:scale-105 ${
+                  className={`flex items-center px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-300 text-sm md:text-base font-medium ${
                     selectedCategory === category.id
-                      ? 'bg-gradient-to-r from-blue-900 to-blue-700 !text-white shadow-2xl shadow-blue-500/25'
-                      : 'bg-white/70 backdrop-blur-sm text-blue-900 hover:bg-white hover:shadow-xl border border-blue-100/50'
+                      ? 'bg-blue-900 !text-white shadow-lg'
+                      : 'bg-blue-50 text-blue-900 hover:bg-blue-100'
                   }`}
-                  style={{
-                    animationDelay: `${index * 100}ms`,
-                  }}
                 >
-                  {selectedCategory === category.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 rounded-2xl blur-lg"></div>
-                  )}
-                  <TagIcon className="w-5 h-5 mr-3 relative z-10" />
-                  <span className="relative z-10">{category.name}</span>
-                  <span className={`ml-3 px-3 py-1 rounded-full text-xs font-bold relative z-10 ${
+                  <TagIcon className="w-5 h-5 mr-2" />
+                  <span>{category.name}</span>
+                  <span className={`ml-2 px-2 py-1 rounded-full text-xs ${
                     selectedCategory === category.id
                       ? 'bg-white/20 text-white'
-                      : 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800'
+                      : 'bg-blue-200 text-blue-800'
                   }`}>
                     {category.count}
                   </span>
@@ -644,7 +648,7 @@ export const Blogs = (): React.JSX.Element => {
                             onClick={() => setSelectedCategory(category.id)}
                             className={`group w-full flex items-center justify-between py-4 px-5 rounded-2xl text-left transition-all duration-300 transform hover:scale-105 ${
                               selectedCategory === category.id
-                                ? 'bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-lg'
+                                ? 'bg-gradient-to-r from-blue-900 to-blue-700 !text-white shadow-lg'
                                 : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 text-slate-700 hover:shadow-md'
                             }`}
                             style={{
