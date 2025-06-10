@@ -1,14 +1,15 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError } from 'axios';
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { styles } from "./styles";
@@ -57,89 +58,96 @@ const ChatbotAI: React.FC = () => {
   return (
     <>
       <TouchableOpacity style={styles.chatButton} onPress={toggleChat}>
-        <Icon name="wechat" size={24} color="white" />
+        <Icon name="wechat" size={20} color="white" />
       </TouchableOpacity>
 
-      {isChatOpen && (
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.chatContainer}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerTitle}>
-              <Icon name="wechat" size={18} color="white" />
-              <Text style={styles.headerText}>Chat tư vấn ADN huyết thống</Text>
+      <Modal
+        visible={isChatOpen}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={toggleChat}
+      >
+        <View style={styles.modalBackdrop}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.chatContainer}
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <View style={styles.headerTitle}>
+                <Icon name="wechat" size={18} color="white" />
+                <Text style={styles.headerText}>Chat tư vấn ADN huyết thống</Text>
+              </View>
+              <TouchableOpacity onPress={toggleChat}>
+                <Icon name="close" size={20} color="white" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={toggleChat}>
-              <Icon name="close" size={20} color="white" />
-            </TouchableOpacity>
-          </View>
 
-          {/* Message Area */}
-          <ScrollView style={styles.messages}>
-            {messages.map((msg, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.messageContainer,
-                  msg.sender === "user"
-                    ? styles.messageRight
-                    : styles.messageLeft,
-                ]}
-              >
+            {/* Message Area */}
+            <ScrollView style={styles.messages}>
+              {messages.map((msg, i) => (
                 <View
+                  key={i}
                   style={[
-                    styles.messageBubble,
+                    styles.messageContainer,
                     msg.sender === "user"
-                      ? styles.userBubble
-                      : styles.botBubble,
+                      ? styles.messageRight
+                      : styles.messageLeft,
                   ]}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.messageText,
+                      styles.messageBubble,
                       msg.sender === "user"
-                        ? styles.userText
-                        : styles.botText,
+                        ? styles.userBubble
+                        : styles.botBubble,
                     ]}
                   >
-                    {msg.text}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.messageText,
+                        msg.sender === "user"
+                          ? styles.userText
+                          : styles.botText,
+                      ]}
+                    >
+                      {msg.text}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
 
-            {isLoading && (
-              <View style={styles.messageLeft}>
-                <View style={styles.botBubble}>
-                  <ActivityIndicator size="small" color="#000" />
-                  <Text style={styles.botText}> Đang xử lý...</Text>
+              {isLoading && (
+                <View style={styles.messageLeft}>
+                  <View style={styles.botBubble}>
+                    <ActivityIndicator size="small" color="#000" />
+                    <Text style={styles.botText}> Đang xử lý...</Text>
+                  </View>
                 </View>
-              </View>
-            )}
-          </ScrollView>
+              )}
+            </ScrollView>
 
-          {/* Input */}
-          <View style={styles.inputArea}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Nhập câu hỏi..."
-              value={inputText}
-              onChangeText={setInputText}
-              onSubmitEditing={handleSendMessage}
-              editable={!isLoading}
-            />
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={handleSendMessage}
-              disabled={isLoading}
-            >
-              <Text style={styles.sendText}>Gửi</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      )}
+            {/* Input */}
+            <View style={styles.inputArea}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập câu hỏi..."
+                value={inputText}
+                onChangeText={setInputText}
+                onSubmitEditing={handleSendMessage}
+                editable={!isLoading}
+              />
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={handleSendMessage}
+                disabled={isLoading}
+              >
+                <Text style={styles.sendText}>Gửi</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
     </>
   );
 };

@@ -19,19 +19,19 @@ const Header: React.FC = () => {
         <a href="/" className="text-gray-600 transition-colors hover:text-blue-600">
             Trang chủ
           </a>
-          <a href="#contact" className="text-gray-600 transition-colors hover:text-blue-600">
+          <a href="/about" className="text-gray-600 transition-colors hover:text-blue-600">
             Về chúng tôi
           </a>
           <a href="/services" className="text-gray-600 transition-colors hover:text-blue-600">
             Dịch vụ
           </a>
-          <a href="#about" className="text-gray-600 transition-colors hover:text-blue-600">
+          <a href="/doctors" className="text-gray-600 transition-colors hover:text-blue-600">
             Các Bác Sĩ
           </a>
-          <a href="#contact" className="text-gray-600 transition-colors hover:text-blue-600">
+          <a href="/blogs" className="text-gray-600 transition-colors hover:text-blue-600">
             Tin tức
           </a>
-          <a href="#contact" className="text-gray-600 transition-colors hover:text-blue-600">
+          <a href="/contacts" className="text-gray-600 transition-colors hover:text-blue-600">
             Liên hệ
           </a>
         </nav>
