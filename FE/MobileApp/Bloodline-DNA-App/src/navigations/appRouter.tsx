@@ -1,12 +1,18 @@
 // AppRouter.tsx
 import { useAuth } from "@/context/auth/AuthContext";
+import Services from "@/screens/services";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen } from "../screens";
+import {
+  ForgotPasswordScreen,
+  HomePageScreen,
+  LoginScreen,
+  RegisterScreen,
+} from "../screens";
 import {
   MainTabParamList,
   RootStackParamList,
@@ -103,19 +109,24 @@ const AppRouter: React.FC = () => {
   }
 
   return (
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isLoggedIn ? (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isLoggedIn ? (
+        <>
           <Stack.Screen name="Main" component={MainTabs} />
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          </>
-        )}
-      </Stack.Navigator>
+          <Stack.Screen name="Services" component={Services} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
+          />
+        </>
+      )}
+    </Stack.Navigator>
   );
-
 };
 
 export default AppRouter;

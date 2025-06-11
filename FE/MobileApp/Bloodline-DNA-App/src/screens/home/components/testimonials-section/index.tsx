@@ -5,7 +5,6 @@ import {
   Text,
   View
 } from "react-native";
-// import LinearGradient from "react-native-linear-gradient"; // Temporarily disabled
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Testimonial } from "../../../../types/home/home.types";
 import { styles } from "./styles";

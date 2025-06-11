@@ -1,4 +1,5 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from "react";
 import {
   Animated,
@@ -26,6 +27,7 @@ const navItems = [
 ];
 
 const Header: React.FC = () => {
+  const navigation = useNavigation();
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
 
@@ -57,7 +59,7 @@ const Header: React.FC = () => {
   };
 
   const onSelectMenu = (screen: string) => {
-    console.log("Chọn menu:", screen);
+    navigation.navigate(screen as never); // Chuyển trang
     closeMenu();
   };
 
@@ -131,8 +133,12 @@ const Header: React.FC = () => {
               <Text style={styles.menuItemText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
+
           <TouchableOpacity
-            onPress={() => console.log("Đăng xuất")}
+            onPress={() => {
+              console.log("Đăng xuất");
+              // Thêm logic đăng xuất ở đây
+            }}
             style={styles.logoutButton}
           >
             <Text style={styles.logoutButtonText}>Đăng xuất</Text>
@@ -143,6 +149,5 @@ const Header: React.FC = () => {
     </View>
   );
 };
-
 
 export default Header;
