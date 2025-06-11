@@ -1,4 +1,4 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 import React, { useRef, useState } from "react";
 import {
     Animated,
@@ -7,7 +7,7 @@ import {
     Pressable,
     Text,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./styles";
@@ -89,7 +89,12 @@ const Header: React.FC = () => {
           <Text style={styles.logoText}>ADN Huyết Thống</Text>
         </View>
 
-        <TouchableOpacity onPress={toggleMenu}>
+        <TouchableOpacity
+          style={{
+            top: 12,
+          }}
+          onPress={toggleMenu}
+        >
           <Icon
             name={menuVisible ? "close" : "menu"}
             size={30}
@@ -99,9 +104,7 @@ const Header: React.FC = () => {
       </View>
 
       {/* Overlay mờ nền */}
-      {menuVisible && (
-        <Pressable style={styles.overlay} onPress={closeMenu} />
-      )}
+      {menuVisible && <Pressable style={styles.overlay} onPress={closeMenu} />}
 
       {/* Menu trượt */}
       {menuVisible && (
@@ -143,6 +146,5 @@ const Header: React.FC = () => {
     </View>
   );
 };
-
 
 export default Header;

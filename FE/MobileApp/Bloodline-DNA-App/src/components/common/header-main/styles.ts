@@ -6,13 +6,15 @@ const MENU_WIDTH = SCREEN_WIDTH * 0.8;
 const styles = StyleSheet.create({
   header: {
     height: 80,
-    top: 12,
+    top: 0,
+    backgroundColor: "#fff",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
   logoContainer: {
+    top: 12,
     flexDirection: "row",
     alignItems: "center",
   },
