@@ -13,23 +13,46 @@ namespace ADNTester.Service.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IServicePriceService _servicePriceService;
 
-        public TestServiceService(IUnitOfWork unitOfWork, IMapper mapper)
+        public TestServiceService(
+            IUnitOfWork unitOfWork, 
+            IMapper mapper,
+            IServicePriceService servicePriceService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _servicePriceService = servicePriceService;
         }
 
         public async Task<IEnumerable<TestServiceDto>> GetAllAsync()
         {
             var services = await _unitOfWork.TestServiceRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<TestServiceDto>>(services);
+            var serviceDtos = _mapper.Map<IEnumerable<TestServiceDto>>(services);
+
+            // Lấy thông tin giá cho từng dịch vụ
+            foreach (var serviceDto in serviceDtos)
+            {
+                var prices = await _servicePriceService.GetByServiceIdAsync(serviceDto.Id);
+                serviceDto.PriceServices = prices.ToList();
+            }
+
+            return serviceDtos;
         }
 
         public async Task<TestServiceDto> GetByIdAsync(string id)
         {
             var service = await _unitOfWork.TestServiceRepository.GetByIdAsync(id);
-            return service == null ? null : _mapper.Map<TestServiceDto>(service);
+            if (service == null)
+                return null;
+
+            var serviceDto = _mapper.Map<TestServiceDto>(service);
+
+            
+            var prices = await _servicePriceService.GetByServiceIdAsync(id);
+            serviceDto.PriceServices = prices.ToList();
+
+            return serviceDto;
         }
 
         public async Task<string> CreateAsync(CreateTestServiceDto dto)
@@ -97,5 +120,7 @@ namespace ADNTester.Service.Implementations
             _unitOfWork.TestServiceRepository.Remove(service);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
+
+       
     }
 } 

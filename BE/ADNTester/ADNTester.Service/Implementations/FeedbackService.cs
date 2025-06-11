@@ -1,9 +1,11 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.Feedback;
 using ADNTester.BO.Entities;
 using ADNTester.Repository.Interfaces;
 using ADNTester.Service.Interfaces;
 using AutoMapper;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ADNTester.Service.Implementations
@@ -58,6 +60,36 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.FeedbackRepository.Remove(feedback);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<FeedbackDetailDto>> GetFeedbacksByUserIdAsync(string userId)
+        {
+            var feedbacks = await _unitOfWork.FeedbackRepository.GetAllAsync();
+            var userFeedbacks = feedbacks.Where(f => f.UserId == userId).ToList();
+
+            // Load user data for each feedback
+            foreach (var feedback in userFeedbacks)
+            {
+                feedback.User = await _unitOfWork.UserRepository.GetByIdAsync(feedback.UserId);
+                feedback.TestService = await _unitOfWork.TestServiceRepository.GetByIdAsync(feedback.TestServiceId);
+            }
+
+            return _mapper.Map<IEnumerable<FeedbackDetailDto>>(userFeedbacks);
+        }
+
+        public async Task<IEnumerable<FeedbackDetailDto>> GetFeedbacksByServiceIdAsync(string serviceId)
+        {
+            var feedbacks = await _unitOfWork.FeedbackRepository.GetAllAsync();
+            var serviceFeedbacks = feedbacks.Where(f => f.TestServiceId == serviceId).ToList();
+
+            // Load user and service data for each feedback
+            foreach (var feedback in serviceFeedbacks)
+            {
+                feedback.User = await _unitOfWork.UserRepository.GetByIdAsync(feedback.UserId);
+                feedback.TestService = await _unitOfWork.TestServiceRepository.GetByIdAsync(feedback.TestServiceId);
+            }
+
+            return _mapper.Map<IEnumerable<FeedbackDetailDto>>(serviceFeedbacks);
         }
     }
 } 

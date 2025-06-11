@@ -1,4 +1,6 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.Common;
+using ADNTester.Service.Implementations;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +25,7 @@ namespace ADNTester.Api.Controllers
         public async Task<ActionResult<IEnumerable<TestServiceDto>>> GetAll()
         {
             var testServices = await _testServiceService.GetAllAsync();
-            return Ok(testServices);
+            return Ok(new ApiResponse<IEnumerable<TestServiceDto>>(testServices, "Lấy danh sách dịch vụ xét nghiệm thành công"));
         }
 
         [HttpGet("{id}")]
@@ -31,16 +33,16 @@ namespace ADNTester.Api.Controllers
         {
             var testService = await _testServiceService.GetByIdAsync(id);
             if (testService == null)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy dịch vụ xét nghiệm", 404));
 
-            return Ok(testService);
+            return Ok(new ApiResponse<TestServiceDto>(testService, "Thông tin dịch vụ xét nghiệm"));
         }
 
         [HttpPost]
         public async Task<ActionResult<string>> Create(CreateTestServiceDto dto)
         {
             var id = await _testServiceService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, id);
+            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo dịch vụ xét nghiệm thành công", 201));
         }
 
         [HttpPut]
@@ -48,9 +50,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _testServiceService.UpdateAsync(dto);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy dịch vụ xét nghiệm để cập nhật", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(dto.Id, "Cập nhật dịch vụ xét nghiệm thành công"));
         }
 
         [HttpDelete("{id}")]
@@ -58,9 +60,11 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _testServiceService.DeleteAsync(id);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy dịch vụ xét nghiệm để xóa", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(id, "Xóa dịch vụ xét nghiệm thành công"));
         }
+
+       
     }
 } 

@@ -23,13 +23,21 @@ namespace ADNTester.Service.Implementations
         public async Task<IEnumerable<BlogDto>> GetAllAsync()
         {
             var blogs = await _unitOfWork.IBlogRepository.GetAllAsync();
+            foreach (var blog in blogs)
+            {
+                blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
+            }
             return _mapper.Map<IEnumerable<BlogDto>>(blogs);
         }
 
         public async Task<BlogDto> GetByIdAsync(string id)
         {
             var blog = await _unitOfWork.IBlogRepository.GetByIdAsync(id);
-            return blog == null ? null : _mapper.Map<BlogDto>(blog);
+            if (blog == null)
+                return null;
+
+            blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
+            return _mapper.Map<BlogDto>(blog);
         }
 
         public async Task<string> CreateAsync(CreateBlogWithUrlDto dto)

@@ -1,4 +1,7 @@
 using ADNTester.BO.DTOs;
+using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.Feedback;
+using ADNTester.BO.Entities;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +26,7 @@ namespace ADNTester.Api.Controllers
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetAll()
         {
             var feedbacks = await _feedbackService.GetAllAsync();
-            return Ok(feedbacks);
+            return Ok(new ApiResponse<IEnumerable<FeedbackDto>>(feedbacks, "Lấy danh sách feedback thành công"));
         }
 
         [HttpGet("{id}")]
@@ -31,16 +34,30 @@ namespace ADNTester.Api.Controllers
         {
             var feedback = await _feedbackService.GetByIdAsync(id);
             if (feedback == null)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy feedback", 404));
 
-            return Ok(feedback);
+            return Ok(new ApiResponse<FeedbackDto>(feedback, "Thông tin feedback"));
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<FeedbackDetailDto>>> GetByUserId(string userId)
+        {
+            var feedbacks = await _feedbackService.GetFeedbacksByUserIdAsync(userId);
+            return Ok(new ApiResponse<IEnumerable<FeedbackDetailDto>>(feedbacks, "Thông tin feedback"));
+        }
+
+        [HttpGet("service/{serviceId}")]
+        public async Task<ActionResult<IEnumerable<FeedbackDetailDto>>> GetByServiceId(string serviceId)
+        {
+            var feedbacks = await _feedbackService.GetFeedbacksByServiceIdAsync(serviceId);
+            return Ok(new ApiResponse<IEnumerable<FeedbackDetailDto>>(feedbacks, "Thông tin feedback"));
         }
 
         [HttpPost]
         public async Task<ActionResult<string>> Create(CreateFeedbackDto dto)
         {
             var id = await _feedbackService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, id);
+            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo feedback thành công", 201));
         }
 
         [HttpPut]
@@ -48,9 +65,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _feedbackService.UpdateAsync(dto);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy feedback để cập nhật", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(dto.Id, "Cập nhật feedback thành công"));
         }
 
         [HttpDelete("{id}")]
@@ -58,9 +75,9 @@ namespace ADNTester.Api.Controllers
         {
             var result = await _feedbackService.DeleteAsync(id);
             if (!result)
-                return NotFound();
+                return NotFound(new ApiResponse<string>("Không tìm thấy feedback để xóa", 404));
 
-            return NoContent();
+            return Ok(new ApiResponse<string>(id, "Xóa feedback thành công"));
         }
     }
 } 

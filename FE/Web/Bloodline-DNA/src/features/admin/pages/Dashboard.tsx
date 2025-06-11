@@ -1,8 +1,8 @@
 
-function DashboardAdmin() {
+function Dashboard() {
   return (
     <div>Dashboard</div>
   )
 }
 
-export default DashboardAdmin
+export default Dashboard;

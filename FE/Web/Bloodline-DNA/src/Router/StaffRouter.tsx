@@ -1,16 +1,21 @@
 import { Route, Routes } from 'react-router-dom';
-import { DashboardStaff } from '../features';
+import { NotFound } from '../components';
 import Sidebar from '../features/staff/components/Sidebar';
+import TestBookingManagement from '../features/staff/pages/TestBookingManagement';
+import SampleManagement from '../features/staff/pages/SampleManagement';
+import TestResult from '../features/staff/pages/TestResult';
 
 export default function StaffRouter() {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-[#FCFEFE]">
             <Sidebar />
             <div className="flex-1">
                 <Routes>
-                    <Route path="/" element={<DashboardStaff />} />
-                    <Route path="staff-dashboard" element={<DashboardStaff />} />
-                    <Route path="*" element={<h1>404</h1>} />
+                    <Route path="/" element={<SampleManagement />} />
+                    <Route path="samplemanagement" element={<SampleManagement />} />
+                    <Route path="testbookingmanagement" element={<TestBookingManagement />} />
+                    <Route path="testresult" element={<TestResult />} />
+                    <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
         </div>

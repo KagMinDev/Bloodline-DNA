@@ -6,6 +6,7 @@ using ADNTester.Service.Interfaces;
 using AutoMapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ADNTester.Service.Implementations
 {
@@ -59,6 +60,82 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.TestSampleRepository.Remove(testSample);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<TestSampleDetailDto>> GetTestSampleByUserId(string userId)
+        {
+            // Lấy tất cả kit
+            var kits = await _unitOfWork.TestKitRepository.GetAllAsync();
+            
+            // Lấy tất cả booking của user
+            var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
+            var userBookings = bookings.Where(b => b.ClientId == userId).ToList();
+            var userBookingIds = userBookings.Select(b => b.Id).ToList();
+            
+            // Lọc các kit thuộc booking của user
+            var userKits = kits.Where(k => userBookingIds.Contains(k.BookingId)).ToList();
+            var userKitIds = userKits.Select(k => k.Id).ToList();
+            
+            // Lấy tất cả sample
+            var samples = await _unitOfWork.TestSampleRepository.GetAllAsync();
+            
+            // Lọc các sample thuộc kit của user
+            var userSamples = samples.Where(s => userKitIds.Contains(s.KitId)).ToList();
+            
+            foreach (var sample in userSamples)
+            {
+                // Lấy thông tin kit
+                var kit = userKits.FirstOrDefault(k => k.Id == sample.KitId);
+                if (kit != null)
+                {
+                    // Lấy thông tin booking từ kit
+                    var booking = userBookings.FirstOrDefault(b => b.Id == kit.BookingId);
+                    if (booking != null)
+                    {
+                        // Lấy thông tin user từ booking
+                        booking.Client = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+                        // Lấy thông tin test service
+                        booking.TestService = await _unitOfWork.TestServiceRepository.GetByIdAsync(booking.TestServiceId);
+                        // Gán thông tin booking vào kit
+                        kit.Booking = booking;
+                    }
+                    // Gán thông tin kit vào sample
+                    sample.Kit = kit;
+                }
+            }
+            
+            return _mapper.Map<IEnumerable<TestSampleDetailDto>>(userSamples);
+        }
+
+        public async Task<TestSampleDetailDto> GetTestSampleByKitId(string kitId)
+        {
+            // Lấy thông tin kit trước
+            var kit = await _unitOfWork.TestKitRepository.GetByIdAsync(kitId);
+            if (kit == null)
+                return null;
+
+            var sample = await _unitOfWork.TestSampleRepository.GetAllAsync();
+            var targetSample = sample.FirstOrDefault(s => s.KitId == kitId);
+            
+            if (targetSample == null)
+                return null;
+
+            // Lấy thông tin booking từ kit
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(kit.BookingId);
+            if (booking != null)
+            {
+                // Lấy thông tin user từ booking
+                booking.Client = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+                // Lấy thông tin test service
+                booking.TestService = await _unitOfWork.TestServiceRepository.GetByIdAsync(booking.TestServiceId);
+                // Gán thông tin booking vào kit
+                kit.Booking = booking;
+            }
+            
+            // Gán thông tin kit vào sample
+            targetSample.Kit = kit;
+            
+            return _mapper.Map<TestSampleDetailDto>(targetSample);
         }
     }
 } 

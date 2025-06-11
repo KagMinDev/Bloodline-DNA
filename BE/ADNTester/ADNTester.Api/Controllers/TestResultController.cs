@@ -37,6 +37,13 @@ namespace ADNTester.Api.Controllers
             return Ok(testResult);
         }
 
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<IEnumerable<TestResultDetailDto>>> GetByUserId(string userId)
+        {
+            var testResults = await _testResultService.GetTestResultsByUserIdAsync(userId);
+            return Ok(testResults);
+        }
+
         [HttpPost]
         public async Task<ActionResult<string>> Create(CreateTestResultDto dto)
         {

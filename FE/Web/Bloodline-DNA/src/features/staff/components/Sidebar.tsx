@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
-import { BiCategory } from "react-icons/bi";
+import { Link, useLocation } from 'react-router-dom';
 import {
+  FaChartBar,
   FaAngleDown,
   FaAngleRight,
-  FaChartBar,
 } from 'react-icons/fa';
+import { BiCategory } from "react-icons/bi";
 import { TbShoppingCartCog } from "react-icons/tb";
-import { Link, useLocation } from 'react-router-dom';
-
-import logoSidebar from '../../../assets/logo.png';
+import { Dna } from 'lucide-react';
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -20,20 +19,20 @@ interface SidebarDataType {
 const SidebarData: SidebarDataType[] = [
   {
     icon: FaChartBar,
-    heading: 'Thống kê',
-    href: '/staff/dashboard'
+    heading: 'Quản lí đơn xét nghiệm',
+    href: '/staff/testbookingmanagement',
   },
   {
     icon: BiCategory,
-    heading: 'Quản lí danh mục',
-    href: '/staff/category',
+    heading: 'Quản lí mẫu xét nghiệm',
+    href: '/staff/samplemanagement',
   },
   {
     icon: TbShoppingCartCog,
-    heading: 'Quản lí sản phẩm',
-    href: '/staff/products'
+    heading: 'Quản lí kết quả xét nghiệm',
+    href: '/staff/testresult',
   },
-  
+
 ];
 
 const Sidebar = () => {
@@ -49,20 +48,14 @@ const Sidebar = () => {
   };
 
   return (
-    <div className='flex h-screen w-64 flex-col bg-[#5f9ea0] shadow-lg'>
-      <div className="flex flex-col items-center mb-6">
-          <img
-            src={logoSidebar}
-            alt="AquaShop Logo"
-            width={120}
-            height={120}
-            className="mb-2 drop-shadow-xl"
-            style={{ objectFit: 'contain' }}
-            draggable={false}
-          />
-          <h2 className="text-3xl font-bold text-white">Quản lí</h2>
+    <div className='flex h-screen w-64 flex-col bg-blue-600 shadow-lg'>
+      <div className="flex flex-col items-center py-6">
+        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center mb-2">
+          <Dna size={32} className="text-white" />
         </div>
-      <nav className='flex-1 px-6 py-6 overflow-y-auto scrollbar-hide'>
+        <span className="text-2xl font-bold text-white text-center">ADN Huyết Thống</span>
+        </div>
+      <nav className='scrollbar-hide flex-1 overflow-y-auto px-6 py-6'>
         <ul className='space-y-2'>
           {SidebarData.map(item => (
             <li key={item.heading}>
@@ -72,8 +65,8 @@ const Sidebar = () => {
                     onClick={() => toggleDropdown(item.heading)}
                     className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${
                       pathname.startsWith(item.href)
-                        ? 'bg-[#EDEBDF] font-bold text-[#325343]'
-                        : 'text-white hover:bg-[#EDEBDF] hover:text-[#325343]'
+                        ? 'bg-[#EDEBDF] font-bold text-blue-800'
+                        : 'text-white hover:bg-[#EDEBDF] hover:text-blue-800'
                     }`}
                   >
                     <div className='flex items-center'>
@@ -89,15 +82,15 @@ const Sidebar = () => {
                     )}
                   </div>
                   {openDropdown[item.heading] && (
-                    <ul className='mt-1 ml-2 space-y-1'>
+                    <ul className='ml-2 mt-1 space-y-1'>
                       {item.children.map(child => (
                         <li key={child.heading}>
                           <Link to={child.href}>
                             <div
                               className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
                                 pathname === child.href
-                                  ? 'bg-[#EDEBDF] font-bold text-[#325343]'
-                                  : 'text-white hover:bg-[#EDEBDF] hover:text-[#325343]'
+                                  ? 'bg-[#EDEBDF] font-bold text-blue-800'
+                                  : 'text-white hover:bg-[#EDEBDF] hover:text-blue-800'
                               }`}
                             >
                               <div className='mr-3 text-lg'>
@@ -116,8 +109,8 @@ const Sidebar = () => {
                   <div
                     className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
                       pathname === item.href
-                        ? 'bg-[#EDEBDF] font-bold text-[#325343]'
-                        : 'text-white hover:bg-[#EDEBDF] hover:text-[#325343]'
+                        ? 'bg-[#EDEBDF] font-bold text-blue-800'
+                        : 'text-white hover:bg-[#EDEBDF] hover:text-blue-800'
                     }`}
                   >
                     <div className='mr-3 text-lg'>
@@ -131,10 +124,9 @@ const Sidebar = () => {
           ))}
         </ul>
       </nav>
-      
       <div className='px-4 py-6'>
         <Link to='/'>
-          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#EDEBDF] hover:text-[#325343]'>
+          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#EDEBDF] hover:text-blue-800'>
             Đăng xuất
           </button>
         </Link>

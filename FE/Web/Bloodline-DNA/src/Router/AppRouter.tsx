@@ -1,11 +1,11 @@
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { NotFound } from "../components";
 import { ForgotPassword, Login, Register } from "../features";
-import HomePage from "../features/home/HomePage";
+import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import StaffRouter from "./StaffRouter";
-
-
+import CustomerRouter from "./CustomerRouter";
 const App: React.FC = () => {
   return (
     <Router>
@@ -16,10 +16,14 @@ const App: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         
         <Route path="/" element={<HomePage />} />
+        
+        {/* Not found */}
+        <Route path="*" element={<NotFound />} />
 
         {/* Các route khác */}
         <Route path="/staff/*" element={<StaffRouter />} />
         <Route path="/admin/*" element={<AdminRouter />} />
+        <Route path="/customer/*" element={<CustomerRouter />} />
       </Routes>
     </Router>
   );
