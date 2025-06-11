@@ -217,7 +217,7 @@ export const Blogs = (): React.JSX.Element => {
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
       <div className="w-full max-w-none relative">
         {/* Header */}
-        <div className="relative z-50">
+        <div className="fixed w-full z-50">
           <Header />
         </div>
 

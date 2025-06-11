@@ -1,2 +1,11 @@
 export { Services } from "./pages/Services";
-export { DetailServices } from "./pages/DetailServices"; 
+export { DetailServices } from "./pages/DetailServices";
+export { Doctors } from "./pages/Doctors";
+export { Contacts } from "./pages/Contacts";
+export { Blogs } from "./pages/Blogs";
+export { EditProfile } from "./pages/EditProfile";
+export { BookingModal } from "./components/BookingModal";
+export { BookingDetail } from "./pages/BookingDetail";
+export { TestProgress } from "./pages/TestProgress";
+export { EditBooking } from "./pages/EditBooking";
+export { BookingList } from "./pages/BookingList"; 
