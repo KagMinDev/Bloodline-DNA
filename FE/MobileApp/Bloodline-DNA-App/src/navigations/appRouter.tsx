@@ -1,5 +1,9 @@
 // AppRouter.tsx
 import { useAuth } from "@/context/auth/AuthContext";
+import AboutScreen from "@/screens/about";
+import ContactScreen from "@/screens/contact";
+import DoctorsScreen from "@/screens/doctors";
+import NewsScreen from "@/screens/news";
 import Services from "@/screens/services";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
@@ -114,6 +118,10 @@ const AppRouter: React.FC = () => {
         <>
           <Stack.Screen name="Main" component={MainTabs} />
           <Stack.Screen name="Services" component={Services} />
+          <Stack.Screen name="About" component={AboutScreen} />
+          <Stack.Screen name="Doctors" component={DoctorsScreen} />
+          <Stack.Screen name="News" component={NewsScreen} />
+          <Stack.Screen name="Contact" component={ContactScreen} />
         </>
       ) : (
         <>
