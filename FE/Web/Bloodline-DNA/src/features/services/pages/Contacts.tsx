@@ -1,22 +1,15 @@
-import React, { useEffect, useState, useRef } from "react";
-import { 
-  PhoneIcon, 
+import {
+  ArrowRightIcon,
+  CarIcon,
+  ClockIcon,
+  HeadphonesIcon,
   MailIcon,
   MapPinIcon,
-  ClockIcon,
-  SendIcon,
-  MessageSquareIcon,
-  UserIcon,
-  BuildingIcon,
-  CarIcon,
-  CreditCardIcon,
-  HeadphonesIcon,
-  ShieldCheckIcon,
-  CalendarIcon,
-  ArrowRightIcon
+  PhoneIcon,
+  SendIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../components/ui/Card";
+import React, { useEffect, useRef, useState } from "react";
+import { Footer, Header } from "../../../components";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,8 +17,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
 
 interface ContactInfo {
   id: number;
@@ -144,7 +137,7 @@ export const Contacts = (): React.JSX.Element => {
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
         <div className="relative z-50">
           <Header />
@@ -168,20 +161,20 @@ export const Contacts = (): React.JSX.Element => {
           {/* Decorative Medical Elements */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating medical icons */}
-            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
+            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-white/10 animate-pulse">
               <PhoneIcon className="w-8 h-8 text-white/60" />
             </div>
-            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
+            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-white/10 animate-bounce" style={{animationDelay: '1s'}}>
               <MailIcon className="w-6 h-6 text-white/60" />
             </div>
-            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
+            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-white/10 animate-pulse" style={{animationDelay: '2s'}}>
               <HeadphonesIcon className="w-7 h-7 text-white/60" />
             </div>
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+          <div className="relative z-10 flex items-center h-full">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
               <div className={`transition-all duration-1000 ease-out ${
                 isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
               }`}>
@@ -190,7 +183,7 @@ export const Contacts = (): React.JSX.Element => {
                   <Breadcrumb>
                     <BreadcrumbList className="text-white/90">
                       <BreadcrumbItem>
-                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                        <BreadcrumbLink href="/" className="transition-colors duration-200 text-white/80 hover:text-white">
                           Trang Chủ
                         </BreadcrumbLink>
                       </BreadcrumbItem>
@@ -203,7 +196,7 @@ export const Contacts = (): React.JSX.Element => {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
                   Liên Hệ Với Chúng Tôi
                   <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
                     Hỗ Trợ 24/7
@@ -211,7 +204,7 @@ export const Contacts = (): React.JSX.Element => {
                 </h1>
 
                 {/* Description */}
-                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-white/90">
                   Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn mọi lúc với đội ngũ chăm sóc khách hàng chuyên nghiệp.
                 </p>
               </div>
@@ -220,25 +213,25 @@ export const Contacts = (): React.JSX.Element => {
         </section>
 
         {/* Contact Form & Contact Info */}
-        <section className="py-16 md:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16">
+        <section className="py-16 bg-white md:py-20 lg:py-24">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-5 lg:gap-16">
               {/* Contact Form */}
               <div className="lg:col-span-3">
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10">
+                <div className="p-8 bg-white shadow-xl rounded-2xl md:p-10">
                   <div className="mb-8">
-                    <h2 className="text-3xl md:text-4xl font-bold text-blue-900 mb-4">
+                    <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">
                       Gửi Tin Nhắn
                     </h2>
-                    <p className="text-lg text-slate-600 leading-relaxed">
+                    <p className="text-lg leading-relaxed text-slate-600">
                       Điền thông tin bên dưới và chúng tôi sẽ liên hệ lại với bạn sớm nhất có thể
                     </p>
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
-                        <label htmlFor="name" className="block text-sm font-semibold text-slate-700 mb-2">
+                        <label htmlFor="name" className="block mb-2 text-sm font-semibold text-slate-700">
                           Họ và Tên *
                         </label>
                         <input
@@ -248,12 +241,12 @@ export const Contacts = (): React.JSX.Element => {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                          className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                           placeholder="Nhập họ và tên của bạn"
                         />
                       </div>
                       <div>
-                        <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">
+                        <label htmlFor="phone" className="block mb-2 text-sm font-semibold text-slate-700">
                           Số Điện Thoại *
                         </label>
                         <input
@@ -263,14 +256,14 @@ export const Contacts = (): React.JSX.Element => {
                           value={formData.phone}
                           onChange={handleInputChange}
                           required
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                          className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                           placeholder="0912 345 678"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label htmlFor="email" className="block mb-2 text-sm font-semibold text-slate-700">
                         Email *
                       </label>
                       <input
@@ -280,13 +273,13 @@ export const Contacts = (): React.JSX.Element => {
                         value={formData.email}
                         onChange={handleInputChange}
                         required
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                        className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                         placeholder="email@example.com"
                       />
                     </div>
 
                     <div>
-                      <label htmlFor="subject" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label htmlFor="subject" className="block mb-2 text-sm font-semibold text-slate-700">
                         Chủ Đề
                       </label>
                       <select
@@ -294,7 +287,7 @@ export const Contacts = (): React.JSX.Element => {
                         name="subject"
                         value={formData.subject}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                        className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                       >
                         <option value="">Chọn chủ đề</option>
                         <option value="appointment">Đặt lịch khám</option>
@@ -306,7 +299,7 @@ export const Contacts = (): React.JSX.Element => {
                     </div>
 
                     <div>
-                      <label htmlFor="message" className="block text-sm font-semibold text-slate-700 mb-2">
+                      <label htmlFor="message" className="block mb-2 text-sm font-semibold text-slate-700">
                         Tin Nhắn *
                       </label>
                       <textarea
@@ -316,7 +309,7 @@ export const Contacts = (): React.JSX.Element => {
                         onChange={handleInputChange}
                         required
                         rows={5}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none transition-colors duration-200 resize-none"
+                        className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg resize-none focus:border-blue-500 focus:outline-none"
                         placeholder="Nhập tin nhắn của bạn..."
                       />
                     </div>
@@ -328,7 +321,7 @@ export const Contacts = (): React.JSX.Element => {
                     >
                       {isSubmitting ? (
                         <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                          <div className="w-5 h-5 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
                           Đang Gửi...
                         </>
                       ) : (
@@ -343,29 +336,29 @@ export const Contacts = (): React.JSX.Element => {
               </div>
 
               {/* Contact Info Cards in Sidebar */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="space-y-8 lg:col-span-2">
                 {/* Top Row: Emergency and Location */}
                 <div className="grid grid-cols-2 gap-8">
                   {/* Emergency/Hotline Card */}
                   <Card
-                    className="w-full aspect-square group text-center p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center"
+                    className="flex items-center justify-center w-full p-8 text-center transition-all duration-300 border-0 aspect-square group hover:shadow-xl hover:-translate-y-2 bg-gradient-to-br from-blue-100 to-blue-50"
                   >
-                    <CardContent className="p-0 flex flex-col items-center">
+                    <CardContent className="flex flex-col items-center p-0">
                       <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-                        <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300 shadow-lg">
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
                           <PhoneIcon className="w-8 h-8 text-blue-700" />
                         </div>
                       </div>
-                      <h3 className="text-lg font-bold text-blue-900 mb-3 group-hover:text-blue-700 transition-colors duration-300 uppercase tracking-wider whitespace-nowrap">
+                      <h3 className="mb-3 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700 whitespace-nowrap">
                         Hotline 24/7
                       </h3>
                       <div className="space-y-2">
-                        <p className="text-sm text-slate-600 mb-3 whitespace-nowrap text-center">
+                        <p className="mb-3 text-sm text-center text-slate-600 whitespace-nowrap">
                           Hỗ trợ khẩn cấp và tư vấn
                         </p>
                         <a
                           href="tel:1900xxxx"
-                          className="block text-lg font-semibold text-blue-800 hover:text-blue-900 transition-colors duration-200 whitespace-nowrap"
+                          className="block text-lg font-semibold text-blue-800 transition-colors duration-200 hover:text-blue-900 whitespace-nowrap"
                         >
                           1900-xxxx
                         </a>
@@ -375,24 +368,24 @@ export const Contacts = (): React.JSX.Element => {
 
                   {/* Location Card */}
                   <Card
-                    className="w-full aspect-square group text-center p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-gradient-to-br from-blue-800 to-blue-900 flex items-center justify-center"
+                    className="flex items-center justify-center w-full p-8 text-center transition-all duration-300 border-0 aspect-square group hover:shadow-xl hover:-translate-y-2 bg-gradient-to-br from-blue-800 to-blue-900"
                   >
-                    <CardContent className="p-0 flex flex-col items-center">
+                    <CardContent className="flex flex-col items-center p-0">
                       <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-                        <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors duration-300 shadow-lg">
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 rounded-full shadow-lg bg-white/20 group-hover:bg-white/30">
                           <MapPinIcon className="w-8 h-8 text-white" />
                         </div>
                       </div>
-                      <h3 className="text-lg font-bold text-white mb-3 group-hover:text-gray-100 transition-colors duration-300 uppercase tracking-wider">
+                      <h3 className="mb-3 text-lg font-bold tracking-wider text-white uppercase transition-colors duration-300 group-hover:text-gray-100">
                         Địa Chỉ
                       </h3>
                       <div className="space-y-2">
-                        <p className="text-sm text-white/90 mb-2 whitespace-nowrap text-center">
+                        <p className="mb-2 text-sm text-center text-white/90 whitespace-nowrap">
                           Số 123, Đường ABC, Quận XYZ
                         </p>
                         <a
                           href="https://maps.google.com"
-                          className="block text-lg font-semibold text-white hover:text-gray-200 transition-colors duration-200 whitespace-nowrap"
+                          className="block text-lg font-semibold text-white transition-colors duration-200 hover:text-gray-200 whitespace-nowrap"
                         >
                           TP. Hồ Chí Minh
                         </a>
@@ -415,21 +408,21 @@ export const Contacts = (): React.JSX.Element => {
       overflow-hidden                    /* nếu nội dung quá cao sẽ bị ẩn bớt */
     "
   >
-    <CardContent className="p-0 flex flex-col justify-center items-center">
+    <CardContent className="flex flex-col items-center justify-center p-0">
       <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-        <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300 shadow-lg">
+        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
           <MailIcon className="w-8 h-8 text-blue-700" />
         </div>
       </div>
-      <h3 className="text-lg font-bold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors duration-300 uppercase tracking-wider">
+      <h3 className="mb-2 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700">
         Email
       </h3>
-      <p className="text-sm text-slate-600 mb-3 text-center whitespace-nowrap">
+      <p className="mb-3 text-sm text-center text-slate-600 whitespace-nowrap">
         Gửi câu hỏi và nhận tư vấn
       </p>
       <a
         href="mailto:support@hospital.vn"
-        className="text-base font-semibold text-blue-800 hover:text-blue-900 transition-colors duration-200 break-words text-center"
+        className="text-base font-semibold text-center text-blue-800 break-words transition-colors duration-200 hover:text-blue-900"
       >
         support@hospital.vn
       </a>
@@ -438,29 +431,21 @@ export const Contacts = (): React.JSX.Element => {
 
   {/* Working Hours Card */}
   <Card
-    className="
-      w-full aspect-square
-      group text-center
-      p-6
-      hover:shadow-xl transition-all duration-300 hover:-translate-y-2
-      border-0 bg-gradient-to-br from-blue-100 to-blue-50
-      flex flex-col justify-center items-center
-      overflow-hidden
-    "
+    className="flex flex-col items-center justify-center w-full p-6 overflow-hidden text-center transition-all duration-300 border-0 aspect-square group hover:shadow-xl hover:-translate-y-2 bg-gradient-to-br from-blue-100 to-blue-50"
   >
-    <CardContent className="p-0 flex flex-col justify-center items-center">
+    <CardContent className="flex flex-col items-center justify-center p-0">
       <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-        <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300 shadow-lg">
+        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
           <ClockIcon className="w-8 h-8 text-blue-700" />
         </div>
       </div>
-      <h3 className="text-lg font-bold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors duration-300 uppercase tracking-wider">
+      <h3 className="mb-2 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700">
         Giờ Làm Việc
       </h3>
-      <p className="text-sm text-slate-600 mb-3 text-center">
+      <p className="mb-3 text-sm text-center text-slate-600">
         Thứ 2 – Chủ Nhật
       </p>
-      <p className="text-lg font-semibold text-blue-800 text-center">
+      <p className="text-lg font-semibold text-center text-blue-800">
         24/7
       </p>
     </CardContent>
@@ -473,18 +458,18 @@ export const Contacts = (): React.JSX.Element => {
         </section>
 
         {/* Map Section */}
-        <section className="py-16 md:py-20 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-blue-900 mb-4">
+        <section className="py-16 bg-white md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center">
+              <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">
                 Vị Trí Bệnh Viện
               </h2>
-              <p className="text-lg text-slate-600 leading-relaxed">
+              <p className="text-lg leading-relaxed text-slate-600">
                 Chúng tôi có vị trí thuận lợi, dễ dàng di chuyển bằng các phương tiện giao thông
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            <div className="grid items-start grid-cols-1 gap-8 lg:grid-cols-3">
               {/* Map */}
               <div className="lg:col-span-2">
                 <div className="relative h-96 lg:h-[500px] bg-gray-200 rounded-2xl overflow-hidden shadow-xl">
@@ -503,13 +488,13 @@ export const Contacts = (): React.JSX.Element => {
 
               {/* Location Info */}
               <div className="space-y-6">
-                <Card className="bg-blue-50 border-0">
+                <Card className="border-0 bg-blue-50">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <h3 className="flex items-center mb-4 text-xl font-bold text-blue-900">
                       <MapPinIcon className="w-5 h-5 mr-2" />
                       Địa Chỉ Chi Tiết
                     </h3>
-                    <p className="text-slate-600 leading-relaxed mb-4">
+                    <p className="mb-4 leading-relaxed text-slate-600">
                       Số 123, Đường ABC, Phường XYZ<br />
                       Quận 1, TP. Hồ Chí Minh<br />
                       Việt Nam
@@ -521,9 +506,9 @@ export const Contacts = (): React.JSX.Element => {
                   </CardContent>
                 </Card>
 
-                <Card className="bg-green-50 border-0">
+                <Card className="border-0 bg-green-50">
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-blue-900 mb-4 flex items-center">
+                    <h3 className="flex items-center mb-4 text-xl font-bold text-blue-900">
                       <CarIcon className="w-5 h-5 mr-2" />
                       Giao Thông
                     </h3>
