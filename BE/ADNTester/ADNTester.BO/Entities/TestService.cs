@@ -12,6 +12,7 @@ namespace ADNTester.BO.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public List<ServicePrice> Prices { get; set; }
+        public int SampleCount { get; set; }
         public TestServiceType Type { get; set; }
 
         public ICollection<TestBooking> Bookings { get; set; }
