@@ -25,6 +25,8 @@ namespace ADNTester.Repository
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<BlogTag> BlogTags {  get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<SampleTypeInstruction> SampleTypeInstructions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
