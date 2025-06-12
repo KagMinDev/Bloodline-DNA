@@ -12,5 +12,6 @@ namespace ADNTester.Service.Interfaces
         Task<string> CreateAsync(CreateTestResultDto dto);
         Task<bool> UpdateAsync(UpdateTestResultDto dto);
         Task<bool> DeleteAsync(string id);
+        Task<IEnumerable<TestResultDetailDto>> GetTestResultsByUserIdAsync(string userId);
     }
 } 

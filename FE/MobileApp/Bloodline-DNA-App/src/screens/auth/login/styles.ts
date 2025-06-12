@@ -261,4 +261,10 @@ export default StyleSheet.create({
     marginRight: 4,
     marginTop: 3,
   },
+  checkboxChecked: {
+  backgroundColor: "#2563EB", // Or any color you prefer for the checked state
+  borderColor: "#2563EB",
+  justifyContent: "center",
+  alignItems: "center",
+},
 });

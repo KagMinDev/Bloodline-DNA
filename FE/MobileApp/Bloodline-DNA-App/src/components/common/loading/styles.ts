@@ -1,21 +1,28 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-    alignItems: 'center',
+iconContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   fullScreen: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'black',
+    opacity: 0.5, // Làm mờ nền
+    zIndex: -1, // Đảm bảo backdrop nằm phía sau nội dung
+  },
   content: {
-    flexDirection: 'column',
-    alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    alignItems: 'center',
+    padding: 24,
+    backgroundColor: 'white', // hoặc 'transparent' nếu bạn muốn nền trong
+    borderRadius: 12,
+    zIndex: 1,
   },
   inline: {
     flexDirection: 'column',

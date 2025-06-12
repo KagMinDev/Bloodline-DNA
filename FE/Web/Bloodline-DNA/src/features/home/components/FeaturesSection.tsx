@@ -26,9 +26,9 @@ const features: Feature[] = [
 ];
 
 const FeaturesSection: React.FC = () => (
-  <section id="features" className="py-16 md:py-20 bg-white">
+  <section id="features" className="py-16 bg-white md:py-20">
     <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-      <h2 className="mb-8 text-2xl md:text-3xl font-bold text-center text-gray-800">
+      <h2 className="mb-8 text-2xl font-bold text-center text-gray-800 md:text-3xl">
         Vì sao chọn dịch vụ xét nghiệm ADN của chúng tôi?
       </h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -38,10 +38,10 @@ const FeaturesSection: React.FC = () => (
             className="p-6 text-center transition-shadow border border-blue-200 rounded-lg shadow-md bg-blue-50 hover:shadow-lg"
           >
             <feature.icon size={40} className="mx-auto mb-4 text-blue-600" />
-            <h3 className="mb-2 text-lg md:text-xl font-semibold text-gray-800">
+            <h3 className="mb-2 text-lg font-semibold text-gray-800 md:text-xl">
               {feature.title}
             </h3>
-            <p className="text-sm md:text-base text-gray-600">
+            <p className="text-sm text-gray-600 md:text-base">
               {feature.description}
             </p>
           </div>

@@ -40,6 +40,19 @@ namespace ADNTester.Service.Implementations
             var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
             return _mapper.Map<IEnumerable<TestBookingDto>>(bookings);
         }
+        public async Task<IEnumerable<TestBookingDetailDto>> GetBookingByUserId(string userId)
+        {
+            var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
+            var userBookings = bookings.Where(b => b.ClientId == userId).ToList();
+            
+            foreach (var booking in userBookings)
+            {
+                booking.Client = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+                booking.TestService = await _unitOfWork.TestServiceRepository.GetByIdAsync(booking.TestServiceId);
+            }
+            
+            return _mapper.Map<IEnumerable<TestBookingDetailDto>>(userBookings);
+        }
 
         public async Task<TestBookingDetailDto> GetByIdAsync(string id)
         {
@@ -332,5 +345,6 @@ namespace ADNTester.Service.Implementations
                 _ => ""
             };
         }
+
     }
 } 

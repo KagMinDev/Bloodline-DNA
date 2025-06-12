@@ -5,10 +5,7 @@ import { ForgotPassword, Login, Register } from "../features";
 import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import StaffRouter from "./StaffRouter";
-import { Services } from "../features/services/pages/Services";
-import { DetailServices } from "../features/services/pages/DetailServices";
-import { Doctors } from "../features/services/pages/Doctors";
-import { Contacts } from "../features/services/pages/Contacts";
+import CustomerRouter from "./CustomerRouter";
 const App: React.FC = () => {
   return (
     <Router>
@@ -19,17 +16,14 @@ const App: React.FC = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         
         <Route path="/" element={<HomePage />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/services/:id" element={<DetailServices />} />
-        <Route path="/doctors" element={<Doctors />} />
-        <Route path="/contacts" element={<Contacts />} />
-
+        
         {/* Not found */}
         <Route path="*" element={<NotFound />} />
 
         {/* Các route khác */}
         <Route path="/staff/*" element={<StaffRouter />} />
         <Route path="/admin/*" element={<AdminRouter />} />
+        <Route path="/customer/*" element={<CustomerRouter />} />
       </Routes>
     </Router>
   );

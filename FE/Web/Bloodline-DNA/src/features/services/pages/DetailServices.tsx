@@ -237,50 +237,78 @@ export const DetailServices = (): React.JSX.Element => {
           <Header />
         </div>
 
-        {/* Hero Section */}
-        <section className="relative w-full h-[250px] md:h-[300px] lg:h-[350px] overflow-hidden">
-          {/* Background with parallax */}
-          <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-75 ease-out"
-            style={{
-              backgroundImage: `url(${serviceData.heroImage})`,
-              transform: `translateY(${scrollY * 0.5}px)`,
-            }}
-          />
-          
-          <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/85 to-white/75" />
+        {/* Hero Section - Medical Style */}
+        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+          {/* Medical Pattern Background */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="medical-cross-detail" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                  <rect x="8" y="4" width="4" height="12" fill="white"/>
+                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#medical-cross-detail)" />
+            </svg>
+          </div>
 
-          {/* Content - Left aligned to match the image */}
-          <div className={`absolute top-1/2 left-8 md:left-12 lg:left-16 xl:left-20 -translate-y-1/2 transition-all duration-1000 ease-out ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-          }`}>
-            {/* Breadcrumb */}
-            <div className="mb-4">
-              <Breadcrumb>
-                <BreadcrumbList className="text-slate-600">
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-slate-600 hover:text-blue-800 transition-colors duration-200">
-                      Trang Chủ
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-slate-400" />
-                  <BreadcrumbItem>
-                    <BreadcrumbLink href="/services" className="text-slate-600 hover:text-blue-800 transition-colors duration-200">
-                      Dịch Vụ
-                    </BreadcrumbLink>
-                  </BreadcrumbItem>
-                  <BreadcrumbSeparator className="text-slate-400" />
-                  <BreadcrumbItem>
-                    <span className="text-blue-800 font-semibold">{serviceData.title}</span>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+          {/* Decorative Medical Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating medical icons */}
+            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
+              <StethoscopeIcon className="w-8 h-8 text-white/60" />
             </div>
+            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
+              <ActivityIcon className="w-6 h-6 text-white/60" />
+            </div>
+            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
+              <ShieldIcon className="w-7 h-7 text-white/60" />
+            </div>
+          </div>
 
-            {/* Title - Enhanced with gradient colors */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold bg-gradient-to-r from-blue-900 via-blue-700 to-blue-600 bg-clip-text text-transparent leading-tight">
-              {serviceData.title}
-            </h1>
+          {/* Content Container */}
+          <div className="relative z-10 h-full flex items-center">
+            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+              <div className={`transition-all duration-1000 ease-out ${
+                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
+              }`}>
+                {/* Breadcrumb */}
+                <div className="mb-6">
+                  <Breadcrumb>
+                    <BreadcrumbList className="text-white/90">
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                          Trang Chủ
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <BreadcrumbLink href="/services" className="text-white/80 hover:text-white transition-colors duration-200">
+                          Dịch Vụ
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbItem>
+                        <span className="text-[#00D4FF] font-semibold">{serviceData.title}</span>
+                      </BreadcrumbItem>
+                    </BreadcrumbList>
+                  </Breadcrumb>
+                </div>
+
+                {/* Title */}
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                  {serviceData.title}
+                  <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                    {serviceData.subtitle}
+                  </span>
+                </h1>
+
+                {/* Description */}
+                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                  Dịch vụ chuyên nghiệp với đội ngũ bác sĩ chuyên khoa và trang thiết bị y tế hiện đại nhất.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
