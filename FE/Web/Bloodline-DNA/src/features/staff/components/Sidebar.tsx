@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  FaChartBar,
-  FaAngleDown,
-  FaAngleRight,
-} from 'react-icons/fa';
-import { BiCategory } from "react-icons/bi";
-import { TbShoppingCartCog } from "react-icons/tb";
+import {FaAngleDown,FaAngleRight,} from 'react-icons/fa';
+import { TbTestPipe } from "react-icons/tb";
+import { SiTestcafe } from "react-icons/si";
 import { Dna } from 'lucide-react';
+import { GrTestDesktop } from "react-icons/gr";
+
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -18,17 +16,17 @@ interface SidebarDataType {
 
 const SidebarData: SidebarDataType[] = [
   {
-    icon: FaChartBar,
+    icon: GrTestDesktop,
     heading: 'Quản lí đơn xét nghiệm',
     href: '/staff/testbookingmanagement',
   },
   {
-    icon: BiCategory,
+    icon: TbTestPipe,
     heading: 'Quản lí mẫu xét nghiệm',
     href: '/staff/samplemanagement',
   },
   {
-    icon: TbShoppingCartCog,
+    icon: SiTestcafe,
     heading: 'Quản lí kết quả xét nghiệm',
     href: '/staff/testresult',
   },
