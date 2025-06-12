@@ -1,16 +1,18 @@
 import { Route, Routes } from "react-router-dom";
 import { NotFound } from "../components";
-import { DashboardManager } from "../features";
 import Sidebar from "../features/manager/components/Sidebar";
+import { Service } from "../features";
+import Blogs from "../features/manager/pages/Blogs";
 
 export default function ManagerRouter() {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen overflow-hidden">
         <Sidebar />
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto">
             <Routes>
-            <Route path="/" element={<DashboardManager />} />
-            <Route path="manager-dashboard" element={<DashboardManager />} />
+            <Route path="/" element={<Service />} />
+            <Route path="service" element={<Service />} />
+            <Route path="blogs" element={<Blogs />} />
 
             {/* Not found */}
             <Route path="*" element={<NotFound />} />

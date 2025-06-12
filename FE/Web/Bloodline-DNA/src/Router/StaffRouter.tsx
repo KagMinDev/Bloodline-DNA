@@ -7,9 +7,9 @@ import TestResult from '../features/staff/pages/TestResult';
 
 export default function StaffRouter() {
     return (
-        <div className="flex min-h-screen bg-[#FCFEFE]">
+        <div className="flex min-h-screen bg-[#FCFEFE] overflow-hidden">
             <Sidebar />
-            <div className="flex-1">
+            <div className="flex-1 overflow-y-auto">
                 <Routes>
                     <Route path="/" element={<SampleManagement />} />
                     <Route path="samplemanagement" element={<SampleManagement />} />
