@@ -6,8 +6,6 @@ import {
   FaAngleRight,
   FaUsers,
 } from 'react-icons/fa';
-import { BiCategory } from "react-icons/bi";
-import { TbShoppingCartCog } from "react-icons/tb";
 import { Dna } from 'lucide-react';
 
 interface SidebarDataType {
