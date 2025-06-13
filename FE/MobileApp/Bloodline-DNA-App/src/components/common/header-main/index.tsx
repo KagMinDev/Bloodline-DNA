@@ -1,13 +1,14 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useNavigation } from "@react-navigation/native";
 import React, { useRef, useState } from "react";
 import {
-    Animated,
-    Dimensions,
-    Easing,
-    Pressable,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Dimensions,
+  Easing,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./styles";
@@ -17,7 +18,7 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MENU_WIDTH = SCREEN_WIDTH * 0.8;
 
 const navItems = [
-  { label: "Trang chủ", screen: "Home" },
+  { label: "Trang chủ", screen: "Main" },
   { label: "Về chúng tôi", screen: "About" },
   { label: "Dịch vụ", screen: "Services" },
   { label: "Các Bác Sĩ", screen: "Doctors" },
@@ -28,6 +29,7 @@ const navItems = [
 const Header: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
+  const navigation = useNavigation();
 
   const openMenu = () => {
     setMenuVisible(true);
@@ -57,7 +59,7 @@ const Header: React.FC = () => {
   };
 
   const onSelectMenu = (screen: string) => {
-    console.log("Chọn menu:", screen);
+    navigation.navigate(screen as never); // Chuyển trang
     closeMenu();
   };
 
