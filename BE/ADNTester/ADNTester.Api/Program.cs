@@ -172,7 +172,7 @@ app.UseSwaggerUI(config =>
 });
 //}
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 
