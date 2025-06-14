@@ -1,8 +1,8 @@
 import { Route, Routes } from 'react-router-dom';
 import { NotFound } from '../components';
 import Sidebar from '../features/staff/components/Sidebar';
-import TestBookingManagement from '../features/staff/pages/TestBookingManagement';
 import SampleManagement from '../features/staff/pages/SampleManagement';
+import TestBookingManagement from '../features/staff/pages/TestBookingManagement';
 import TestResult from '../features/staff/pages/TestResult';
 
 export default function StaffRouter() {

@@ -4,9 +4,9 @@ import { NotFound } from "../components";
 import { ForgotPassword, Login, Register } from "../features";
 import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
-import StaffRouter from "./StaffRouter";
 import CustomerRouter from "./CustomerRouter";
 import ManagerRouter from "./ManagerRouter";
+import StaffRouter from "./StaffRouter";
 const App: React.FC = () => {
   return (
     <Router>
@@ -15,7 +15,6 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        
         <Route path="/" element={<HomePage />} />
         
         {/* Not found */}

@@ -1,26 +1,22 @@
-import React, { useEffect, useState, useRef } from "react";
-import { 
-  ArrowRightIcon, 
-  StarIcon, 
-  PhoneIcon, 
+import {
+  ActivityIcon,
+  AwardIcon,
+  BabyIcon,
+  BrainIcon,
   CalendarIcon,
-  MapPinIcon,
-  GraduationCapIcon,
-  UserIcon,
-  FilterIcon,
-  SearchIcon,
   CheckCircleIcon,
   ClockIcon,
-  AwardIcon,
-  StethoscopeIcon,
-  HeartIcon,
   EyeIcon,
-  BrainIcon,
-  BabyIcon,
-  ActivityIcon
+  GraduationCapIcon,
+  HeartIcon,
+  MapPinIcon,
+  SearchIcon,
+  StarIcon,
+  StethoscopeIcon,
+  UserIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../components/ui/Card";
+import React, { useEffect, useRef, useState } from "react";
+import { Footer, Header } from "../../../components";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -28,8 +24,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
 
 interface Doctor {
   id: number;
@@ -252,9 +248,9 @@ export const Doctors = (): React.JSX.Element => {
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
-        <div className="relative z-50">
+        <div className="fixed z-50 w-full">
           <Header />
         </div>
 
@@ -276,20 +272,20 @@ export const Doctors = (): React.JSX.Element => {
           {/* Decorative Medical Elements */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating medical icons */}
-            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
+            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-white/10 animate-pulse">
               <StethoscopeIcon className="w-8 h-8 text-white/60" />
             </div>
-            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
+            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-white/10 animate-bounce" style={{animationDelay: '1s'}}>
               <UserIcon className="w-6 h-6 text-white/60" />
             </div>
-            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
+            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-white/10 animate-pulse" style={{animationDelay: '2s'}}>
               <AwardIcon className="w-7 h-7 text-white/60" />
             </div>
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+          <div className="relative z-10 flex items-center h-full">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
               <div className={`transition-all duration-1000 ease-out ${
                 isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
               }`}>
@@ -298,7 +294,7 @@ export const Doctors = (): React.JSX.Element => {
                   <Breadcrumb>
                     <BreadcrumbList className="text-white/90">
                       <BreadcrumbItem>
-                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                        <BreadcrumbLink href="/" className="transition-colors duration-200 text-white/80 hover:text-white">
                           Trang Chủ
                         </BreadcrumbLink>
                       </BreadcrumbItem>
@@ -311,7 +307,7 @@ export const Doctors = (): React.JSX.Element => {
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
                   Đội Ngũ Bác Sĩ
                   <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
                     Chuyên Gia Hàng Đầu
@@ -319,7 +315,7 @@ export const Doctors = (): React.JSX.Element => {
                 </h1>
 
                 {/* Description */}
-                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-white/90">
                   Gặp gỡ các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm và trình độ chuyên môn cao.
                 </p>
               </div>
@@ -328,16 +324,16 @@ export const Doctors = (): React.JSX.Element => {
         </section>
 
         {/* Search and Filter Section */}
-        <section className="py-12 md:py-16 bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+        <section className="py-12 bg-white border-b border-gray-200 md:py-16">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             {/* Search Bar */}
             <div className="mb-8">
               <div className="relative max-w-2xl mx-auto">
-                <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <SearchIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm bác sĩ, chuyên khoa..."
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                  className="w-full py-4 pl-12 pr-4 text-lg transition-colors duration-200 border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -373,7 +369,7 @@ export const Doctors = (): React.JSX.Element => {
 
         {/* Doctors Grid */}
         <section className="py-16 md:py-20 lg:py-24 bg-blue-50">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             {/* Results Info */}
             <div className="mb-8">
               <p className="text-lg text-slate-600">
@@ -387,12 +383,12 @@ export const Doctors = (): React.JSX.Element => {
             {/* Featured Doctors */}
             {filteredDoctors.some(doctor => doctor.featured) && (
               <div className="mb-12">
-                <h2 className="text-2xl md:text-3xl font-bold text-blue-900 mb-8">Bác Sĩ Nổi Bật</h2>
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+                <h2 className="mb-8 text-2xl font-bold text-blue-900 md:text-3xl">Bác Sĩ Nổi Bật</h2>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-3">
                   {filteredDoctors.filter(doctor => doctor.featured).map((doctor) => (
-                    <Card key={doctor.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-0 relative">
+                    <Card key={doctor.id} className="relative overflow-hidden transition-all duration-500 bg-white border-0 group hover:shadow-2xl hover:-translate-y-2">
                       {/* Featured Badge */}
-                      <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold z-10">
+                      <div className="absolute z-10 px-3 py-1 text-sm font-semibold text-yellow-900 bg-yellow-400 rounded-full top-4 right-4">
                         ⭐ Nổi Bật
                       </div>
                       
@@ -400,21 +396,21 @@ export const Doctors = (): React.JSX.Element => {
                         <img 
                           src={doctor.image}
                           alt={doctor.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent group-hover:opacity-100"></div>
                       </div>
                       
                       <CardContent className="p-6">
                         <div className="mb-4">
-                          <h3 className="text-xl font-bold text-blue-900 mb-1 group-hover:text-blue-700 transition-colors duration-300">
+                          <h3 className="mb-1 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
                             {doctor.name}
                           </h3>
-                          <p className="text-blue-600 font-semibold text-sm mb-1">{doctor.title}</p>
-                          <p className="text-blue-600 font-medium">{getSpecializationName(doctor.specialization)}</p>
+                          <p className="mb-1 text-sm font-semibold text-blue-600">{doctor.title}</p>
+                          <p className="font-medium text-blue-600">{getSpecializationName(doctor.specialization)}</p>
                         </div>
 
-                        <div className="space-y-2 mb-4 text-sm">
+                        <div className="mb-4 space-y-2 text-sm">
                           <div className="flex items-center text-slate-600">
                             <GraduationCapIcon className="w-4 h-4 mr-2 text-blue-500" />
                             {doctor.experience}
@@ -433,7 +429,7 @@ export const Doctors = (): React.JSX.Element => {
                           <div className="flex items-center">
                             <StarIcon className="w-5 h-5 text-yellow-400 fill-current" />
                             <span className="ml-1 font-semibold text-gray-800">{doctor.rating}</span>
-                            <span className="ml-1 text-slate-500 text-sm">({doctor.reviews})</span>
+                            <span className="ml-1 text-sm text-slate-500">({doctor.reviews})</span>
                           </div>
                           <div className="text-right">
                             <span className="text-lg font-bold text-blue-900">{doctor.price}</span>
@@ -441,7 +437,7 @@ export const Doctors = (): React.JSX.Element => {
                           </div>
                         </div>
 
-                        <p className="text-slate-600 text-sm mb-4 line-clamp-2">
+                        <p className="mb-4 text-sm text-slate-600 line-clamp-2">
                           {doctor.about}
                         </p>
 
@@ -459,20 +455,20 @@ export const Doctors = (): React.JSX.Element => {
 
             {/* All Doctors */}
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-blue-900 mb-8">
+              <h2 className="mb-8 text-2xl font-bold text-blue-900 md:text-3xl">
                 {filteredDoctors.some(doctor => doctor.featured) ? "Tất Cả Bác Sĩ" : "Danh Sách Bác Sĩ"}
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-8">
                 {filteredDoctors.map((doctor) => (
-                  <Card key={doctor.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white border-0">
+                  <Card key={doctor.id} className="overflow-hidden transition-all duration-300 bg-white border-0 group hover:shadow-xl hover:-translate-y-2">
                     <div className="relative h-48 overflow-hidden">
                       <img 
                         src={doctor.image}
                         alt={doctor.name}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
                       />
                       {doctor.featured && (
-                        <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
+                        <div className="absolute px-2 py-1 text-xs font-semibold text-yellow-900 bg-yellow-400 rounded-full top-2 right-2">
                           ⭐
                         </div>
                       )}
@@ -480,13 +476,13 @@ export const Doctors = (): React.JSX.Element => {
                     
                     <CardContent className="p-4">
                       <div className="mb-3">
-                        <h3 className="text-lg font-bold text-blue-900 mb-1 group-hover:text-blue-700 transition-colors duration-300 line-clamp-1">
+                        <h3 className="mb-1 text-lg font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700 line-clamp-1">
                           {doctor.name}
                         </h3>
-                        <p className="text-blue-600 font-medium text-sm">{getSpecializationName(doctor.specialization)}</p>
+                        <p className="text-sm font-medium text-blue-600">{getSpecializationName(doctor.specialization)}</p>
                       </div>
 
-                      <div className="space-y-1 mb-3 text-xs">
+                      <div className="mb-3 space-y-1 text-xs">
                         <div className="flex items-center text-slate-600">
                           <GraduationCapIcon className="w-3 h-3 mr-1 text-blue-500" />
                           {doctor.experience}
@@ -500,7 +496,7 @@ export const Doctors = (): React.JSX.Element => {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center">
                           <StarIcon className="w-4 h-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 font-semibold text-gray-800 text-sm">{doctor.rating}</span>
+                          <span className="ml-1 text-sm font-semibold text-gray-800">{doctor.rating}</span>
                         </div>
                         <span className="text-sm font-bold text-blue-900">{doctor.price}</span>
                       </div>
@@ -517,9 +513,9 @@ export const Doctors = (): React.JSX.Element => {
 
               {/* No Results */}
               {filteredDoctors.length === 0 && (
-                <div className="text-center py-16">
-                  <UserIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-slate-600 mb-2">Không tìm thấy bác sĩ</h3>
+                <div className="py-16 text-center">
+                  <UserIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                  <h3 className="mb-2 text-xl font-semibold text-slate-600">Không tìm thấy bác sĩ</h3>
                   <p className="text-slate-500">Vui lòng thử lại với từ khóa khác hoặc thay đổi bộ lọc</p>
                   <Button 
                     onClick={() => {
@@ -537,47 +533,47 @@ export const Doctors = (): React.JSX.Element => {
         </section>
 
         {/* Why Choose Our Doctors */}
-        <section className="py-16 md:py-20 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+        <section className="py-16 bg-white md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center md:mb-16">
+              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                 Tại Sao Chọn Bác Sĩ Của Chúng Tôi?
               </h2>
-              <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
+              <p className="max-w-3xl mx-auto text-lg leading-relaxed text-slate-600">
                 Đội ngũ bác sĩ chuyên nghiệp với nhiều năm kinh nghiệm và được đào tạo bài bản
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
               <div className="text-center group">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
                   <AwardIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="text-xl font-bold text-blue-900 mb-2">Chuyên Gia Hàng Đầu</h3>
+                <h3 className="mb-2 text-xl font-bold text-blue-900">Chuyên Gia Hàng Đầu</h3>
                 <p className="text-slate-600">Các bác sĩ được đào tạo tại những trường đại học y khoa uy tín</p>
               </div>
 
               <div className="text-center group">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
                   <HeartIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="text-xl font-bold text-blue-900 mb-2">Tận Tâm Chăm Sóc</h3>
+                <h3 className="mb-2 text-xl font-bold text-blue-900">Tận Tâm Chăm Sóc</h3>
                 <p className="text-slate-600">Luôn đặt sức khỏe và sự hài lòng của bệnh nhân lên hàng đầu</p>
               </div>
 
               <div className="text-center group">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
                   <ActivityIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="text-xl font-bold text-blue-900 mb-2">Công Nghệ Hiện Đại</h3>
+                <h3 className="mb-2 text-xl font-bold text-blue-900">Công Nghệ Hiện Đại</h3>
                 <p className="text-slate-600">Sử dụng trang thiết bị y tế tiên tiến nhất cho chẩn đoán chính xác</p>
               </div>
 
               <div className="text-center group">
-                <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors duration-300">
+                <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 transition-colors duration-300 bg-blue-100 rounded-full group-hover:bg-blue-200">
                   <CheckCircleIcon className="w-8 h-8 text-blue-900" />
                 </div>
-                <h3 className="text-xl font-bold text-blue-900 mb-2">Kinh Nghiệm Phong Phú</h3>
+                <h3 className="mb-2 text-xl font-bold text-blue-900">Kinh Nghiệm Phong Phú</h3>
                 <p className="text-slate-600">Nhiều năm kinh nghiệm điều trị thành công hàng nghìn ca bệnh</p>
               </div>
             </div>
@@ -586,19 +582,19 @@ export const Doctors = (): React.JSX.Element => {
 
         {/* CTA Section */}
         <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-r from-blue-900 to-blue-700">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+          <div className="container max-w-4xl px-4 mx-auto text-center md:px-6 lg:px-8">
+            <h2 className="mb-6 text-3xl font-bold text-white md:text-4xl lg:text-5xl">
               Sẵn Sàng Đặt Lịch Khám?
             </h2>
-            <p className="text-xl text-white/90 mb-8 leading-relaxed">
+            <p className="mb-8 text-xl leading-relaxed text-white/90">
               Liên hệ ngay với chúng tôi để được tư vấn và đặt lịch khám với bác sĩ phù hợp
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-blue-900 hover:bg-blue-50 hover:text-blue-900 px-8 py-4 rounded-full text-lg font-semibold">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Button className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900">
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 Đặt Lịch Khám
               </Button>
-              {/* <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 rounded-full text-lg">
+              {/* <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
                 <PhoneIcon className="w-5 h-5 mr-2" />
                 Hotline: 1900-xxxx
               </Button> */}

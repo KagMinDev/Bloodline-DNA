@@ -1,8 +1,44 @@
-import { Button } from "antd";
-import { Dna } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Button, Dropdown, Menu } from "antd";
+import { Dna, UserCircle2 } from "lucide-react";
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  const menu = (
+    <Menu>
+      <Menu.Item key="profile" onClick={() => navigate("/customer/edit-profile")}>
+        Hồ sơ cá nhân
+      </Menu.Item>
+      <Menu.Item key="bookings" onClick={() => navigate("/customer/booking-list")}>
+        Lịch sử đặt lịch
+      </Menu.Item>
+      <Menu.Item key="logout" danger onClick={handleLogout}>
+        Đăng xuất
+      </Menu.Item>
+    </Menu>
+  );
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const navItems = [
+    { label: "Trang chủ", path: "/" },
+    { label: "Về chúng tôi", path: "/customer/about" },
+    { label: "Dịch vụ", path: "/customer/services" },
+    { label: "Các Bác Sĩ", path: "/customer/doctors" },
+    { label: "Tin tức", path: "/customer/blogs" },
+    { label: "Liên hệ", path: "/customer/contacts" },
+  ];
+
   return (
     <header className="sticky top-0 z-50 shadow-sm bg-white/90 backdrop-blur-md">
       <div className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -16,43 +52,48 @@ const Header: React.FC = () => {
 
         {/* Navigation */}
         <nav className="hidden space-x-8 md:flex">
-        <a href="/" className="text-gray-600 transition-colors hover:text-blue-600">
-            Trang chủ
-          </a>
-          <a href="/about" className="text-gray-600 transition-colors hover:text-blue-600">
-            Về chúng tôi
-          </a>
-          <a href="/services" className="text-gray-600 transition-colors hover:text-blue-600">
-            Dịch vụ
-          </a>
-          <a href="/doctors" className="text-gray-600 transition-colors hover:text-blue-600">
-            Các Bác Sĩ
-          </a>
-          <a href="/blogs" className="text-gray-600 transition-colors hover:text-blue-600">
-            Tin tức
-          </a>
-          <a href="/contacts" className="text-gray-600 transition-colors hover:text-blue-600">
-            Liên hệ
-          </a>
+          {navItems.map((item) => (
+            <a
+              key={item.path}
+              href={item.path}
+              className={`relative transition-colors duration-300 after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:transition-all after:duration-300 after:bg-blue-600
+                ${
+                  isActive(item.path)
+                    ? "text-blue-600 after:w-full"
+                    : "text-gray-600 hover:text-blue-600 after:w-0 hover:after:w-full"
+                }
+              `}
+            >
+              {item.label}
+            </a>
+          ))}
         </nav>
 
         {/* Actions */}
         <div className="flex items-center space-x-4">
-          <Link
-            to="/login"
-            className="font-semibold text-blue-600 transition-colors hover:text-blue-800"
-          >
-            Đăng nhập
-          </Link>
-          <Link to="/register">
-            <Button
-              type="primary"
-              size="large"
-              className="transition-all bg-blue-600 border-none shadow-lg hover:bg-blue-700 hover:shadow-xl"
-            >
-              Đăng ký ngay
-            </Button>
-          </Link>
+          {user && user.role === "Client" ? (
+            <Dropdown overlay={menu} placement="bottomRight" arrow>
+              <div className="flex items-center space-x-2 cursor-pointer">
+                <UserCircle2 size={32} className="text-blue-600" />
+                <span className="font-semibold text-gray-700">{user.fullName}</span>
+              </div>
+            </Dropdown>
+          ) : (
+            <>
+              <Link to="/login" className="font-semibold text-blue-600 transition-colors hover:text-blue-800">
+                Đăng nhập
+              </Link>
+              <Link to="/register">
+                <Button
+                  type="primary"
+                  size="large"
+                  className="transition-all bg-blue-600 border-none shadow-lg hover:bg-blue-700 hover:shadow-xl"
+                >
+                  Đăng ký ngay
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
