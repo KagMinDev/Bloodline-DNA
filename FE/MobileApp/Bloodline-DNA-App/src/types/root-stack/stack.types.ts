@@ -5,9 +5,13 @@ export type RootStackParamList = {
   Home: undefined;
   Services: undefined;
   Contact: undefined;
+  About: undefined;
+  Doctors: undefined;
+  News: undefined;
   BlogDetail: { id: string };
   Main: undefined;
 };
+
 
 export type MainTabParamList = {
   Home: undefined;
