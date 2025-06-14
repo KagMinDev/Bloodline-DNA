@@ -17,6 +17,11 @@ namespace ADNTester.BO.Entities
         public DateTime? SentToLabAt { get; set; }
         public DateTime? LabReceivedAt { get; set; }
 
+        public string? ShippingOrderCode { get; set; }
+        public string? ReturnOrderCode { get; set; }
+
+        public int SampleCount { get; set; }
+
         public string? Note { get; set; }
 
         public ICollection<TestSample> Samples { get; set; } = new List<TestSample>();

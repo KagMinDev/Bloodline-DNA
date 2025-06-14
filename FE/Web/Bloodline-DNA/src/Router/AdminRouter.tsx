@@ -6,9 +6,9 @@ import Dashboard from '../features/admin/pages/Dashboard';
 
 export default function AdminRouter() {
     return (
-        <div className="flex min-h-screen">
+        <div className="flex h-screen overflow-hidden">
             <Sidebar />
-            <div className="flex-1">
+            <div className="flex-1 overflow-y-auto ">
                 <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/users" element={<UserMangement />} />

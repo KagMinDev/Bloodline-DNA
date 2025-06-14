@@ -6,6 +6,7 @@ import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import StaffRouter from "./StaffRouter";
 import CustomerRouter from "./CustomerRouter";
+import ManagerRouter from "./ManagerRouter";
 const App: React.FC = () => {
   return (
     <Router>
@@ -22,6 +23,7 @@ const App: React.FC = () => {
 
         {/* Các route khác */}
         <Route path="/staff/*" element={<StaffRouter />} />
+        <Route path="/manager/*" element={<ManagerRouter />} />
         <Route path="/admin/*" element={<AdminRouter />} />
         <Route path="/customer/*" element={<CustomerRouter />} />
       </Routes>
