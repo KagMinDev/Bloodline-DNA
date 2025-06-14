@@ -30,7 +30,8 @@ namespace ADNTester.Service
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IGHNService, GHNService>();
-
+            services.AddScoped<ISampleInstructionService, SampleInstructionService>();
+            services.AddScoped<IPaymentService, PaymentService>();
 
 
             // Đăng ký AutoMapper
