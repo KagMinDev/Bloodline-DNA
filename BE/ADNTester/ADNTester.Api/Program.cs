@@ -15,16 +15,28 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+#region CORS config
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+#endregion
+
 #region Cloudiary config
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinaryConfig"));
 #endregion
+
 #region GHN config
 builder.Services.AddHttpClient("GHN", client =>
 {
     client.BaseAddress = new Uri("https://dev-online-gateway.ghn.vn/shiip/");
 });
 #endregion
+
 #region Swagger UI
 builder.Services.AddSwaggerGen(options =>
 {
@@ -161,6 +173,8 @@ app.UseSwaggerUI(config =>
 //}
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 
