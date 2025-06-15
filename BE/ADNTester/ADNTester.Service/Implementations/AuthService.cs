@@ -1,7 +1,9 @@
 ﻿using ADNTester.BO.DTOs.Auth;
 using ADNTester.BO.DTOs.Common;
 using ADNTester.BO.Entities;
+using ADNTester.BO.Enums;
 using ADNTester.Repository.Interfaces;
+using ADNTester.Service.Helper;
 using ADNTester.Service.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,7 @@ namespace ADNTester.Service.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IJwtTokenService _jwtTokenService;
+        private readonly IOtpService _otpService;
 
         public AuthService(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService)
         {
@@ -35,7 +38,7 @@ namespace ADNTester.Service.Implementations
                 Phone = dto.Phone,
                 Address = dto.Address,
                 Role = dto.Role,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+                PasswordHash = HashHelper.HashPassword(dto.Password)
             };
 
             await _unitOfWork.UserRepository.AddAsync(user);
@@ -49,7 +52,7 @@ namespace ADNTester.Service.Implementations
             if (user == null)
                 return null;
 
-            bool verified = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
+            bool verified = HashHelper.VerifyPassword(dto.Password, user.PasswordHash);
             if (!verified)
                 return null;
 
@@ -62,6 +65,41 @@ namespace ADNTester.Service.Implementations
                 UserName = user.FullName,
                 Role = user.Role.ToString()
             };
+        }
+        public async Task<RequestResetOtpResult> RequestResetPasswordOtpAsync(string email)
+        {
+            var user = await _unitOfWork.UserRepository.FindOneAsync(u => u.Email == email);
+            if (user == null)
+                return RequestResetOtpResult.NotFound;
+
+            var success = await _otpService.GenerateAndSendOtpAsync(
+                user.Id,
+                user.Email,
+                OtpDeliveryMethod.Email,
+                OtpPurpose.ResetPassword, default, default
+            );
+
+            return success ? RequestResetOtpResult.Success : RequestResetOtpResult.FailedToSend;
+        }
+
+        public async Task<ResetPasswordResult> ResetPasswordWithOtpAsync(ConfirmResetPasswordDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.FindOneAsync(u => u.Email == dto.Email);
+            if (user == null)
+                return ResetPasswordResult.UserNotFound;
+
+            var verified = await _otpService.VerifyOtpAsync(
+                user.Id,
+                dto.OtpCode,
+                OtpPurpose.ResetPassword);
+
+            if (!verified)
+                return ResetPasswordResult.InvalidOtp;
+
+            user.PasswordHash = HashHelper.HashPassword(dto.NewPassword);
+            await _unitOfWork.SaveChangesAsync();
+
+            return ResetPasswordResult.Success;
         }
 
     }

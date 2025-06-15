@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace ADNTester.BO.Enums
 {
-    public enum UserRole
+    public enum OtpPurpose
     {
-        Admin,
-        Staff,
-        Client,
-        Manager
+        ResetPassword,
+        VerifyAccount,
+        TwoFactorAuth
     }
 }

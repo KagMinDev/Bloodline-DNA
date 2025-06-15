@@ -21,6 +21,7 @@ namespace ADNTester.Repository.Interfaces
         IUserRepository UserRepository { get; }
         ISampleInstructionRepository SampleInstructionRepository { get; }
         IPaymentRepository PaymentRepository { get; }
+        IOtpRepository OtpRepository { get; }
         Task BeginTransactionAsync();
         Task CommitAsync();
         Task RollbackAsync();

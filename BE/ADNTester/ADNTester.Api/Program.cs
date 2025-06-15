@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using ADNTester.BO.DTOs.Cloundinary;
+using ADNTester.Api.BackgroundJobs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -86,6 +87,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 #region DI
 builder.Services.AddRepositoryDependencies();
 builder.Services.AddServiceDependencies();
+#endregion
+
+#region Background Services
+builder.Services.AddHostedService<OtpCleanupWorker>();
 #endregion
 
 #region HTTPS config

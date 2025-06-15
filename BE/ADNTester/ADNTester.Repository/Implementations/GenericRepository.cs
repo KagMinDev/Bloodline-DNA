@@ -61,6 +61,11 @@ namespace ADNTester.Repository.Implementations
             _dbSet.Remove(entity);
         }
 
+        public void RemoveRange(IEnumerable<T> entities)
+        {
+            _dbSet.RemoveRange(entities);
+        }
+
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();

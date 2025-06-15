@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace ADNTester.BO.Enums
 {
-    public enum UserRole
+    public enum OtpDeliveryMethod
     {
-        Admin,
-        Staff,
-        Client,
-        Manager
+        Email,
+        Sms
     }
 }
