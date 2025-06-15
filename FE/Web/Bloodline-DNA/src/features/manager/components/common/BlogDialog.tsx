@@ -34,14 +34,14 @@ const BlogDialog: React.FC<BlogDialogProps> = ({
   editingBlog,
 }) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-2xl w-full">
+    <DialogContent className="max-w-7xl w-full">
       <DialogHeader>
         <DialogTitle className="text-xl font-bold text-blue-800">
           {editingBlog ? 'Chỉnh sửa bài viết' : 'Thêm bài viết'}
         </DialogTitle>
       </DialogHeader>
 
-      <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+      <div className="flex flex-col gap-4 max-h-[85vh] overflow-y-auto">
         <Input
           className="w-full"
           placeholder="Tiêu đề bài viết"
@@ -57,7 +57,7 @@ const BlogDialog: React.FC<BlogDialogProps> = ({
         <Textarea
           className="w-full"
           placeholder="Nội dung bài viết"
-          rows={5}
+          rows={10}
           value={form.content}
           onChange={(e) => setForm({ ...form, content: e.target.value })}
         />

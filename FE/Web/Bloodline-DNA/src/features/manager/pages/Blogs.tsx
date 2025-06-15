@@ -3,6 +3,7 @@ import type { Blog } from '../types/blogs';
 import { Button } from '../../staff/components/sample/ui/button';
 import BlogCard from '../components/common/BlogCard';
 import BlogDialog from '../components/common/BlogDialog';
+import { FaPlus } from 'react-icons/fa';
 
 const initialBlogs: Blog[] = [
 	{
@@ -133,18 +134,29 @@ function Blogs() {
 	};
 
 	return (
-		<div className="p-8 bg-gray-50 min-h-screen overflow-auto">
-			<div className="flex items-center justify-between mb-8">
-				<h1 className="text-3xl font-bold text-blue-800">Quản lý bài viết</h1>
-				<Button onClick={() => setShowDialog(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-					Thêm bài viết
-				</Button>
-			</div>
+		<div className="h-screen flex flex-col items-center bg-blue-50 p-6 relative overflow-auto">
+			<div className="max-w-7xl mx-auto">
+				<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+					<h1 className="text-2xl md:text-3xl font-bold text-blue-800">Quản lý bài viết</h1>
+					<Button
+						onClick={() => setShowDialog(true)}
+						className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 px-4 py-2 rounded-lg shadow"
+					>
+						<FaPlus className="text-lg text-white" />
+						<span className="text-white">Thêm bài viết</span>
+					</Button>
+				</div>
 
-			<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{blogs.map(blog => (
-					<BlogCard key={blog.id} blog={blog} onEdit={handleEdit} onDelete={handleDelete} />
-				))}
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+					{blogs.map(blog => (
+						<BlogCard
+							key={blog.id}
+							blog={blog}
+							onEdit={handleEdit}
+							onDelete={handleDelete}
+						/>
+					))}
+				</div>
 			</div>
 
 			<BlogDialog
