@@ -139,7 +139,7 @@ export const Contacts = (): React.JSX.Element => {
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
       <div className="relative w-full max-w-none">
         {/* Header */}
-        <div className="relative z-50">
+        <div className="fixed z-50 w-full">
           <Header />
         </div>
 
