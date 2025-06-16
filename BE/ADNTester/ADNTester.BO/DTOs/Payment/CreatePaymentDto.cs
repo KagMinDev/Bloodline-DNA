@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ADNTester.BO.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -24,5 +25,6 @@ namespace ADNTester.BO.DTOs.Payment
 
         [Required]
         public string BookingId { get; set; }
+        public PaymentStatus Status { get; set; } = PaymentStatus.Pending;
     }
 }

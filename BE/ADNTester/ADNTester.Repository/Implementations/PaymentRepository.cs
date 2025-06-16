@@ -1,5 +1,6 @@
 ﻿using ADNTester.BO.Entities;
 using ADNTester.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,7 @@ namespace ADNTester.Repository.Implementations
         public PaymentRepository(ApplicationDbContext context) : base(context)
         {
         }
+
+       
     }
 }
