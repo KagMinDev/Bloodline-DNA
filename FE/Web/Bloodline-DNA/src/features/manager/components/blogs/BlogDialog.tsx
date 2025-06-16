@@ -10,6 +10,7 @@ import { Input } from '../../../staff/components/booking/ui/input';
 import { Textarea } from '../../../staff/components/booking/ui/textarea';
 import { Button } from '../../../staff/components/sample/ui/button';
 import type { BlogResponse } from '../../types/blogs';
+import Checkbox from '../common/Checkbox';
 
 interface BlogDialogProps {
   open: boolean;
@@ -18,7 +19,7 @@ interface BlogDialogProps {
     title: string;
     content: string;
     thumbnailURL: string | File; // Có thể là string (khi edit) hoặc File (khi upload)
-    thumbnailPreview?: string;   // <-- Thêm dòng này
+    thumbnailPreview?: string;   
     status: string;
     authorId: string;
     authorName: string;
@@ -102,6 +103,18 @@ const BlogDialog: React.FC<BlogDialogProps> = ({
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
           />
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={form.status === 'Hiển thị' || form.status === '1'}
+              onChange={(checked) =>
+                setForm((prev: any) => ({
+                  ...prev,
+                  status: checked ? 'Hiển thị' : 'Ẩn', // hoặc '1' : '0' nếu muốn lưu số
+                }))
+              }
+              label="Hiển thị (Công khai)"
+            />
+          </div>
           <Button
             onClick={onSave}
             className="w-full bg-blue-600 text-white hover:bg-blue-700 transition"

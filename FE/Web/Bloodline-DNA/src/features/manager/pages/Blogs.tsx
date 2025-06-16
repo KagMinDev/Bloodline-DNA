@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '../../staff/components/sample/ui/button';
-import BlogCard from '../components/common/BlogCard';
-import BlogDialog from '../components/common/BlogDialog';
+import BlogCard from '../components/blogs/BlogCard';
+import BlogDialog from '../components/blogs/BlogDialog';
 import { FaPlus } from 'react-icons/fa';
 import { getBlogsApi, createBlogApi } from '../api/blogsApi';
 import type { BlogResponse } from '../types/blogs';
