@@ -14,9 +14,13 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (data: Login) => {
+    console.log("Start loading");
+    
     setLoading(true);
     try {
       const response = await loginApi(data.email, data.password);
+      console.log("Done loading Login");
+      
       localStorage.setItem("token", response.data.token);
       const userData = await getUserInfoApi(response.data.token);
       if (!userData) {
@@ -61,6 +65,7 @@ const LoginForm: React.FC = () => {
         },
       ]);
     } finally {
+      console.log("End loading");
       setLoading(false);
     }
   };
