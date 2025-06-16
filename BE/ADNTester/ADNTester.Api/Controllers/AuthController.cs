@@ -20,9 +20,9 @@ namespace ADNTester.Api.Controllers
         }
 
         /// <summary>
-        /// Đăng ký tài khoản người dùng mới.
+        /// Đăng ký tài khoản người dùng mới(chỉ cho Client).
         /// </summary>
-        /// <param name="dto">Thông tin người dùng cần đăng ký.</param>
+        /// <param name="dto">Thông tin client cần đăng ký.</param>
         /// <returns>Trạng thái thành công hoặc lỗi.</returns>
         [AllowAnonymous]
         [HttpPost("register")]

@@ -14,5 +14,6 @@ namespace ADNTester.Service.Interfaces
         Task<LoginResponseDto> LoginAsync(LoginRequestDto dto);
         Task<RequestResetOtpResult> RequestResetPasswordOtpAsync(string email);
         Task<ResetPasswordResult> ResetPasswordWithOtpAsync(ConfirmResetPasswordDto dto);
+        Task<bool> CreateStaffAccountAsync(CreateStaffRequestDto dto);
     }
 }

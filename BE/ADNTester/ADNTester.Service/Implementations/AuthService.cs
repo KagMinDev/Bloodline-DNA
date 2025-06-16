@@ -37,7 +37,7 @@ namespace ADNTester.Service.Implementations
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
-                Role = dto.Role,
+                Role = UserRole.Client,
                 PasswordHash = HashHelper.HashPassword(dto.Password)
             };
 
@@ -100,6 +100,29 @@ namespace ADNTester.Service.Implementations
             await _unitOfWork.SaveChangesAsync();
 
             return ResetPasswordResult.Success;
+        }
+
+        public async Task<bool> CreateStaffAccountAsync(CreateStaffRequestDto dto)
+        {
+            if (dto.Role != UserRole.Staff && dto.Role != UserRole.Manager)
+                return false;
+
+            var existing = await _unitOfWork.UserRepository.FindOneAsync(u => u.Email == dto.Email);
+            if (existing != null) return false;
+
+            var user = new User
+            {
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Address = dto.Address,
+                Role = dto.Role,
+                PasswordHash = HashHelper.HashPassword(dto.Password)
+            };
+
+            await _unitOfWork.UserRepository.AddAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
 
     }
