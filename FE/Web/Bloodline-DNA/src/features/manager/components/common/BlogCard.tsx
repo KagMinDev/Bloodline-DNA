@@ -2,19 +2,28 @@ import { Card, CardContent } from '../../../staff/components/sample/ui/card';
 import { Button } from '../../../staff/components/sample/ui/button';
 import { format } from 'date-fns';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import type { Blog } from '../../types/blogs';
+import type { BlogResponse } from '../../types/blogs';
 
 interface BlogCardProps {
-  blog: Blog;
-  onEdit: (blog: Blog) => void;
+  blog: BlogResponse;
+  onEdit: (blog: BlogResponse) => void;
   onDelete: (id: string) => void;
 }
+
+const getStatusText = (status: string) => {
+  if (status === '1') return 'Công khai';
+  if (status === '0') return 'Bản nháp';
+  return status;
+};
 
 const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) => (
   <Card className="shadow-md border border-blue-100 relative">
     <CardContent className=" space-y-3 flex flex-col">
       <img src={blog.thumbnailURL} alt={blog.title} className="w-full h-70 object-cover rounded-md" />
       <h2 className="text-xl font-semibold text-blue-700 truncate" title={blog.title}>{blog.title}</h2>
+      <p className="text-sm text-gray-600">
+        Trạng thái: <span className="font-medium">{getStatusText(blog.status)}</span>
+      </p>
       <p className="text-sm text-gray-600">Tác giả: <span className="font-medium">{blog.authorName}</span></p>
       <p className="text-sm text-gray-500">Ngày tạo: {format(new Date(blog.createdAt), 'dd/MM/yyyy')}</p>
       <div className="flex gap-3 pt-2">
