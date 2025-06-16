@@ -3,7 +3,7 @@ import { Button, Form, Input, message } from "antd";
 import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginApi } from "../../../apis/auth/loginApi";
+import { getUserInfoApi, loginApi } from "../../../apis/auth/loginApi";
 import Loading, { ButtonLoading } from "../../../components/Loading";
 import type { Login } from "../types/auth.types";
 
@@ -14,10 +14,23 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (data: Login) => {
+    console.log("Start loading");
+    
     setLoading(true);
     try {
       const response = await loginApi(data.email, data.password);
+      console.log("Done loading Login");
+      
       localStorage.setItem("token", response.data.token);
+      const userData = await getUserInfoApi(response.data.token);
+      if (!userData) {
+        message.error("Không thể lấy thông tin người dùng");
+        return;
+      }
+      // Lưu thông tin người dùng vào localStorage
+      localStorage.setItem("accountId", userData.id);
+      console.log("userDataId:", userData.id);
+
       const user = {
         userName: response.data.userName,
         role: response.data.role,
@@ -26,13 +39,13 @@ const LoginForm: React.FC = () => {
       const userRole = response.data.role;
       switch (userRole) {
         case "Admin":
-          navigate("/admin");
+          navigate("/admin/dashboard");
           break;
         case "Staff":
-          navigate("/staff");
+          navigate("/staff/");
           break;
         case "Manager":
-          navigate("/manager");
+          navigate("/manager/service");
           break;
         case "Client":
           navigate("/customer");
@@ -52,6 +65,7 @@ const LoginForm: React.FC = () => {
         },
       ]);
     } finally {
+      console.log("End loading");
       setLoading(false);
     }
   };
