@@ -32,11 +32,11 @@ const UserMangement: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-blue-600">Quản lý người dùng</h1>
         <Button
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+          className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800"
           onClick={() => alert('Chức năng thêm người dùng sẽ được triển khai sau.')}
         >
           <FaPlus className="text-white" />
-          Thêm người dùng
+          <span className="text-white">Thêm người dùng</span>
         </Button>
       </div>
 
