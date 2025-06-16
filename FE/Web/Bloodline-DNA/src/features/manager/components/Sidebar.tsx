@@ -42,6 +42,10 @@ const Sidebar = () => {
     }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+  };
+
   return (
     <div className='flex h-screen w-64 flex-col bg-[#1F2B6C] shadow-lg '>
       <div className="flex flex-col items-center py-6">
@@ -118,7 +122,10 @@ const Sidebar = () => {
       </nav>
       <div className='px-4 py-6'>
         <Link to='/'>
-          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-[#1F2B6C] bg-white hover:bg-[#EDEBDF] transition-colors'>
+          <button
+            className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-[#1F2B6C] bg-white hover:bg-[#EDEBDF] transition-colors'
+            onClick={handleLogout}
+          >
             Đăng xuất
           </button>
         </Link>
