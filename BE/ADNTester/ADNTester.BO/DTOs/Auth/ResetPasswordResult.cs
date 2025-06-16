@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ADNTester.BO.Enums
+namespace ADNTester.BO.DTOs.Auth
 {
-    public enum UserRole
+    public enum ResetPasswordResult
     {
-        Admin,
-        Staff,
-        Client,
-        Manager
+        Success,
+        UserNotFound,
+        InvalidOtp
     }
 }
