@@ -1,4 +1,12 @@
-import { ActivityIcon, ArrowRightIcon, ClipboardCheckIcon, HeartIcon, ShieldIcon, StethoscopeIcon, UserCheckIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  ArrowRightIcon,
+  ClipboardCheckIcon,
+  HeartIcon,
+  ShieldIcon,
+  StethoscopeIcon,
+  UserCheckIcon,
+} from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
@@ -12,7 +20,8 @@ export const ServicesSection = (): React.JSX.Element => {
     {
       id: 1,
       title: "Cấp Cứu 24/7",
-      description: "Dịch vụ y tế cấp cứu 24/7 với đội ngũ chuyên gia y tế giàu kinh nghiệm sẵn sàng xử lý các tình huống nguy cấp với sự chăm sóc và chính xác tối đa.",
+      description:
+        "Dịch vụ y tế cấp cứu 24/7 với đội ngũ chuyên gia y tế giàu kinh nghiệm sẵn sàng xử lý các tình huống nguy cấp với sự chăm sóc và chính xác tối đa.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: true,
       hasFloatingIcon: false,
@@ -23,7 +32,8 @@ export const ServicesSection = (): React.JSX.Element => {
     {
       id: 2,
       title: "Khám Sức Khỏe Định Kỳ",
-      description: "Khám sức khỏe toàn diện và chăm sóc phòng ngừa để giúp duy trì sức khỏe tối ưu và phát hiện sớm các vấn đề tiềm ẩn.",
+      description:
+        "Khám sức khỏe toàn diện và chăm sóc phòng ngừa để giúp duy trì sức khỏe tối ưu và phát hiện sớm các vấn đề tiềm ẩn.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -34,7 +44,8 @@ export const ServicesSection = (): React.JSX.Element => {
     {
       id: 3,
       title: "Tư Vấn Chuyên Khoa",
-      description: "Tư vấn chuyên sâu với các bác sĩ chuyên khoa được chứng nhận trong nhiều lĩnh vực y tế để giải quyết các vấn đề sức khỏe cụ thể của bạn.",
+      description:
+        "Tư vấn chuyên sâu với các bác sĩ chuyên khoa được chứng nhận trong nhiều lĩnh vực y tế để giải quyết các vấn đề sức khỏe cụ thể của bạn.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -45,7 +56,8 @@ export const ServicesSection = (): React.JSX.Element => {
     {
       id: 4,
       title: "Theo Dõi Sức Khỏe",
-      description: "Theo dõi sức khỏe liên tục và các kế hoạch chăm sóc cá nhân hóa để giúp bạn duy trì sức khỏe tối ưu suốt cuộc đời.",
+      description:
+        "Theo dõi sức khỏe liên tục và các kế hoạch chăm sóc cá nhân hóa để giúp bạn duy trì sức khỏe tối ưu suốt cuộc đời.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -56,7 +68,8 @@ export const ServicesSection = (): React.JSX.Element => {
     {
       id: 5,
       title: "Dịch Vụ Xét Nghiệm",
-      description: "Xét nghiệm và chẩn đoán hiện đại với kết quả nhanh chóng, chính xác được thực hiện bởi các kỹ thuật viên được chứng nhận.",
+      description:
+        "Xét nghiệm và chẩn đoán hiện đại với kết quả nhanh chóng, chính xác được thực hiện bởi các kỹ thuật viên được chứng nhận.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -67,7 +80,8 @@ export const ServicesSection = (): React.JSX.Element => {
     {
       id: 6,
       title: "Khám Từ Xa",
-      description: "Tư vấn sức khỏe trực tuyến tại nhà với các nhà cung cấp dịch vụ chăm sóc sức khỏe có giấy phép thông qua video call an toàn.",
+      description:
+        "Tư vấn sức khỏe trực tuyến tại nhà với các nhà cung cấp dịch vụ chăm sóc sức khỏe có giấy phép thông qua video call an toàn.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -82,22 +96,27 @@ export const ServicesSection = (): React.JSX.Element => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const cardId = parseInt(entry.target.getAttribute('data-card-id') || '0');
-            setVisibleCards(prev => new Set(prev).add(cardId));
+            const cardId = parseInt(
+              entry.target.getAttribute("data-card-id") || "0"
+            );
+            setVisibleCards((prev) => new Set(prev).add(cardId));
           }
         });
       },
       { threshold: 0.2 }
     );
 
-    const cards = document.querySelectorAll('[data-card-id]');
-    cards.forEach(card => observer.observe(card));
+    const cards = document.querySelectorAll("[data-card-id]");
+    cards.forEach((card) => observer.observe(card));
 
     return () => observer.disconnect();
   }, []);
 
   return (
-    <section ref={sectionRef} className="w-full py-16 md:py-20 lg:py-24 xl:py-28 bg-gradient-to-b from-white via-gray-50 to-white">
+    <section
+      ref={sectionRef}
+      className="w-full py-16 md:py-20 lg:py-24 xl:py-28 bg-gradient-to-b from-white via-gray-50 to-white"
+    >
       <div className="container px-4 mx-auto md:px-6 lg:px-8 xl:px-12 max-w-7xl">
         {/* Section header with Vietnamese content */}
         <div className="mb-12 text-center md:mb-16 lg:mb-20 xl:mb-24">
@@ -110,7 +129,9 @@ export const ServicesSection = (): React.JSX.Element => {
             </h2>
             <div className="w-16 md:w-20 lg:w-24 xl:w-32 h-1 md:h-1.5 lg:h-2 bg-gradient-to-r from-app-accent to-app-secondary mx-auto mb-6 md:mb-8 lg:mb-10 animate-fade-in-up animation-delay-400"></div>
             <p className="max-w-2xl mx-auto text-base leading-relaxed text-gray-600 md:text-lg lg:text-xl xl:text-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl animate-fade-in-up animation-delay-600">
-              Giải pháp chăm sóc sức khỏe toàn diện được thiết kế riêng để đáp ứng nhu cầu cá nhân của bạn với công nghệ tiên tiến và sự chăm sóc tận tâm.
+              Giải pháp chăm sóc sức khỏe toàn diện được thiết kế riêng để đáp
+              ứng nhu cầu cá nhân của bạn với công nghệ tiên tiến và sự chăm sóc
+              tận tâm.
             </p>
           </div>
         </div>
@@ -118,17 +139,19 @@ export const ServicesSection = (): React.JSX.Element => {
         {/* Enhanced grid with staggered animation - responsive grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 md:gap-8 lg:gap-10 xl:gap-12">
           {serviceCards.map((card, index) => {
-            const IconComponent = card.hasOverlay ? card.overlayIcon : card.floatingIcon;
+            const IconComponent = card.hasOverlay
+              ? card.overlayIcon
+              : card.floatingIcon;
             const isVisible = visibleCards.has(card.id);
-            
+
             return (
               <Card
                 key={card.id}
                 data-card-id={card.id}
                 className={`group rounded-xl border-0 shadow-lg hover:shadow-2xl overflow-hidden bg-white transition-all duration-700 ease-out transform hover:-translate-y-3 hover:scale-105 ${
-                  isVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-8'
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
                 }`}
                 style={{
                   animationDelay: `${index * 150}ms`,
@@ -213,8 +236,12 @@ export const ServicesSection = (): React.JSX.Element => {
         {/* Call to action with new background color - responsive spacing and sizing */}
         <div className="mt-16 text-center md:mt-20 lg:mt-24 xl:mt-28">
           <div className="max-w-4xl p-6 mx-auto text-white shadow-2xl bg-gradient-to-br from-blue-600 to-blue-800 md:p-8 lg:p-10 xl:p-12 rounded-2xl md:rounded-3xl">
-            <h3 className="mb-3 text-xl font-bold md:text-2xl lg:text-3xl xl:text-4xl md:mb-4 lg:mb-6">Sẵn Sàng Bắt Đầu?</h3>
-            <p className="mb-6 text-base md:text-lg lg:text-xl xl:text-2xl opacity-90 md:mb-8 lg:mb-10">Liên hệ với chúng tôi ngay hôm nay để đặt lịch tư vấn</p>
+            <h3 className="mb-3 text-xl font-bold md:text-2xl lg:text-3xl xl:text-4xl md:mb-4 lg:mb-6">
+              Sẵn Sàng Bắt Đầu?
+            </h3>
+            <p className="mb-6 text-base md:text-lg lg:text-xl xl:text-2xl opacity-90 md:mb-8 lg:mb-10">
+              Liên hệ với chúng tôi ngay hôm nay để đặt lịch tư vấn
+            </p>
             <Button className="px-6 py-3 text-sm font-semibold text-yellow-600 transition-all duration-300 bg-white rounded-full shadow-lg hover:bg-yellow-400 hover:text-blue-800 md:px-8 lg:px-10 xl:px-12 md:py-4 lg:py-5 xl:py-6 md:text-base lg:text-lg xl:text-xl hover:scale-105">
               Đặt Lịch Hẹn
             </Button>
@@ -223,8 +250,9 @@ export const ServicesSection = (): React.JSX.Element => {
       </div>
 
       {/* Global styles for animations */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @keyframes fade-in-up {
             from {
               opacity: 0;
@@ -258,8 +286,9 @@ export const ServicesSection = (): React.JSX.Element => {
             -webkit-box-orient: vertical;
             overflow: hidden;
           }
-        `
-      }} />
+        `,
+        }}
+      />
     </section>
   );
 };

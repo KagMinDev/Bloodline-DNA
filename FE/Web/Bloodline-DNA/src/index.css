@@ -119,3 +119,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.ant-message {
+  z-index: 9999 !important;
+}

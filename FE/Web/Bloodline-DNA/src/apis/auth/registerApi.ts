@@ -23,7 +23,9 @@ export const registerApi = async (userData: RegisterUser) => {
     if (axios.isAxiosError(error)) {
       // Trích xuất thông báo lỗi từ backend nếu có
       const serverMessage =
-        error.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
+        error.response?.data?.message ||
+        error.response?.data?.title ||
+        "Đăng ký thất bại. Vui lòng thử lại.";
       throw new Error(serverMessage);
     } else {
       // Lỗi không phải từ Axios
