@@ -1,14 +1,11 @@
-﻿using ADNTester.BO.Entities;
-using System;
+using ADNTester.BO.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace ADNTester.Repository.Interfaces
+namespace ADNTester.DAL.Interfaces
 {
     public interface IPaymentRepository : IGenericRepository<Payment>
     {
-        
+        Task<Payment> GetByOrderCodeAsync(string orderCode);
     }
-}
+} 

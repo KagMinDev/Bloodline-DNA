@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace ADNTester.Service
 {
@@ -36,6 +37,9 @@ namespace ADNTester.Service
 
             // Đăng ký AutoMapper
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+            // Register PayOS service
+          
 
             return services;
         }
