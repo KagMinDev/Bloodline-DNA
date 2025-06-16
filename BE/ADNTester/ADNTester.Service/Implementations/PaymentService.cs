@@ -57,7 +57,7 @@ namespace ADNTester.Service.Implementations
             _mapper.Map(dto, existing);
             _unitOfWork.PaymentRepository.Update(existing);
             return await _unitOfWork.SaveChangesAsync() > 0;
-            
+
         }
     }
 }
