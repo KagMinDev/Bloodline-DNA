@@ -49,7 +49,7 @@ namespace ADNTester.Service.Implementations
         public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
         {
             var user = await _unitOfWork.UserRepository.FindOneAsync(u => u.Email == dto.Email);
-            if (user == null)
+            if (user == null || !user.IsActive)
                 return null;
 
             bool verified = HashHelper.VerifyPassword(dto.Password, user.PasswordHash);
