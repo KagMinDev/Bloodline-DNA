@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { Button } from '../../staff/components/sample/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../staff/components/sample/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../staff/components/sample/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../staff/components/sample/ui/table';
-import type { User } from '../types/UserManager';
-
-const initialUsers: User[] = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'a@gmail.com', role: 'Admin', status: 'Hoạt động' },
-  { id: 2, name: 'Trần Thị B', email: 'b@gmail.com', role: 'Nhân viên', status: 'Đã khóa' },
-];
+import type { UserResponse } from '../types/User';
+import ModalUser from '../components/user/ModalUser';
+import { createStaffApi, getAllUserApi } from '../api/userApi';
 
 const UserMangement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const token = localStorage.getItem('token') || '';
+
+  // Định nghĩa fetchUsers với useCallback
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await getAllUserApi(token);
+      setUsers(res);
+    } catch (error) {
+      alert('Không thể tải danh sách người dùng');
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const toggleUserStatus = (id: number) => {
     setUsers((prev) =>
@@ -27,13 +40,24 @@ const UserMangement: React.FC = () => {
     );
   };
 
+  const handleAddUser = async (data: any) => {
+    try {
+      await createStaffApi(data, token);
+      await fetchUsers(); // Gọi lại fetchUsers để cập nhật danh sách
+      setShowModal(false);
+    } catch (error: any) {
+      alert(error.message || 'Tạo người dùng thất bại');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-blue-50 p-8">
+      <ModalUser open={showModal} onClose={() => setShowModal(false)} onSubmit={handleAddUser} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-blue-600">Quản lý người dùng</h1>
         <Button
           className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800"
-          onClick={() => alert('Chức năng thêm người dùng sẽ được triển khai sau.')}
+          onClick={() => setShowModal(true)}
         >
           <FaPlus className="text-white" />
           <span className="text-white">Thêm người dùng</span>
