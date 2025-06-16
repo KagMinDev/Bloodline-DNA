@@ -1,3 +1,4 @@
+import { RegisterUser } from '@/types/auth/auth.types';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
@@ -14,12 +15,11 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import ErrorBoundary from '../../../components/common/error-boundary';
 import { PageLoading } from '../../../components/common/loading';
-import { Register } from '../../../types/auth/auth.types';
 import { RootStackParamList } from '../../../types/root-stack/stack.types';
 import styles from './styles';
 
 const RegisterScreen: React.FC = () => {
-  const [fullName, setFullName] = useState<string>('');
+  const [fullName, setf] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
   const [address, setAddress] = useState<string>('');
@@ -47,7 +47,7 @@ const RegisterScreen: React.FC = () => {
     const newErrors: { [key: string]: string | null } = {};
     let valid = true;
 
-    // FullName validation (assuming fullNameRules requires non-empty and min length)
+    // f validation (assuming fullNameRules requires non-empty and min length)
     if (!fullName) {
       newErrors.fullName = 'Vui lòng nhập họ và tên';
       valid = false;
@@ -113,18 +113,17 @@ const RegisterScreen: React.FC = () => {
       return;
     }
 
-    const registerData: Register = {
-      FullName: fullName,
-      Email: email,
-      Phone: phone,
-      PasswordHash: password,
-      Address: address,
-      Role: 'customer',
+    const registerData: RegisterUser = {
+      fullName: fullName,
+      email: email,
+      phone: phone,
+      password: password,
+      address: address,
+      role: 2,
     };
 
     setLoading(true);
     try {
-      console.log('Dữ liệu giả:', registerData);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       // @ts-ignore
       navigation.navigate('Main');
@@ -253,7 +252,7 @@ const RegisterScreen: React.FC = () => {
                 placeholderTextColor="#9CA3AF"
                 value={fullName}
                 onChangeText={(text) => {
-                  setFullName(text);
+                  setf(text);
                   setErrors((prev) => ({ ...prev, fullName: null }));
                 }}
                 editable={!loading}

@@ -1,3 +1,4 @@
+import { ForgotPassword } from '@/types/auth/auth.types';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
@@ -12,7 +13,6 @@ import {
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ForgotPassword } from '../../../types/auth/auth.types';
 import { RootStackParamList } from '../../../types/root-stack/stack.types';
 import styles from './styles';
 
@@ -56,7 +56,6 @@ const ForgotPasswordScreen: React.FC = () => {
     const data: ForgotPassword = { Email: email };
     setLoading(true);
     try {
-      console.log('Dữ liệu giả:', data);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       setEmail('');
       Alert.alert('Thành công', 'Hướng dẫn đặt lại mật khẩu đã được gửi đến email của bạn');

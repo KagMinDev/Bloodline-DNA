@@ -18,7 +18,7 @@ const ForgotPassword: React.FC = () => {
     setLoading(true);
     try {
       // Giả lập gửi yêu cầu đặt lại mật khẩu để kiểm tra loading
-      console.log("Dữ liệu giả:", values);
+      console.log("Dữ  giả:", values);
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Giả lập thời gian chờ 1.5s
       // Nếu muốn dùng API thực, bỏ comment đoạn dưới và comment đoạn trên
       /*
