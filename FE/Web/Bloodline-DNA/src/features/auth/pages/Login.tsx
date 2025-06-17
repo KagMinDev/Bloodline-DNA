@@ -13,58 +13,79 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (data: Login) => {
-    console.log("Start loading");
-    
-    setLoading(true);
-    try {
-      const response = await loginApi(data.email, data.password);      
-      localStorage.setItem("token", response.data.token);
-      const userData = await getUserInfoApi(response.data.token);
-      if (!userData) {
-        message.error("Không thể lấy thông tin người dùng");
-        return;
-      }
-      // Lưu thông tin người dùng vào localStorage
-      localStorage.setItem("accountId", userData.id);
-      
-      const user = {
-        userName: response.data.userName,
-        role: response.data.role,
-      };
-      localStorage.setItem("user", JSON.stringify(user));
-      const userRole = response.data.role;
-      switch (userRole) {
-        case "Admin":
-          navigate("/admin/dashboard");
-          break;
-        case "Staff":
-          navigate("/staff/");
-          break;
-        case "Manager":
-          navigate("/manager/service");
-          break;
-        case "Client":
-          navigate("/customer");
-          break;
-        default:
-          message.error("Role không hợp lệ");
-          break;
-      }
-    } catch (error) {
-      console.error("Đăng nhập thất bại:", error);
+const handleLogin = async (data: Login) => {
+  setLoading(true);
+  try {
+    const response = await loginApi(data.email, data.password);
+
+    localStorage.setItem("token", response.data.token);
+
+    const userData = await getUserInfoApi(response.data.token);
+    if (!userData) {
+      message.error("Không thể lấy thông tin người dùng");
+      return;
+    }
+
+    localStorage.setItem("accountId", userData.id);
+    const user = {
+      userName: response.data.userName,
+      role: response.data.role,
+    };
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // Navigate theo role
+    switch (response.data.role) {
+      case "Admin":
+        navigate("/admin/dashboard");
+        break;
+      case "Staff":
+        navigate("/staff/");
+        break;
+      case "Manager":
+        navigate("/manager/service");
+        break;
+      case "Client":
+        navigate("/customer");
+        break;
+      default:
+        message.error("Role không hợp lệ");
+        break;
+    }
+  } catch (error) {
+    console.error("Đăng nhập thất bại:", error);
+
+    // Nếu lỗi có message rõ ràng (từ loginApi ném ra)
+    const errorMessage =
+      error instanceof Error ? error.message : "Lỗi không xác định";
+
+    // Gán lỗi vào field password
+    form.setFields([
+      {
+        name: "password",
+        errors: [errorMessage],
+      },
+    ]);
+
+    // (tuỳ chọn) Nếu bạn muốn chia lỗi cho từng field:
+    if (errorMessage.includes("Email")) {
+      form.setFields([
+        {
+          name: "email",
+          errors: [errorMessage],
+        },
+      ]);
+    } else {
       form.setFields([
         {
           name: "password",
-          errors: [
-            error instanceof Error ? error.message : "Lỗi không xác định",
-          ],
+          errors: [errorMessage],
         },
       ]);
-    } finally {
-      setLoading(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
