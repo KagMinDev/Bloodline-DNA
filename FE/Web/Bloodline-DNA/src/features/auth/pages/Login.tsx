@@ -3,8 +3,8 @@ import { Button, Form, Input, message } from "antd";
 import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginApi } from "../../../apis/auth/loginApi";
 import Loading, { ButtonLoading } from "../../../components/Loading";
+import { loginApi } from "../api/loginApi";
 import type { Login } from "../types/auth.types";
 
 const LoginForm: React.FC = () => {
