@@ -21,19 +21,7 @@ const SidebarData: SidebarDataType[] = [
   {
     icon: MdDomainAdd,
     heading: 'Quản lí dịch vụ',
-    href: '/manager/',
-    children: [
-      {
-          icon: SiTestcafe,
-          heading: 'Danh sách  dịch vụ',
-          href: '/manager/service',
-        },
-        {
-          icon: SiTestcafe,
-          heading: 'Danh sách giá dịch vụ',
-          href: '/manager/pricemanagement',
-        },
-      ],
+    href: '/manager/test-management',
   },
   {
     icon: FaBookReader,

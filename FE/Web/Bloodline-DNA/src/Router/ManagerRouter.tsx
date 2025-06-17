@@ -3,7 +3,8 @@ import { NotFound } from "../components";
 import Sidebar from "../features/manager/components/Sidebar";
 import { Service } from "../features";
 import Blogs from "../features/manager/pages/Blogs";
-import PriceManagement from "../features/manager/pages/PriceManagement";
+import TestManagement from "../features/manager/pages/TestManagement";
+
 
 export default function ManagerRouter() {
     return (
@@ -14,7 +15,8 @@ export default function ManagerRouter() {
             <Route path="/" element={<Service />} />
             <Route path="service" element={<Service />} />
             <Route path="blogs" element={<Blogs />} />
-            <Route path="pricemanagement" element={<PriceManagement />} />
+            <Route path="test-management" element={<TestManagement />} />
+
 
             {/* Not found */}
             <Route path="*" element={<NotFound />} />

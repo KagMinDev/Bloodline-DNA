@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Loading, { ButtonLoading } from "../../../components/Loading";
 import { getUserInfoApi, loginApi } from "../api/loginApi";
 import type { Login } from "../types/auth.types";
+import { getUserInfoApi, loginApi } from "../api/loginApi";
 
 const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
