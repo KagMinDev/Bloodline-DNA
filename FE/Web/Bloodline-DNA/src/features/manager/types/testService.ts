@@ -1,15 +1,28 @@
 export interface PriceServiceRequest {
+  id?: string;
   price: number;
   collectionMethod: number;
   effectiveFrom: string;
   effectiveTo: string;
   isActive: boolean;
+  currency?: string;
 }
 
+// Dùng cho tạo mới (POST)
 export interface TestRequest {
   name: string;
   description: string;
-  type: number;
+  type: number; // BẮT BUỘC là number khi tạo mới
+  isActive: boolean;
+  priceServices: PriceServiceRequest[];
+}
+
+// Dùng cho cập nhật (PUT)
+export interface TestUpdateRequest {
+  id: string;
+  name: string;
+  description: string;
+  category: string; // BẮT BUỘC là string khi cập nhật
   isActive: boolean;
   priceServices: PriceServiceRequest[];
 }

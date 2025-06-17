@@ -5,8 +5,7 @@ import { Label } from "../../../staff/components/booking/ui/label";
 import { Input } from "../../../staff/components/booking/ui/input";
 import Checkbox from "../common/Checkbox";
 import { Button } from "../../../staff/components/sample/ui/button";
-import { CATEGORY_OPTIONS, categoryToType } from '../../utils/categoryMap';
-
+import { CATEGORY_OPTIONS } from '../../utils/categoryMap';
 
 interface ModalAddTestProps {
   open: boolean;
@@ -14,23 +13,24 @@ interface ModalAddTestProps {
   onSubmit: (data: {
     name: string;
     description: string;
-    type: number;
+    category: string;
     isActive: boolean;
     priceService: PriceServiceRequest;
   }) => Promise<void>;
-  collectionMethods?: string[]; // Thêm prop này để truyền danh sách phương thức thu
+  collectionMethods?: string[];
   initialData?: {
     name: string;
     description: string;
     category: string;
     isActive: boolean;
-  }; // Thêm prop này nếu cần sửa dịch vụ
+    priceServices?: PriceServiceRequest[];
+  };
 }
 
 const defaultTest = {
   name: "",
   description: "",
-  type: 0,
+  category: "",
   isActive: true,
 };
 
@@ -46,25 +46,24 @@ const ModalTest: React.FC<ModalAddTestProps> = ({
   open,
   onClose,
   onSubmit,
-  collectionMethods = ["Trực tiếp", "Chuyển khoản"], // default nếu không truyền vào
-  initialData, // nếu có
+  collectionMethods = ["Trực tiếp", "Chuyển khoản"],
+  initialData,
 }) => {
   const [test, setTest] = useState(defaultTest);
   const [price, setPrice] = useState<PriceServiceRequest>(defaultPrice);
 
-  // Nếu sửa, lấy type từ category string
   useEffect(() => {
     if (open && initialData) {
       setTest({
         ...defaultTest,
         name: initialData.name,
         description: initialData.description,
-        type: categoryToType(initialData.category),
+        category: initialData.category,
         isActive: initialData.isActive,
       });
-      // Nếu initialData có priceServices, lấy giá trị đầu tiên để set vào price
-      if ((initialData as any).priceServices && (initialData as any).priceServices.length > 0) {
-        const firstPrice = (initialData as any).priceServices[0];
+
+      if (initialData.priceServices && initialData.priceServices.length > 0) {
+        const firstPrice = initialData.priceServices[0];
         setPrice({
           price: firstPrice.price,
           collectionMethod: firstPrice.collectionMethod,
@@ -89,20 +88,20 @@ const ModalTest: React.FC<ModalAddTestProps> = ({
       ...prev,
       [name]: type === "checkbox"
         ? (e.target as HTMLInputElement).checked
-        : name === "type"
-        ? Number(value)
         : value,
     }));
   };
 
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handlePriceChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
     setPrice((prev) => ({
       ...prev,
       [name]: name === "price"
-        ? Number(value.replace(/[^0-9]/g, "")) // chỉ lấy số
+        ? Number(value.replace(/[^0-9]/g, ""))
         : name === "collectionMethod"
-        ? Number(value) // lưu index hoặc backend yêu cầu string thì sửa lại
+        ? Number(value)
         : type === "checkbox"
         ? (e.target as HTMLInputElement).checked
         : value,
@@ -111,11 +110,18 @@ const ModalTest: React.FC<ModalAddTestProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({
-      ...test,
-      priceService: price,
-    });
-    onClose();
+    try {
+      await onSubmit({
+        name: test.name,
+        description: test.description,
+        category: test.category,
+        isActive: test.isActive,
+        priceService: price,
+      });
+      onClose();
+    } catch (err) {
+      alert("Có lỗi xảy ra khi thêm dịch vụ.");
+    }
   };
 
   return (
@@ -149,17 +155,17 @@ const ModalTest: React.FC<ModalAddTestProps> = ({
             />
           </div>
           <div>
-            <Label htmlFor="type">Loại</Label>
+            <Label htmlFor="category">Danh mục</Label>
             <select
-              id="type"
-              name="type"
-              value={test.type}
+              id="category"
+              name="category"
+              value={test.category}
               onChange={handleTestChange}
               className="w-full border border-input rounded-md px-3 py-2"
               required
             >
               {CATEGORY_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                <option key={opt.api} value={opt.label}>{opt.label}</option>
               ))}
             </select>
           </div>
@@ -220,7 +226,6 @@ const ModalTest: React.FC<ModalAddTestProps> = ({
               />
             </div>
           </div>
-          {/* Chỉ giữ 1 checkbox ở dưới cùng */}
           <div className="flex items-center space-x-2">
             <Checkbox
               checked={test.isActive}

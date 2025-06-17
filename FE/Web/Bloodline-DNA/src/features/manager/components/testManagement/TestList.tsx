@@ -1,5 +1,5 @@
 import { Pencil, Trash2 } from 'lucide-react';
-import { type PriceServiceResponse, type TestResponse } from '../../types/testService';
+import { type TestResponse } from '../../types/testService';
 import { Card, CardContent } from '../../../staff/components/sample/ui/card';
 import { Button } from '../../../staff/components/sample/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../staff/components/sample/ui/table';
@@ -8,12 +8,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 interface TestListProps {
   tests: TestResponse[];
-  onAddPrice: (testId: string) => void;
-  onEditPrice: (price: PriceServiceResponse, testId: string) => void;
+  onEditTest: (testId: string) => void;
   onShowDetail: (test: TestResponse) => void;
+  onDeleteTest?: (testId: string) => void;
 }
 
-const TestList: React.FC<TestListProps> = ({ tests, onEditPrice, onShowDetail }) => (
+const TestList: React.FC<TestListProps> = ({ tests, onEditTest, onShowDetail }) => (
   <Card className="shadow-lg mb-8">
     <CardContent className="overflow-x-auto">
       <Table>
@@ -84,7 +84,7 @@ const TestList: React.FC<TestListProps> = ({ tests, onEditPrice, onShowDetail })
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={e => { e.stopPropagation(); onEditPrice(price, test.id); }}>
+                            <DropdownMenuItem onClick={e => { e.stopPropagation(); onEditTest(test.id); }}>
                               <Pencil size={16} className="mr-2" /> Sửa
                             </DropdownMenuItem>
                             <DropdownMenuItem
