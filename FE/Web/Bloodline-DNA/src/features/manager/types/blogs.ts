@@ -10,10 +10,19 @@ export interface BlogResponse {
   updatedAt: string;
 }
 
-export interface BlogRequest {
+export interface BlogCreateRequest {
   title: string;
   content: string;
-  thumbnailURL: File; 
+  thumbnailURL: File; // File for POST
+  status: number;
+  authorId: string;
+}
+
+export interface BlogUpdateRequest {
+  id: string;
+  title: string;
+  content: string;
+  thumbnailURL?: string; // Optional string for PUT
   status: number;
   authorId: string;
 }
