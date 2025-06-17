@@ -7,7 +7,6 @@ import {
 } from 'react-icons/fa';
 import { Dna } from 'lucide-react';
 import { MdDomainAdd } from "react-icons/md";
-import { SiTestcafe } from 'react-icons/si';
 
 
 interface SidebarDataType {

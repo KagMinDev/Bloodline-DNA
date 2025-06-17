@@ -11,6 +11,7 @@ import { Textarea } from '../../../staff/components/booking/ui/textarea';
 import { Button } from '../../../staff/components/sample/ui/button';
 import type { BlogResponse } from '../../types/blogs';
 import Checkbox from '../common/Checkbox';
+import { Loading } from '../../../../components';
 
 interface BlogDialogProps {
   open: boolean;
@@ -18,15 +19,24 @@ interface BlogDialogProps {
   form: {
     title: string;
     content: string;
-    thumbnailURL: string | File; // Có thể là string (khi edit) hoặc File (khi upload)
-    thumbnailPreview?: string;   
+    thumbnailURL: string | File;
+    thumbnailPreview: string;
     status: string;
     authorId: string;
     authorName: string;
   };
-  setForm: (form: any) => void;
+  setForm: React.Dispatch<React.SetStateAction<{
+    title: string;
+    content: string;
+    thumbnailURL: string | File;
+    thumbnailPreview: string;
+    status: string;
+    authorId: string;
+    authorName: string;
+  }>>;
   onSave: () => void;
   editingBlog: BlogResponse | null;
+  isLoading: boolean;
 }
 
 const BlogDialog: React.FC<BlogDialogProps> = ({
@@ -36,24 +46,55 @@ const BlogDialog: React.FC<BlogDialogProps> = ({
   setForm,
   onSave,
   editingBlog,
+  isLoading,
 }) => {
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    setForm((prev: any) => ({
-      ...prev,
-      thumbnailURL: file,
-      thumbnailPreview: file ? URL.createObjectURL(file) : prev.thumbnailPreview,
-    }));
-  }, [setForm]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (file) {
+        if (form.thumbnailPreview) {
+          URL.revokeObjectURL(form.thumbnailPreview);
+        }
+        setForm((prev) => ({
+          ...prev,
+          thumbnailURL: file,
+          thumbnailPreview: URL.createObjectURL(file),
+        }));
+      }
+    },
+    [form.thumbnailPreview, setForm]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'image/*': [] },
     multiple: false,
+    disabled: isLoading,
   });
 
+  const handleOpenChange = useCallback(
+    (isOpen: boolean) => {
+      if (!isOpen) {
+        setForm({
+          title: '',
+          content: '',
+          thumbnailURL: '',
+          thumbnailPreview: '',
+          status: '',
+          authorId: form.authorId,
+          authorName: form.authorName,
+        });
+        if (form.thumbnailPreview) {
+          URL.revokeObjectURL(form.thumbnailPreview);
+        }
+      }
+      onOpenChange(isOpen);
+    },
+    [form.thumbnailPreview, form.authorId, form.authorName, onOpenChange, setForm]
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-7xl w-full">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-blue-800">
@@ -66,29 +107,31 @@ const BlogDialog: React.FC<BlogDialogProps> = ({
             className="w-full"
             placeholder="Tiêu đề bài viết"
             value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+            disabled={isLoading}
           />
 
-          {/* Chọn file ảnh thumbnail bằng react-dropzone */}
           <div>
             <label className="block mb-1 font-medium text-blue-800">Ảnh thumbnail</label>
             <div
               {...getRootProps()}
               className={`border-2 border-dashed rounded p-4 text-center cursor-pointer transition ${
                 isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-              }`}
+              } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
             >
               <input {...getInputProps()} />
               {isDragActive
-                ? "Thả ảnh vào đây..."
-                : "Nhấn vào đây hoặc kéo-thả ảnh vào để chọn ảnh thumbnail"}
+                ? 'Thả ảnh vào đây...'
+                : 'Nhấn vào đây hoặc kéo-thả ảnh vào để chọn ảnh thumbnail'}
             </div>
             {(form.thumbnailPreview || (editingBlog && typeof form.thumbnailURL === 'string')) && (
               <img
                 src={
                   form.thumbnailPreview
                     ? form.thumbnailPreview
-                    : (typeof form.thumbnailURL === 'string' ? form.thumbnailURL : '')
+                    : typeof form.thumbnailURL === 'string'
+                    ? form.thumbnailURL
+                    : ''
                 }
                 alt="Thumbnail preview"
                 className="mt-2 rounded max-h-40 object-contain border"
@@ -101,25 +144,34 @@ const BlogDialog: React.FC<BlogDialogProps> = ({
             placeholder="Nội dung bài viết"
             rows={10}
             value={form.content}
-            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            onChange={(e) => setForm((prev) => ({ ...prev, content: e.target.value }))}
+            disabled={isLoading}
           />
           <div className="flex items-center gap-2">
             <Checkbox
               checked={form.status === 'Hiển thị' || form.status === '1'}
               onChange={(checked) =>
-                setForm((prev: any) => ({
+                setForm((prev) => ({
                   ...prev,
-                  status: checked ? 'Hiển thị' : 'Ẩn', // hoặc '1' : '0' nếu muốn lưu số
+                  status: checked ? 'Hiển thị' : 'Ẩn',
                 }))
               }
               label="Hiển thị (Công khai)"
+              disabled={isLoading}
             />
           </div>
           <Button
             onClick={onSave}
             className="w-full bg-blue-600 text-white hover:bg-blue-700 transition"
+            disabled={isLoading}
           >
-            {editingBlog ? 'Lưu thay đổi' : 'Thêm bài viết'}
+            {isLoading ? (
+              <Loading size="small" message="Đang xử lý..." color="white" />
+            ) : editingBlog ? (
+              'Lưu thay đổi'
+            ) : (
+              'Thêm bài viết'
+            )}
           </Button>
         </div>
       </DialogContent>
