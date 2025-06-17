@@ -44,8 +44,6 @@ export const loginApi = async (email: string, password: string) => {
 
   while (attempts < maxRetries) {
     try {
-      console.log(`Login attempt ${attempts + 1}`);
-
       const response = await axios.post(
         `${BASE_URL}/auth/login`,
         { email, password },
@@ -56,10 +54,7 @@ export const loginApi = async (email: string, password: string) => {
           timeout: timeout, // 10 seconds
         }
       );
-
-      console.log("Login successful:", response.data);
       return response.data;
-
     } catch (error) {
       attempts++;
 
@@ -85,8 +80,6 @@ export const loginApi = async (email: string, password: string) => {
  * @returns 
  */
 export const getUserInfoApi = async (token: string) => {
-  console.log("Fetching user info with token:", token);
-
   try {
     const response = await axios.get(`${BASE_URL}/user/me`, {
       headers: {
@@ -94,7 +87,6 @@ export const getUserInfoApi = async (token: string) => {
       },
     });
 
-    console.log("User info response:", response.data);
     return response.data.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
