@@ -19,10 +19,11 @@ namespace ADNTester.Service.Implementations
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IOtpService _otpService;
 
-        public AuthService(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService)
+        public AuthService(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IOtpService otpService)
         {
             _unitOfWork = unitOfWork;
             _jwtTokenService = jwtTokenService;
+            _otpService = otpService;
         }
 
         public async Task<bool> RegisterAsync(RegisterRequestDto dto)
@@ -76,7 +77,7 @@ namespace ADNTester.Service.Implementations
                 user.Id,
                 user.Email,
                 OtpDeliveryMethod.Email,
-                OtpPurpose.ResetPassword, default, default
+                OtpPurpose.ResetPassword
             );
 
             return success ? RequestResetOtpResult.Success : RequestResetOtpResult.FailedToSend;
