@@ -3,9 +3,9 @@ import { Button, Form, Input, message } from "antd";
 import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getUserInfoApi, loginApi } from "../../../apis/auth/loginApi";
 import Loading, { ButtonLoading } from "../../../components/Loading";
 import type { Login } from "../types/auth.types";
+import { getUserInfoApi, loginApi } from "../api/loginApi";
 
 const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
