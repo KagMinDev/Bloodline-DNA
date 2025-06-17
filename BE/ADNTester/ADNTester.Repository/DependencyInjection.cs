@@ -25,6 +25,9 @@ namespace ADNTester.Repository
             services.AddScoped<ITestSampleRepository, TestSampleRepository>();
             services.AddScoped<ITestServiceRepository, TestServiceRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<ISampleInstructionRepository, SampleInstructionRepository>();
+            services.AddScoped<IOtpRepository, OtpRepository>();
 
             return services;
         }

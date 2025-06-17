@@ -13,6 +13,7 @@ namespace ADNTester.BO.Enums
         Paid = 2,        // Đã thanh toán toàn bộ
         Failed = 3,      // Thanh toán thất bại
         Refunded = 4,    // Đã hoàn tiền
-        Canceled = 5     // Đã hủy
+        Canceled = 5,     // Đã hủy
+        Cancelled = 6    // Đã hủy
     }
 }

@@ -1,4 +1,4 @@
-export interface Blog {
+export interface BlogResponse {
   id: string;
   title: string;
   content: string;
@@ -8,4 +8,12 @@ export interface Blog {
   authorName: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BlogRequest {
+  title: string;
+  content: string;
+  thumbnailURL: File; 
+  status: number;
+  authorId: string;
 }
