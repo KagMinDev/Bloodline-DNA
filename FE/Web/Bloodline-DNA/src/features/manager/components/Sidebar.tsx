@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fa';
 import { Dna } from 'lucide-react';
 import { MdDomainAdd } from "react-icons/md";
+import { SiTestcafe } from 'react-icons/si';
 
 
 interface SidebarDataType {
@@ -20,7 +21,19 @@ const SidebarData: SidebarDataType[] = [
   {
     icon: MdDomainAdd,
     heading: 'Quản lí dịch vụ',
-    href: '/manager/service'
+    href: '/manager/',
+    children: [
+      {
+          icon: SiTestcafe,
+          heading: 'Danh sách  dịch vụ',
+          href: '/manager/service',
+        },
+        {
+          icon: SiTestcafe,
+          heading: 'Danh sách giá dịch vụ',
+          href: '/manager/pricemanagement',
+        },
+      ],
   },
   {
     icon: FaBookReader,
@@ -42,6 +55,10 @@ const Sidebar = () => {
     }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+  };
+
   return (
     <div className='flex h-screen w-64 flex-col bg-[#1F2B6C] shadow-lg '>
       <div className="flex flex-col items-center py-6">
@@ -58,10 +75,11 @@ const Sidebar = () => {
                 <>
                   <div
                     onClick={() => toggleDropdown(item.heading)}
-                    className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${pathname.startsWith(item.href)
+                    className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${
+                      pathname === item.href
                         ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
                         : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
-                      }`}
+                    }`}
                   >
                     <div className='flex items-center'>
                       <div className='mr-3 text-lg'>
@@ -100,10 +118,11 @@ const Sidebar = () => {
               ) : (
                 <Link to={item.href}>
                   <div
-                    className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${pathname === item.href
+                    className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
+                      pathname === item.href
                         ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
                         : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
-                      }`}
+                    }`}
                   >
                     <div className='mr-3 text-lg'>
                       <item.icon />
@@ -118,7 +137,10 @@ const Sidebar = () => {
       </nav>
       <div className='px-4 py-6'>
         <Link to='/'>
-          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-[#1F2B6C] bg-white hover:bg-[#EDEBDF] transition-colors'>
+          <button
+            className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-[#1F2B6C] bg-white hover:bg-[#EDEBDF] transition-colors'
+            onClick={handleLogout}
+          >
             Đăng xuất
           </button>
         </Link>

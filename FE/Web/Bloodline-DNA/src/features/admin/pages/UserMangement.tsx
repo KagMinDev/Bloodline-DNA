@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FaPlus, FaEllipsisV } from 'react-icons/fa';
+import { FaPlus, FaLock, FaUnlock } from 'react-icons/fa';
 import { Button } from '../../staff/components/sample/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../staff/components/sample/ui/card';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../staff/components/sample/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../staff/components/sample/ui/table';
 import type { UserResponse } from '../types/User';
 import ModalUser from '../components/user/ModalUser';
@@ -91,7 +90,7 @@ const UserMangement: React.FC = () => {
                 users.map(user => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium text-blue-700">{user.id}</TableCell>
-                    <TableCell>{user.name}</TableCell>
+                    <TableCell>{user.fullName}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{user.role}</TableCell>
                     <TableCell>
@@ -103,26 +102,17 @@ const UserMangement: React.FC = () => {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <FaEllipsisV className="text-blue-600" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => alert(`Chỉnh sửa: ${user.name}`)}>
-                            Sửa tài khoản
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => toggleUserStatus(user.id)}
-                            className={user.status === 'Hoạt động'
-                              ? 'text-red-600 focus:bg-red-50 focus:text-red-800'
-                              : 'text-green-600 focus:bg-green-50 focus:text-green-800'}
-                          >
-                            {user.status === 'Hoạt động' ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title={user.status === 'Đã khóa' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
+                        onClick={() => toggleUserStatus(user.id)}
+                        className={user.status === 'Đã khóa'
+                          ? 'text-green-600 hover:bg-green-50 hover:text-green-800'
+                          : 'text-red-600 hover:bg-red-50 hover:text-red-800'}
+                      >
+                        {user.status === 'Đã khóa' ? <FaLock /> : <FaUnlock />}
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

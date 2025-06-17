@@ -3,21 +3,33 @@ import type { BlogRequest, BlogResponse } from "../types/blogs";
 
 // Hàm GET: Lấy danh sách bài viết
 export const getBlogsApi = async (): Promise<BlogResponse[]> => {
-  try {
-    const response = await rootApi.get<{ data: BlogResponse[] }>("/Blog");
-    if (!response.data?.data) {
-      throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+  const maxRetries = 3;
+  const timeout = 10000;
+  let attempts = 0;
+
+  while (attempts < maxRetries) {
+    try {
+      const response = await rootApi.get<{ data: BlogResponse[] }>("/Blog", { timeout });
+      if (!response.data?.data) {
+        throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+      }
+      return response.data.data;
+    } catch (error) {
+      attempts++;
+      const errorDetails = {
+        message: error instanceof Error ? error.message : "Unknown error",
+        response: error instanceof Error && "response" in error ? (error as any).response?.data : undefined,
+        status: error instanceof Error && "response" in error ? (error as any).response?.status : undefined,
+      };
+      console.error("getBlogsApi error:", errorDetails);
+      if (attempts >= maxRetries) {
+        throw new Error(error instanceof Error ? `Failed to get blogs: ${error.message}` : "Failed to get blogs: Unknown error");
+      }
+      // Optional: delay giữa các lần retry
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    return response.data.data;
-  } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : "Unknown error",
-      response: error instanceof Error && "response" in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && "response" in error ? (error as any).response?.status : undefined,
-    };
-    console.error("getBlogsApi error:", errorDetails);
-    throw new Error(error instanceof Error ? `Failed to get blogs: ${error.message}` : "Failed to get blogs: Unknown error");
   }
+  throw new Error("Failed to get blogs after retries");
 };
 
 // Hàm POST: Tạo bài viết mới
