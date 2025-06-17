@@ -3,8 +3,8 @@ import { Button, Form, Input, message } from "antd";
 import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getUserInfoApi, loginApi } from "../../../apis/auth/loginApi";
 import Loading, { ButtonLoading } from "../../../components/Loading";
+import { getUserInfoApi, loginApi } from "../api/loginApi";
 import type { Login } from "../types/auth.types";
 
 const LoginForm: React.FC = () => {
@@ -18,9 +18,7 @@ const LoginForm: React.FC = () => {
     
     setLoading(true);
     try {
-      const response = await loginApi(data.email, data.password);
-      console.log("Done loading Login");
-      
+      const response = await loginApi(data.email, data.password);      
       localStorage.setItem("token", response.data.token);
       const userData = await getUserInfoApi(response.data.token);
       if (!userData) {
@@ -29,8 +27,7 @@ const LoginForm: React.FC = () => {
       }
       // Lưu thông tin người dùng vào localStorage
       localStorage.setItem("accountId", userData.id);
-      console.log("userDataId:", userData.id);
-
+      
       const user = {
         userName: response.data.userName,
         role: response.data.role,
@@ -65,7 +62,6 @@ const LoginForm: React.FC = () => {
         },
       ]);
     } finally {
-      console.log("End loading");
       setLoading(false);
     }
   };

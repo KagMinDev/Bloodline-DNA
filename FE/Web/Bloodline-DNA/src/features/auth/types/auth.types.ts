@@ -30,3 +30,13 @@ export const UserRoleNames = {
   2: 'Client',
   3: 'Manager'
 } as const;
+
+export interface ForgotPassword {
+  email: string;
+}
+
+export interface ResetPassword {
+  email: string;
+  otpCode: string;
+  newPassword: string;
+}
