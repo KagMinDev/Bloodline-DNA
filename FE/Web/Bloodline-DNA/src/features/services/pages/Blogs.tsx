@@ -724,10 +724,6 @@ export const Blogs = (): React.JSX.Element => {
           </div>
         </section>
 
-    
-
-      
-
         {/* Footer */}
         <div className="relative">
           <Footer />

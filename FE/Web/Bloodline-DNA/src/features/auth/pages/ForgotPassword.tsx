@@ -1,34 +1,28 @@
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, Modal } from "antd";
 import { Heart, Mail, Shield, Unlock, Users } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Loading from "../../../components/Loading";
 import { emailRules } from "../../../utils/validators/auth";
-
-interface ForgotPasswordData {
-  Email: string;
-}
+import type { ForgotPassword, ResetPassword } from "../types/auth.types";
 
 const ForgotPassword: React.FC = () => {
   const [form] = Form.useForm();
+  const [resetForm] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [emailSent, setEmailSent] = useState<string>("");
 
-  // Handle forgot password request
-  const handleForgotPassword = async (values: ForgotPasswordData) => {
+  const handleForgotPassword = async (values: ForgotPassword) => {
     setLoading(true);
     try {
-      // Giả lập gửi yêu cầu đặt lại mật khẩu để kiểm tra loading
-      console.log("Dữ  giả:", values);
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Giả lập thời gian chờ 1.5s
-      // Nếu muốn dùng API thực, bỏ comment đoạn dưới và comment đoạn trên
-      /*
-      const response = await axios.post(
-        "http://localhost:5000/api/users/forgot-password",
-        values
-      );
-      console.log("Yêu cầu đặt lại mật khẩu thành công:", response.data);
-      */
-      form.resetFields(); // Xóa form sau khi gửi thành công
+      // Giả lập gọi API
+      console.log("Gửi yêu cầu quên mật khẩu:", values);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      setEmailSent(values.email);
+      setIsModalVisible(true);
+      form.resetFields();
     } catch (error) {
       console.error("Gửi yêu cầu thất bại:", error);
       form.setFields([
@@ -42,12 +36,42 @@ const ForgotPassword: React.FC = () => {
     }
   };
 
+  const handleResetPassword = async (values: ResetPassword) => {
+    try {
+      const payload = {
+        email: emailSent,
+        otpCode: values.otpCode,
+        newPassword: values.newPassword,
+      };
+
+      console.log("Reset password payload:", payload);
+
+      // Giả lập API đổi mật khẩu
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      Modal.success({
+        title: "Thành công",
+        content: "Mật khẩu đã được đặt lại!",
+      });
+
+      setIsModalVisible(false);
+      resetForm.resetFields();
+    } catch (error) {
+      console.error("Reset password error:", error);
+      resetForm.setFields([
+        {
+          name: "otpCode",
+          errors: ["Mã OTP không hợp lệ hoặc đã hết hạn"],
+        },
+      ]);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Left Side - Medical Image/Illustration */}
+      {/* Left side */}
       <div className="relative flex items-center justify-center flex-1 p-12 bg-gradient-to-br from-blue-600 to-blue-800">
         <div className="max-w-lg text-center text-white">
-          {/* Medical Cross Icon */}
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm">
@@ -58,7 +82,6 @@ const ForgotPassword: React.FC = () => {
                   strokeWidth="2"
                   viewBox="0 0 24 24"
                 >
-                  {/* DNA Double Helix */}
                   <defs>
                     <style>
                       {`
@@ -71,79 +94,27 @@ const ForgotPassword: React.FC = () => {
                       `}
                     </style>
                   </defs>
-
-                  {/* Left DNA Strand */}
                   <g className="dna-strand1">
-                    <path
-                      d="M8 2c0 4-2 6-2 10s2 6 2 10"
-                      strokeLinecap="round"
-                    />
+                    <path d="M8 2c0 4-2 6-2 10s2 6 2 10" strokeLinecap="round" />
                     <circle cx="8" cy="4" r="1.5" fill="currentColor" />
                     <circle cx="6" cy="8" r="1.5" fill="currentColor" />
                     <circle cx="8" cy="12" r="1.5" fill="currentColor" />
                     <circle cx="6" cy="16" r="1.5" fill="currentColor" />
                     <circle cx="8" cy="20" r="1.5" fill="currentColor" />
                   </g>
-
-                  {/* Right DNA Strand */}
                   <g className="dna-strand2">
-                    <path
-                      d="M16 2c0 4 2 6 2 10s-2 6-2 10"
-                      strokeLinecap="round"
-                    />
+                    <path d="M16 2c0 4 2 6 2 10s-2 6-2 10" strokeLinecap="round" />
                     <circle cx="16" cy="4" r="1.5" fill="currentColor" />
                     <circle cx="18" cy="8" r="1.5" fill="currentColor" />
                     <circle cx="16" cy="12" r="1.5" fill="currentColor" />
                     <circle cx="18" cy="16" r="1.5" fill="currentColor" />
                     <circle cx="16" cy="20" r="1.5" fill="currentColor" />
                   </g>
-
-                  {/* Connecting Lines */}
-                  <line
-                    x1="8"
-                    y1="4"
-                    x2="16"
-                    y2="4"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    opacity="0.7"
-                  />
-                  <line
-                    x1="6"
-                    y1="8"
-                    x2="18"
-                    y2="8"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    opacity="0.7"
-                  />
-                  <line
-                    x1="8"
-                    y1="12"
-                    x2="16"
-                    y2="12"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    opacity="0.7"
-                  />
-                  <line
-                    x1="6"
-                    y1="16"
-                    x2="18"
-                    y2="16"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    opacity="0.7"
-                  />
-                  <line
-                    x1="8"
-                    y1="20"
-                    x2="16"
-                    y2="20"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    opacity="0.7"
-                  />
+                  <line x1="8" y1="4" x2="16" y2="4" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+                  <line x1="6" y1="8" x2="18" y2="8" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+                  <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+                  <line x1="6" y1="16" x2="18" y2="16" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+                  <line x1="8" y1="20" x2="16" y2="20" stroke="currentColor" strokeWidth="1" opacity="0.7" />
                 </svg>
               </div>
               <div className="absolute flex items-center justify-center w-8 h-8 bg-green-400 rounded-full -top-2 -right-2">
@@ -151,13 +122,10 @@ const ForgotPassword: React.FC = () => {
               </div>
             </div>
           </div>
-
           <h1 className="mb-4 text-4xl font-bold">Khôi Phục Tài Khoản</h1>
           <p className="mb-8 text-xl text-blue-100">
             Lấy lại quyền truy cập hệ thống y tế của bạn
           </p>
-
-          {/* Features */}
           <div className="space-y-4">
             <div className="flex items-center justify-center space-x-3 text-blue-100">
               <Shield size={20} />
@@ -173,30 +141,19 @@ const ForgotPassword: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Decorative medical elements */}
-        <div className="absolute w-16 h-16 rounded-full top-10 left-10 bg-white/10 animate-pulse"></div>
-        <div className="absolute w-12 h-12 rounded-full bottom-20 right-16 bg-green-400/20 animate-pulse"></div>
-        <div className="absolute w-8 h-8 rounded-full top-1/3 right-8 bg-white/15"></div>
       </div>
 
-      {/* Right Side - Forgot Password Form */}
+      {/* Right side - form */}
       <div className="flex items-center justify-center flex-1 p-8 bg-white">
         <div className="w-full max-w-md">
-          {/* Header */}
           <div className="mb-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
               <Unlock size={24} className="text-blue-600" />
             </div>
-            <h2 className="mb-2 text-3xl font-bold text-gray-800">
-              Quên Mật Khẩu
-            </h2>
-            <p className="text-gray-600">
-              Nhập email để nhận hướng dẫn đặt lại mật khẩu
-            </p>
+            <h2 className="mb-2 text-3xl font-bold text-gray-800">Quên Mật Khẩu</h2>
+            <p className="text-gray-600">Nhập email để nhận hướng dẫn đặt lại mật khẩu</p>
           </div>
 
-          {/* Forgot Password Form */}
           <Form
             form={form}
             layout="vertical"
@@ -235,23 +192,16 @@ const ForgotPassword: React.FC = () => {
             </Form.Item>
           </Form>
 
-          {/* Footer */}
           <div className="text-center">
-            <p className="mb-4 text-sm text-gray-600">
-              Quay lại{" "}
-              <Link
-                to="/login"
-                className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
-              >
+            <p className="text-sm text-gray-600 ">
+              Quay lại.{""}
+              <Link to="/login" className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline">
                 Đăng nhập
               </Link>
             </p>
-            <p className="mb-4 text-sm text-gray-600">
+            <p className="text-sm text-gray-600">
               Chưa có tài khoản?{" "}
-              <Link
-                to="/register"
-                className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
-              >
+              <Link to="/register" className="ml-2 font-semibold text-green-600 hover:text-green-700 hover:underline">
                 Đăng ký ngay
               </Link>
             </p>
@@ -259,10 +209,46 @@ const ForgotPassword: React.FC = () => {
               <span>Hỗ trợ 24/7</span>
               <span>•</span>
               <span>Bảo mật SSL</span>
+              <span>•</span>
+              <span>HIPAA Compliant</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal xác nhận đổi mật khẩu */}
+      <Modal
+        title="Xác nhận đổi mật khẩu"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <Form form={resetForm} layout="vertical" onFinish={handleResetPassword}>
+          <Form.Item label="Email" name="email" initialValue={emailSent}>
+            <Input disabled />
+          </Form.Item>
+          <Form.Item
+            label="Mã xác nhận (OTP)"
+            name="otpCode"
+            rules={[{ required: true, message: "Vui lòng nhập mã xác nhận" }]}
+          >
+            <Input placeholder="Nhập mã xác nhận" />
+          </Form.Item>
+          <Form.Item
+            label="Mật khẩu mới"
+            name="newPassword"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới" }]}
+          >
+            <Input.Password placeholder="Nhập mật khẩu mới" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" className="w-full">
+              Xác nhận đổi mật khẩu
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
       {loading && (
         <Loading
           fullScreen={true}
@@ -275,4 +261,4 @@ const ForgotPassword: React.FC = () => {
   );
 };
 
-export default ForgotPassword
+export default ForgotPassword;
