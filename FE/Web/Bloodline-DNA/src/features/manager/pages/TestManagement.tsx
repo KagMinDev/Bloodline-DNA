@@ -93,7 +93,6 @@ export default function TestManagement() {
 
   // Xóa dịch vụ
   const handleDeleteTest = async (id: string) => {
-    if (!window.confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
     try {
       await deleteTestApi(id, token);
       setTests(tests.filter(t => t.id !== id));
