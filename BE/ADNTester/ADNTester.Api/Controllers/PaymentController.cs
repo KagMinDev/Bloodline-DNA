@@ -43,6 +43,13 @@ namespace ADNTester.API.Controllers
                     return NotFound(new { error = "Không tìm thấy đơn đặt lịch." });
                 }
 
+                // Kiểm tra trạng thái booking phải là Pending
+                if (Enum.Parse<BookingStatus>(booking.Status) != BookingStatus.Pending)
+                {
+                    Console.WriteLine($"Đơn đặt lịch với ID: {bookingId} không ở trạng thái Pending");
+                    return BadRequest(new { error = "Chỉ có thể thanh toán cho đơn đặt lịch ở trạng thái Pending." });
+                }
+
                 // Kiểm tra thông tin số tiền
                 if (booking.Price <= 0 || booking.Price > int.MaxValue)
                 {
