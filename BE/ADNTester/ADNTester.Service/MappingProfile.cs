@@ -9,6 +9,8 @@ using ADNTester.BO.Enums;
 using AutoMapper;
 using System.Linq;
 using ADNTester.BO.DTOs.Feedback;
+using ADNTester.BO.DTOs.SampleInstruction;
+using ADNTester.BO.DTOs.Payment;
 
 namespace ADNTester.Service
 {
@@ -95,13 +97,27 @@ namespace ADNTester.Service
             CreateMap<UpdateTestBookingDto, TestBooking>();
             #endregion
 
-            #region Blog Mappings
+            #region Blog Mapping
             CreateMap<Blog, BlogDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.FullName));
             CreateMap<CreateBlogWithUrlDto, Blog>();
             CreateMap<UpdateBlogDto, Blog>();
             #endregion
+
+            #region SampleInstruction Mapping
+            CreateMap<SampleTypeInstruction, SampleInstructionDto>().ReverseMap();
+
+            CreateMap<CreateSampleInstructionDto, SampleTypeInstruction>();
+            CreateMap<UpdateSampleInstructionDto, SampleTypeInstruction>();
+            #endregion
+
+            #region Payment Mapping
+            CreateMap<Payment, PaymentDto>().ReverseMap();
+            CreateMap<CreatePaymentDto, Payment>();
+            CreateMap<UpdatePaymentDto, Payment>();
+            #endregion
+
         }
     }
 }

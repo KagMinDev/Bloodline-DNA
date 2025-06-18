@@ -15,6 +15,7 @@ import { PageLoading } from "../../../components/common/loading";
 import { useAuth } from "../../../context/auth/AuthContext"; // Import hàm login từ
 import { Login } from "../../../types/auth/auth.types";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
+import { loginApi } from "../apis/loginApi";
 import styles from "./styles";
 
 const LoginScreen: React.FC = () => {
@@ -66,27 +67,23 @@ const LoginScreen: React.FC = () => {
   };
 
 const handleLogin = async (data: Login) => {
-    if (!validateInputs()) {
-      return;
-    }
+  if (!validateInputs()) {
+    return;
+  }
 
-    setLoading(true);
-    try {
-      console.log("Dữ liệu giả:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Giả lập token từ API
-      const fakeToken = "fake-jwt-token";
-      await login(fakeToken); // Sử dụng hàm login từ useAuth()
-      
-      // Navigation sẽ tự động xử lý bởi AppRouter dựa trên isLoggedIn
-    } catch (error) {
-      console.error("Đăng nhập thất bại:", error);
-      setEmailError("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await loginApi(data.email, data.password); // Gọi API thật
+    const token = response.data.token;
+
+    await login(token); // Lưu token vào AsyncStorage và cập nhật trạng thái đăng nhập
+  } catch (error: any) {
+    console.error("Đăng nhập thất bại:", error.message);
+    setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
@@ -293,7 +290,7 @@ const handleLogin = async (data: Login) => {
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.disabledButton]}
               onPress={() =>
-                handleLogin({ Email: email, PasswordHash: password })
+                handleLogin({ email: email, password: password })
               }
               disabled={loading}
             >

@@ -10,6 +10,7 @@ namespace ADNTester.BO.Enums
     {
         Admin,
         Staff,
-        Client
+        Client,
+        Manager
     }
 }

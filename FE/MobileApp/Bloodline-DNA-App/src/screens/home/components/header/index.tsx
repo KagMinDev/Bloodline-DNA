@@ -1,4 +1,8 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { useAuth } from "@/context/auth/AuthContext";
+import { RootStackParamList } from "@/types/root-stack/stack.types";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useRef, useState } from "react";
 import {
   Animated,
@@ -7,7 +11,7 @@ import {
   Pressable,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./styles";
@@ -28,6 +32,9 @@ const navItems = [
 const Header: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { logout } = useAuth();
 
   const openMenu = () => {
     setMenuVisible(true);
@@ -57,7 +64,7 @@ const Header: React.FC = () => {
   };
 
   const onSelectMenu = (screen: string) => {
-    console.log("Chọn menu:", screen);
+    navigation.navigate(screen as never); // Chuyển trang
     closeMenu();
   };
 
@@ -80,6 +87,10 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleLogout = async () => {
+    await logout(); // ✅ tự động setIsLoggedIn(false)
+  };
+
   return (
     <View style={{ zIndex: 100 }}>
       {/* Header Bar */}
@@ -99,9 +110,7 @@ const Header: React.FC = () => {
       </View>
 
       {/* Overlay mờ nền */}
-      {menuVisible && (
-        <Pressable style={styles.overlay} onPress={closeMenu} />
-      )}
+      {menuVisible && <Pressable style={styles.overlay} onPress={closeMenu} />}
 
       {/* Menu trượt */}
       {menuVisible && (
@@ -131,10 +140,8 @@ const Header: React.FC = () => {
               <Text style={styles.menuItemText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity
-            onPress={() => console.log("Đăng xuất")}
-            style={styles.logoutButton}
-          >
+
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
             <Text style={styles.logoutButtonText}>Đăng xuất</Text>
             <AntDesign name="logout" size={12} color="#ff4d4d" />
           </TouchableOpacity>
@@ -143,6 +150,5 @@ const Header: React.FC = () => {
     </View>
   );
 };
-
 
 export default Header;

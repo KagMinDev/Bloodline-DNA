@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  FaChartBar,
-  FaAngleDown,
-  FaAngleRight,
-} from 'react-icons/fa';
-import { BiCategory } from "react-icons/bi";
-import { TbShoppingCartCog } from "react-icons/tb";
+import {FaAngleDown,FaAngleRight,} from 'react-icons/fa';
+import { TbTestPipe } from "react-icons/tb";
+import { SiTestcafe } from "react-icons/si";
 import { Dna } from 'lucide-react';
+import { GrTestDesktop } from "react-icons/gr";
+
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -18,17 +16,17 @@ interface SidebarDataType {
 
 const SidebarData: SidebarDataType[] = [
   {
-    icon: FaChartBar,
+    icon: GrTestDesktop,
     heading: 'Quản lí đơn xét nghiệm',
     href: '/staff/testbookingmanagement',
   },
   {
-    icon: BiCategory,
+    icon: TbTestPipe,
     heading: 'Quản lí mẫu xét nghiệm',
     href: '/staff/samplemanagement',
   },
   {
-    icon: TbShoppingCartCog,
+    icon: SiTestcafe,
     heading: 'Quản lí kết quả xét nghiệm',
     href: '/staff/testresult',
   },
@@ -47,14 +45,18 @@ const Sidebar = () => {
     }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+  };
+
   return (
-    <div className='flex h-screen w-64 flex-col bg-blue-600 shadow-lg'>
+    <div className='flex h-screen w-64 flex-col bg-[#1F2B6C] shadow-lg'>
       <div className="flex flex-col items-center py-6">
-        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center mb-2">
+        <div className="w-14 h-14 rounded-full bg-[#1F2B6C] flex items-center justify-center mb-2">
           <Dna size={32} className="text-white" />
         </div>
         <span className="text-2xl font-bold text-white text-center">ADN Huyết Thống</span>
-        </div>
+      </div>
       <nav className='scrollbar-hide flex-1 overflow-y-auto px-6 py-6'>
         <ul className='space-y-2'>
           {SidebarData.map(item => (
@@ -63,11 +65,10 @@ const Sidebar = () => {
                 <>
                   <div
                     onClick={() => toggleDropdown(item.heading)}
-                    className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${
-                      pathname.startsWith(item.href)
-                        ? 'bg-[#EDEBDF] font-bold text-blue-800'
-                        : 'text-white hover:bg-[#EDEBDF] hover:text-blue-800'
-                    }`}
+                    className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${pathname.startsWith(item.href)
+                        ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
+                        : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
+                      }`}
                   >
                     <div className='flex items-center'>
                       <div className='mr-3 text-lg'>
@@ -87,11 +88,10 @@ const Sidebar = () => {
                         <li key={child.heading}>
                           <Link to={child.href}>
                             <div
-                              className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
-                                pathname === child.href
-                                  ? 'bg-[#EDEBDF] font-bold text-blue-800'
-                                  : 'text-white hover:bg-[#EDEBDF] hover:text-blue-800'
-                              }`}
+                              className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${pathname === child.href
+                                  ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
+                                  : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
+                                }`}
                             >
                               <div className='mr-3 text-lg'>
                                 <child.icon />
@@ -107,11 +107,10 @@ const Sidebar = () => {
               ) : (
                 <Link to={item.href}>
                   <div
-                    className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${
-                      pathname === item.href
-                        ? 'bg-[#EDEBDF] font-bold text-blue-800'
-                        : 'text-white hover:bg-[#EDEBDF] hover:text-blue-800'
-                    }`}
+                    className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${pathname === item.href
+                        ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
+                        : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
+                      }`}
                   >
                     <div className='mr-3 text-lg'>
                       <item.icon />
@@ -126,7 +125,10 @@ const Sidebar = () => {
       </nav>
       <div className='px-4 py-6'>
         <Link to='/'>
-          <button className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-white hover:bg-[#EDEBDF] hover:text-blue-800'>
+          <button
+            className='flex w-full items-center rounded-lg px-4 py-2 text-sm font-medium text-[#1F2B6C] bg-white hover:bg-[#EDEBDF] transition-colors'
+            onClick={handleLogout}
+          >
             Đăng xuất
           </button>
         </Link>
