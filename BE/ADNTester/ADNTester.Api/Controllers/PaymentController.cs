@@ -43,6 +43,13 @@ namespace ADNTester.API.Controllers
                     return NotFound(new { error = "Không tìm thấy đơn đặt lịch." });
                 }
 
+                
+                if (booking.Status != "Pending")
+                {
+                    Console.WriteLine($"Trạng thái booking không hợp lệ: {booking.Status}");
+                    return BadRequest(new { error = "Chỉ có thể thanh toán cho đơn đặt lịch ở trạng thái Pending." });
+                }
+
                 // Kiểm tra thông tin số tiền
                 if (booking.Price <= 0 || booking.Price > int.MaxValue)
                 {
