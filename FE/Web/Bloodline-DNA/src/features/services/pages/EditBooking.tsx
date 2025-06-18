@@ -234,14 +234,14 @@ export const EditBooking = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full h-[240px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           {/* Medical Pattern Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross-edit" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross-edit)" />
@@ -254,27 +254,27 @@ export const EditBooking = (): React.JSX.Element => {
               {/* Breadcrumb */}
               <div className="mb-6">
                 <Breadcrumb>
-                  <BreadcrumbList className="text-white/90">
+                  <BreadcrumbList className="text-blue-600">
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                      <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Trang Chủ
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/booking-list" className="text-white/80 hover:text-white transition-colors duration-200">
+                      <BreadcrumbLink href="/booking-list" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Danh Sách Đặt Lịch
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <BreadcrumbLink href={`/booking-detail/${formData.id}`} className="text-white/80 hover:text-white transition-colors duration-200">
+                      <BreadcrumbLink href={`/booking-detail/${formData.id}`} className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Chi Tiết Đặt Lịch
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <span className="text-[#00D4FF] font-semibold">Cập Nhật Thông Tin</span>
+                      <span className="text-blue-900 font-semibold">Cập Nhật Thông Tin</span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
@@ -283,9 +283,9 @@ export const EditBooking = (): React.JSX.Element => {
               {/* Title */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-4">
+                  <h1 className="text-3xl md:text-4xl font-bold text-blue-900 leading-tight mb-4">
                     Cập Nhật Thông Tin
-                    <span className="block text-[#00D4FF] text-xl md:text-2xl font-medium mt-1">
+                    <span className="block text-blue-700 text-xl md:text-2xl font-medium mt-1">
                       Đặt lịch #{formData.id}
                     </span>
                   </h1>
