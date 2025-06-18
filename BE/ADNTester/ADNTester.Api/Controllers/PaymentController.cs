@@ -162,8 +162,8 @@ namespace ADNTester.API.Controllers
 
                     await _paymentService.CreateAsync(paymentDto);
 
-                    // Cập nhật trạng thái booking thành KitSend
-                    await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.KitSend);
+                    // Cập nhật trạng thái booking thành PreparingKit
+                    await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.PreparingKit);
 
                     return Ok(new { message = "Xử lý thanh toán thành công." });
                 }
