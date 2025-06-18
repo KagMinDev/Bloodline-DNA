@@ -26,6 +26,7 @@ import {
 } from "../components/ui/Breadcrumb";
 import { Header } from "../../../components";
 import { Footer } from "../../../components";
+import { useBookingModal } from "../components/BookingModalContext";
 
 interface Booking {
   id: string;
@@ -72,6 +73,8 @@ export const BookingList = (): React.JSX.Element => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+
+  const { openBookingModal } = useBookingModal();
 
   // Sample data
   const sampleBookings: Booking[] = [
@@ -171,13 +174,13 @@ export const BookingList = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full h-[240px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross-booking" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross-booking)" />
@@ -188,23 +191,23 @@ export const BookingList = (): React.JSX.Element => {
             <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
               <div className="mb-6">
                 <Breadcrumb>
-                  <BreadcrumbList className="text-white/90">
+                  <BreadcrumbList className="text-blue-600">
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                      <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Trang Chủ
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <span className="text-[#00D4FF] font-semibold">Danh Sách Đặt Lịch</span>
+                      <span className="text-blue-900 font-semibold">Danh Sách Đặt Lịch</span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-4">
+              <h1 className="text-3xl md:text-4xl font-bold text-blue-900 leading-tight mb-4">
                 Danh Sách Đặt Lịch
-                <span className="block text-[#00D4FF] text-xl md:text-2xl font-medium mt-1">
+                <span className="block text-blue-700 text-xl md:text-2xl font-medium mt-1">
                   Quản lý lịch hẹn xét nghiệm
                 </span>
               </h1>
@@ -266,7 +269,7 @@ export const BookingList = (): React.JSX.Element => {
               <div className="text-center py-16">
                 <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-slate-600 mb-2">Không có lịch hẹn nào</h3>
-                <Button className="bg-blue-900 hover:bg-blue-800 text-white">
+                <Button onClick={openBookingModal} className="bg-blue-900 hover:bg-blue-800 text-white">
                   Đặt Lịch Mới
                 </Button>
               </div>

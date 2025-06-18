@@ -38,7 +38,7 @@ export const ServicesHeaderSection = (): React.JSX.Element => {
       <div className="absolute inset-0 bg-gradient-to-r from-[#ffffff95] via-[#ffffff80] to-[#ffffff60]" />
 
       {/* Animated decorative elements */}
-      <div className="absolute w-full h-full top-0 left-0 overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
         {/* Large floating circle - responsive sizing */}
         <div 
           className={`absolute w-32 h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 xl:w-80 xl:h-80 top-[15%] md:top-[20%] lg:top-[25%] right-[5%] md:right-[10%] lg:right-[15%] bg-app-accent rounded-full opacity-40 md:opacity-50 transition-all duration-1000 ease-out ${
@@ -79,7 +79,7 @@ export const ServicesHeaderSection = (): React.JSX.Element => {
       </div>
 
       {/* Animated bottom color bars - responsive height */}
-      <div className="absolute w-full h-2 md:h-3 lg:h-4 bottom-0 left-0 flex overflow-hidden">
+      <div className="absolute bottom-0 left-0 flex w-full h-2 overflow-hidden md:h-3 lg:h-4">
         <div 
           className="h-full w-[20%] md:w-[25%] lg:w-[30%] bg-app-accent transition-all duration-1000 ease-out transform"
           style={{
@@ -87,7 +87,7 @@ export const ServicesHeaderSection = (): React.JSX.Element => {
           }}
         />
         <div 
-          className="h-full flex-1 bg-app-primary transition-all duration-1200 ease-out transform delay-200"
+          className="flex-1 h-full transition-all ease-out delay-200 transform bg-app-primary duration-1200"
           style={{
             transform: isVisible ? 'translateX(0)' : 'translateX(-100%)',
           }}
@@ -105,7 +105,7 @@ export const ServicesHeaderSection = (): React.JSX.Element => {
         isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
       }`}>
         {/* Animated breadcrumb - responsive text size with Vietnamese content */}
-        <div className="transform transition-all duration-800 ease-out delay-300">
+        <div className="transition-all ease-out delay-300 transform duration-800">
           <Breadcrumb>
             <BreadcrumbList className="text-sm md:text-base lg:text-lg">
               <BreadcrumbItem>
@@ -133,10 +133,10 @@ export const ServicesHeaderSection = (): React.JSX.Element => {
         <h1 className={`font-display-1 font-[number:var(--display-1-font-weight)] text-app-primary text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-[var(--display-1-letter-spacing)] leading-[var(--display-1-line-height)] [font-style:var(--display-1-font-style)] mt-4 md:mt-6 lg:mt-8 transition-all duration-1000 ease-out delay-500 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
-          <span className="inline-block hover:scale-105 transition-transform duration-300">
+          <span className="inline-block transition-transform duration-300 hover:scale-105">
             Dịch Vụ Y Tế
           </span>
-          <span className="inline-block w-1 h-6 md:h-8 lg:h-10 xl:h-12 bg-app-secondary ml-2 animate-pulse" />
+          <span className="inline-block w-1 h-6 ml-2 md:h-8 lg:h-10 xl:h-12 bg-app-secondary animate-pulse" />
         </h1>
 
         {/* Subtitle for better context - responsive sizing with Vietnamese content */}
@@ -150,7 +150,7 @@ export const ServicesHeaderSection = (): React.JSX.Element => {
         <div className={`mt-6 md:mt-8 lg:mt-10 transition-all duration-1400 ease-out delay-900 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
-          <button className="bg-app-primary hover:bg-app-secondary text-white font-semibold px-6 md:px-8 lg:px-10 py-3 md:py-4 lg:py-5 rounded-full text-sm md:text-base lg:text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl transform">
+          <button className="px-6 py-3 text-sm font-semibold text-white transition-all duration-300 transform rounded-full bg-app-primary hover:bg-app-secondary md:px-8 lg:px-10 md:py-4 lg:py-5 md:text-base lg:text-lg hover:scale-105 hover:shadow-xl">
             Khám Phá Dịch Vụ
           </button>
         </div>

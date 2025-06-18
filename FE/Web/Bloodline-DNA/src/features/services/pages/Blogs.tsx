@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { 
+import {
+  BookmarkIcon,
   CalendarIcon,
   ClockIcon,
   EyeIcon,
-  TagIcon,
-  SearchIcon,
   HeartIcon,
+  SearchIcon,
   ShareIcon,
-  BookmarkIcon,
-  TrendingUpIcon,
-  AwardIcon,
-  StethoscopeIcon
+  TagIcon,
+  TrendingUpIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent } from "../components/ui/Card";
+import React, { useEffect, useState } from "react";
+import { Footer, Header } from "../../../components";
+import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,8 +19,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
 
 interface BlogPost {
   id: number;
@@ -215,21 +213,21 @@ export const Blogs = (): React.JSX.Element => {
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
-        <div className="fixed w-full z-50">
+        <div className="fixed z-50 w-full">
           <Header />
         </div>
 
         {/* Hero Section - Medical Style */}
-        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           {/* Medical Pattern Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross-blog" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross-blog)" />
@@ -239,50 +237,50 @@ export const Blogs = (): React.JSX.Element => {
           {/* Decorative Medical Elements */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating medical icons */}
-            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
-              <BookmarkIcon className="w-8 h-8 text-white/60" />
+            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-blue-200/30 animate-pulse">
+              <BookmarkIcon className="w-8 h-8 text-blue-600/60" />
             </div>
-            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
-              <TrendingUpIcon className="w-6 h-6 text-white/60" />
+            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-blue-200/30 animate-bounce" style={{animationDelay: '1s'}}>
+              <TrendingUpIcon className="w-6 h-6 text-blue-600/60" />
             </div>
-            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
-              <HeartIcon className="w-7 h-7 text-white/60" />
+            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-blue-200/30 animate-pulse" style={{animationDelay: '2s'}}>
+              <HeartIcon className="w-7 h-7 text-blue-600/60" />
             </div>
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+          <div className="relative z-10 flex items-center h-full">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
               <div className={`transition-all duration-1000 ease-out ${
                 isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
               }`}>
                 {/* Breadcrumb */}
                 <div className="mb-6">
                   <Breadcrumb>
-                    <BreadcrumbList className="text-white/90">
+                    <BreadcrumbList className="text-blue-600">
                       <BreadcrumbItem>
-                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                        <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                           Trang Chủ
                         </BreadcrumbLink>
                       </BreadcrumbItem>
-                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbSeparator className="text-blue-400" />
                       <BreadcrumbItem>
-                        <span className="text-[#00D4FF] font-semibold">Blog Y Tế</span>
+                        <span className="text-blue-900 font-semibold">Blog Y Tế</span>
                       </BreadcrumbItem>
                     </BreadcrumbList>
                   </Breadcrumb>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl lg:text-5xl">
                   Blog Y Tế
-                  <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                  <span className="block text-blue-700 text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
                     Kiến Thức Sức Khỏe
                   </span>
                 </h1>
 
                 {/* Description */}
-                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-blue-700">
                   Khám phá những bài viết chuyên sâu về sức khỏe, y học và lối sống khỏe mạnh từ đội ngũ chuyên gia.
                 </p>
               </div>
@@ -291,16 +289,16 @@ export const Blogs = (): React.JSX.Element => {
         </section>
 
         {/* Search and Filter Section */}
-        <section className="py-12 md:py-16 bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+        <section className="py-12 bg-white border-b border-gray-200 md:py-16">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             {/* Search Bar */}
             <div className="mb-8">
               <div className="relative max-w-2xl mx-auto">
-                <SearchIcon className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <SearchIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-4 top-1/2" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm bài viết, tác giả, chủ đề..."
-                  className="w-full pl-12 pr-4 py-4 text-lg border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                  className="w-full py-4 pl-12 pr-4 text-lg transition-colors duration-200 border-2 border-gray-200 rounded-full focus:border-blue-500 focus:outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -337,16 +335,16 @@ export const Blogs = (): React.JSX.Element => {
         {/* Featured Posts */}
         {filteredPosts.some(post => post.featured) && (
           <section className="py-16 md:py-20 bg-gray-50">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-blue-900 mb-8 md:mb-12">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+              <h2 className="mb-8 text-2xl font-bold text-blue-900 md:text-3xl lg:text-4xl md:mb-12">
                 Bài Viết Nổi Bật
               </h2>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-3">
                 {filteredPosts.filter(post => post.featured).map((post) => (
-                  <Card key={post.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white border-0 relative">
+                  <Card key={post.id} className="relative overflow-hidden transition-all duration-500 bg-white border-0 group hover:shadow-2xl hover:-translate-y-2">
                     {/* Featured Badge */}
-                    {/* <div className="absolute top-4 right-4 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold z-10">
+                    {/* <div className="absolute z-10 px-3 py-1 text-sm font-semibold text-yellow-900 bg-yellow-400 rounded-full top-4 right-4">
                       ⭐ Nổi Bật
                     </div> */}
                     
@@ -354,22 +352,22 @@ export const Blogs = (): React.JSX.Element => {
                       <img 
                         src={post.image}
                         alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-blue-900/60 via-transparent to-transparent group-hover:opacity-100"></div>
                       
                       {/* Category Badge */}
-                      <div className="absolute top-4 left-4 bg-blue-900 text-white px-3 py-1 rounded-full text-sm font-medium">
+                      <div className="absolute px-3 py-1 text-sm font-medium text-white bg-blue-900 rounded-full top-4 left-4">
                         {getCategoryName(post.category)}
                       </div>
                     </div>
                     
                     <CardContent className="p-6">
                       <div className="mb-4">
-                        <h3 className="text-xl font-bold text-blue-900 mb-3 group-hover:text-blue-700 transition-colors duration-300 line-clamp-2">
+                        <h3 className="mb-3 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700 line-clamp-2">
                           {post.title}
                         </h3>
-                        <p className="text-slate-600 text-sm line-clamp-3">
+                        <p className="text-sm text-slate-600 line-clamp-3">
                           {post.excerpt}
                         </p>
                       </div>
@@ -379,7 +377,7 @@ export const Blogs = (): React.JSX.Element => {
                         <img 
                           src={post.authorAvatar}
                           alt={post.author}
-                          className="w-10 h-10 rounded-full object-cover mr-3"
+                          className="object-cover w-10 h-10 mr-3 rounded-full"
                         />
                         <div>
                           <p className="text-sm font-semibold text-blue-900">{post.author}</p>
@@ -414,7 +412,7 @@ export const Blogs = (): React.JSX.Element => {
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-4">
                         {post.tags.slice(0, 3).map((tag, index) => (
-                          <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                          <span key={index} className="px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded-full">
                             #{tag}
                           </span>
                         ))}
@@ -438,9 +436,9 @@ export const Blogs = (): React.JSX.Element => {
         )}
 
         {/* Main Content - 2 Column Layout */}
-        <section className="py-16 md:py-20 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+        <section className="py-16 bg-white md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12">
               
               {/* Main Content Area */}
               <div className="lg:col-span-8">
@@ -457,48 +455,48 @@ export const Blogs = (): React.JSX.Element => {
                 {/* Blog Posts List */}
                 <div className="space-y-6">
                   {filteredPosts.map((post, index) => (
-                    <Card key={post.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border-2 border-gray-200 hover:border-gray-300 rounded-2xl relative transform hover:-translate-y-1">
+                    <Card key={post.id} className="relative overflow-hidden transition-all duration-300 transform bg-white border-2 border-gray-200 group hover:shadow-xl hover:border-gray-300 rounded-2xl hover:-translate-y-1">
                       {/* Glow effect */}
-                      <div className="absolute -inset-1 bg-gradient-to-r from-blue-200/30 via-blue-300/20 to-blue-200/30 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute transition-opacity duration-300 opacity-0 -inset-1 bg-gradient-to-r from-blue-200/30 via-blue-300/20 to-blue-200/30 rounded-2xl blur group-hover:opacity-100"></div>
                       
-                      <div className="relative flex flex-col md:flex-row bg-white rounded-2xl overflow-hidden">
+                      <div className="relative flex flex-col overflow-hidden bg-white md:flex-row rounded-2xl">
                         {/* Post Image */}
-                        <div className="md:w-64 lg:w-72 h-48 md:h-48 relative overflow-hidden">
+                        <div className="relative h-48 overflow-hidden md:w-64 lg:w-72 md:h-48">
                           <img 
                             src={post.image}
                             alt={post.title}
-                            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                            className="object-cover w-full h-full transition-all duration-500 group-hover:scale-105"
                           />
                           {/* Image overlay gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 via-transparent to-blue-800/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-br from-blue-900/10 via-transparent to-blue-800/10 group-hover:opacity-100"></div>
                           
                           {/* {post.featured && (
-                            <div className="absolute top-3 right-3 bg-gradient-to-r from-blue-400 to-blue-600 text-white px-3 py-1 rounded-xl text-xs font-bold shadow-md">
+                            <div className="absolute px-3 py-1 text-xs font-bold text-white shadow-md top-3 right-3 bg-gradient-to-r from-blue-400 to-blue-600 rounded-xl">
                               ⭐ Nổi Bật
                             </div>
                           )} */}
                           {/* Enhanced Category Badge */}
-                          <div className="absolute top-3 left-3 bg-gradient-to-r from-blue-900 to-blue-700 text-white px-3 py-1 rounded-xl text-xs font-semibold shadow-lg">
+                          <div className="absolute px-3 py-1 text-xs font-semibold text-white shadow-lg top-3 left-3 bg-gradient-to-r from-blue-900 to-blue-700 rounded-xl">
                             {getCategoryName(post.category)}
                           </div>
                           
                           {/* Reading time badge */}
-                          <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm text-white px-2 py-1 rounded-lg text-xs">
-                            <ClockIcon className="w-3 h-3 inline mr-1" />
+                          <div className="absolute px-2 py-1 text-xs text-white rounded-lg bottom-3 left-3 bg-black/60 backdrop-blur-sm">
+                            <ClockIcon className="inline w-3 h-3 mr-1" />
                             {post.readTime}
                           </div>
                         </div>
 
                         {/* Post Content */}
-                        <CardContent className="flex-1 p-5 flex flex-col justify-between relative">
+                        <CardContent className="relative flex flex-col justify-between flex-1 p-5">
                           <div className="relative z-10">
                             {/* Title */}
-                            <h2 className="text-lg md:text-xl font-bold bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 bg-clip-text text-transparent mb-3 group-hover:from-blue-700 group-hover:to-blue-600 transition-all duration-300 leading-tight">
+                            <h2 className="mb-3 text-lg font-bold leading-tight text-transparent transition-all duration-300 md:text-xl bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 bg-clip-text group-hover:from-blue-700 group-hover:to-blue-600">
                               {post.title}
                             </h2>
                             
                             {/* Excerpt */}
-                            <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-2">
+                            <p className="mb-4 text-sm leading-relaxed text-slate-600 line-clamp-2">
                               {post.excerpt}
                             </p>
                             
@@ -507,7 +505,7 @@ export const Blogs = (): React.JSX.Element => {
                               {post.tags.slice(0, 2).map((tag, tagIndex) => (
                                 <span 
                                   key={tagIndex} 
-                                  className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 px-3 py-1 rounded-xl text-xs font-medium hover:from-blue-200 hover:to-blue-300 transition-all duration-300 cursor-pointer"
+                                  className="px-3 py-1 text-xs font-medium text-blue-800 transition-all duration-300 cursor-pointer bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl hover:from-blue-200 hover:to-blue-300"
                                 >
                                   #{tag}
                                 </span>
@@ -523,7 +521,7 @@ export const Blogs = (): React.JSX.Element => {
                                   <img 
                                     src={post.authorAvatar}
                                     alt={post.author}
-                                    className="w-8 h-8 rounded-full object-cover mr-3 ring-2 ring-gray-200 group-hover:ring-gray-300 transition-all duration-300"
+                                    className="object-cover w-8 h-8 mr-3 transition-all duration-300 rounded-full ring-2 ring-gray-200 group-hover:ring-gray-300"
                                   />
                                   <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border border-white"></div>
                                 </div>
@@ -534,7 +532,7 @@ export const Blogs = (): React.JSX.Element => {
                               </div>
                               
                                                               <div className="flex items-center text-xs text-slate-500">
-                                <div className="flex items-center bg-gray-50 border border-gray-200 px-2 py-1 rounded-lg">
+                                <div className="flex items-center px-2 py-1 border border-gray-200 rounded-lg bg-gray-50">
                                   <CalendarIcon className="w-3 h-3 mr-1 text-blue-500" />
                                   {formatDate(post.publishDate)}
                                 </div>
@@ -548,15 +546,15 @@ export const Blogs = (): React.JSX.Element => {
                               </Button>
                               
                               <div className="flex items-center space-x-3">
-                                <div className="flex items-center hover:text-blue-900 cursor-pointer transition-all duration-300 bg-blue-50 hover:bg-blue-100 border border-gray-200 hover:border-gray-300 px-2 py-1 rounded-lg">
+                                <div className="flex items-center px-2 py-1 transition-all duration-300 border border-gray-200 rounded-lg cursor-pointer hover:text-blue-900 bg-blue-50 hover:bg-blue-100 hover:border-gray-300">
                                   <EyeIcon className="w-3 h-3 mr-1" />
                                   <span className="text-xs font-semibold">{formatViews(post.views)}</span>
                                 </div>
-                                <div className="flex items-center hover:text-blue-600 cursor-pointer transition-all duration-300 bg-blue-50 hover:bg-blue-100 border border-gray-200 hover:border-gray-300 px-2 py-1 rounded-lg">
+                                <div className="flex items-center px-2 py-1 transition-all duration-300 border border-gray-200 rounded-lg cursor-pointer hover:text-blue-600 bg-blue-50 hover:bg-blue-100 hover:border-gray-300">
                                   <HeartIcon className="w-3 h-3 mr-1" />
                                   <span className="text-xs font-semibold">{post.likes}</span>
                                 </div>
-                                <button className="flex items-center hover:text-blue-700 transition-all duration-300 bg-blue-50 hover:bg-blue-100 border border-gray-200 hover:border-gray-300 p-2 rounded-lg">
+                                <button type="button" title="Share Icon" className="flex items-center p-2 transition-all duration-300 border border-gray-200 rounded-lg hover:text-blue-700 bg-blue-50 hover:bg-blue-100 hover:border-gray-300">
                                   <ShareIcon className="w-3 h-3" />
                                 </button>
                               </div>
@@ -570,9 +568,9 @@ export const Blogs = (): React.JSX.Element => {
 
                 {/* No Results */}
                 {filteredPosts.length === 0 && (
-                  <div className="text-center py-16">
-                    <BookmarkIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-slate-600 mb-2">Không tìm thấy bài viết</h3>
+                  <div className="py-16 text-center">
+                    <BookmarkIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                    <h3 className="mb-2 text-xl font-semibold text-slate-600">Không tìm thấy bài viết</h3>
                     <p className="text-slate-500">Vui lòng thử lại với từ khóa khác hoặc thay đổi bộ lọc</p>
                     <Button 
                       onClick={() => {
@@ -589,14 +587,14 @@ export const Blogs = (): React.JSX.Element => {
 
               {/* Enhanced Sidebar */}
               <div className="lg:col-span-4">
-                <div className="space-y-8 sticky top-8">
+                <div className="sticky space-y-8 top-8">
                   
                   {/* Recent Posts */}
-                  <Card className="border-2 border-gray-200 bg-gradient-to-br from-white to-blue-50/50 shadow-xl rounded-3xl overflow-hidden">
+                  <Card className="overflow-hidden border-2 border-gray-200 shadow-xl bg-gradient-to-br from-white to-blue-50/50 rounded-3xl">
                     <CardContent className="p-8">
                       <div className="flex items-center mb-6">
-                        <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-blue-700 rounded-full mr-4"></div>
-                        <h3 className="text-xl font-bold bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
+                        <div className="w-2 h-8 mr-4 rounded-full bg-gradient-to-b from-blue-500 to-blue-700"></div>
+                        <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text">
                           Bài Viết Gần Đây
                         </h3>
                       </div>
@@ -604,7 +602,7 @@ export const Blogs = (): React.JSX.Element => {
                         {blogPosts.slice(0, 4).map((post, index) => (
                           <div 
                             key={`recent-${post.id}`} 
-                            className="flex items-start space-x-4 group cursor-pointer p-3 rounded-2xl hover:bg-white/80 transition-all duration-300"
+                            className="flex items-start p-3 space-x-4 transition-all duration-300 cursor-pointer group rounded-2xl hover:bg-white/80"
                             style={{
                               animationDelay: `${index * 100}ms`,
                             }}
@@ -613,15 +611,15 @@ export const Blogs = (): React.JSX.Element => {
                               <img 
                                 src={post.image}
                                 alt={post.title}
-                                className="w-20 h-20 object-cover rounded-xl flex-shrink-0 group-hover:scale-105 transition-transform duration-300"
+                                className="flex-shrink-0 object-cover w-20 h-20 transition-transform duration-300 rounded-xl group-hover:scale-105"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-br from-blue-900/0 to-blue-900/20 rounded-xl group-hover:from-blue-900/10 group-hover:to-blue-900/30 transition-all duration-300"></div>
+                              <div className="absolute inset-0 transition-all duration-300 bg-gradient-to-br from-blue-900/0 to-blue-900/20 rounded-xl group-hover:from-blue-900/10 group-hover:to-blue-900/30"></div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-sm font-bold text-blue-900 group-hover:text-blue-700 transition-colors line-clamp-2 leading-tight mb-2">
+                              <h4 className="mb-2 text-sm font-bold leading-tight text-blue-900 transition-colors group-hover:text-blue-700 line-clamp-2">
                                 {post.title}
                               </h4>
-                              <div className="flex items-center text-xs text-slate-500 bg-blue-50 border border-gray-200 px-2 py-1 rounded-full w-fit">
+                              <div className="flex items-center px-2 py-1 text-xs border border-gray-200 rounded-full text-slate-500 bg-blue-50 w-fit">
                                 <CalendarIcon className="w-3 h-3 mr-1" />
                                 {formatDate(post.publishDate)}
                               </div>
@@ -633,11 +631,11 @@ export const Blogs = (): React.JSX.Element => {
                   </Card>
 
                   {/* Enhanced Categories */}
-                  <Card className="border-2 border-gray-200 bg-gradient-to-br from-white to-blue-50/50 shadow-xl rounded-3xl overflow-hidden">
+                  <Card className="overflow-hidden border-2 border-gray-200 shadow-xl bg-gradient-to-br from-white to-blue-50/50 rounded-3xl">
                     <CardContent className="p-8">
                       <div className="flex items-center mb-6">
-                        <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-blue-700 rounded-full mr-4"></div>
-                        <h3 className="text-xl font-bold bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
+                        <div className="w-2 h-8 mr-4 rounded-full bg-gradient-to-b from-blue-500 to-blue-700"></div>
+                        <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text">
                           Chuyên Mục
                         </h3>
                       </div>
@@ -670,11 +668,11 @@ export const Blogs = (): React.JSX.Element => {
                   </Card>
 
                   {/* Enhanced Popular Tags */}
-                  {/* <Card className="border-0 bg-gradient-to-br from-white to-blue-50/50 shadow-xl rounded-3xl overflow-hidden">
+                  {/* <Card className="overflow-hidden border-0 shadow-xl bg-gradient-to-br from-white to-blue-50/50 rounded-3xl">
                     <CardContent className="p-8">
                       <div className="flex items-center mb-6">
-                        <div className="w-2 h-8 bg-gradient-to-b from-blue-500 to-blue-700 rounded-full mr-4"></div>
-                        <h3 className="text-xl font-bold bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text text-transparent">
+                        <div className="w-2 h-8 mr-4 rounded-full bg-gradient-to-b from-blue-500 to-blue-700"></div>
+                        <h3 className="text-xl font-bold text-transparent bg-gradient-to-r from-blue-900 to-blue-700 bg-clip-text">
                           Tags Phổ Biến
                         </h3>
                       </div>
@@ -682,7 +680,7 @@ export const Blogs = (): React.JSX.Element => {
                         {['sức khỏe', 'dinh dưỡng', 'phòng bệnh', 'tim mạch', 'yoga', 'thiền', 'AI', 'công nghệ y tế', 'giấc ngủ', 'căng thẳng', 'miễn dịch', 'khám định kỳ'].map((tag, index) => (
                           <button
                             key={index}
-                            className="bg-gradient-to-r from-gray-100 to-gray-200 hover:from-blue-100 hover:to-blue-200 text-slate-700 hover:text-blue-900 px-4 py-2 rounded-2xl text-sm transition-all duration-300 font-medium hover:scale-105 hover:shadow-md"
+                            className="px-4 py-2 text-sm font-medium transition-all duration-300 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-blue-100 hover:to-blue-200 text-slate-700 hover:text-blue-900 rounded-2xl hover:scale-105 hover:shadow-md"
                             style={{
                               animationDelay: `${index * 30}ms`,
                             }}
@@ -695,16 +693,16 @@ export const Blogs = (): React.JSX.Element => {
                   </Card> */}
 
                   {/* Newsletter Signup Widget */}
-                  {/* <Card className="border-0 bg-gradient-to-br from-blue-900 to-blue-800 shadow-2xl rounded-3xl overflow-hidden">
+                  {/* <Card className="overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-900 to-blue-800 rounded-3xl">
                     <CardContent className="p-8 text-center">
                       <div className="mb-4">
-                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-white/20">
                           <BookmarkIcon className="w-8 h-8 text-white" />
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2">
+                        <h3 className="mb-2 text-xl font-bold text-white">
                           Đăng Ký Newsletter
                         </h3>
-                        <p className="text-white/90 text-sm">
+                        <p className="text-sm text-white/90">
                           Nhận thông báo bài viết mới nhất
                         </p>
                       </div>
@@ -712,9 +710,9 @@ export const Blogs = (): React.JSX.Element => {
                         <input 
                           type="email" 
                           placeholder="Email của bạn..."
-                          className="w-full px-4 py-3 rounded-2xl bg-white/20 backdrop-blur-sm text-white placeholder-white/70 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+                          className="w-full px-4 py-3 text-white border rounded-2xl bg-white/20 backdrop-blur-sm placeholder-white/70 border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
                         />
-                        <Button className="w-full bg-white text-blue-900 hover:bg-white/90 font-semibold py-3 rounded-2xl">
+                        <Button className="w-full py-3 font-semibold text-blue-900 bg-white hover:bg-white/90 rounded-2xl">
                           Đăng Ký
                         </Button>
                       </div>
@@ -727,12 +725,11 @@ export const Blogs = (): React.JSX.Element => {
           </div>
         </section>
 
-    
-
-      
-
         {/* Footer */}
         <div className="relative">
+          <div className="fixed bottom-0 right-0 p-4">
+            <ChatbotAI />
+          </div>
           <Footer />
         </div>
       </div>

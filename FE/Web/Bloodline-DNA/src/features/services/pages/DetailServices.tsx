@@ -1,22 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
-import { 
-  ArrowRightIcon, 
-  CheckCircleIcon, 
-  ClockIcon, 
-  StarIcon, 
-  UserIcon, 
-  PhoneIcon, 
-  CalendarIcon,
-  ShieldIcon,
-  AwardIcon,
-  HeartIcon,
+import {
   ActivityIcon,
-  StethoscopeIcon,
+  ArrowRightIcon,
+  AwardIcon,
+  CalendarIcon,
+  CheckCircleIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  ClockIcon,
+  HeartIcon,
+  ShieldIcon,
+  StarIcon,
+  StethoscopeIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../components/ui/Card";
+import React, { useEffect, useRef, useState } from "react";
+import { Footer, Header } from "../../../components";
+import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,8 +22,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent, CardHeader } from "../components/ui/Card";
 
 interface ServiceFeature {
   icon: React.ReactNode;
@@ -62,6 +60,7 @@ export const DetailServices = (): React.JSX.Element => {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [selectedPackage, setSelectedPackage] = useState(0);
   const sectionRef = useRef<HTMLElement>(null);
+  const { openBookingModal } = useBookingModal();
 
   // Service data - this would typically come from props or API
   const serviceData = {
@@ -231,21 +230,21 @@ export const DetailServices = (): React.JSX.Element => {
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
         <div className="relative z-50">
           <Header />
         </div>
 
         {/* Hero Section - Medical Style */}
-        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           {/* Medical Pattern Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross-detail" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross-detail)" />
@@ -255,56 +254,56 @@ export const DetailServices = (): React.JSX.Element => {
           {/* Decorative Medical Elements */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating medical icons */}
-            <div className="absolute top-20 right-20 w-16 h-16 bg-white/10 rounded-full flex items-center justify-center animate-pulse">
-              <StethoscopeIcon className="w-8 h-8 text-white/60" />
+            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-blue-200/30 animate-pulse">
+              <StethoscopeIcon className="w-8 h-8 text-blue-600/60" />
             </div>
-            <div className="absolute bottom-32 right-32 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center animate-bounce" style={{animationDelay: '1s'}}>
-              <ActivityIcon className="w-6 h-6 text-white/60" />
+            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-blue-200/30 animate-bounce" style={{animationDelay: '1s'}}>
+              <ActivityIcon className="w-6 h-6 text-blue-600/60" />
             </div>
-            <div className="absolute top-32 left-32 w-14 h-14 bg-white/10 rounded-full flex items-center justify-center animate-pulse" style={{animationDelay: '2s'}}>
-              <ShieldIcon className="w-7 h-7 text-white/60" />
+            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-blue-200/30 animate-pulse" style={{animationDelay: '2s'}}>
+              <ShieldIcon className="w-7 h-7 text-blue-600/60" />
             </div>
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+          <div className="relative z-10 flex items-center h-full">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
               <div className={`transition-all duration-1000 ease-out ${
                 isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
               }`}>
                 {/* Breadcrumb */}
                 <div className="mb-6">
                   <Breadcrumb>
-                    <BreadcrumbList className="text-white/90">
+                    <BreadcrumbList className="text-blue-600">
                       <BreadcrumbItem>
-                        <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                        <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                           Trang Chủ
                         </BreadcrumbLink>
                       </BreadcrumbItem>
-                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbSeparator className="text-blue-400" />
                       <BreadcrumbItem>
-                        <BreadcrumbLink href="/services" className="text-white/80 hover:text-white transition-colors duration-200">
+                        <BreadcrumbLink href="/services" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                           Dịch Vụ
                         </BreadcrumbLink>
                       </BreadcrumbItem>
-                      <BreadcrumbSeparator className="text-white/60" />
+                      <BreadcrumbSeparator className="text-blue-400" />
                       <BreadcrumbItem>
-                        <span className="text-[#00D4FF] font-semibold">{serviceData.title}</span>
+                        <span className="text-blue-900 font-semibold">{serviceData.title}</span>
                       </BreadcrumbItem>
                     </BreadcrumbList>
                   </Breadcrumb>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight mb-4">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl lg:text-5xl">
                   {serviceData.title}
-                  <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                  <span className="block text-blue-700 text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
                     {serviceData.subtitle}
                   </span>
                 </h1>
 
                 {/* Description */}
-                <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6 max-w-lg">
+                <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-blue-700">
                   Dịch vụ chuyên nghiệp với đội ngũ bác sĩ chuyên khoa và trang thiết bị y tế hiện đại nhất.
                 </p>
               </div>
@@ -313,17 +312,17 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* Service Overview */}
-        <section className="py-16 md:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <section className="py-16 bg-white md:py-20 lg:py-24">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="grid items-center grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
               <div>
-                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+                <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                   Tổng Quan Dịch Vụ
                 </h2>
-                <p className="text-lg text-black mb-6 leading-relaxed">
+                <p className="mb-6 text-lg leading-relaxed text-black">
                   {serviceData.description}
                 </p>
-                <p className="text-lg text-black mb-8 leading-relaxed">
+                <p className="mb-8 text-lg leading-relaxed text-black">
                   {serviceData.overview}
                 </p>
                 <Button className="bg-blue-900 hover:bg-blue-800 !text-white px-6 py-3 rounded-full transition-all duration-300">
@@ -344,30 +343,30 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* Service Features */}
-        <section className="py-16 md:py-20 bg-blue-100">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+        <section className="py-16 bg-blue-100 md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center md:mb-16">
+              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                 Tại Sao Chọn Chúng Tôi?
               </h2>
-              <p className="text-lg text-black max-w-3xl mx-auto whitespace-nowrap">
+              <p className="max-w-3xl mx-auto text-lg text-black whitespace-nowrap">
                 Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe chất lượng cao với những ưu điểm vượt trội
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
               {serviceFeatures.map((feature, index) => (
-                <Card key={index} className="group text-center p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border-0 bg-white">
+                <Card key={index} className="p-6 text-center transition-all duration-300 bg-white border-0 group hover:shadow-xl hover:-translate-y-2">
                   <CardContent className="p-0">
                     <div className="mb-6 transition-transform duration-300 group-hover:scale-110">
-                      <div className="w-16 h-16 mx-auto bg-blue-50 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300">
+                      <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 rounded-full bg-blue-50 group-hover:bg-blue-200">
                         {feature.icon}
                       </div>
                     </div>
-                    <h3 className="text-xl font-bold text-blue-900 mb-4 group-hover:text-blue-700 transition-colors duration-300">
+                    <h3 className="mb-4 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
                       {feature.title}
                     </h3>
-                    <p className="text-black leading-relaxed">
+                    <p className="leading-relaxed text-black">
                       {feature.description}
                     </p>
                   </CardContent>
@@ -378,18 +377,18 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* Pricing Packages */}
-        <section className="py-16 md:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+        <section className="py-16 bg-white md:py-20 lg:py-24">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center md:mb-16">
+              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                 Gói Khám Sức Khỏe
               </h2>
-              <p className="text-lg text-black max-w-3xl mx-auto leading-relaxed">
+              <p className="max-w-3xl mx-auto text-lg leading-relaxed text-black">
                 Chọn gói khám phù hợp với nhu cầu và ngân sách của bạn
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {pricingPackages.map((pkg, index) => (
                 <Card 
                   key={index} 
@@ -400,30 +399,30 @@ export const DetailServices = (): React.JSX.Element => {
                 >
                   {/* PHỔ BIẾN NHẤT Label */}
                   {pkg.popular && (
-                    <div className="absolute top-0 left-0 right-0 bg-blue-500 text-white text-center py-2 font-semibold text-sm z-10">
+                    <div className="absolute top-0 left-0 right-0 z-10 py-2 text-sm font-semibold text-center text-white bg-blue-500">
                       PHỔ BIẾN NHẤT
                     </div>
                   )}
                   
                   {/* Header */}
                   <CardHeader className={`text-center ${pkg.popular ? 'pt-12' : 'pt-6'} pb-6`}>
-                    <h3 className="text-2xl font-bold text-blue-900 mb-2">{pkg.name}</h3>
+                    <h3 className="mb-2 text-2xl font-bold text-blue-900">{pkg.name}</h3>
                     <div className="mb-4">
                       <span className="text-4xl font-bold text-blue-700">{pkg.price}</span>
-                      <span className="text-black ml-1">VNĐ</span>
+                      <span className="ml-1 text-black">VNĐ</span>
                     </div>
                     <p className="text-black">
-                      <ClockIcon className="w-4 h-4 inline mr-1" />
+                      <ClockIcon className="inline w-4 h-4 mr-1" />
                       {pkg.duration}
                     </p>
                   </CardHeader>
                   
                   {/* Nội dung và Button - sử dụng flex để button luôn ở dưới */}
                   <CardContent className="flex flex-col flex-grow px-6 pb-6">
-                    <ul className="space-y-3 mb-6 flex-grow">
+                    <ul className="flex-grow mb-6 space-y-3">
                       {pkg.features.map((feature, idx) => (
                         <li key={idx} className="flex items-center">
-                          <CheckCircleIcon className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
+                          <CheckCircleIcon className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" />
                           <span className="text-black">{feature}</span>
                         </li>
                       ))}
@@ -447,35 +446,35 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* Doctor Profiles */}
-        <section className="py-16 md:py-20 bg-blue-100">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+        <section className="py-16 bg-blue-100 md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center md:mb-16">
+              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                 Đội Ngũ Bác Sĩ
               </h2>
-              <p className="text-lg text-black max-w-3xl mx-auto leading-relaxed">
+              <p className="max-w-3xl mx-auto text-lg leading-relaxed text-black">
                 Các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {doctors.map((doctor) => (
-                <Card key={doctor.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white border-0">
-                  <div className="relative h-80 overflow-hidden">
+                <Card key={doctor.id} className="overflow-hidden transition-all duration-300 bg-white border-0 group hover:shadow-xl hover:-translate-y-2">
+                  <div className="relative overflow-hidden h-80">
                     <img 
                       src={doctor.image}
                       alt={doctor.name}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-blue-900/50 to-transparent group-hover:opacity-100"></div>
                   </div>
                   
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors duration-300">
+                    <h3 className="mb-2 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
                       {doctor.name}
                     </h3>
-                    <p className="text-blue-600 font-semibold mb-2">{doctor.specialization}</p>
-                    <p className="text-black mb-4">{doctor.experience}</p>
+                    <p className="mb-2 font-semibold text-blue-600">{doctor.specialization}</p>
+                    <p className="mb-4 text-black">{doctor.experience}</p>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
@@ -483,7 +482,7 @@ export const DetailServices = (): React.JSX.Element => {
                         <span className="ml-1 font-semibold text-black">{doctor.rating}</span>
                         <span className="ml-1 text-black">({doctor.reviews} đánh giá)</span>
                       </div>
-                      <Button variant="outline" size="sm" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white">
+                      <Button variant="outline" size="sm" className="text-blue-900 border-blue-900 hover:bg-blue-900 hover:text-white">
                         Xem Profile
                       </Button>
                     </div>
@@ -495,25 +494,25 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 md:py-20 lg:py-24 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+        <section className="py-16 bg-white md:py-20 lg:py-24">
+          <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
+            <div className="mb-12 text-center md:mb-16">
+              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                 Câu Hỏi Thường Gặp
               </h2>
-              <p className="text-lg text-black leading-relaxed">
+              <p className="text-lg leading-relaxed text-black">
                 Những thắc mắc phổ biến về dịch vụ khám sức khỏe
               </p>
             </div>
 
             <div className="space-y-4">
               {faqs.map((faq, index) => (
-                <Card key={index} className="border border-blue-200 overflow-hidden hover:border-blue-400 transition-colors duration-200">
+                <Card key={index} className="overflow-hidden transition-colors duration-200 border border-blue-200 hover:border-blue-400">
                   <CardHeader 
-                    className="cursor-pointer hover:bg-blue-50 transition-colors duration-200"
+                    className="transition-colors duration-200 cursor-pointer hover:bg-blue-50"
                     onClick={() => toggleFAQ(index)}
                   >
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-blue-900">{faq.question}</h3>
                       {openFAQ === index ? (
                         <ChevronUpIcon className="w-5 h-5 text-blue-600" />
@@ -525,7 +524,7 @@ export const DetailServices = (): React.JSX.Element => {
                   
                   {openFAQ === index && (
                     <CardContent className="pt-0 pb-6">
-                      <p className="text-black leading-relaxed">{faq.answer}</p>
+                      <p className="leading-relaxed text-black">{faq.answer}</p>
                     </CardContent>
                   )}
                 </Card>
@@ -535,33 +534,33 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* Related Services */}
-        <section className="py-16 md:py-20 bg-blue-100">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-900 mb-6">
+        <section className="py-16 bg-blue-100 md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center md:mb-16">
+              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
                 Dịch Vụ Liên Quan
               </h2>
-              <p className="text-lg text-black leading-relaxed">
+              <p className="text-lg leading-relaxed text-black">
                 Khám phá thêm các dịch vụ y tế khác
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
               {relatedServices.map((service) => (
-                <Card key={service.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-white border-0 cursor-pointer">
+                <Card key={service.id} className="overflow-hidden transition-all duration-300 bg-white border-0 cursor-pointer group hover:shadow-xl hover:-translate-y-2">
                   <div className="relative h-48 overflow-hidden">
                     <img 
                       src={service.image}
                       alt={service.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
                     />
                   </div>
                   
                   <CardContent className="p-6">
-                    <h3 className="text-xl font-bold text-blue-900 mb-3 group-hover:text-blue-700 transition-colors duration-300">
+                    <h3 className="mb-3 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
                       {service.title}
                     </h3>
-                    <p className="text-black mb-4 leading-relaxed">
+                    <p className="mb-4 leading-relaxed text-black">
                       {service.description}
                     </p>
                     <Button variant="outline" className="w-full border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white">
@@ -577,19 +576,22 @@ export const DetailServices = (): React.JSX.Element => {
 
         {/* CTA Section */}
         <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-r from-blue-900 to-blue-700">
-          <div className="w-full px-4 md:px-6 lg:px-8 text-center">
-            <h2 className="block text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6 whitespace-nowrap">
+          <div className="w-full px-4 text-center md:px-6 lg:px-8">
+            <h2 className="block mb-6 text-3xl font-bold text-white md:text-4xl lg:text-5xl whitespace-nowrap">
               Sẵn Sàng Bắt Đầu Hành Trình Chăm Sóc Sức Khỏe?
             </h2>
-            <p className="text-xl text-white/90 mb-8 whitespace-nowrap">
+            <p className="mb-8 text-xl text-white/90 whitespace-nowrap">
               Đặt lịch khám ngay hôm nay để nhận được sự chăm sóc tốt nhất từ đội ngũ chuyên gia của chúng tôi
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-blue-900 hover:bg-blue-100 hover:text-blue-900 px-8 py-4 rounded-full text-lg font-semibold">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Button
+                onClick={openBookingModal}
+                className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-100 hover:text-blue-900"
+              >
                 <CalendarIcon className="w-10 h-10 mr-2" />
                 Đặt Lịch Ngay
               </Button>
-              {/* <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900 px-8 py-4 rounded-full text-lg">
+              {/* <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
                 <PhoneIcon className="w-5 h-5 mr-2" />
                 Hotline: 1900-xxxx
               </Button> */}

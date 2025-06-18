@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { 
-  CalendarIcon, 
-  PackageIcon, 
-  FlaskConicalIcon,
-  TruckIcon,
-  BuildingIcon,
-  ClipboardCheckIcon,
-  FileTextIcon,
-  CheckCircleIcon,
-  ClockIcon,
+import {
   AlertCircleIcon,
+  BuildingIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  ClipboardCheckIcon,
+  ClockIcon,
+  FileTextIcon,
+  FlaskConicalIcon,
+  MailIcon,
+  PackageIcon,
   PhoneIcon,
-  MailIcon
+  TruckIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../components/ui/Card";
+import React, { useEffect, useState } from "react";
+import { Footer, Header } from "../../../components";
+import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,8 +22,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
 
 interface ProgressStep {
   id: number;
@@ -196,7 +196,7 @@ export const TestProgress = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
             <p className="text-slate-600">Đang tải thông tin theo dõi...</p>
           </div>
         </div>
@@ -212,10 +212,10 @@ export const TestProgress = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <AlertCircleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-600 mb-2">Không tìm thấy thông tin</h3>
-            <p className="text-slate-500 mb-6">Không thể tải thông tin theo dõi xét nghiệm</p>
-            <Button onClick={() => window.history.back()} className="bg-blue-900 hover:bg-blue-800 text-white">
+            <AlertCircleIcon className="w-16 h-16 mx-auto mb-4 text-red-400" />
+            <h3 className="mb-2 text-xl font-semibold text-slate-600">Không tìm thấy thông tin</h3>
+            <p className="mb-6 text-slate-500">Không thể tải thông tin theo dõi xét nghiệm</p>
+            <Button onClick={() => window.history.back()} className="text-white bg-blue-900 hover:bg-blue-800">
               Quay Lại
             </Button>
           </div>
@@ -226,21 +226,21 @@ export const TestProgress = (): React.JSX.Element => {
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
         <div className="relative z-50">
           <Header />
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full h-[280px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           {/* Medical Pattern Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross-progress" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross-progress)" />
@@ -248,37 +248,37 @@ export const TestProgress = (): React.JSX.Element => {
           </div>
 
           {/* Content Container */}
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+          <div className="relative z-10 flex items-center h-full">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
               {/* Breadcrumb */}
               <div className="mb-6">
                 <Breadcrumb>
-                  <BreadcrumbList className="text-white/90">
+                  <BreadcrumbList className="text-blue-600">
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/" className="text-white/80 hover:text-white transition-colors duration-200">
+                      <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Trang Chủ
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/booking-list" className="text-white/80 hover:text-white transition-colors duration-200">
+                      <BreadcrumbLink href="/booking-list" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Danh Sách Đặt Lịch
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <span className="text-[#00D4FF] font-semibold">Theo Dõi Quá Trình</span>
+                      <span className="text-blue-900 font-semibold">Theo Dõi Quá Trình</span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
               </div>
 
               {/* Title & Info */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+              <div className="grid items-center grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-4">
+                  <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl">
                     Theo Dõi Quá Trình
-                    <span className="block text-[#00D4FF] text-xl md:text-2xl font-medium mt-1">
+                    <span className="block text-blue-700 text-xl md:text-2xl font-medium mt-1">
                       {progressData.testType}
                     </span>
                   </h1>
@@ -286,8 +286,8 @@ export const TestProgress = (): React.JSX.Element => {
                 </div>
                 
                 <div className="lg:text-right">
-                  <div className="inline-block bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                    <p className="text-white/80 text-sm mb-2">Dự kiến có kết quả</p>
+                  <div className="inline-block p-4 rounded-lg bg-white/20 backdrop-blur-sm">
+                    <p className="mb-2 text-sm text-white/80">Dự kiến có kết quả</p>
                     {progressData.expectedResultDate && (
                       <p className="text-[#00D4FF] text-xl font-bold">
                         {formatDate(progressData.expectedResultDate)}
@@ -302,14 +302,14 @@ export const TestProgress = (): React.JSX.Element => {
 
         {/* Progress Timeline */}
         <section className="py-16 md:py-20 bg-blue-50">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-5xl">
+          <div className="container max-w-5xl px-4 mx-auto md:px-6 lg:px-8">
             {/* Progress Overview */}
             <div className="mb-12">
-              <Card className="bg-white shadow-lg border-0">
+              <Card className="bg-white border-0 shadow-lg">
                 <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-slate-800 mb-2">
+                      <h3 className="mb-2 text-xl font-bold text-slate-800">
                         Tiến độ hiện tại: Bước {progressData.currentStep}/7
                       </h3>
                       <p className="text-slate-600">
@@ -325,7 +325,7 @@ export const TestProgress = (): React.JSX.Element => {
                         </div>
                       )}
                       
-                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full">
                         <span className="text-2xl font-bold text-blue-900">
                           {Math.round((progressData.currentStep / 7) * 100)}%
                         </span>
@@ -335,9 +335,9 @@ export const TestProgress = (): React.JSX.Element => {
                   
                   {/* Progress Bar */}
                   <div className="mt-6">
-                    <div className="w-full bg-gray-200 rounded-full h-3">
+                    <div className="w-full h-3 bg-gray-200 rounded-full">
                       <div 
-                        className="bg-gradient-to-r from-blue-600 to-blue-500 h-3 rounded-full transition-all duration-500"
+                        className="h-3 transition-all duration-500 rounded-full bg-gradient-to-r from-blue-600 to-blue-500"
                         style={{ width: `${(progressData.currentStep / 7) * 100}%` }}
                       ></div>
                     </div>
@@ -384,7 +384,7 @@ export const TestProgress = (): React.JSX.Element => {
                           
                           {/* Step Content */}
                           <div className="flex-1">
-                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                               <div className="flex-1">
                                 <h3 className={`text-lg font-bold mb-2 ${
                                   step.status === 'completed' ? 'text-green-700' :
@@ -393,7 +393,7 @@ export const TestProgress = (): React.JSX.Element => {
                                 }`}>
                                   {step.title}
                                 </h3>
-                                <p className="text-slate-600 mb-4">{step.description}</p>
+                                <p className="mb-4 text-slate-600">{step.description}</p>
                                 
                                 {step.details && (
                                   <ul className="space-y-2">
@@ -412,16 +412,16 @@ export const TestProgress = (): React.JSX.Element => {
                               </div>
                               
                               {/* Date Info */}
-                              <div className="text-right flex-shrink-0">
+                              <div className="flex-shrink-0 text-right">
                                 {step.completedDate && (
                                   <div className="mb-2">
-                                    <p className="text-sm text-green-600 font-medium">Hoàn thành</p>
+                                    <p className="text-sm font-medium text-green-600">Hoàn thành</p>
                                     <p className="text-sm text-slate-500">{formatDateTime(step.completedDate)}</p>
                                   </div>
                                 )}
                                 {step.estimatedDate && !step.completedDate && (
                                   <div className="mb-2">
-                                    <p className="text-sm text-blue-600 font-medium">Dự kiến</p>
+                                    <p className="text-sm font-medium text-blue-600">Dự kiến</p>
                                     <p className="text-sm text-slate-500">{formatDate(step.estimatedDate)}</p>
                                   </div>
                                 )}
@@ -447,25 +447,25 @@ export const TestProgress = (): React.JSX.Element => {
 
             {/* Support Section */}
             <div className="mt-12">
-              <Card className="bg-gradient-to-r from-purple-50 to-blue-50 border-0 shadow-lg">
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-blue-50">
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <h3 className="text-xl font-bold text-slate-800 mb-4">Cần Hỗ Trợ?</h3>
-                    <p className="text-slate-600 mb-6">
+                    <h3 className="mb-4 text-xl font-bold text-slate-800">Cần Hỗ Trợ?</h3>
+                    <p className="mb-6 text-slate-600">
                       Nếu bạn có bất kỳ thắc mắc nào về quá trình xét nghiệm, đừng ngần ngại liên hệ với chúng tôi
                     </p>
                     
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                       <Button
                         variant="outline"
-                        className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                        className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white"
                       >
                         <PhoneIcon className="w-4 h-4 mr-2" />
                         Gọi Hotline: 1900-xxxx
                       </Button>
                       <Button
                         variant="outline"
-                        className="border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white"
+                        className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white"
                       >
                         <MailIcon className="w-4 h-4 mr-2" />
                         Email: support@bloodline.vn
@@ -480,6 +480,9 @@ export const TestProgress = (): React.JSX.Element => {
 
         {/* Footer */}
         <div className="relative">
+          <div className="fixed bottom-0 right-0 p-4">
+            <ChatbotAI />
+          </div>
           <Footer />
         </div>
       </div>
