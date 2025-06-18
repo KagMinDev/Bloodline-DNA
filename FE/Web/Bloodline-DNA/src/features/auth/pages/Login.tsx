@@ -1,9 +1,10 @@
-import { WechatWorkOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from "antd";
+import { WechatWorkOutlined } from "@ant-design/icons";
+import { Button, Form, Input, message } from "antd";
 import { Eye, EyeOff, Heart, Lock, Mail, Shield, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Loading, { ButtonLoading } from "../../../components/Loading";
+import { getUserInfoApi, loginApi } from "../api/loginApi";
 import type { Login } from "../types/auth.types";
 
 const LoginForm: React.FC = () => {
@@ -13,28 +14,51 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (data: Login) => {
+    console.log("Start loading");
+    
     setLoading(true);
     try {
-      // Giả lập dữ liệu đăng nhập để kiểm tra loading mà không cần API
-      console.log("Dữ liệu giả:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Giả lập thời gian chờ 1.5s
-      // Nếu muốn dùng API thực, bỏ comment đoạn dưới và comment đoạn trên
-      /*
-      const response = await axios.post(
-        "http://localhost:5000/api/users/login",
-        data
-      );
-      console.log("Đăng nhập thành công:", response.data);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      */
-      navigate("/");
-
+      const response = await loginApi(data.email, data.password);      
+      localStorage.setItem("token", response.data.token);
+      const userData = await getUserInfoApi(response.data.token);
+      if (!userData) {
+        message.error("Không thể lấy thông tin người dùng");
+        return;
+      }
+      // Lưu thông tin người dùng vào localStorage
+      localStorage.setItem("accountId", userData.id);
+      
+      const user = {
+        userName: response.data.userName,
+        role: response.data.role,
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      const userRole = response.data.role;
+      switch (userRole) {
+        case "Admin":
+          navigate("/admin/dashboard");
+          break;
+        case "Staff":
+          navigate("/staff/");
+          break;
+        case "Manager":
+          navigate("/manager/test-management");
+          break;
+        case "Client":
+          navigate("/customer");
+          break;
+        default:
+          message.error("Role không hợp lệ");
+          break;
+      }
     } catch (error) {
       console.error("Đăng nhập thất bại:", error);
       form.setFields([
         {
-          name: "PasswordHash",
-          errors: ["Đăng nhập thất bại, vui lòng kiểm tra lại"],
+          name: "password",
+          errors: [
+            error instanceof Error ? error.message : "Lỗi không xác định",
+          ],
         },
       ]);
     } finally {
@@ -154,7 +178,7 @@ const LoginForm: React.FC = () => {
 
           <h1 className="mb-4 text-4xl font-bold">Hệ Thống Y Tế Thông Minh</h1>
           <p className="mb-8 text-xl text-blue-100">
-          Dịch vụ xét nghiệm ADN huyết thống
+            Dịch vụ xét nghiệm ADN huyết thống
           </p>
 
           {/* Features */}
@@ -212,7 +236,7 @@ const LoginForm: React.FC = () => {
                   Địa chỉ Email
                 </span>
               }
-              name="Email"
+              name="email"
               rules={[
                 { required: true, message: "Vui lòng nhập email" },
                 { type: "email", message: "Email không hợp lệ" },
@@ -232,7 +256,7 @@ const LoginForm: React.FC = () => {
                   Mật Khẩu
                 </span>
               }
-              name="PasswordHash"
+              name="password"
               rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
             >
               <Input
