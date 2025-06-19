@@ -104,25 +104,26 @@ namespace ADNTester.Service.Implementations
             await _unitOfWork.TestBookingRepository.AddAsync(booking);
             await _unitOfWork.SaveChangesAsync();
 
-            // Tạo TestKit dựa trên CollectionMethod
-            var testKit = new CreateTestKitDto
-            {
-                BookingId = booking.Id
-            };
-
-            // Set các trường ngày tháng dựa trên CollectionMethod
+            // Kiểm tra phương thức lấy mẫu
             if (priceService.CollectionMethod == SampleCollectionMethod.SelfSample)
             {
-                testKit.ShippedAt = DateTime.UtcNow;
-                testKit.ReceivedAt = null;
+                // Nếu là lấy mẫu tại nhà, không tạo kit ngay
+                // Kit sẽ được tạo sau khi thanh toán cọc
+                return booking.Id;
             }
             else if (priceService.CollectionMethod == SampleCollectionMethod.AtFacility)
             {
-                testKit.SentToLabAt = DateTime.UtcNow;
-                testKit.LabReceivedAt = null;
+                // Nếu là lấy mẫu tại cơ sở, tạo kit ngay
+                var testKit = new CreateTestKitDto
+                {
+                    BookingId = booking.Id,
+                    SentToLabAt = DateTime.UtcNow,
+                    LabReceivedAt = null
+                };
+
+                await _testKitService.CreateAsync(testKit);
             }
 
-            await _testKitService.CreateAsync(testKit);
             return booking.Id;
         }
 

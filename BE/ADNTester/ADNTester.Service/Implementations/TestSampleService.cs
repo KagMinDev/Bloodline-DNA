@@ -7,6 +7,8 @@ using AutoMapper;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
+using System;
+using ADNTester.BO.Enums;
 
 namespace ADNTester.Service.Implementations
 {
@@ -35,6 +37,32 @@ namespace ADNTester.Service.Implementations
 
         public async Task<string> CreateAsync(CreateTestSampleDto dto)
         {
+            // Lấy thông tin kit
+            var kit = await _unitOfWork.TestKitRepository.GetByIdAsync(dto.KitId);
+            if (kit == null)
+                throw new Exception("Kit không tồn tại");
+
+            // Lấy thông tin booking
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(kit.BookingId);
+            if (booking == null)
+                throw new Exception("Không tìm thấy thông tin đặt lịch");
+
+            // Kiểm tra trạng thái booking
+            if (booking.Status != BookingStatus.SampleRecived)
+            {
+                throw new Exception($"Không thể tạo sample. Trạng thái đặt lịch hiện tại là {booking.Status}, cần phải ở trạng thái SampleReceived.");
+            }
+
+            // Đếm số lượng sample hiện tại của kit
+            var existingSamples = await _unitOfWork.TestSampleRepository.GetAllAsync();
+            var currentSampleCount = existingSamples.Count(s => s.KitId == dto.KitId);
+
+            // Kiểm tra số lượng sample có vượt quá giới hạn không
+            if (currentSampleCount >= kit.SampleCount)
+            {
+                throw new Exception($"Kit này chỉ cho phép tạo tối đa {kit.SampleCount} sample. Hiện tại đã có {currentSampleCount} sample.");
+            }
+
             var testSample = _mapper.Map<TestSample>(dto);
             await _unitOfWork.TestSampleRepository.AddAsync(testSample);
             await _unitOfWork.SaveChangesAsync();

@@ -16,5 +16,6 @@ namespace ADNTester.BO.DTOs.TestKit
         public ICollection<TestSampleDto> Samples { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public int SampleCount { get; set; }
     }
 } 
