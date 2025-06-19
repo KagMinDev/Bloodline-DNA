@@ -1,162 +1,224 @@
-import { useState } from 'react';
-import type { Blog } from '../types/blogs';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '../../staff/components/sample/ui/button';
-import BlogCard from '../components/common/BlogCard';
-import BlogDialog from '../components/common/BlogDialog';
-
-const initialBlogs: Blog[] = [
-	{
-		id: '1',
-		title: 'Giới thiệu xét nghiệm ADN',
-		content: 'Đây là bài viết giới thiệu về xét nghiệm ADN...',
-		thumbnailURL: 'https://via.placeholder.com/150',
-		status: 'Hiển thị',
-		authorId: 'admin',
-		authorName: 'Admin',
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-	},
-	{
-		id: '2',
-		title: 'Lợi ích của xét nghiệm huyết thống',
-		content: 'Bài viết về lợi ích của xét nghiệm huyết thống, giúp xác định mối quan hệ huyết thống một cách chính xác và nhanh chóng.',
-		thumbnailURL: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-		status: 'Hiển thị',
-		authorId: 'staff1',
-		authorName: 'Nguyễn Văn B',
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-	},
-	{
-		id: '3',
-		title: 'Quy trình lấy mẫu xét nghiệm',
-		content: 'Hướng dẫn quy trình lấy mẫu xét nghiệm ADN đúng chuẩn, đảm bảo kết quả chính xác nhất.',
-		thumbnailURL: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80',
-		status: 'Hiển thị',
-		authorId: 'staff2',
-		authorName: 'Trần Thị C',
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-	},
-	{
-		id: '4',
-		title: 'Những điều cần biết trước khi xét nghiệm',
-		content: 'Một số lưu ý quan trọng trước khi làm xét nghiệm ADN để đảm bảo kết quả chính xác.',
-		thumbnailURL: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-		status: 'Hiển thị',
-		authorId: 'staff3',
-		authorName: 'Lê Văn D',
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-	},
-	{
-		id: '5',
-		title: 'Câu hỏi thường gặp về xét nghiệm ADN',
-		content: 'Tổng hợp các câu hỏi thường gặp về xét nghiệm ADN và giải đáp chi tiết.',
-		thumbnailURL: 'https://images.unsplash.com/photo-1503676382389-4809596d5290?auto=format&fit=crop&w=400&q=80',
-		status: 'Hiển thị',
-		authorId: 'staff4',
-		authorName: 'Phạm Thị E',
-		createdAt: new Date().toISOString(),
-		updatedAt: new Date().toISOString(),
-	},
-];
+import BlogCard from '../components/blogs/BlogCard';
+import BlogDialog from '../components/blogs/BlogDialog';
+import { FaPlus } from 'react-icons/fa';
+import { getBlogsApi, createBlogApi, getBlogByIdApi, updateBlogApi, deleteBlogApi } from '../api/blogsApi';
+import type { BlogResponse, BlogCreateRequest, BlogUpdateRequest } from '../types/blogs';
+import { Loading } from '../../../components';
 
 function Blogs() {
-	const [blogs, setBlogs] = useState<Blog[]>(initialBlogs);
-	const [showDialog, setShowDialog] = useState(false);
-	const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [blogs, setBlogs] = useState<BlogResponse[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<BlogResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const accountId = localStorage.getItem('accountId') || '';
+  const accountName = localStorage.getItem('accountName') || '';
+  const authorId = accountId;
 
-	const [form, setForm] = useState<Omit<Blog, 'id' | 'createdAt' | 'updatedAt'>>({
-		title: '',
-		content: '',
-		thumbnailURL: '',
-		status: 'Hiển thị',
-		authorId: 'admin',
-		authorName: 'Admin',
-	});
+  const [form, setForm] = useState<{
+    title: string;
+    content: string;
+    thumbnailURL: string | File;
+    thumbnailPreview: string;
+    status: string;
+    authorId: string;
+    authorName: string;
+  }>({
+    title: '',
+    content: '',
+    thumbnailURL: '',
+    thumbnailPreview: '',
+    status: '',
+    authorId: authorId,
+    authorName: accountName,
+  });
 
-	const handleSave = () => {
-		if (editingBlog) {
-			setBlogs(
-				blogs.map(b =>
-					b.id === editingBlog.id
-						? {
-								...editingBlog,
-								...form,
-								updatedAt: new Date().toISOString(),
-						  }
-						: b
-				)
-			);
-		} else {
-			setBlogs([
-				...blogs,
-				{
-					...form,
-					id: crypto.randomUUID(),
-					createdAt: new Date().toISOString(),
-					updatedAt: new Date().toISOString(),
-				},
-			]);
-		}
+  const fetchBlogs = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const blogsData = await getBlogsApi();
+      if (Array.isArray(blogsData)) {
+        setBlogs(blogsData);
+      } else {
+        console.error('fetchBlogs: Invalid data format', blogsData);
+        setBlogs([]);
+      }
+    } catch (error) {
+      console.error('fetchBlogs error:', error);
+      alert('Không thể tải danh sách bài viết');
+      setBlogs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-		setShowDialog(false);
-		setEditingBlog(null);
-		setForm({
-			title: '',
-			content: '',
-			thumbnailURL: '',
-			status: 'Hiển thị',
-			authorId: 'admin',
-			authorName: 'Admin',
-		});
-	};
+  useEffect(() => {
+    fetchBlogs();
+  }, [fetchBlogs]);
 
-	const handleEdit = (blog: Blog) => {
-		setEditingBlog(blog);
-		setForm({
-			title: blog.title,
-			content: blog.content,
-			thumbnailURL: blog.thumbnailURL,
-			status: blog.status,
-			authorId: blog.authorId,
-			authorName: blog.authorName,
-		});
-		setShowDialog(true);
-	};
+  useEffect(() => {
+    return () => {
+      if (form.thumbnailPreview) {
+        URL.revokeObjectURL(form.thumbnailPreview);
+      }
+    };
+  }, [form.thumbnailPreview]);
 
-	const handleDelete = (id: string) => {
-		if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
-			setBlogs(blogs.filter(b => b.id !== id));
-		}
-	};
+  const handleSave = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const statusNumber = form.status === 'Hiển thị' ? 1 : 0;
 
-	return (
-		<div className="p-8 bg-gray-50 min-h-screen overflow-auto">
-			<div className="flex items-center justify-between mb-8">
-				<h1 className="text-3xl font-bold text-blue-800">Quản lý bài viết</h1>
-				<Button onClick={() => setShowDialog(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-					Thêm bài viết
-				</Button>
-			</div>
+      if (editingBlog) {
+        const blogRequest: BlogUpdateRequest = {
+          id: editingBlog.id,
+          title: form.title,
+          content: form.content,
+          status: statusNumber,
+          authorId: form.authorId,
+          thumbnailURL: typeof form.thumbnailURL === 'string' ? form.thumbnailURL : undefined,
+        };
 
-			<div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-				{blogs.map(blog => (
-					<BlogCard key={blog.id} blog={blog} onEdit={handleEdit} onDelete={handleDelete} />
-				))}
-			</div>
+        const updatedBlog = await updateBlogApi(editingBlog.id, blogRequest);
+        setBlogs((prevBlogs) =>
+          prevBlogs.map((blog) => (blog.id === editingBlog.id ? { ...blog, ...updatedBlog } : blog))
+        );
+        alert('Cập nhật bài viết thành công');
+      } else {
+        if (!(form.thumbnailURL instanceof File)) {
+          alert('Vui lòng chọn file ảnh thumbnail!');
+          return;
+        }
+        const blogRequest: BlogCreateRequest = {
+          title: form.title,
+          content: form.content,
+          status: statusNumber,
+          authorId: form.authorId,
+          thumbnailURL: form.thumbnailURL,
+        };
+        await createBlogApi(blogRequest);
+        await fetchBlogs();
+        alert('Tạo bài viết thành công');
+      }
 
-			<BlogDialog
-				open={showDialog}
-				onOpenChange={setShowDialog}
-				form={form}
-				setForm={setForm}
-				onSave={handleSave}
-				editingBlog={editingBlog}
-			/>
-		</div>
-	);
+      setShowDialog(false);
+      setEditingBlog(null);
+      setForm({
+        title: '',
+        content: '',
+        thumbnailURL: '',
+        thumbnailPreview: '',
+        status: '',
+        authorId: authorId,
+        authorName: accountName,
+      });
+    } catch (error: any) {
+      console.error('handleSave error:', error);
+      alert(error.message || (editingBlog ? 'Cập nhật bài viết thất bại' : 'Tạo bài viết thất bại'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [form, editingBlog, authorId, accountName, fetchBlogs]);
+
+  const handleEdit = useCallback(async (blog: BlogResponse) => {
+    try {
+      setIsLoading(true);
+      const blogData = await getBlogByIdApi(blog.id);
+      setEditingBlog(blogData);
+      setForm({
+        title: blogData.title,
+        content: blogData.content,
+        thumbnailURL: blogData.thumbnailURL,
+        thumbnailPreview: blogData.thumbnailURL,
+        status: (typeof blogData.status === 'string' ? Number(blogData.status) : blogData.status) === 1 ? 'Hiển thị' : 'Ẩn',
+        authorId: blogData.authorId,
+        authorName: blogData.authorName,
+      });
+      setShowDialog(true);
+    } catch (error: any) {
+      console.error('handleEdit error:', error);
+      alert(error.message || 'Không thể tải thông tin bài viết');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (confirm('Bạn có chắc muốn xóa bài viết này?')) {
+      try {
+        setIsLoading(true);
+        await deleteBlogApi(id);
+        setBlogs((prevBlogs) => prevBlogs.filter((b) => b.id !== id));
+        alert('Xóa bài viết thành công');
+      } catch (error: any) {
+        console.error('handleDelete error:', error);
+        alert(error.message || 'Xóa bài viết thất bại');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  const handleAddNewBlog = useCallback(() => {
+    setForm({
+      title: '',
+      content: '',
+      thumbnailURL: '',
+      thumbnailPreview: '',
+      status: '',
+      authorId: authorId,
+      authorName: accountName,
+    });
+    setEditingBlog(null);
+    setShowDialog(true);
+  }, [authorId, accountName]);
+
+  return (
+    <>
+      <div className="h-screen flex flex-col items-center bg-blue-50 p-6 relative overflow-auto">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-blue-800">Quản lý bài viết</h1>
+            <Button
+              onClick={handleAddNewBlog}
+              className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 px-4 py-2 rounded-lg shadow"
+              disabled={isLoading}
+            >
+              <FaPlus className="text-lg text-white" />
+              <span className="text-white">Thêm bài viết</span>
+            </Button>
+          </div>
+
+          {blogs.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.map((blog) => (
+                <BlogCard
+                  key={blog.id}
+                  blog={blog}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">Không có bài viết nào để hiển thị.</p>
+          )}
+        </div>
+
+        <BlogDialog
+          open={showDialog}
+          onOpenChange={setShowDialog}
+          form={form}
+          setForm={setForm}
+          onSave={handleSave}
+          editingBlog={editingBlog}
+          isLoading={isLoading}
+        />
+      </div>
+      {isLoading && <Loading message="Đang tải..." fullScreen={true} />}
+    </>
+  );
 }
 
 export default Blogs;

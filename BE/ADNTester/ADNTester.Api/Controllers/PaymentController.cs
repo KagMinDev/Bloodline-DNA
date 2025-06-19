@@ -43,10 +43,9 @@ namespace ADNTester.API.Controllers
                     return NotFound(new { error = "Không tìm thấy đơn đặt lịch." });
                 }
 
-                // Kiểm tra trạng thái booking phải là Pending
-                if (Enum.Parse<BookingStatus>(booking.Status) != BookingStatus.Pending)
+                if (booking.Status != "Pending")
                 {
-                    Console.WriteLine($"Đơn đặt lịch với ID: {bookingId} không ở trạng thái Pending");
+                    Console.WriteLine($"Trạng thái booking không hợp lệ: {booking.Status}");
                     return BadRequest(new { error = "Chỉ có thể thanh toán cho đơn đặt lịch ở trạng thái Pending." });
                 }
 
@@ -162,8 +161,8 @@ namespace ADNTester.API.Controllers
 
                     await _paymentService.CreateAsync(paymentDto);
 
-                    // Cập nhật trạng thái booking thành KitSend
-                    await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.KitSend);
+                    // Cập nhật trạng thái booking thành PreparingKit
+                    await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.PreparingKit);
 
                     return Ok(new { message = "Xử lý thanh toán thành công." });
                 }

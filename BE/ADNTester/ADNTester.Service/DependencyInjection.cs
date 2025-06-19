@@ -30,7 +30,6 @@ namespace ADNTester.Service
             services.AddScoped<ITestSampleService, TestSampleService>();
             services.AddScoped<ICloudinaryService, CloudinaryService>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IGHNService, GHNService>();
             services.AddScoped<ISampleInstructionService, SampleInstructionService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IOtpService, OtpService>();

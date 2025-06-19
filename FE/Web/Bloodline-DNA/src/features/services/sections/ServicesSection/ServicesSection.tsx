@@ -8,12 +8,14 @@ import {
   UserCheckIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
+import { useBookingModal } from "../../components/BookingModalContext";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
 
 export const ServicesSection = (): React.JSX.Element => {
   const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
   const sectionRef = useRef<HTMLElement>(null);
+  const { openBookingModal } = useBookingModal();
 
   // Enhanced service card data with Vietnamese content
   const serviceCards = [
@@ -242,7 +244,10 @@ export const ServicesSection = (): React.JSX.Element => {
             <p className="mb-6 text-base md:text-lg lg:text-xl xl:text-2xl opacity-90 md:mb-8 lg:mb-10">
               Liên hệ với chúng tôi ngay hôm nay để đặt lịch tư vấn
             </p>
-            <Button className="px-6 py-3 text-sm font-semibold text-yellow-600 transition-all duration-300 bg-white rounded-full shadow-lg hover:bg-yellow-400 hover:text-blue-800 md:px-8 lg:px-10 xl:px-12 md:py-4 lg:py-5 xl:py-6 md:text-base lg:text-lg xl:text-xl hover:scale-105">
+            <Button
+              onClick={openBookingModal}
+              className="px-6 py-3 text-sm font-semibold text-yellow-600 transition-all duration-300 bg-white rounded-full shadow-lg hover:bg-yellow-400 hover:text-blue-800 md:px-8 lg:px-10 xl:px-12 md:py-4 lg:py-5 xl:py-6"
+            >
               Đặt Lịch Hẹn
             </Button>
           </div>

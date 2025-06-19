@@ -19,10 +19,11 @@ namespace ADNTester.Service.Implementations
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IOtpService _otpService;
 
-        public AuthService(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService)
+        public AuthService(IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IOtpService otpService)
         {
             _unitOfWork = unitOfWork;
             _jwtTokenService = jwtTokenService;
+            _otpService = otpService;
         }
 
         public async Task<bool> RegisterAsync(RegisterRequestDto dto)
@@ -37,7 +38,7 @@ namespace ADNTester.Service.Implementations
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
-                Role = dto.Role,
+                Role = UserRole.Client,
                 PasswordHash = HashHelper.HashPassword(dto.Password)
             };
 
@@ -49,7 +50,7 @@ namespace ADNTester.Service.Implementations
         public async Task<LoginResponseDto?> LoginAsync(LoginRequestDto dto)
         {
             var user = await _unitOfWork.UserRepository.FindOneAsync(u => u.Email == dto.Email);
-            if (user == null)
+            if (user == null || !user.IsActive)
                 return null;
 
             bool verified = HashHelper.VerifyPassword(dto.Password, user.PasswordHash);
@@ -76,7 +77,7 @@ namespace ADNTester.Service.Implementations
                 user.Id,
                 user.Email,
                 OtpDeliveryMethod.Email,
-                OtpPurpose.ResetPassword, default, default
+                OtpPurpose.ResetPassword
             );
 
             return success ? RequestResetOtpResult.Success : RequestResetOtpResult.FailedToSend;
@@ -100,6 +101,29 @@ namespace ADNTester.Service.Implementations
             await _unitOfWork.SaveChangesAsync();
 
             return ResetPasswordResult.Success;
+        }
+
+        public async Task<bool> CreateStaffAccountAsync(CreateStaffRequestDto dto)
+        {
+            if (dto.Role != UserRole.Staff && dto.Role != UserRole.Manager)
+                return false;
+
+            var existing = await _unitOfWork.UserRepository.FindOneAsync(u => u.Email == dto.Email);
+            if (existing != null) return false;
+
+            var user = new User
+            {
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Address = dto.Address,
+                Role = dto.Role,
+                PasswordHash = HashHelper.HashPassword(dto.Password)
+            };
+
+            await _unitOfWork.UserRepository.AddAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
 
     }

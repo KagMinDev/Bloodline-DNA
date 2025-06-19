@@ -9,7 +9,6 @@ import { Button, Checkbox, Form, Input, message } from "antd";
 import { Activity, Clock, Heart, Shield, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { registerApi } from "../../../apis/auth/registerApi";
 import { SuccessModal } from "../../../components";
 import Loading from "../../../components/Loading";
 import {
@@ -21,6 +20,7 @@ import {
   phoneRules,
   termsValidator,
 } from "../../../utils/validators/auth";
+import { registerApi } from "../api/registerApi";
 import { UserRole, type RegisterUser } from "../types/auth.types";
 
 const RegisterForm: React.FC = () => {
@@ -49,15 +49,14 @@ const RegisterForm: React.FC = () => {
 
       // Lưu email để hiển thị trong modal
       setRegisteredEmail(values.email);
-      
+
       // Hiển thị modal thành công thay vì message
       setShowSuccessModal(true);
-      
+
       // Reset form
       form.resetFields();
       setConfirmPassword("");
       setPasswordsMatch(true);
-
     } catch (error) {
       console.error("Đăng ký thất bại:", error);
 
@@ -325,18 +324,21 @@ const RegisterForm: React.FC = () => {
                 <Form.Item
                   name="email"
                   label={
-                    <span className="text-sm font-semibold text-gray-700">
+                    <div className="text-sm font-semibold text-gray-700">
                       <span className="text-xs text-red-400">*</span> Email
-                    </span>
+                    </div>
                   }
                   rules={emailRules}
                 >
                   <Input
                     size="middle"
                     prefix={
-                      <MailOutlined size={15} className="text-gray-400 mr-0.5" />
+                      <MailOutlined
+                        size={15}
+                        className="text-gray-400 mr-0.5"
+                      />
                     }
-                    placeholder="Nhập địa chỉ email"
+                    placeholder="Nhập địa chỉ email thực"
                     className="border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500"
                   />
                 </Form.Item>
@@ -354,13 +356,20 @@ const RegisterForm: React.FC = () => {
                   <Input
                     size="middle"
                     prefix={
-                      <PhoneOutlined size={15} className="text-gray-400 mr-0.5" />
+                      <PhoneOutlined
+                        size={15}
+                        className="text-gray-400 mr-0.5"
+                      />
                     }
                     placeholder="Nhập số điện thoại"
                     className="border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500"
                   />
                 </Form.Item>
               </div>
+              <p style={{marginTop: '-15px', marginBottom: '18px', fontSize: '9px'}} className="italic text-gray-500">
+                (Lưu ý: Vui lòng sử dụng{" "}
+                <strong>email và số điện thoại thực</strong> để đảm bảo một số nhu cầu về dịch vụ cũng như tài khoản..)
+              </p>
 
               <Form.Item
                 name="address"
@@ -394,7 +403,10 @@ const RegisterForm: React.FC = () => {
                   <Input.Password
                     size="middle"
                     prefix={
-                      <LockOutlined size={15} className="text-gray-400 mr-0.5" />
+                      <LockOutlined
+                        size={15}
+                        className="text-gray-400 mr-0.5"
+                      />
                     }
                     placeholder="Nhập mật khẩu của bạn"
                     onChange={handlePasswordChange}
@@ -406,8 +418,8 @@ const RegisterForm: React.FC = () => {
                   name="confirmPassword"
                   label={
                     <span className="text-sm font-semibold text-gray-700">
-                      <span className="text-xs text-red-400">*</span> Xác nhận mật
-                      khẩu
+                      <span className="text-xs text-red-400">*</span> Xác nhận
+                      mật khẩu
                     </span>
                   }
                   rules={[createConfirmPasswordValidator(form.getFieldValue)]}
@@ -415,7 +427,10 @@ const RegisterForm: React.FC = () => {
                   <Input.Password
                     size="middle"
                     prefix={
-                      <LockOutlined size={15} className="text-gray-400 mr-0.5" />
+                      <LockOutlined
+                        size={15}
+                        className="text-gray-400 mr-0.5"
+                      />
                     }
                     placeholder="Nhập lại mật khẩu của bạn"
                     onChange={handleConfirmPasswordChange}
@@ -489,7 +504,7 @@ const RegisterForm: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         {loading && (
           <Loading
             fullScreen={true}

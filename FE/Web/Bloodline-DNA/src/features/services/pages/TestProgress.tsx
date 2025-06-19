@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
+import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -232,14 +233,14 @@ export const TestProgress = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full h-[280px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           {/* Medical Pattern Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross-progress" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross-progress)" />
@@ -252,21 +253,21 @@ export const TestProgress = (): React.JSX.Element => {
               {/* Breadcrumb */}
               <div className="mb-6">
                 <Breadcrumb>
-                  <BreadcrumbList className="text-white/90">
+                  <BreadcrumbList className="text-blue-600">
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/" className="transition-colors duration-200 text-white/80 hover:text-white">
+                      <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Trang Chủ
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/booking-list" className="transition-colors duration-200 text-white/80 hover:text-white">
+                      <BreadcrumbLink href="/booking-list" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Danh Sách Đặt Lịch
                       </BreadcrumbLink>
                     </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-white/60" />
+                    <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <span className="text-[#00D4FF] font-semibold">Theo Dõi Quá Trình</span>
+                      <span className="text-blue-900 font-semibold">Theo Dõi Quá Trình</span>
                     </BreadcrumbItem>
                   </BreadcrumbList>
                 </Breadcrumb>
@@ -275,9 +276,9 @@ export const TestProgress = (): React.JSX.Element => {
               {/* Title & Info */}
               <div className="grid items-center grid-cols-1 gap-6 lg:grid-cols-2">
                 <div>
-                  <h1 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl">
+                  <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl">
                     Theo Dõi Quá Trình
-                    <span className="block text-[#00D4FF] text-xl md:text-2xl font-medium mt-1">
+                    <span className="block text-blue-700 text-xl md:text-2xl font-medium mt-1">
                       {progressData.testType}
                     </span>
                   </h1>
@@ -479,6 +480,9 @@ export const TestProgress = (): React.JSX.Element => {
 
         {/* Footer */}
         <div className="relative">
+          <div className="fixed bottom-0 right-0 p-4">
+            <ChatbotAI />
+          </div>
           <Footer />
         </div>
       </div>

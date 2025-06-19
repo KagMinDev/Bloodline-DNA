@@ -64,5 +64,17 @@ namespace ADNTester.Service.Implementations
                 throw;
             }
         }
+        public async Task<bool?> ToggleUserActiveStatusAsync(string userId)
+        {
+            var user = await _unitOfWork.UserRepository.GetByIdAsync(userId);
+            if (user == null) return null;
+
+            user.IsActive = !user.IsActive;
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            return user.IsActive;
+        }
+
     }
 }

@@ -8,13 +8,15 @@ namespace ADNTester.BO.Enums
 {
     public enum BookingStatus
     {
-        Pending = 0,
-        KitSend = 1,
-        Confirmed = 2,
-        Completed = 3,
-        Cancelled = 4,
-        SampleRecived = 5,
-        Testing = 6
-
+        Pending = 0,                // chờ
+        PreparingKit = 1,           // chuẩn bị kit test để giao hàng
+        DeliveringKit = 2,          // Staff đang giao kit test
+        KitDelivered = 3,           // Client nhận được kit test
+        WaitingForSample = 4,       // đợi client lấy mẫu
+        ReturningSample = 5,        // kit đang được staff lấy về
+        SampleReceived = 6,         // Nhận được sample
+        Testing = 7,                // đang kiểm tra sample
+        Completed = 8,              // hoàn thành có Test Result
+        Cancelled = 9               // bị hủy
     }
 }

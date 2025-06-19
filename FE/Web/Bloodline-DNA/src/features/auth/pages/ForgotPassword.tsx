@@ -1,40 +1,55 @@
-import { Button, Form, Input } from "antd";
-import { Heart, Mail, Shield, Unlock, Users } from "lucide-react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Button, Form, Input, Modal } from "antd";
+import { Ban, Heart, Mail, Shield, Unlock, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Loading from "../../../components/Loading";
 import { emailRules } from "../../../utils/validators/auth";
-
-interface ForgotPasswordData {
-  Email: string;
-}
+import { forgotPassword, resetPassword } from "../api/forgotPasswordApi";
+import type { ForgotPassword, ResetPassword } from "../types/auth.types";
 
 const ForgotPassword: React.FC = () => {
   const [form] = Form.useForm();
+  const [resetForm] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [emailSent, setEmailSent] = useState<string>("");
+  const [resetLoading, setResetLoading] = useState<boolean>(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [countdown, setCountdown] = useState(5); // thời gian đếm ngược (giây)
+  const navigate = useNavigate();
 
-  // Handle forgot password request
-  const handleForgotPassword = async (values: ForgotPasswordData) => {
+  useEffect(() => {
+    if (resetSuccess) {
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            navigate("/login");
+            setIsModalVisible(false);
+            setResetSuccess(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval); // cleanup nếu modal đóng
+    }
+  }, [resetSuccess, navigate]);
+
+  const handleForgotPassword = async (values: ForgotPassword) => {
     setLoading(true);
     try {
-      // Giả lập gửi yêu cầu đặt lại mật khẩu để kiểm tra loading
-      console.log("Dữ  giả:", values);
-      await new Promise((resolve) => setTimeout(resolve, 1500)); // Giả lập thời gian chờ 1.5s
-      // Nếu muốn dùng API thực, bỏ comment đoạn dưới và comment đoạn trên
-      /*
-      const response = await axios.post(
-        "http://localhost:5000/api/users/forgot-password",
-        values
-      );
-      console.log("Yêu cầu đặt lại mật khẩu thành công:", response.data);
-      */
-      form.resetFields(); // Xóa form sau khi gửi thành công
+      await forgotPassword(values.email);
+      setEmailSent(values.email);
+      setIsModalVisible(true);
+      form.resetFields();
     } catch (error) {
       console.error("Gửi yêu cầu thất bại:", error);
       form.setFields([
         {
-          name: "Email",
-          errors: ["Gửi yêu cầu thất bại, vui lòng kiểm tra lại"],
+          name: "email",
+          errors: [(error as Error).message],
         },
       ]);
     } finally {
@@ -42,12 +57,37 @@ const ForgotPassword: React.FC = () => {
     }
   };
 
+  const handleResetPassword = async (values: ResetPassword) => {
+  setResetLoading(true);
+  try {
+    const payload = {
+      email: emailSent,
+      otpCode: values.otpCode,
+      newPassword: values.newPassword,
+    };
+    await resetPassword(payload.email, payload.otpCode, payload.newPassword);
+
+    setResetSuccess(true); // ← Bắt đầu hiển thị trạng thái thành công
+    setCountdown(5); // ← Đặt lại thời gian đếm ngược 5s
+    resetForm.resetFields();
+  } catch (error) {
+    console.error("Reset password error:", error);
+    resetForm.setFields([
+      {
+        name: "otpCode",
+        errors: ["Mã OTP không hợp lệ hoặc đã hết hạn"],
+      },
+    ]);
+  } finally {
+    setResetLoading(false);
+  }
+};
+
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      {/* Left Side - Medical Image/Illustration */}
+      {/* Left side */}
       <div className="relative flex items-center justify-center flex-1 p-12 bg-gradient-to-br from-blue-600 to-blue-800">
         <div className="max-w-lg text-center text-white">
-          {/* Medical Cross Icon */}
           <div className="flex justify-center mb-8">
             <div className="relative">
               <div className="flex items-center justify-center w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm">
@@ -58,7 +98,6 @@ const ForgotPassword: React.FC = () => {
                   strokeWidth="2"
                   viewBox="0 0 24 24"
                 >
-                  {/* DNA Double Helix */}
                   <defs>
                     <style>
                       {`
@@ -71,8 +110,6 @@ const ForgotPassword: React.FC = () => {
                       `}
                     </style>
                   </defs>
-
-                  {/* Left DNA Strand */}
                   <g className="dna-strand1">
                     <path
                       d="M8 2c0 4-2 6-2 10s2 6 2 10"
@@ -84,8 +121,6 @@ const ForgotPassword: React.FC = () => {
                     <circle cx="6" cy="16" r="1.5" fill="currentColor" />
                     <circle cx="8" cy="20" r="1.5" fill="currentColor" />
                   </g>
-
-                  {/* Right DNA Strand */}
                   <g className="dna-strand2">
                     <path
                       d="M16 2c0 4 2 6 2 10s-2 6-2 10"
@@ -97,8 +132,6 @@ const ForgotPassword: React.FC = () => {
                     <circle cx="18" cy="16" r="1.5" fill="currentColor" />
                     <circle cx="16" cy="20" r="1.5" fill="currentColor" />
                   </g>
-
-                  {/* Connecting Lines */}
                   <line
                     x1="8"
                     y1="4"
@@ -151,13 +184,10 @@ const ForgotPassword: React.FC = () => {
               </div>
             </div>
           </div>
-
           <h1 className="mb-4 text-4xl font-bold">Khôi Phục Tài Khoản</h1>
           <p className="mb-8 text-xl text-blue-100">
             Lấy lại quyền truy cập hệ thống y tế của bạn
           </p>
-
-          {/* Features */}
           <div className="space-y-4">
             <div className="flex items-center justify-center space-x-3 text-blue-100">
               <Shield size={20} />
@@ -173,17 +203,11 @@ const ForgotPassword: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Decorative medical elements */}
-        <div className="absolute w-16 h-16 rounded-full top-10 left-10 bg-white/10 animate-pulse"></div>
-        <div className="absolute w-12 h-12 rounded-full bottom-20 right-16 bg-green-400/20 animate-pulse"></div>
-        <div className="absolute w-8 h-8 rounded-full top-1/3 right-8 bg-white/15"></div>
       </div>
 
-      {/* Right Side - Forgot Password Form */}
+      {/* Right side - form */}
       <div className="flex items-center justify-center flex-1 p-8 bg-white">
         <div className="w-full max-w-md">
-          {/* Header */}
           <div className="mb-8 text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full">
               <Unlock size={24} className="text-blue-600" />
@@ -196,7 +220,6 @@ const ForgotPassword: React.FC = () => {
             </p>
           </div>
 
-          {/* Forgot Password Form */}
           <Form
             form={form}
             layout="vertical"
@@ -211,13 +234,25 @@ const ForgotPassword: React.FC = () => {
                   Địa chỉ Email <span className="text-red-500">*</span>
                 </span>
               }
-              name="Email"
+              name="email"
               rules={emailRules}
+              className="mb-3"
+              help={
+                form.getFieldError("email").length > 0 ? (
+                  <div className="flex items-center gap-1.5 mt-2 mb-4 text-sm text-red-500">
+                    <Ban size={14} className="mt-[1px]" />
+                    <span>{form.getFieldError("email")[0]}</span>
+                  </div>
+                ) : null
+              }
+              validateStatus={
+                form.getFieldError("email").length > 0 ? "error" : ""
+              }
             >
               <Input
                 size="large"
                 placeholder="Nhập email của bạn"
-                prefix={<Mail size={15} className="mr-0.5 text-gray-400" />}
+                prefix={<Mail size={15} className="mr-1 text-gray-400" />}
                 className="border-gray-300 rounded-lg hover:border-blue-500 focus:border-blue-500"
               />
             </Form.Item>
@@ -235,10 +270,9 @@ const ForgotPassword: React.FC = () => {
             </Form.Item>
           </Form>
 
-          {/* Footer */}
           <div className="text-center">
-            <p className="mb-4 text-sm text-gray-600">
-              Quay lại{" "}
+            <p className="text-sm text-gray-600 ">
+              Quay lại.{""}
               <Link
                 to="/login"
                 className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
@@ -246,11 +280,11 @@ const ForgotPassword: React.FC = () => {
                 Đăng nhập
               </Link>
             </p>
-            <p className="mb-4 text-sm text-gray-600">
+            <p className="text-sm text-gray-600">
               Chưa có tài khoản?{" "}
               <Link
                 to="/register"
-                className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                className="ml-2 font-semibold text-green-600 hover:text-green-700 hover:underline"
               >
                 Đăng ký ngay
               </Link>
@@ -259,10 +293,73 @@ const ForgotPassword: React.FC = () => {
               <span>Hỗ trợ 24/7</span>
               <span>•</span>
               <span>Bảo mật SSL</span>
+              <span>•</span>
+              <span>HIPAA Compliant</span>
             </div>
           </div>
         </div>
       </div>
+
+      <Modal
+        title="Xác nhận đổi mật khẩu"
+        open={isModalVisible}
+        onCancel={() => {
+          setIsModalVisible(false);
+          setResetSuccess(false);
+          setCountdown(5);
+        }}
+        footer={null}
+      >
+        {resetSuccess ? (
+          <div className="py-6 text-center">
+            <p className="text-lg font-semibold text-green-600">
+              ✅ Mật khẩu đã được đặt lại thành công!
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Đang chuyển đến trang đăng nhập sau{" "}
+              <span className="font-semibold text-blue-600">{countdown}</span>{" "}
+              giây...
+            </p>
+          </div>
+        ) : (
+          <Form
+            form={resetForm}
+            layout="vertical"
+            onFinish={handleResetPassword}
+          >
+            <Form.Item label="Email" name="email" initialValue={emailSent}>
+              <Input disabled />
+            </Form.Item>
+            <Form.Item
+              label="Mã xác nhận (OTP)"
+              name="otpCode"
+              rules={[{ required: true, message: "Vui lòng nhập mã xác nhận" }]}
+            >
+              <Input placeholder="Nhập mã xác nhận" />
+            </Form.Item>
+            <Form.Item
+              label="Mật khẩu mới"
+              name="newPassword"
+              rules={[
+                { required: true, message: "Vui lòng nhập mật khẩu mới" },
+              ]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu mới" />
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="w-full"
+                loading={resetLoading}
+              >
+                Xác nhận đổi mật khẩu
+              </Button>
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
+
       {loading && (
         <Loading
           fullScreen={true}
@@ -275,4 +372,4 @@ const ForgotPassword: React.FC = () => {
   );
 };
 
-export default ForgotPassword
+export default ForgotPassword;
