@@ -1,9 +1,9 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { NotFound } from '../components';
+import { Blogs } from '../features';
 import AboutPage from '../features/about/pages/AboutPage';
 import HomePage from '../features/home/pages/HomePage';
-import { Blogs } from '../features/services/pages/Blogs';
 import { BookingDetail } from '../features/services/pages/BookingDetail';
 import { BookingList } from '../features/services/pages/BookingList';
 import { Contacts } from '../features/services/pages/Contacts';
