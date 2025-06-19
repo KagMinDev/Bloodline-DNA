@@ -201,8 +201,9 @@ namespace ADNTester.API.Controllers
      amount: (int)Math.Round(currentPayment.RemainingAmount ?? 0), // Handle null case
      description: description,
      items: [new("Thanh toán số tiền còn lại", 1, (int)Math.Round(currentPayment.RemainingAmount ?? 0))], // Handle null case
-     returnUrl: $"{domain}/payment/return",
-     cancelUrl: $"{domain}/payment/cancel"
+     returnUrl: $"{domain}/checkout-success",
+                    
+                    cancelUrl: $"{domain}/checkcancel"
  );
 
                 // Gọi API để tạo liên kết thanh toán
@@ -272,10 +273,10 @@ namespace ADNTester.API.Controllers
 
                     await _paymentService.CreateAsync(paymentDto);
 
-<<<<<<< HEAD
+
                     // Cập nhật trạng thái booking thành PreparingKit
                     await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.PreparingKit);
-=======
+
                     // Nếu là lấy mẫu tại nhà, tạo TestKit sau khi thanh toán cọc
                     if (booking.CollectionMethod == SampleCollectionMethod.SelfSample.ToString())
                     {
