@@ -349,7 +349,7 @@ namespace ADNTester.API.Controllers
                     await _paymentService.UpdatePaymentStatusAsync(callback.bookingId, PaymentStatus.Paid);
                     
                     // Cập nhật trạng thái booking thành Confirmed
-                    await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.Confirmed);
+                    await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.Testing);
 
                     return Ok(new { message = "Xử lý thanh toán số tiền còn lại thành công." });
                 }

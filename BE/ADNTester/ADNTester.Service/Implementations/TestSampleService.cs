@@ -48,7 +48,7 @@ namespace ADNTester.Service.Implementations
                 throw new Exception("Không tìm thấy thông tin đặt lịch");
 
             // Kiểm tra trạng thái booking
-            if (booking.Status != BookingStatus.SampleRecived)
+            if (booking.Status != BookingStatus.SampleReceived)
             {
                 throw new Exception($"Không thể tạo sample. Trạng thái đặt lịch hiện tại là {booking.Status}, cần phải ở trạng thái SampleReceived.");
             }
