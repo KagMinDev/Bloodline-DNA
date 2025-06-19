@@ -1,9 +1,10 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { NotFound } from '../components';
+import BlogDetail from '../features/customer/pages/BlogDetails';
+import { Blogs } from '../features/customer/pages/Blogs';
 import HomePage from '../features/home/pages/HomePage';
 import { BookingModal } from '../features/services/components/BookingModal';
-import { Blogs } from '../features/services/pages/Blogs';
 import { BookingDetail } from '../features/services/pages/BookingDetail';
 import { BookingList } from '../features/services/pages/BookingList';
 import { Contacts } from '../features/services/pages/Contacts';
@@ -26,6 +27,7 @@ export default function CustomerRouter() {
                 <Route path="/doctors" element={<Doctors />} />
                 <Route path="/contacts" element={<Contacts />} />
                 <Route path="/blogs" element={<Blogs />} />
+                <Route path="/blogs/:id" element={<BlogDetail />} />
                 <Route path="/booking-modal" element={<BookingModal isOpen={true} onClose={() => { }} onSubmit={() => { }} />} />
                 <Route path="/booking-detail" element={<BookingDetail />} />
                 <Route path="/test-progress" element={<TestProgress />} />

@@ -7,7 +7,7 @@ import { emailRules } from "../../../utils/validators/auth";
 import { forgotPassword, resetPassword } from "../api/forgotPasswordApi";
 import type { ForgotPassword, ResetPassword } from "../types/auth.types";
 
-const ForgotPassword: React.FC = () => {
+export const ForgotPasswordForm: React.FC = () => {
   const [form] = Form.useForm();
   const [resetForm] = Form.useForm();
   const [loading, setLoading] = useState<boolean>(false);
@@ -371,5 +371,3 @@ const ForgotPassword: React.FC = () => {
     </div>
   );
 };
-
-export default ForgotPassword;

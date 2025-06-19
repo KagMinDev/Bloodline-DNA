@@ -1,7 +1,8 @@
 import React from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { NotFound } from "../components";
-import { ForgotPassword, Login, Register } from "../features";
+import { ForgotPasswordForm, Login, Register } from "../features";
+import BlogDetail from "../features/customer/pages/BlogDetails";
 import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import CustomerRouter from "./CustomerRouter";
@@ -14,9 +15,10 @@ const App: React.FC = () => {
         {/* router auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
         <Route path="/" element={<HomePage />} />
-        
+
         {/* Not found */}
         <Route path="*" element={<NotFound />} />
 
