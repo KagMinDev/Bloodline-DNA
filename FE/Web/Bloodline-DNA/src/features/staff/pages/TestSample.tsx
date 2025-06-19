@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 
 import type { SampleTest } from '../types/sampleTest';
 
-const SampleManagement: React.FC = () => {
+const TestSample: React.FC = () => {
   const [samples, setSamples] = useState<SampleTest[]>([
     { id: 'ORD001', kitId: 'KIT001', sampleCode: 'SAMPLE001', donorName: 'Nguyen Van A', relationshipToSubject: 'Bố', sampleType: 'Máu', collectedById: 'COLLECTOR001' },
     { id: 'ORD002', kitId: 'KIT002', sampleCode: 'SAMPLE002', donorName: 'Tran Thi B', relationshipToSubject: 'Mẹ', sampleType: 'Nước tiểu', collectedById: 'COLLECTOR002' },
@@ -96,4 +96,4 @@ const SampleManagement: React.FC = () => {
   );
 };
 
-export default SampleManagement;
+export default TestSample;

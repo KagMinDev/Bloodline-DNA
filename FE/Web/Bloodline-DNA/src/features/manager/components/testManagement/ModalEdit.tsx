@@ -60,15 +60,15 @@ const ModalEdit: React.FC<ModalEditProps> = ({
             ? [{ ...initialData.priceServices[0] }]
             : [{ ...defaultPrice }],
       });
+      console.log("Initial isActive:", initialData?.priceServices[0]?.isActive ?? defaultPrice.isActive);
     } else {
       setForm(defaultForm);
+      console.log("Initial isActive:", defaultPrice.isActive);
     }
   }, [initialData, open]);
 
-  // Xử lý thay đổi trường chung và trường giá
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    // Nếu là trường của priceServices[0]
     if (
       [
         "price",
@@ -76,7 +76,6 @@ const ModalEdit: React.FC<ModalEditProps> = ({
         "currency",
         "effectiveFrom",
         "effectiveTo",
-        "isActive"
       ].includes(name)
     ) {
       setForm((prev) => ({
@@ -84,9 +83,9 @@ const ModalEdit: React.FC<ModalEditProps> = ({
         priceServices: prev.priceServices.map((ps, idx) =>
           idx === 0
             ? {
-              ...ps,
-              [name]: type === "number" ? Number(value) : type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-            }
+                ...ps,
+                [name]: type === "number" ? Number(value) : value,
+              }
             : ps
         ),
       }));
@@ -116,13 +115,15 @@ const ModalEdit: React.FC<ModalEditProps> = ({
           id: oldPriceServiceId,
           price: price.price,
           collectionMethod: price.collectionMethod,
-          effectiveFrom: price.effectiveFrom,
-          effectiveTo: price.effectiveTo,
+          effectiveFrom: new Date(price.effectiveFrom).toISOString(),
+          effectiveTo: new Date(price.effectiveTo).toISOString(),
           isActive: price.isActive,
           currency: price.currency || "VND",
         },
       ],
     };
+
+    console.log("Payload sent to API:", JSON.stringify(payload, null, 2));
 
     await onSubmit(payload);
     onClose();
@@ -220,20 +221,21 @@ const ModalEdit: React.FC<ModalEditProps> = ({
           <div className="flex items-center space-x-2">
             <Checkbox
               checked={price.isActive}
-              onChange={(checked: boolean) =>
+              onChange={(checked: boolean) => {
+                console.log("isActive changed to:", checked);
                 setForm((prev) => ({
                   ...prev,
                   priceServices: prev.priceServices.map((ps, idx) =>
                     idx === 0 ? { ...ps, isActive: checked } : ps
                   ),
-                }))
-              }
+                }));
+              }}
               label="Giá đang áp dụng"
             />
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
-            <Button type="submit">Lưu</Button>
+            <Button type="submit" className="bg-blue-600 text-white">Lưu</Button>
           </div>
         </form>
       </DialogContent>
