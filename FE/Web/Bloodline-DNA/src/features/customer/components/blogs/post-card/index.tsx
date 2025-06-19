@@ -16,7 +16,9 @@ export const PostCard: React.FC<PostCardProps> = ({
   const navigate = useNavigate();
 
   const handleReadMore = () => {
-    navigate(`/blogs/${post.id}`);
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const basePath = user?.role === "Client" ? "/customer" : "";
+    navigate(`${basePath}/blogs/${post.id}`);
   };
 
   return (

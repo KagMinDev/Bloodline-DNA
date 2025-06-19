@@ -4,6 +4,7 @@ import { NotFound } from "../components";
 import { ForgotPasswordForm, Login, Register } from "../features";
 import BlogDetail from "../features/customer/pages/BlogDetails";
 import HomePage from "../features/home/pages/HomePage";
+import { Blogs, Contacts, DetailServices, Doctors, Services } from "../features/services";
 import AdminRouter from "./AdminRouter";
 import CustomerRouter from "./CustomerRouter";
 import ManagerRouter from "./ManagerRouter";
@@ -16,7 +17,12 @@ const App: React.FC = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/:id" element={<DetailServices />} />
+        <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
+        <Route path="/doctors" element={<Doctors />} />
+        <Route path="/contacts" element={<Contacts />} />
         <Route path="/" element={<HomePage />} />
 
         {/* Not found */}
