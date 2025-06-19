@@ -18,17 +18,17 @@ const SidebarData: SidebarDataType[] = [
   {
     icon: GrTestDesktop,
     heading: 'Quản lí đơn xét nghiệm',
-    href: '/staff/testbookingmanagement',
+    href: '/staff/test-booking',
   },
   {
     icon: TbTestPipe,
     heading: 'Quản lí mẫu xét nghiệm',
-    href: '/staff/samplemanagement',
+    href: '/staff/test-sample',
   },
   {
     icon: SiTestcafe,
     heading: 'Quản lí kết quả xét nghiệm',
-    href: '/staff/testresult',
+    href: '/staff/test-result',
   },
 
 ];
