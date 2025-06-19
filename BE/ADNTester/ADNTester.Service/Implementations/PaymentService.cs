@@ -1,8 +1,10 @@
 ﻿using ADNTester.BO.DTOs.Payment;
 using ADNTester.BO.Entities;
+using ADNTester.BO.Enums;
 using ADNTester.Repository.Interfaces;
 using ADNTester.Service.Interfaces;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -14,12 +16,18 @@ namespace ADNTester.Service.Implementations
 {
     public class PaymentService : IPaymentService
     {
+        private readonly IPaymentRepository _paymentRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<PaymentService> _logger;
 
-        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<PaymentService> logger)
+        public PaymentService(
+            IPaymentRepository paymentRepository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            ILogger<PaymentService> logger)
         {
+            _paymentRepository = paymentRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
@@ -57,7 +65,47 @@ namespace ADNTester.Service.Implementations
             _mapper.Map(dto, existing);
             _unitOfWork.PaymentRepository.Update(existing);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+          
+        public async Task<Payment> GetByBookingIdAsync(string bookingId)
+        {
+            try
+            {
+                var payment = await _paymentRepository.FindOneAsync( x=> x.BookingId == bookingId);
 
+
+                return payment;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting payment by booking ID: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdatePaymentStatusAsync(string bookingId, PaymentStatus status)
+        {
+            try
+            {
+                var payment = await GetByBookingIdAsync(bookingId);
+                if (payment == null)
+                {
+                    return false;
+                }
+
+                payment.Status = status;
+                payment.UpdatedAt = DateTime.UtcNow;
+
+                _paymentRepository.Update(payment);
+                await _unitOfWork.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error updating payment status: {ex.Message}");
+                throw;
+            }
         }
     }
 }

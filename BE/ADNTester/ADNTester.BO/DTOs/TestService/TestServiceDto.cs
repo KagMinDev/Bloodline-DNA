@@ -13,5 +13,6 @@ namespace ADNTester.BO.DTOs
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public List<PriceServiceDto> PriceServices { get; set; }
+        public int SampleCount { get; set; }
     }
 } 
