@@ -28,6 +28,8 @@ namespace ADNTester.Repository
         public DbSet<Payment> Payments { get; set; }
         public DbSet<SampleTypeInstruction> SampleTypeInstructions { get; set; }
         public DbSet<OtpCode> OtpCodes { get; set; }
+        public DbSet<LogisticsInfo> LogisticsInfos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -136,6 +138,35 @@ namespace ADNTester.Repository
                 .Property(b => b.Status)
                 .HasConversion<string>()
                 .HasMaxLength(30);
+
+            modelBuilder.Entity<TestService>()
+                .Property(x => x.IsActive)
+                .HasDefaultValue(true);
+            // LogisticsInfo config
+            modelBuilder.Entity<LogisticsInfo>(entity =>
+            {
+                entity.HasKey(l => l.Id);
+                entity.Property(l => l.Id).ValueGeneratedNever(); // Do not let DB auto-generate
+            });
+            modelBuilder.Entity<LogisticsInfo>()
+                .Property(l => l.Type)
+                .HasConversion<string>()
+                .HasMaxLength(30);// store enum as string
+
+            // TestKit config
+            modelBuilder.Entity<TestKit>(entity =>
+            {
+                entity.HasOne(t => t.DeliveryInfo)
+                      .WithMany() // Not a 2-way navigation
+                      .HasForeignKey(t => t.DeliveryInfoId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(t => t.PickupInfo)
+                      .WithMany()
+                      .HasForeignKey(t => t.PickupInfoId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
         }
     }
 }

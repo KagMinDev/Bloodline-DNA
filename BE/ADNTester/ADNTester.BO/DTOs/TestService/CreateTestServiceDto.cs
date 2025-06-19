@@ -9,6 +9,7 @@ namespace ADNTester.BO.DTOs
         public string Description { get; set; }
         public TestServiceType Type { get; set; }
         public bool IsActive { get; set; }
+        public int SampleCount { get; set; }
         public List<CreatePriceServiceDto> PriceServices { get; set; }
     }
 }

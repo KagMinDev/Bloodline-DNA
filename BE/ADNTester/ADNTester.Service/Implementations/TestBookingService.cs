@@ -104,25 +104,26 @@ namespace ADNTester.Service.Implementations
             await _unitOfWork.TestBookingRepository.AddAsync(booking);
             await _unitOfWork.SaveChangesAsync();
 
-            // Tạo TestKit dựa trên CollectionMethod
-            var testKit = new CreateTestKitDto
-            {
-                BookingId = booking.Id
-            };
-
-            // Set các trường ngày tháng dựa trên CollectionMethod
+            // Kiểm tra phương thức lấy mẫu
             if (priceService.CollectionMethod == SampleCollectionMethod.SelfSample)
             {
-                testKit.ShippedAt = DateTime.UtcNow;
-                testKit.ReceivedAt = null;
+                // Nếu là lấy mẫu tại nhà, không tạo kit ngay
+                // Kit sẽ được tạo sau khi thanh toán cọc
+                return booking.Id;
             }
             else if (priceService.CollectionMethod == SampleCollectionMethod.AtFacility)
             {
-                testKit.SentToLabAt = DateTime.UtcNow;
-                testKit.LabReceivedAt = null;
+                // Nếu là lấy mẫu tại cơ sở, tạo kit ngay
+                var testKit = new CreateTestKitDto
+                {
+                    BookingId = booking.Id,
+                    SentToLabAt = DateTime.UtcNow,
+                    LabReceivedAt = null
+                };
+
+                await _testKitService.CreateAsync(testKit);
             }
 
-            await _testKitService.CreateAsync(testKit);
             return booking.Id;
         }
 
@@ -279,16 +280,21 @@ namespace ADNTester.Service.Implementations
             return emailTemplate;
         }
 
+        #region Helper methods
         private string GetStatusText(BookingStatus status)
         {
             return status switch
             {
-                BookingStatus.KitSend => "Kit Sent",
-                BookingStatus.Confirmed => "Booking Confirmed",
+                BookingStatus.Pending => "Pending",
+                BookingStatus.PreparingKit => "Preparing Test Kit",
+                BookingStatus.DeliveringKit => "Delivering Test Kit",
+                BookingStatus.KitDelivered => "Kit Delivered",
+                BookingStatus.WaitingForSample => "Waiting for Sample",
+                BookingStatus.ReturningSample => "Returning Sample",
+                BookingStatus.SampleReceived => "Sample Received",
+                BookingStatus.Testing => "Testing in Progress",
                 BookingStatus.Completed => "Test Completed",
                 BookingStatus.Cancelled => "Booking Cancelled",
-                BookingStatus.SampleRecived => "Sample Received",
-                BookingStatus.Testing => "Testing in Progress",
                 _ => status.ToString()
             };
         }
@@ -297,12 +303,16 @@ namespace ADNTester.Service.Implementations
         {
             return status switch
             {
-                BookingStatus.KitSend => $"Your test kit for {serviceName} has been sent. Please expect the kit to arrive soon.",
-                BookingStatus.Confirmed => $"Your booking for {serviceName} has been confirmed. We will process your request shortly.",
-                BookingStatus.Completed => $"Your test for {serviceName} has been completed. You can view your results in your account.",
-                BookingStatus.Cancelled => $"Your booking for {serviceName} has been cancelled. If you have any questions, please contact our support team.",
-                BookingStatus.SampleRecived => $"We have received your sample for {serviceName}. We will begin processing your sample shortly.",
-                BookingStatus.Testing => $"Your sample for {serviceName} is currently being tested. We will notify you once the results are ready.",
+                BookingStatus.Pending => $"Your booking for {serviceName} is pending. We will begin processing it shortly.",
+                BookingStatus.PreparingKit => $"We are preparing your test kit for {serviceName}. It will be delivered soon.",
+                BookingStatus.DeliveringKit => $"Your test kit for {serviceName} is on the way. Please be available to receive it.",
+                BookingStatus.KitDelivered => $"You have received the test kit for {serviceName}. Please collect your sample as instructed.",
+                BookingStatus.WaitingForSample => $"We are waiting for your sample for {serviceName}. Please return it as soon as possible.",
+                BookingStatus.ReturningSample => $"Your sample for {serviceName} is being returned to our lab by our staff.",
+                BookingStatus.SampleReceived => $"We have received your sample for {serviceName}. Testing will begin shortly.",
+                BookingStatus.Testing => $"Testing is currently in progress for your {serviceName} sample.",
+                BookingStatus.Completed => $"Your {serviceName} test is completed. Results are available in your account.",
+                BookingStatus.Cancelled => $"Your booking for {serviceName} has been cancelled.",
                 _ => $"Your booking status for {serviceName} has been updated."
             };
         }
@@ -311,40 +321,63 @@ namespace ADNTester.Service.Implementations
         {
             return status switch
             {
-                BookingStatus.KitSend => @"
-            <p>What to expect next:</p>
+                BookingStatus.PreparingKit => @"
+            <p>We're preparing your DNA test kit:</p>
             <ul>
-                <li>You will receive the test kit within 2-3 business days</li>
-                <li>Follow the instructions provided in the kit</li>
-                <li>Return the sample using the prepaid shipping label</li>
+                <li>Expect delivery within 1–2 days</li>
+                <li>Check your contact info is correct</li>
             </ul>",
-                BookingStatus.Confirmed => @"
-            <p>Next steps:</p>
+
+                BookingStatus.DeliveringKit => @"
+            <p>Kit is being delivered:</p>
             <ul>
-                <li>Prepare for your appointment</li>
-                <li>Bring a valid ID</li>
-                <li>Arrive 10 minutes before your scheduled time</li>
+                <li>Keep your phone available for delivery updates</li>
+                <li>Contact staff if you’re not home</li>
             </ul>",
-                BookingStatus.Completed => @"
-            <p>Your results are now available:</p>
-            <a href='https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fsearch%3Fk%3Ddna%2Blogo&psig=AOvVaw3SjIGcROq-REudWAWyUwTr&ust=1748592724549000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCNCr0tWdyI0DFQAAAAAdAAAAABAE' class='button'>View Results</a>",
-                BookingStatus.SampleRecived => @"
-            <p>Sample processing timeline:</p>
+
+                BookingStatus.KitDelivered => @"
+            <p>Kit delivered:</p>
             <ul>
-                <li>Sample verification: 1-2 business days</li>
-                <li>Testing process: 3-5 business days</li>
-                <li>Results review: 1-2 business days</li>
+                <li>Open the kit and follow the instructions carefully</li>
+                <li>Collect your sample as soon as possible</li>
             </ul>",
+
+                BookingStatus.WaitingForSample => @"
+            <p>Waiting for your sample:</p>
+            <ul>
+                <li>Make sure your sample is packaged correctly</li>
+                <li>Use the provided return bag</li>
+            </ul>",
+
+                BookingStatus.ReturningSample => @"
+            <p>Your sample is on its way back to us:</p>
+            <ul>
+                <li>It is being handled by a staff member</li>
+                <li>We'll notify you once received</li>
+            </ul>",
+
+                BookingStatus.SampleReceived => @"
+            <p>Sample received at the lab:</p>
+            <ul>
+                <li>Verification: 1–2 business days</li>
+                <li>Testing starts soon</li>
+            </ul>",
+
                 BookingStatus.Testing => @"
-            <p>Current testing phase:</p>
+            <p>Testing underway:</p>
             <ul>
                 <li>Sample analysis in progress</li>
-                <li>Quality control checks</li>
-                <li>Results compilation</li>
+                <li>Results available in 3–5 business days</li>
             </ul>",
+
+                BookingStatus.Completed => @"
+            <p>Your test is completed:</p>
+            <a href='https://yourdomain.com/results' class='button'>View Results</a>",
+
                 _ => ""
             };
         }
+#endregion
 
     }
 } 

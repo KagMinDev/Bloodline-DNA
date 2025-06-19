@@ -1,10 +1,9 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { NotFound } from '../components';
-import BlogDetail from '../features/customer/pages/BlogDetails';
-import { Blogs } from '../features/customer/pages/Blogs';
+import AboutPage from '../features/about/pages/AboutPage';
 import HomePage from '../features/home/pages/HomePage';
-import { BookingModal } from '../features/services/components/BookingModal';
+import { Blogs } from '../features/services/pages/Blogs';
 import { BookingDetail } from '../features/services/pages/BookingDetail';
 import { BookingList } from '../features/services/pages/BookingList';
 import { Contacts } from '../features/services/pages/Contacts';
@@ -22,13 +21,12 @@ export default function CustomerRouter() {
         <div className="flex-1">
             <Routes>
                 <Route path="/" element={<HomePage />} /> {/* 👈 route homepage trong customer */}
+                <Route path="/about" element={<AboutPage />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/services/:id" element={<DetailServices />} />
                 <Route path="/doctors" element={<Doctors />} />
                 <Route path="/contacts" element={<Contacts />} />
                 <Route path="/blogs" element={<Blogs />} />
-                <Route path="/blogs/:id" element={<BlogDetail />} />
-                <Route path="/booking-modal" element={<BookingModal isOpen={true} onClose={() => { }} onSubmit={() => { }} />} />
                 <Route path="/booking-detail" element={<BookingDetail />} />
                 <Route path="/test-progress" element={<TestProgress />} />
                 <Route path="/edit-booking" element={<EditBooking />} />

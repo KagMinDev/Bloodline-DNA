@@ -1,18 +1,38 @@
-import { message } from 'antd';
-import React from 'react';
-import AppRouters from './Router/AppRouter';
+import AppRouter from './Router/AppRouter';
+import { BrowserRouter } from 'react-router-dom';
+import { BookingModalProvider } from './features/services/components/BookingModalContext';
+import { BookingModal } from './features/services/components/BookingModal';
+import { useBookingModal } from './features/services/components/BookingModalContext';
+import ChatbotAI from './features/chatbotAI/components/ChatbotAI';
 
-message.config({
-  top: 80,         // Cách top 80px (để tránh đè lên header nếu có)
-  duration: 3,     // Tự động đóng sau 3 giây
-  maxCount: 3,     // Tối đa 3 message cùng lúc
-});
-
-const App: React.FC = () => {
+function App() {
   return (
-    <div className="App">
-      <AppRouters />
-    </div>
+    <BrowserRouter>
+      <BookingModalProvider>
+        <MainContent />
+      </BookingModalProvider>
+    </BrowserRouter>
+  );
+}
+
+function MainContent() {
+  const { isBookingModalOpen, closeBookingModal } = useBookingModal();
+
+  return (
+    <>
+      <AppRouter />
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={closeBookingModal}
+        onSubmit={() => {
+          // Handle submission logic here
+          closeBookingModal();
+        }}
+      />
+      <div className="fixed bottom-0 right-0 p-4 z-50">
+        <ChatbotAI />
+      </div>
+    </>
   );
 }
 

@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Footer, Header } from "../../../components";
+import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -57,6 +58,7 @@ export const Services = (): React.JSX.Element => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
 
+  const { openBookingModal } = useBookingModal();
   const navigate = useNavigate();
 
   const handleClick = (id: number) => {
@@ -250,14 +252,14 @@ export const Services = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section - Medical Style */}
-        <section className="relative w-full h-[320px] md:h-[360px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] via-[#0052A3] to-[#003875]">
+        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
           {/* Medical Pattern Background */}
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <pattern id="medical-cross" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="white"/>
-                  <rect x="4" y="8" width="12" height="4" fill="white"/>
+                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
+                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#medical-cross)" />
@@ -267,14 +269,14 @@ export const Services = (): React.JSX.Element => {
           {/* Decorative Medical Elements */}
           <div className="absolute inset-0 overflow-hidden">
             {/* Floating medical icons */}
-            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-white/10 animate-pulse">
-              <HeartIcon className="w-8 h-8 text-white/60" />
+            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-blue-200/30 animate-pulse">
+              <HeartIcon className="w-8 h-8 text-blue-600/60" />
             </div>
-            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-white/10 animate-bounce" style={{animationDelay: '1s'}}>
-              <StethoscopeIcon className="w-6 h-6 text-white/60" />
+            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-blue-200/30 animate-bounce" style={{animationDelay: '1s'}}>
+              <StethoscopeIcon className="w-6 h-6 text-blue-600/60" />
             </div>
-            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-white/10 animate-pulse" style={{animationDelay: '2s'}}>
-              <ShieldIcon className="w-7 h-7 text-white/60" />
+            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-blue-200/30 animate-pulse" style={{animationDelay: '2s'}}>
+              <ShieldIcon className="w-7 h-7 text-blue-600/60" />
             </div>
           </div>
 
@@ -290,30 +292,30 @@ export const Services = (): React.JSX.Element => {
                   {/* Breadcrumb */}
                   <div className="mb-6">
                     <Breadcrumb>
-                      <BreadcrumbList className="text-white/90">
+                      <BreadcrumbList className="text-blue-600">
                         <BreadcrumbItem>
-                          <BreadcrumbLink href="/" className="transition-colors duration-200 text-white/80 hover:text-white">
+                          <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                             Trang Chủ
                           </BreadcrumbLink>
                         </BreadcrumbItem>
-                        <BreadcrumbSeparator className="text-white/60" />
+                        <BreadcrumbSeparator className="text-blue-400" />
                         <BreadcrumbItem>
-                          <span className="text-[#00D4FF] font-semibold">Dịch Vụ Y Tế</span>
+                          <span className="text-blue-900 font-semibold">Dịch Vụ Y Tế</span>
                         </BreadcrumbItem>
                       </BreadcrumbList>
                     </Breadcrumb>
                   </div>
 
                   {/* Title */}
-                  <h1 className="mb-4 text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+                  <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl lg:text-5xl">
                     Dịch Vụ Y Tế
-                    <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
+                    <span className="block text-blue-700 text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
                       Chất Lượng Cao
                     </span>
                   </h1>
 
                   {/* Description */}
-                  <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-white/90">
+                  <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-blue-700">
                     Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.
                   </p>
 
@@ -579,7 +581,10 @@ export const Services = (): React.JSX.Element => {
               Liên hệ ngay với chúng tôi để được tư vấn và đặt lịch sử dụng dịch vụ phù hợp
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900">
+              <Button
+                onClick={openBookingModal}
+                className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900"
+              >
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 Đặt Lịch Ngay
               </Button>
