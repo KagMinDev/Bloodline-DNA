@@ -1,13 +1,14 @@
+'use client';
 import React from 'react';
 import { BsCalendarXFill } from 'react-icons/bs';
 import type { TestBookingResponse } from '../../../types/testBooking';
-import { STATUS_MAPPING } from '../utils/statusmapping';
-import { getStatusColor } from '../utils/statusColor';
+import { getStatusLabel } from '../utils/statusUtils';
+import { getStatusColor } from '../constants/statusMapping';
 
 interface BookingListPanelProps {
   selectedDay: string;
   bookings: TestBookingResponse[];
-  selectedStatus: Record<string, string>;
+  selectedStatus: Record<string, string>; // Fixed to match usage
   statusOptions: string[];
   setSelectedStatus: (bookingId: string, value: string) => void;
 }
@@ -16,31 +17,6 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
   selectedDay,
   bookings,
 }) => {
-  // Function to convert status to numeric value
-  const statusToNumber = (status: string | number): number => {
-    if (typeof status === 'number') {
-      return status; // Return as-is if already a number
-    }
-    // Map API string statuses to numeric values
-    const statusMap: Record<string, number> = {
-      Pending: 0, // Chờ xử lý
-      SentKit: 1, // Đã gửi kit
-      Confirmed: 2, // Đã xác nhận
-      Completed: 3, // Đã hoàn tất
-      Cancelled: 4, // Đã huỷ
-      SampleReceived: 5, // Đã nhận mẫu
-      Testing: 6, // Đang xét nghiệm
-    };
-    return statusMap[status] !== undefined ? statusMap[status] : -1; // Fallback to -1 for unknown statuses
-  };
-
-  // Function to get status label
-  const getStatusLabel = (statusValue: string | number) => {
-    const numericValue = typeof statusValue === 'number' ? statusValue : statusToNumber(statusValue);
-    const status = STATUS_MAPPING.find((item: any) => item.value === numericValue);
-    return status ? status.label : 'Không xác định';
-  };
-
   return (
     <div className="flex h-full w-full flex-col rounded-xl bg-white shadow-lg">
       <div className="text-center pt-6 pb-3 border-b-2 border-blue-600 text-lg font-semibold text-blue-600">
@@ -54,7 +30,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
           </div>
         ) : (
           bookings.map((booking) => {
-            console.log('Booking status:', booking.status); // Debug status value
+            console.log('Booking status:', booking.status);
             const statusLabel = getStatusLabel(booking.status);
             return (
               <div
@@ -78,7 +54,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
                         booking.status
                       )}`}
                     >
-                      {statusLabel} {/* Use statusLabel instead of booking.status */}
+                      {statusLabel}
                     </span>
                   </div>
                   <div>Giá: {booking.price?.toLocaleString() || '0'} VNĐ</div>

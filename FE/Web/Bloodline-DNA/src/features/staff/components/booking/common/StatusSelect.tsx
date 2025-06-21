@@ -1,26 +1,27 @@
-// components/booking/common/StatusSelect.tsx
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+'use client';
+import React from 'react';
 
-type Props = {
+interface Props {
   value: string;
   options: string[];
   onChange: (value: string) => void;
-};
+  disabled?: boolean;
+}
 
-const StatusSelect: React.FC<Props> = ({ value, options, onChange }) => {
+const StatusSelect: React.FC<Props> = ({ value, options, onChange, disabled = false }) => {
   return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Chọn trạng thái" />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((status) => (
-          <SelectItem key={status} value={status}>
-            {status}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
   );
 };
 

@@ -1,5 +1,5 @@
 import { Button } from "antd";
-import { useBookingModal } from "../../services/components/BookingModalContext";
+import { useBookingModal } from "../../customer/components/BookingModalContext";
 
 const HeroSection: React.FC = () => {
   const { openBookingModal } = useBookingModal();

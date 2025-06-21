@@ -59,6 +59,7 @@ export const getTestBookingByIdApi = async (id: string, token: string): Promise<
 };
 
 // Hàm PUT/PATCH: Cập nhật trạng thái đặt lịch xét nghiệm
+// https://api.adntester.duckdns.org/api/TestBooking/2929BD388FF34838/status?newStatus=8
 export const updateTestBookingStatusApi = async (request: TestBookingStatusRequest, token: string): Promise<TestBookingResponse> => {
   const maxRetries = 3;
   const timeout = 10000;
@@ -66,7 +67,7 @@ export const updateTestBookingStatusApi = async (request: TestBookingStatusReque
 
   while (attempts < maxRetries) {
     try {
-      const response = await rootApi.put<{ data: TestBookingResponse }>(`/TestBooking/${request.bookingId}/status`, {
+      const response = await rootApi.put<{ data: TestBookingResponse }>(`/TestBooking/${request.bookingId}/status?newStatus=${request.status}`, {
         status: request.status,
       },
         {

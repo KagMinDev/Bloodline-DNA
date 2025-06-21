@@ -3,16 +3,16 @@ import { Route, Routes } from 'react-router-dom';
 import { NotFound } from '../components';
 import AboutPage from '../features/about/pages/AboutPage';
 import HomePage from '../features/home/pages/HomePage';
-import { Blogs } from '../features/services/pages/Blogs';
-import { BookingDetail } from '../features/services/pages/BookingDetail';
-import { BookingList } from '../features/services/pages/BookingList';
-import { Contacts } from '../features/services/pages/Contacts';
-import { DetailServices } from '../features/services/pages/DetailServices';
-import { Doctors } from '../features/services/pages/Doctors';
-import { EditBooking } from '../features/services/pages/EditBooking';
-import { EditProfile } from '../features/services/pages/EditProfile';
-import { Services } from '../features/services/pages/Services';
-import { TestProgress } from '../features/services/pages/TestProgress';
+import { Blogs } from '../features/customer/pages/Blogs';
+import { BookingDetail } from '../features/customer/pages/BookingDetail';
+import { BookingList } from '../features/customer/pages/BookingList';
+import { Contacts } from '../features/customer/pages/Contacts';
+import { DetailServices } from '../features/customer/pages/DetailServices';
+import { Doctors } from '../features/customer/pages/Doctors';
+import { EditBooking } from '../features/customer/pages/EditBooking';
+import { EditProfile } from '../features/customer/pages/EditProfile';
+import { Services } from '../features/customer/pages/Services';
+import { TestProgress } from '../features/customer/pages/TestProgress';
 
 export default function CustomerRouter() {
     return (
