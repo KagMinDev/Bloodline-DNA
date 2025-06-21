@@ -19,6 +19,7 @@ namespace ADNTester.Repository
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
             services.AddScoped<IServicePriceRepository, ServicePriceRepository>();
             services.AddScoped<ITagRepository, TagRepository>();
+            services.AddScoped<IBlogTagRepository, BlogTagRepository>();
             services.AddScoped<ITestBookingRepository, TestBookingRepository>();
             services.AddScoped<ITestKitRepository, TestKitRepository>();
             services.AddScoped<ITestResultRepository, TestResultRepository>();
@@ -28,7 +29,7 @@ namespace ADNTester.Repository
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<ISampleInstructionRepository, SampleInstructionRepository>();
             services.AddScoped<IOtpRepository, OtpRepository>();
-
+            services.AddScoped<ILogisticInfoRepository, LogisticInfoRepository>();
             return services;
         }
     }

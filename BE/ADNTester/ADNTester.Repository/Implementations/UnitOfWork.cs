@@ -17,6 +17,7 @@ namespace ADNTester.Repository.Implementations
         public IFeedbackRepository FeedbackRepository { get; }
         public IServicePriceRepository ServicePriceRepository { get; }
         public ITagRepository TagRepository { get; }
+        public IBlogTagRepository BlogTagRepository { get; }
         public ITestBookingRepository TestBookingRepository { get; }
         public ITestKitRepository TestKitRepository { get; }
         public ITestResultRepository TestResultRepository { get; }
@@ -26,12 +27,14 @@ namespace ADNTester.Repository.Implementations
         public ISampleInstructionRepository SampleInstructionRepository { get; }
         public IPaymentRepository PaymentRepository { get; }
         public IOtpRepository OtpRepository { get; }
+        public ILogisticInfoRepository LogisticInfoRepository { get; }
         public UnitOfWork(
             ApplicationDbContext context,
             IBlogRepository blogRepository,
             IFeedbackRepository feedbackRepository,
             IServicePriceRepository servicePriceRepository,
             ITagRepository tagRepository,
+            IBlogTagRepository blogTagRepository,
             ITestBookingRepository testBookingRepository,
             ITestKitRepository testKitRepository,
             ITestResultRepository testResultRepository,
@@ -40,13 +43,15 @@ namespace ADNTester.Repository.Implementations
             IUserRepository userRepository,
             ISampleInstructionRepository sampleInstructionRepository,
             IPaymentRepository paymentRepository,
-            IOtpRepository otpRepository)
+            IOtpRepository otpRepository,
+            ILogisticInfoRepository logisticInfoRepository)
         {
             _context = context;
             IBlogRepository = blogRepository;
             FeedbackRepository = feedbackRepository;
             ServicePriceRepository = servicePriceRepository;
             TagRepository = tagRepository;
+            BlogTagRepository = blogTagRepository;
             TestBookingRepository = testBookingRepository;
             TestKitRepository = testKitRepository;
             TestResultRepository = testResultRepository;
@@ -56,6 +61,7 @@ namespace ADNTester.Repository.Implementations
             SampleInstructionRepository = sampleInstructionRepository;
             PaymentRepository = paymentRepository;
             OtpRepository = otpRepository;
+            LogisticInfoRepository = logisticInfoRepository;
         }
 
         public async Task BeginTransactionAsync()

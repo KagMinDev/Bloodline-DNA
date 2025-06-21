@@ -1,4 +1,6 @@
-﻿using ADNTester.BO.Enums;
+﻿using ADNTester.BO.DTOs.TestBooking;
+using ADNTester.BO.DTOs.User;
+using ADNTester.BO.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,5 +32,8 @@ namespace ADNTester.BO.DTOs.Payment
         public string PaymentUrl { get; set; }
 
         public string QrCode { get; set; }
+
+        public TestBookingDetailDto Booking { get; set; }
+        public UserDto User { get; set; }
     }
 }

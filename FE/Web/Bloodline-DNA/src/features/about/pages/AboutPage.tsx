@@ -1,13 +1,13 @@
 import React from "react";
 import { Footer, Header } from "../../../components";
 import {
+  AchievementsSection,
   HeroSection,
   HistorySection,
   MissionVisionSection,
-  ValuesSection,
   TeamSection,
-  AchievementsSection,
-  TechnologySection
+  TechnologySection,
+  ValuesSection,
 } from "../components";
 
 const AboutPage: React.FC = () => {
@@ -26,4 +26,4 @@ const AboutPage: React.FC = () => {
   );
 };
 
-export default AboutPage; 
+export default AboutPage;

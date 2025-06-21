@@ -10,6 +10,6 @@ namespace ADNTester.BO.DTOs.TestKit
         public DateTime? SentToLabAt { get; set; }
         public DateTime? LabReceivedAt { get; set; }
         public string? Note { get; set; }
-
+        public int SampleCount { get; set; }
     }
 } 

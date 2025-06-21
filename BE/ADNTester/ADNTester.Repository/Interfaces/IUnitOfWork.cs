@@ -13,6 +13,7 @@ namespace ADNTester.Repository.Interfaces
         IFeedbackRepository FeedbackRepository { get; }
         IServicePriceRepository ServicePriceRepository { get; }
         ITagRepository TagRepository { get; }
+        IBlogTagRepository BlogTagRepository { get; }
         ITestBookingRepository TestBookingRepository { get; }
         ITestKitRepository TestKitRepository { get; }
         ITestResultRepository TestResultRepository { get; }
@@ -22,6 +23,7 @@ namespace ADNTester.Repository.Interfaces
         ISampleInstructionRepository SampleInstructionRepository { get; }
         IPaymentRepository PaymentRepository { get; }
         IOtpRepository OtpRepository { get; }
+        ILogisticInfoRepository LogisticInfoRepository { get; }
         Task BeginTransactionAsync();
         Task CommitAsync();
         Task RollbackAsync();

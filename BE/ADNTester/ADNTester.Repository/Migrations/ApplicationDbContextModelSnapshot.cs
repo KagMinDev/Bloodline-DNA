@@ -122,6 +122,43 @@ namespace ADNTester.Repository.Migrations
                     b.ToTable("Feedbacks");
                 });
 
+            modelBuilder.Entity("ADNTester.BO.Entities.LogisticsInfo", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ScheduledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("StaffId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StaffId");
+
+                    b.ToTable("LogisticsInfos");
+                });
+
             modelBuilder.Entity("ADNTester.BO.Entities.OtpCode", b =>
                 {
                     b.Property<string>("Id")
@@ -365,10 +402,16 @@ namespace ADNTester.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("CollectionMethod")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("DeliveryInfoId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("LabReceivedAt")
                         .HasColumnType("datetime2");
@@ -376,23 +419,14 @@ namespace ADNTester.Repository.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("ReceivedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ReturnOrderCode")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("PickupInfoId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("SampleCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("SentToLabAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ShippedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ShippingOrderCode")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .ValueGeneratedOnAdd()
@@ -403,6 +437,10 @@ namespace ADNTester.Repository.Migrations
 
                     b.HasIndex("BookingId")
                         .IsUnique();
+
+                    b.HasIndex("DeliveryInfoId");
+
+                    b.HasIndex("PickupInfoId");
 
                     b.ToTable("TestKits");
                 });
@@ -513,6 +551,11 @@ namespace ADNTester.Repository.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -633,6 +676,15 @@ namespace ADNTester.Repository.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ADNTester.BO.Entities.LogisticsInfo", b =>
+                {
+                    b.HasOne("ADNTester.BO.Entities.User", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId");
+
+                    b.Navigation("Staff");
+                });
+
             modelBuilder.Entity("ADNTester.BO.Entities.Payment", b =>
                 {
                     b.HasOne("ADNTester.BO.Entities.TestBooking", "Booking")
@@ -682,7 +734,21 @@ namespace ADNTester.Repository.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ADNTester.BO.Entities.LogisticsInfo", "DeliveryInfo")
+                        .WithMany()
+                        .HasForeignKey("DeliveryInfoId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ADNTester.BO.Entities.LogisticsInfo", "PickupInfo")
+                        .WithMany()
+                        .HasForeignKey("PickupInfoId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Booking");
+
+                    b.Navigation("DeliveryInfo");
+
+                    b.Navigation("PickupInfo");
                 });
 
             modelBuilder.Entity("ADNTester.BO.Entities.TestResult", b =>
