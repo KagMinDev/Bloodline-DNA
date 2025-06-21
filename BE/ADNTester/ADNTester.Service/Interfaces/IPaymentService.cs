@@ -17,5 +17,6 @@ namespace ADNTester.Service.Interfaces
         Task<bool> UpdateAsync(UpdatePaymentDto dto);
         Task<Payment> GetByBookingIdAsync(string bookingId);
         Task<bool> UpdatePaymentStatusAsync(string bookingId, PaymentStatus status);
+        Task<IEnumerable<PaymentDetailDto>> GetDepositedPaymentsWithSampleReceivedAsync();
     }
 }

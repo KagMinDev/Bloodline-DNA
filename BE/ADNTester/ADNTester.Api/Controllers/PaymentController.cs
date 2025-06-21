@@ -362,6 +362,21 @@ namespace ADNTester.API.Controllers
                 return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình xử lý callback." });
             }
         }
+
+        [HttpGet("deposited-with-sample-received")]
+        public async Task<IActionResult> GetDepositedPaymentsWithSampleReceived()
+        {
+            try
+            {
+                var payments = await _paymentService.GetDepositedPaymentsWithSampleReceivedAsync();
+                return Ok(payments);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi lấy danh sách payment đã cọc với sample received: {ex.Message}");
+                return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình lấy danh sách payment." });
+            }
+        }
     }
 
     public class PaymentCallbackDto

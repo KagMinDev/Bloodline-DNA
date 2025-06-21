@@ -17,6 +17,7 @@ namespace ADNTester.Repository.Implementations
         public IFeedbackRepository FeedbackRepository { get; }
         public IServicePriceRepository ServicePriceRepository { get; }
         public ITagRepository TagRepository { get; }
+        public IBlogTagRepository BlogTagRepository { get; }
         public ITestBookingRepository TestBookingRepository { get; }
         public ITestKitRepository TestKitRepository { get; }
         public ITestResultRepository TestResultRepository { get; }
@@ -32,6 +33,7 @@ namespace ADNTester.Repository.Implementations
             IFeedbackRepository feedbackRepository,
             IServicePriceRepository servicePriceRepository,
             ITagRepository tagRepository,
+            IBlogTagRepository blogTagRepository,
             ITestBookingRepository testBookingRepository,
             ITestKitRepository testKitRepository,
             ITestResultRepository testResultRepository,
@@ -47,6 +49,7 @@ namespace ADNTester.Repository.Implementations
             FeedbackRepository = feedbackRepository;
             ServicePriceRepository = servicePriceRepository;
             TagRepository = tagRepository;
+            BlogTagRepository = blogTagRepository;
             TestBookingRepository = testBookingRepository;
             TestKitRepository = testKitRepository;
             TestResultRepository = testResultRepository;

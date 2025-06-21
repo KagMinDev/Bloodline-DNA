@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ADNTester.BO.Entities
 {
-    public class BlogTag
+    public class BlogTag : BaseEntity
     {
         public string BlogId {  get; set; }
         public Blog Blog { get; set; }

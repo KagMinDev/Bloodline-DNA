@@ -107,5 +107,47 @@ namespace ADNTester.Service.Implementations
                 throw;
             }
         }
+
+        public async Task<IEnumerable<PaymentDetailDto>> GetDepositedPaymentsWithSampleReceivedAsync()
+        {
+            try
+            {
+                // Lấy tất cả payment có trạng thái Deposited
+                var depositedPayments = await _paymentRepository.FindAsync(p => p.Status == PaymentStatus.Deposited);
+                
+                // Lọc ra những payment có booking status là SampleReceived
+                var result = new List<Payment>();
+                foreach (var payment in depositedPayments)
+                {
+                    // Load booking với đầy đủ thông tin
+                    var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(payment.BookingId);
+                    
+                        // Load thông tin user
+                        var user = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+                        if (user != null)
+                        {
+                            booking.Client = user;
+                        }
+                        
+                        // Load thông tin test service
+                        var testService = await _unitOfWork.TestServiceRepository.GetByIdAsync(booking.TestServiceId);
+                        if (testService != null)
+                        {
+                            booking.TestService = testService;
+                        }
+                        
+                        payment.Booking = booking;
+                        result.Add(payment);
+                    }
+                
+
+                return _mapper.Map<IEnumerable<PaymentDetailDto>>(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting deposited payments with sample received");
+                throw;
+            }
+        }
     }
 }

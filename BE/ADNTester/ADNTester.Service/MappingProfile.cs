@@ -11,6 +11,8 @@ using System.Linq;
 using ADNTester.BO.DTOs.Feedback;
 using ADNTester.BO.DTOs.SampleInstruction;
 using ADNTester.BO.DTOs.Payment;
+using ADNTester.BO.DTOs.Tag;
+using ADNTester.BO.DTOs.BlogTag;
 
 namespace ADNTester.Service
 {
@@ -113,9 +115,26 @@ namespace ADNTester.Service
             #endregion
 
             #region Payment Mapping
-            CreateMap<Payment, PaymentDto>().ReverseMap();
+            CreateMap<Payment, PaymentDto>()
+                .ForMember(dest => dest.Booking, opt => opt.MapFrom(src => src.Booking))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.Booking.Client))
+                .ReverseMap();
+            CreateMap<Payment, PaymentDetailDto>()
+                .ForMember(dest => dest.Booking, opt => opt.MapFrom(src => src.Booking))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.Booking.Client));
             CreateMap<CreatePaymentDto, Payment>();
             CreateMap<UpdatePaymentDto, Payment>();
+            #endregion
+
+            #region Tag Mapping
+            CreateMap<Tag, TagDto>().ReverseMap();
+            CreateMap<CreateTagDto, Tag>();
+            CreateMap<UpdateTagDto, Tag>();
+            #endregion
+
+            #region BlogTag Mapping
+            CreateMap<BlogTag, BlogTagDto>();
+            CreateMap<CreateBlogTagDto, BlogTag>();
             #endregion
 
         }
