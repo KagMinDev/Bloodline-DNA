@@ -33,7 +33,7 @@ namespace ADNTester.Service
             services.AddScoped<ISampleInstructionService, SampleInstructionService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IOtpService, OtpService>();
-
+            services.AddScoped<ILogisticService, LogisticService>();
             // Đăng ký AutoMapper
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
