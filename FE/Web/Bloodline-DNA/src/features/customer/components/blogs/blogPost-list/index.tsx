@@ -1,7 +1,7 @@
 import { BookmarkIcon } from "lucide-react";
-import { Button } from "../../../../services/components/ui/Button";
 import type { BlogPost } from "../../../types/blogs.types";
 import { PostCard } from "../post-card";
+import { Button } from "../../ui/Button";
 
 interface BlogPostListProps {
   filteredPosts: BlogPost[];

@@ -16,3 +16,9 @@ export interface TestBookingStatusRequest {
   bookingId: string;
   status: number; 
 }
+
+export interface CalendarProps {
+  bookingsByDate?: Record<string, number>;
+  events: TestBookingResponse[];
+  onUpdateStatus?: (updatedBooking: TestBookingResponse) => void;
+}

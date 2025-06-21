@@ -1,18 +1,9 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { NotFound } from '../components';
-import { Blogs } from '../features';
 import AboutPage from '../features/about/pages/AboutPage';
 import HomePage from '../features/home/pages/HomePage';
-import { BookingDetail } from '../features/services/pages/BookingDetail';
-import { BookingList } from '../features/services/pages/BookingList';
-import { Contacts } from '../features/services/pages/Contacts';
-import { DetailServices } from '../features/services/pages/DetailServices';
-import { Doctors } from '../features/services/pages/Doctors';
-import { EditBooking } from '../features/services/pages/EditBooking';
-import { EditProfile } from '../features/services/pages/EditProfile';
-import { Services } from '../features/services/pages/Services';
-import { TestProgress } from '../features/services/pages/TestProgress';
+import { Blogs, BookingDetail, BookingList, Contacts, DetailServices, Doctors, EditBooking, EditProfile, Services, TestProgress } from '../features/customer';
 
 export default function CustomerRouter() {
     return (
