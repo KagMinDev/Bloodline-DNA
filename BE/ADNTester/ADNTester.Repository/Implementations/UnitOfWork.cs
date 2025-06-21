@@ -27,6 +27,7 @@ namespace ADNTester.Repository.Implementations
         public ISampleInstructionRepository SampleInstructionRepository { get; }
         public IPaymentRepository PaymentRepository { get; }
         public IOtpRepository OtpRepository { get; }
+        public ILogisticInfoRepository LogisticInfoRepository { get; }
         public UnitOfWork(
             ApplicationDbContext context,
             IBlogRepository blogRepository,
@@ -42,7 +43,8 @@ namespace ADNTester.Repository.Implementations
             IUserRepository userRepository,
             ISampleInstructionRepository sampleInstructionRepository,
             IPaymentRepository paymentRepository,
-            IOtpRepository otpRepository)
+            IOtpRepository otpRepository,
+            ILogisticInfoRepository logisticInfoRepository)
         {
             _context = context;
             IBlogRepository = blogRepository;
@@ -59,6 +61,7 @@ namespace ADNTester.Repository.Implementations
             SampleInstructionRepository = sampleInstructionRepository;
             PaymentRepository = paymentRepository;
             OtpRepository = otpRepository;
+            LogisticInfoRepository = logisticInfoRepository;
         }
 
         public async Task BeginTransactionAsync()

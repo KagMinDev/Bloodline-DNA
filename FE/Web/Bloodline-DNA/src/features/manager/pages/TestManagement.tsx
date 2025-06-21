@@ -79,17 +79,18 @@ export default function TestManagement() {
   };
 
   // Sửa dịch vụ (PUT)
-  const handleUpdateTest = async (data: TestUpdateRequest) => {
-    try {
-      await updateTestApi(data, token);
-      setShowEditTest(false);
-      const newTests = await getTestsApi(token);
-      setTests(newTests);
-      alert('Cập nhật dịch vụ thành công!');
-    } catch (err) {
-      alert('Có lỗi xảy ra khi cập nhật dịch vụ!');
-    }
-  };
+const handleUpdateTest = async (data: TestUpdateRequest) => {
+  try {
+    await updateTestApi(data, token);
+    setShowEditTest(false);
+    const newTests = await getTestsApi(token);
+    console.log("Updated tests:", newTests); // Log danh sách tests mới
+    setTests(newTests);
+    alert('Cập nhật dịch vụ thành công!');
+  } catch (err) {
+    alert('Có lỗi xảy ra khi cập nhật dịch vụ!');
+  }
+};
 
   // Xóa dịch vụ
   const handleDeleteTest = async (id: string) => {

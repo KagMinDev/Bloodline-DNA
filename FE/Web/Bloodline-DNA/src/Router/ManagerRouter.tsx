@@ -3,7 +3,10 @@ import { NotFound } from "../components";
 import Sidebar from "../features/manager/components/Sidebar";
 import Blogs from "../features/manager/pages/Blogs";
 import TestManagement from "../features/manager/pages/TestManagement";
-
+import Report from "../features/manager/pages/Report";
+import Result from "../features/manager/pages/Result";
+import Dashboard from "../features/manager/pages/Dashboard";
+import Feedbacks from "../features/manager/pages/Feedbacks";
 
 export default function ManagerRouter() {
     return (
@@ -11,10 +14,13 @@ export default function ManagerRouter() {
         <Sidebar />
         <div className="flex-1 overflow-y-auto">
             <Routes>
-            <Route path="/" element={<TestManagement />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="blogs" element={<Blogs />} />
             <Route path="test-management" element={<TestManagement />} />
-
+            <Route path="report" element={<Report />} />
+            <Route path="test-results" element={<Result />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="feedback" element={<Feedbacks />} />
 
             {/* Not found */}
             <Route path="*" element={<NotFound />} />

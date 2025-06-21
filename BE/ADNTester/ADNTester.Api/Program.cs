@@ -31,12 +31,6 @@ builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinaryConfig"));
 #endregion
 
-#region GHN config
-builder.Services.AddHttpClient("GHN", client =>
-{
-    client.BaseAddress = new Uri("https://dev-online-gateway.ghn.vn/shiip/");
-});
-#endregion
 
 #region Swagger UI
 builder.Services.AddSwaggerGen(options =>

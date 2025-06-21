@@ -1,9 +1,9 @@
 import { Route, Routes } from 'react-router-dom';
 import { NotFound } from '../components';
 import Sidebar from '../features/staff/components/Sidebar';
-import SampleManagement from '../features/staff/pages/SampleManagement';
-import TestBookingManagement from '../features/staff/pages/TestBookingManagement';
+import TestBooking from '../features/staff/pages/TestBooking';
 import TestResult from '../features/staff/pages/TestResult';
+import TestSample from '../features/staff/pages/TestSample';
 
 export default function StaffRouter() {
     return (
@@ -11,10 +11,10 @@ export default function StaffRouter() {
             <Sidebar />
             <div className="flex-1 overflow-y-auto">
                 <Routes>
-                    <Route path="/" element={<SampleManagement />} />
-                    <Route path="samplemanagement" element={<SampleManagement />} />
-                    <Route path="testbookingmanagement" element={<TestBookingManagement />} />
-                    <Route path="testresult" element={<TestResult />} />
+                    <Route path="/" element={<TestSample />} />
+                    <Route path="test-sample" element={<TestSample />} />
+                    <Route path="test-booking" element={<TestBooking />} />
+                    <Route path="test-result" element={<TestResult />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>

@@ -4,10 +4,13 @@ import {
   FaAngleDown,
   FaAngleRight,
   FaBookReader,
+  FaChartBar,
+  FaFlag,
 } from 'react-icons/fa';
 import { Dna } from 'lucide-react';
 import { MdDomainAdd } from "react-icons/md";
-
+import { BsBuildingCheck } from 'react-icons/bs';
+import { TiStarHalfOutline } from "react-icons/ti";
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -18,6 +21,11 @@ interface SidebarDataType {
 
 const SidebarData: SidebarDataType[] = [
   {
+    icon: FaChartBar,
+    heading: 'Quản lí doanh thu',
+    href: '/manager/dashboard',
+  },
+  {
     icon: MdDomainAdd,
     heading: 'Quản lí dịch vụ',
     href: '/manager/test-management',
@@ -27,7 +35,22 @@ const SidebarData: SidebarDataType[] = [
     heading: 'Quản lí bài viết',
     href: '/manager/blogs',
   },
-  
+  {
+    icon: TiStarHalfOutline,
+    heading: 'Các đánh giá',
+    href: '/manager/feedback',
+  },
+  {
+    icon: FaFlag,
+    heading: 'Quản lí báo cáo',
+    href: '/manager/report',
+  },
+  {
+    icon: BsBuildingCheck,
+    heading: 'Quản lí kết quả xét nghiệm',
+    href: '/manager/test-results',
+  },
+
 ];
 
 const Sidebar = () => {

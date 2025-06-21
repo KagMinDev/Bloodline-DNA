@@ -16,10 +16,16 @@ const Header: React.FC = () => {
 
   const menu = (
     <Menu>
-      <Menu.Item key="profile" onClick={() => navigate("/customer/edit-profile")}>
+      <Menu.Item
+        key="profile"
+        onClick={() => navigate("/customer/edit-profile")}
+      >
         Hồ sơ cá nhân
       </Menu.Item>
-      <Menu.Item key="bookings" onClick={() => navigate("/customer/booking-list")}>
+      <Menu.Item
+        key="bookings"
+        onClick={() => navigate("/customer/booking-list")}
+      >
         Lịch sử đặt lịch
       </Menu.Item>
       <Menu.Item key="logout" danger onClick={handleLogout}>
@@ -29,14 +35,15 @@ const Header: React.FC = () => {
   );
 
   const isActive = (path: string) => location.pathname === path;
+  const basePath = user?.role === "Client" ? "/customer" : "";
 
   const navItems = [
     { label: "Trang chủ", path: "/" },
-    { label: "Về chúng tôi", path: "/customer/about" },
-    { label: "Dịch vụ", path: "/customer/services" },
-    { label: "Các Bác Sĩ", path: "/customer/doctors" },
-    { label: "Tin tức", path: "/customer/blogs" },
-    { label: "Liên hệ", path: "/customer/contacts" },
+    { label: "Về chúng tôi", path: "/about" },
+    { label: "Dịch vụ", path: "/services" },
+    { label: "Các Bác Sĩ", path: "/doctors" },
+    { label: "Tin tức", path: "/blogs" },
+    { label: "Liên hệ", path: "/contacts" },
   ];
 
   return (
@@ -47,26 +54,32 @@ const Header: React.FC = () => {
           <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
             <Dna size={24} className="text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-800">ADN Huyết Thống</span>
+          <span className="text-2xl font-bold text-gray-800">
+            ADN Huyết Thống
+          </span>
         </div>
 
         {/* Navigation */}
         <nav className="hidden space-x-8 md:flex">
-          {navItems.map((item) => (
-            <a
-              key={item.path}
-              href={item.path}
-              className={`relative transition-colors duration-300 after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:transition-all after:duration-300 after:bg-blue-600
-                ${
-                  isActive(item.path)
-                    ? "text-blue-600 after:w-full"
-                    : "text-gray-600 hover:text-blue-600 after:w-0 hover:after:w-full"
-                }
-              `}
-            >
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const fullPath =
+              item.path === "/" ? "/" : `${basePath}${item.path}`;
+            return (
+              <a
+                key={item.path}
+                href={fullPath}
+                className={`relative transition-colors duration-300 after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:transition-all after:duration-300 after:bg-blue-600
+        ${
+          isActive(fullPath)
+            ? "text-blue-600 after:w-full"
+            : "text-gray-600 hover:text-blue-600 after:w-0 hover:after:w-full"
+        }
+      `}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
 
         {/* Actions */}
@@ -75,12 +88,17 @@ const Header: React.FC = () => {
             <Dropdown overlay={menu} placement="bottomRight" arrow>
               <div className="flex items-center space-x-2 cursor-pointer">
                 <UserCircle2 size={32} className="text-blue-600" />
-                <span className="font-semibold text-gray-700">{user.fullName}</span>
+                <span className="font-semibold text-gray-700">
+                  {user.fullName}
+                </span>
               </div>
             </Dropdown>
           ) : (
             <>
-              <Link to="/login" className="font-semibold text-blue-600 transition-colors hover:text-blue-800">
+              <Link
+                to="/login"
+                className="font-semibold text-blue-600 transition-colors hover:text-blue-800"
+              >
                 Đăng nhập
               </Link>
               <Link to="/register">

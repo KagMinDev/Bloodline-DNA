@@ -51,22 +51,30 @@ export const loginApi = async (email: string, password: string) => {
           headers: {
             "Content-Type": "application/json",
           },
-          timeout: timeout, // 10 seconds
+          timeout: timeout,
         }
       );
       return response.data;
     } catch (error) {
       attempts++;
 
-      // Nếu là lỗi timeout thì thử lại
-      if (axios.isAxiosError(error) && error.code === 'ECONNABORTED') {
-        console.warn(`Timeout occurred. Retrying (${attempts}/${maxRetries})...`);
-        if (attempts >= maxRetries) {
-          throw new Error("Server quá chậm, thử lại sau.");
+      if (axios.isAxiosError(error)) {
+        // Timeout retry
+        if (error.code === 'ECONNABORTED') {
+          console.warn(`Timeout occurred. Retrying (${attempts}/${maxRetries})...`);
+          if (attempts >= maxRetries) {
+            throw new Error("Server quá chậm, thử lại sau.");
+          }
+        } else if (error.response) {
+          // Lỗi có trả về từ server
+          const message = error.response.data?.message || "Đã xảy ra lỗi.";
+          throw new Error(message);
+        } else {
+          // Lỗi không rõ
+          throw new Error("Lỗi không xác định.");
         }
       } else {
-        // Lỗi khác thì dừng luôn
-        throw error;
+        throw new Error("Lỗi không xác định.");
       }
     }
   }
