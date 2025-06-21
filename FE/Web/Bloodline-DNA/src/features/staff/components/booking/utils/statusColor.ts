@@ -1,18 +1,19 @@
-export const getStatusColor = (status: string): string => {
-  switch (status.toLowerCase()) {
-    case 'chờ xử lý':
-      return 'bg-gray-500';
-    case 'đã gửi kit':
+export const getStatusColor = (status: string | number): string => {
+  const numericStatus = typeof status === 'number' ? status : parseInt(status, 10) || -1;
+  switch (numericStatus) {
+    case 0:
+      return 'bg-red-300';
+    case 1:
       return 'bg-blue-400';
-    case 'đã xác nhận':
+    case 2:
       return 'bg-green-500';
-    case 'đã hoàn tất':
+    case 3:
       return 'bg-blue-600';
-    case 'đã huỷ':
+    case 4:
       return 'bg-red-500';
-    case 'đã nhận mẫu':
+    case 5:
       return 'bg-orange-500';
-    case 'đang xét nghiệm':
+    case 6:
       return 'bg-purple-500';
     default:
       return 'bg-gray-300';

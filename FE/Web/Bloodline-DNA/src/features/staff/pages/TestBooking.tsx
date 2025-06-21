@@ -4,52 +4,29 @@ import Calendar from "../components/common/Calendar";
 import type { TestBookingResponse } from "../types/testBooking";
 import { getTestBookingApi } from "../api/testBookingApi";
 
-// Dữ liệu giả (điều chỉnh bookingDate để khớp với ngày hiện tại)
-const mockTestBookings: TestBookingResponse[] = [
-  {
-    id: "BK001",
-    testServiceId: "TS001",
-    clientId: "CL001",
-    email: "khachhang1@gmail.com",
-    bookingDate: "2025-06-19T08:00:00.000Z", // Đổi thành hôm nay
-    price: 500000,
-    collectionMethod: "Tại nhà",
-    status: "Đã xác nhận",
-    note: "Lấy mẫu buổi sáng",
-    createdAt: "2025-06-18T10:00:00.000Z",
-    updatedAt: "2025-06-18T12:00:00.000Z",
-  },
-  {
-    id: "BK002",
-    testServiceId: "TS002",
-    clientId: "CL002",
-    email: "khachhang2@gmail.com",
-    bookingDate: "2025-06-19T14:30:00.000Z", // Đổi thành hôm nay
-    price: 700000,
-    collectionMethod: "Tại trung tâm",
-    status: "Chờ xác nhận",
-    note: "",
-    createdAt: "2025-06-18T09:00:00.000Z",
-    updatedAt: "2025-06-18T09:00:00.000Z",
-  },
-];
-
 function TestBooking() {
-  const [bookings, setBookings] = useState<TestBookingResponse[]>(mockTestBookings);
+  const [bookings, setBookings] = useState<TestBookingResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const token = localStorage.getItem("token") || "";
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const data = await getTestBookingApi(token);
-        console.log("API data:", data); // Log dữ liệu API
-        // Nếu API trả về mảng rỗng, sử dụng mock data
-        setBookings(data.length > 0 ? data : mockTestBookings);
+        const response = await getTestBookingApi(token);
+        console.log("API Response:", response);
+        
+        // Kiểm tra dữ liệu trả về
+        if (!Array.isArray(response)) {
+          console.error("Dữ liệu không phải mảng:", response);
+          throw new Error("Dữ liệu trả về không hợp lệ");
+        }
+        
+        setBookings(response);
+        setError(null);
       } catch (error) {
-        console.error("Error fetching test bookings:", error);
-        // Sử dụng mock data nếu API lỗi
-        setBookings(mockTestBookings);
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        setError(error instanceof Error ? error.message : "Lỗi không xác định");
       } finally {
         setIsLoading(false);
       }
@@ -58,7 +35,30 @@ function TestBooking() {
     fetchBookings();
   }, [token]);
 
-  console.log("Bookings state:", bookings); // Log state bookings
+
+  // Hàm đếm booking theo ngày
+   const countBookingsByDate = (bookings: TestBookingResponse[]) => {
+    const counts: Record<string, number> = {};
+    
+    bookings.forEach(booking => {
+      try {
+        const date = new Date(booking.bookingDate);
+        // Kiểm tra ngày hợp lệ
+        if (!isNaN(date.getTime())) {
+          const dateStr = date.toISOString().split('T')[0];
+          counts[dateStr] = (counts[dateStr] || 0) + 1;
+        }
+      } catch (e) {
+        console.warn("Invalid booking date:", booking.bookingDate);
+      }
+    });
+    
+    return counts;
+  };
+
+  const bookingsByDate = countBookingsByDate(bookings);
+  console.log("Bookings by date:", bookingsByDate);
+
 
   const handleUpdateStatus = (updatedBooking: TestBookingResponse) => {
     setBookings((prevBookings) =>
@@ -79,12 +79,20 @@ function TestBooking() {
         </div>
       </div>
       <div className="h-[92%]">
-        {isLoading ? (
+        {error ? (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-red-500">{error}</p>
+          </div>
+        ) : isLoading ? (
           <div className="flex justify-center items-center h-full">
             <p className="text-gray-500">Đang tải dữ liệu...</p>
           </div>
         ) : (
-          <Calendar events={bookings} onUpdateStatus={handleUpdateStatus} />
+          <Calendar 
+            events={bookings} 
+            onUpdateStatus={handleUpdateStatus} 
+            bookingsByDate={bookingsByDate}
+          />
         )}
       </div>
     </div>

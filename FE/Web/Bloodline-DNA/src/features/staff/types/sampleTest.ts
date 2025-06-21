@@ -1,9 +1,17 @@
-export interface SampleTest{
-  id: string;
-  kitId: string;
-  sampleCode: string;
-  donorName: string;
-  relationshipToSubject: string;
-  sampleType: string;
-  collectedById: string;
+export interface SampleTestRequest{
+  sampleType: number;
+  instructionText: string;
+  mediaUrl: string;
+}
+
+export interface SampleTestResponse {
+  success: boolean;
+  data: {
+    id: string;
+    sampleType: number;
+    instructionText: string;
+    mediaUrl: string;
+  };
+  message: string;
+  statusCode: number;
 }
