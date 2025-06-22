@@ -2,7 +2,7 @@
 import React from 'react';
 import { BsCalendarXFill } from 'react-icons/bs';
 import type { TestBookingResponse } from '../../../types/testBooking';
-import { getStatusLabel } from '../utils/statusUtils';
+import { getStatusLabel, renderCollectionMethod } from '../utils/statusUtils';
 import { getStatusColor } from '../constants/statusMapping';
 
 interface BookingListPanelProps {
@@ -45,7 +45,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
                 </div>
                 <div className="grid grid-cols-1 gap-y-1 text-sm text-gray-600">
                   <div>
-                    Phương thức: <span className="font-medium">{booking.collectionMethod}</span>
+                    Phương thức: <span className="font-medium">{renderCollectionMethod(booking.collectionMethod)}</span>
                   </div>
                   <div className="flex items-center">
                     Trạng thái:{' '}
