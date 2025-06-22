@@ -260,15 +260,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
         <BookingListPanel
           selectedDay={selectedDay}
           bookings={filteredBookings}
-          selectedStatuses={selectedStatuses}
           statusOptions={statusOptions.map((option) => option.label)}
-          setSelectedStatus={(bookingId: string, value: string) =>
-            setSelectedStatuses((prev) => ({
-              ...prev,
-              [bookingId]: value,
-            }))
-          }
-          handleUpdateStatus={handleUpdateStatus}
         />
       </div>
     </div>

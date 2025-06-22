@@ -8,9 +8,7 @@ import { getStatusColor } from '../constants/statusMapping';
 interface BookingListPanelProps {
   selectedDay: string;
   bookings: TestBookingResponse[];
-  selectedStatus: Record<string, string>; // Fixed to match usage
   statusOptions: string[];
-  setSelectedStatus: (bookingId: string, value: string) => void;
 }
 
 const BookingListPanel: React.FC<BookingListPanelProps> = ({
