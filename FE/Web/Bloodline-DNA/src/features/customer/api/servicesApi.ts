@@ -183,41 +183,220 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
                   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI2MDNCN0Q2OUFFMTgxNzAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGFsYWxhbGEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJsYTEyQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkNsaWVudCIsImp0aSI6IjBkZjM5ZTEwLTRhNTktNDFlMC1hZGIzLTE4OWM1Mjg1Mjg3MCIsImV4cCI6MTc1MDIyNDgwNSwiaXNzIjoieW91cmRvbWFpbi5jb20iLCJhdWQiOiJ5b3VyZG9tYWluLmNvbSJ9.6ucR2Zmu8Ti5hyUUxVmMfytX37uAkfQ86LsKcDtwV-0';
     
     console.log('🔍 Fetching service detail by ID:', serviceId);
-    console.log('📋 API URL:', `${BASE_URL}/TestService/${serviceId}`);
     
-    const response = await axios.get(`${BASE_URL}/TestService/${serviceId}`, {
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      timeout: 10000, // 10 second timeout
-    });
+    // Try multiple possible endpoints
+    const possibleEndpoints = [
+      `${BASE_URL}/TestService/${serviceId}`,
+      `${BASE_URL}/TestServiceInfor/${serviceId}`,
+      `${BASE_URL}/ServicePrice/${serviceId}`,
+      `${BASE_URL}/api/TestService/${serviceId}`,
+      `${BASE_URL}/api/services/${serviceId}`
+    ];
+    
+    let lastError: any = null;
+    
+    for (const endpoint of possibleEndpoints) {
+      try {
+        console.log('🔄 Trying endpoint:', endpoint);
+        
+        const response = await axios.get(endpoint, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10000, // 10 second timeout
+        });
 
-    console.log('📦 Raw Service Detail Response:', response.data);
-    
-    // Handle different response structures
-    let serviceDetail: ServiceDetail;
-    
-    if (response.data?.data) {
-      // Response has data wrapper
-      serviceDetail = response.data.data;
-    } else if (response.data) {
-      // Direct response
-      serviceDetail = response.data;
-    } else {
-      throw new Error('Không tìm thấy dữ liệu dịch vụ');
+        console.log('📦 Raw Service Detail Response:', response.data);
+        console.log('📦 Response data keys:', Object.keys(response.data || {}));
+        
+        // Handle different response structures
+        let rawData: any;
+        
+        if (response.data?.data) {
+          // Response has data wrapper
+          rawData = response.data.data;
+          console.log('🔄 Using wrapped data:', rawData);
+        } else if (response.data) {
+          // Direct response
+          rawData = response.data;
+          console.log('🔄 Using direct response:', rawData);
+        } else {
+          throw new Error('Không tìm thấy dữ liệu dịch vụ');
+        }
+        
+        console.log('🔍 Raw data:', rawData);
+        console.log('🔍 Raw data keys:', Object.keys(rawData || {}));
+        console.log('🔍 Raw data.name:', rawData?.name);
+        console.log('🔍 Raw data.testServiceInfor:', rawData?.testServiceInfor);
+        
+        // Check if this is already a ServiceDetail format (has name and priceServices)
+        if (rawData.name && rawData.priceServices) {
+          console.log('✅ Found proper ServiceDetail format');
+          return rawData as ServiceDetail;
+        }
+        
+        // Check if this is a TestService format that needs conversion
+        if (rawData.id && rawData.serviceId && rawData.price !== undefined) {
+          console.log('🔄 Converting TestService to ServiceDetail format');
+          
+          // If testServiceInfor exists, use it
+          if (rawData.testServiceInfor) {
+            const serviceDetail: ServiceDetail = {
+              id: rawData.testServiceInfor.id,
+              name: rawData.testServiceInfor.name,
+              description: rawData.testServiceInfor.description,
+              category: rawData.testServiceInfor.category,
+              isActive: rawData.testServiceInfor.isActive,
+              createdAt: rawData.testServiceInfor.createdAt,
+              updatedAt: rawData.testServiceInfor.updatedAt,
+              priceServices: [{
+                id: rawData.id,
+                serviceId: rawData.serviceId,
+                price: rawData.price,
+                collectionMethod: rawData.collectionMethod,
+                currency: rawData.currency,
+                effectiveFrom: rawData.effectiveFrom,
+                effectiveTo: rawData.effectiveTo,
+                isActive: rawData.isActive,
+                createdAt: rawData.createdAt,
+                updatedAt: rawData.updatedAt,
+                testServiceInfor: {
+                  ...rawData.testServiceInfor,
+                  sampleCount: 0
+                }
+              }],
+              sampleCount: 0
+            };
+            console.log('✅ Converted with testServiceInfor, name:', serviceDetail.name);
+            return serviceDetail;
+          } else {
+            // testServiceInfor is null, need to get it from another source
+            console.log('⚠️ testServiceInfor is null, need fallback data');
+            throw new Error('testServiceInfor_is_null'); // Special error to trigger fallback
+          }
+        }
+        
+        console.log('❌ Unknown data format, cannot convert');
+        throw new Error('Định dạng dữ liệu không được hỗ trợ');
+        
+      } catch (endpointError) {
+        console.log('❌ Endpoint failed:', endpoint, endpointError);
+        lastError = endpointError;
+        
+        // If this is the special case where testServiceInfor is null, 
+        // immediately go to fallback instead of trying more endpoints
+        if ((endpointError as Error)?.message === 'testServiceInfor_is_null') {
+          console.log('🔄 testServiceInfor is null, going to fallback immediately');
+          break;
+        }
+        
+        continue; // Try next endpoint
+      }
     }
     
-    console.log('✅ Service detail loaded successfully:', serviceDetail);
-    return serviceDetail;
+    // If all endpoints failed, try to get from services list as fallback
+    console.log('🔄 All endpoints failed, trying fallback method...');
+    try {
+      const allServices = await servicesApi();
+      const matchedService = allServices.find((service: TestService) => 
+        service.id === serviceId || service.serviceId === serviceId
+      );
+      
+      if (matchedService) {
+        console.log('✅ Found service in list, creating detail object');
+        console.log('🔍 MatchedService:', matchedService);
+        console.log('🔍 TestServiceInfor:', matchedService.testServiceInfor);
+        
+        // Check if testServiceInfor exists and has the name
+        if (matchedService.testServiceInfor) {
+          console.log('🔍 TestServiceInfor.name:', matchedService.testServiceInfor.name);
+          console.log('🔍 TestServiceInfor keys:', Object.keys(matchedService.testServiceInfor));
+          
+          // Create a ServiceDetail object from TestService
+          const serviceDetail: ServiceDetail = {
+            id: matchedService.testServiceInfor.id,
+            name: matchedService.testServiceInfor.name,
+            description: matchedService.testServiceInfor.description,
+            category: matchedService.testServiceInfor.category,
+            isActive: matchedService.testServiceInfor.isActive,
+            createdAt: matchedService.testServiceInfor.createdAt,
+            updatedAt: matchedService.testServiceInfor.updatedAt,
+            priceServices: [{
+              id: matchedService.id,
+              serviceId: matchedService.serviceId,
+              price: matchedService.price,
+              collectionMethod: matchedService.collectionMethod,
+              currency: matchedService.currency,
+              effectiveFrom: matchedService.effectiveFrom,
+              effectiveTo: matchedService.effectiveTo,
+              isActive: matchedService.isActive,
+              createdAt: matchedService.createdAt,
+              updatedAt: matchedService.updatedAt,
+              testServiceInfor: {
+                ...matchedService.testServiceInfor,
+                sampleCount: 0
+              }
+            }],
+            sampleCount: 0
+          };
+          
+          return serviceDetail;
+        } else {
+          // testServiceInfor is null, create a minimal ServiceDetail with defaults
+          console.log('⚠️ testServiceInfor is null, creating minimal ServiceDetail with defaults');
+          const serviceDetail: ServiceDetail = {
+            id: matchedService.serviceId || matchedService.id,
+            name: `Dịch vụ xét nghiệm ADN (ID: ${matchedService.id})`,
+            description: "Dịch vụ xét nghiệm ADN chính xác, nhanh chóng và bảo mật.",
+            category: "Civil", // Default category
+            isActive: matchedService.isActive,
+            createdAt: matchedService.createdAt,
+            updatedAt: matchedService.updatedAt,
+            priceServices: [{
+              id: matchedService.id,
+              serviceId: matchedService.serviceId,
+              price: matchedService.price,
+              collectionMethod: matchedService.collectionMethod,
+              currency: matchedService.currency,
+              effectiveFrom: matchedService.effectiveFrom,
+              effectiveTo: matchedService.effectiveTo,
+              isActive: matchedService.isActive,
+              createdAt: matchedService.createdAt,
+              updatedAt: matchedService.updatedAt,
+              testServiceInfor: {
+                id: matchedService.serviceId || matchedService.id,
+                name: `Dịch vụ xét nghiệm ADN (ID: ${matchedService.id})`,
+                description: "Dịch vụ xét nghiệm ADN chính xác, nhanh chóng và bảo mật.",
+                category: "Civil",
+                isActive: matchedService.isActive,
+                createdAt: matchedService.createdAt,
+                updatedAt: matchedService.updatedAt,
+                priceServices: null,
+                sampleCount: 0
+              }
+            }],
+            sampleCount: 0
+          };
+          
+          console.log('✅ Created minimal ServiceDetail with name:', serviceDetail.name);
+          return serviceDetail;
+        }
+      }
+    } catch (fallbackError) {
+      console.error('❌ Fallback method also failed:', fallbackError);
+    }
+    
+    // If everything fails, throw the last error
+    throw lastError;
     
   } catch (error) {
     console.error('❌ Error in getServiceById:', error);
     
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
-        throw new Error('Không tìm thấy dịch vụ với ID này');
+        throw new Error('Endpoint API không tồn tại hoặc service ID không hợp lệ');
       } else if (error.response?.status === 401) {
         throw new Error('Không có quyền truy cập. Vui lòng đăng nhập lại');
       } else if (error.code === 'ECONNABORTED') {
