@@ -104,26 +104,7 @@ namespace ADNTester.Service.Implementations
             await _unitOfWork.TestBookingRepository.AddAsync(booking);
             await _unitOfWork.SaveChangesAsync();
 
-            // Kiểm tra phương thức lấy mẫu
-            if (priceService.CollectionMethod == SampleCollectionMethod.SelfSample)
-            {
-                // Nếu là lấy mẫu tại nhà, không tạo kit ngay
-                // Kit sẽ được tạo sau khi thanh toán cọc
-                return booking.Id;
-            }
-            else if (priceService.CollectionMethod == SampleCollectionMethod.AtFacility)
-            {
-                // Nếu là lấy mẫu tại cơ sở, tạo kit ngay
-                var testKit = new CreateTestKitDto
-                {
-                    BookingId = booking.Id,
-                    SentToLabAt = DateTime.UtcNow,
-                    LabReceivedAt = null
-                };
-
-                await _testKitService.CreateAsync(testKit);
-            }
-
+            // Không tạo TestKit ở đây nữa, chỉ tạo sau khi xác nhận (Confirm)
             return booking.Id;
         }
 
@@ -160,6 +141,26 @@ namespace ADNTester.Service.Implementations
             var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(bookingId);
             if (booking == null)
                 throw new Exception("Booking not found");
+
+            // Nếu chuyển sang Confirm và là AtFacility, tạo TestKit nếu chưa có
+            if (newStatus == BookingStatus.PreparingKit && booking.CollectionMethod == SampleCollectionMethod.AtFacility)
+            {
+                // Kiểm tra đã có kit cho booking này chưa
+                var existingKits = await _unitOfWork.TestKitRepository.GetAllAsync();
+                bool hasKit = existingKits.Any(k => k.BookingId == booking.Id);
+                if (!hasKit)
+                {
+                    var testService = await _testServiceService.GetByIdAsync(booking.TestServiceId);
+                    var testKit = new CreateTestKitDto
+                    {
+                        BookingId = booking.Id,
+                        SentToLabAt = DateTime.UtcNow,
+                        LabReceivedAt = null,
+                        SampleCount = testService?.SampleCount ?? 1,
+                    };
+                    await _testKitService.CreateAsync(testKit);
+                }
+            }
 
             // Cập nhật trạng thái
             booking.Status = newStatus;
@@ -332,7 +333,7 @@ namespace ADNTester.Service.Implementations
             <p>Kit is being delivered:</p>
             <ul>
                 <li>Keep your phone available for delivery updates</li>
-                <li>Contact staff if you’re not home</li>
+                <li>Contact staff if you're not home</li>
             </ul>",
 
                 BookingStatus.KitDelivered => @"
