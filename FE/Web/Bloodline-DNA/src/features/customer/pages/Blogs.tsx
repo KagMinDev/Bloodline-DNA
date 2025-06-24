@@ -7,7 +7,7 @@ import { BlogPostList } from "../components/blogs/blogPost-list";
 import { FeaturedPosts } from "../components/blogs/featured-posts";
 import { BlogHero } from "../components/blogs/hero";
 import { BlogSearchFilter } from "../components/blogs/search";
-import { Sidebar } from "../components/sidebar/inde";
+import { Sidebar } from "../components/sidebar/index";
 import type { BlogPost } from "../types/blogs.types";
 
 export const Blogs: React.FC = () => {
