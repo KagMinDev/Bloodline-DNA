@@ -1,4 +1,4 @@
-export { Blogs } from "../customer/pages/Blogs";
+export { Blogs } from "./pages/Blogs";
 export { BookingModal } from "./components/BookingModal";
 export { BookingDetail } from "./pages/BookingDetail";
 export { BookingList } from "./pages/BookingList";
