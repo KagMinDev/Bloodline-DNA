@@ -7,7 +7,7 @@ import {
   SaveIcon,
   UserIcon
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import {
@@ -20,24 +20,85 @@ import {
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
+import { getUserInfoApi, getMockUserData, updateUserInfoApi, type User, type UpdateUserData } from "../api/userApi";
 
 interface UserProfile {
   name: string;
   email: string;
   phone: string;
   address: string;
+  role?: string;
 }
 
 export const EditProfile = (): React.JSX.Element => {
   const [profile, setProfile] = useState<UserProfile>({
-    name: "Nguyễn Văn An",
-    email: "nguyenvanan@gmail.com", 
-    phone: "0123456789",
-    address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM"
+    name: "",
+    email: "", 
+    phone: "",
+    address: "",
+    role: ""
   });
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
+
+  // Load user data from API
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        setInitialLoading(true);
+        setError(null);
+        
+        const userData = await getUserInfoApi();
+        
+        // Validate essential data
+        if (!userData || !userData.id) {
+          throw new Error("Dữ liệu người dùng không hợp lệ");
+        }
+        
+        // Transform API data to profile format with safe fallbacks
+        const userProfile: UserProfile = {
+          name: userData.fullName || 'Chưa cập nhật',
+          email: userData.email || 'Chưa cập nhật',
+          phone: userData.phone || 'Chưa cập nhật',
+          address: userData.address || 'Chưa cập nhật',
+          role: userData.role || 'Khách hàng'
+        };
+        
+        setProfile(userProfile);
+        setOriginalProfile(userProfile);
+      } catch (err) {
+        console.error("Error loading user data:", err);
+        
+        // Fallback to mock data
+        const mockData = getMockUserData();
+        const mockProfile: UserProfile = {
+          name: mockData.fullName,
+          email: mockData.email,
+          phone: mockData.phone,
+          address: mockData.address,
+          role: mockData.role
+        };
+        
+        setProfile(mockProfile);
+        setOriginalProfile(mockProfile);
+        
+        // Set error message based on the error from API
+        const errorMessage = err instanceof Error 
+          ? err.message
+          : 'Không thể tải thông tin người dùng';
+        setError(`${errorMessage}. Đang hiển thị dữ liệu mẫu.`);
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const handleInputChange = (field: keyof UserProfile, value: string) => {
     setProfile(prev => ({
@@ -48,17 +109,88 @@ export const EditProfile = (): React.JSX.Element => {
 
   const handleSave = async () => {
     setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setLoading(false);
-    setIsEditing(false);
-    // Show success message
+    try {
+      // Validate required fields
+      if (!profile.name || profile.name.trim() === '' || profile.name === 'Chưa cập nhật') {
+        throw new Error('Vui lòng nhập họ và tên');
+      }
+      if (!profile.phone || profile.phone.trim() === '' || profile.phone === 'Chưa cập nhật') {
+        throw new Error('Vui lòng nhập số điện thoại');
+      }
+      if (!profile.address || profile.address.trim() === '' || profile.address === 'Chưa cập nhật') {
+        throw new Error('Vui lòng nhập địa chỉ');
+      }
+
+      // Prepare update data (exclude email as it's not updatable)
+      const updateData: UpdateUserData = {
+        fullName: profile.name.trim(),
+        phone: profile.phone.trim(),
+        address: profile.address.trim()
+      };
+
+      // Call update API
+      const updatedUser = await updateUserInfoApi(updateData);
+      
+      // Update profile with response data
+      const updatedProfile: UserProfile = {
+        name: updatedUser.fullName,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        address: updatedUser.address,
+        role: updatedUser.role
+      };
+      
+      setProfile(updatedProfile);
+      setOriginalProfile(updatedProfile);
+      setIsEditing(false);
+      
+      // Clear any previous errors and show success
+      setError(null);
+      setSuccessMessage('Cập nhật thông tin thành công!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
+      
+      console.log('✅ Profile updated successfully!');
+    } catch (error) {
+      console.error('❌ Error saving profile:', error);
+      
+      // Set error message for user
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : 'Có lỗi xảy ra khi cập nhật thông tin';
+      setError(`Lỗi cập nhật: ${errorMessage}`);
+      
+      // TODO: Add error toast notification here
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     // Reset to original values
+    if (originalProfile) {
+      setProfile(originalProfile);
+    }
   };
+
+  // Loading state
+  if (initialLoading) {
+    return (
+      <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
+        <div className="relative z-50">
+          <Header />
+        </div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Đang tải thông tin người dùng...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
@@ -114,6 +246,62 @@ export const EditProfile = (): React.JSX.Element => {
           </div>
         </section>
 
+        {/* Success Message Display */}
+        {successMessage && (
+          <section className="py-4 bg-green-50 border-y-2 border-green-200">
+            <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
+              <div className="flex items-center p-4 rounded-lg bg-green-100 border border-green-200">
+                <div className="mr-3 text-green-600">✅</div>
+                <div className="flex-1">
+                  <p className="font-medium text-green-800">{successMessage}</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Error/Warning Display */}
+        {error && (
+          <section className={`py-4 border-y-2 ${
+            error.includes('đăng nhập') || error.includes('hết hạn') 
+              ? 'bg-orange-50 border-orange-200' 
+              : 'bg-yellow-50 border-yellow-200'
+          }`}>
+            <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
+              <div className={`flex items-center p-4 rounded-lg border ${
+                error.includes('đăng nhập') || error.includes('hết hạn')
+                  ? 'bg-orange-100 border-orange-200'
+                  : 'bg-yellow-100 border-yellow-200'
+              }`}>
+                <div className={`mr-3 ${
+                  error.includes('đăng nhập') || error.includes('hết hạn') 
+                    ? 'text-orange-600' 
+                    : 'text-yellow-600'
+                }`}>
+                  {error.includes('đăng nhập') || error.includes('hết hạn') ? '🔐' : '⚠️'}
+                </div>
+                <div className="flex-1">
+                  <p className={`font-medium ${
+                    error.includes('đăng nhập') || error.includes('hết hạn') 
+                      ? 'text-orange-800' 
+                      : 'text-yellow-800'
+                  }`}>{error}</p>
+                  {error.includes('mẫu') && !error.includes('đăng nhập') && (
+                    <p className="text-sm text-yellow-600 mt-1">
+                      Để xem dữ liệu thực từ API, vui lòng kiểm tra kết nối mạng hoặc liên hệ hỗ trợ.
+                    </p>
+                  )}
+                                     {error.includes('đăng nhập') && (
+                     <p className="text-sm text-orange-600 mt-1">
+                       Vui lòng đăng nhập để xem thông tin cá nhân. Hiện tại đang hiển thị dữ liệu mẫu.
+                     </p>
+                   )}
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Profile Edit Form */}
         <section className="py-16 md:py-20 bg-blue-50">
           <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
@@ -142,8 +330,8 @@ export const EditProfile = (): React.JSX.Element => {
                 </div>
               </CardHeader>
 
-              <CardContent className="p-8">
-                <div className="grid grid-cols-1 gap-8">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 gap-6">
                   {/* Profile Avatar */}
                   <div className="text-center">
                     <div className="relative inline-block">
@@ -151,19 +339,23 @@ export const EditProfile = (): React.JSX.Element => {
                         <UserIcon className="w-12 h-12 text-white" />
                       </div>
                       {isEditing && (
-                        <button type="button" title="Edit Icon" className="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 text-white transition-colors duration-200 bg-blue-600 rounded-full hover:bg-blue-700">
+                        <button type="button" title="Edit Icon" className="absolute bottom-0 right-0 flex items-center justify-center w-8 h-8 !text-white transition-colors duration-200 bg-blue-600 rounded-full hover:bg-blue-700">
                           <EditIcon className="w-4 h-4" />
                         </button>
                       )}
                     </div>
-                    <h3 className="text-xl font-semibold text-blue-900">{profile.name}</h3>
-                    <p className="text-slate-600">Thành viên từ tháng 1/2024</p>
+                    <h3 className="text-xl font-semibold text-blue-900">
+                      {profile.name && profile.name !== 'Chưa cập nhật' ? profile.name : 'Chưa có tên'}
+                    </h3>
+                    <p className="text-slate-600">
+                      {profile.role && profile.role !== 'Khách hàng' ? `Vai trò: ${profile.role}` : 'Vai trò: Khách hàng'}
+                    </p>
                   </div>
 
                   {/* Form Fields */}
-                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Name Field */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <label className="flex items-center text-sm font-semibold text-blue-900">
                         <UserIcon className="w-4 h-4 mr-2" />
                         Họ và Tên
@@ -171,41 +363,38 @@ export const EditProfile = (): React.JSX.Element => {
                       {isEditing ? (
                         <Input
                           type="text"
-                          value={profile.name}
+                          value={profile.name === 'Chưa cập nhật' ? '' : profile.name}
                           onChange={(e) => handleInputChange('name', e.target.value)}
                           className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
                           placeholder="Nhập họ và tên"
                         />
                       ) : (
-                        <div className="p-3 border-2 border-transparent rounded-lg bg-gray-50">
-                          <span className="text-slate-700">{profile.name}</span>
-                        </div>
+                        <Input
+                          type="text"
+                          value={profile.name}
+                          readOnly
+                          className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                        />
                       )}
                     </div>
 
-                    {/* Email Field */}
-                    <div className="space-y-2">
+                    {/* Email Field - Always Read-only */}
+                    <div className="space-y-1">
                       <label className="flex items-center text-sm font-semibold text-blue-900">
                         <MailIcon className="w-4 h-4 mr-2" />
                         Email
+                        <span className="ml-2 text-xs text-gray-500">(Không thể chỉnh sửa)</span>
                       </label>
-                      {isEditing ? (
-                        <Input
-                          type="email"
-                          value={profile.email}
-                          onChange={(e) => handleInputChange('email', e.target.value)}
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
-                          placeholder="Nhập địa chỉ email"
-                        />
-                      ) : (
-                        <div className="p-3 border-2 border-transparent rounded-lg bg-gray-50">
-                          <span className="text-slate-700">{profile.email}</span>
-                        </div>
-                      )}
+                      <Input
+                        type="email"
+                        value={profile.email}
+                        readOnly
+                        className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                      />
                     </div>
 
                     {/* Phone Field */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <label className="flex items-center text-sm font-semibold text-blue-900">
                         <PhoneIcon className="w-4 h-4 mr-2" />
                         Số Điện Thoại
@@ -213,20 +402,23 @@ export const EditProfile = (): React.JSX.Element => {
                       {isEditing ? (
                         <Input
                           type="tel"
-                          value={profile.phone}
+                          value={profile.phone === 'Chưa cập nhật' ? '' : profile.phone}
                           onChange={(e) => handleInputChange('phone', e.target.value)}
                           className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
                           placeholder="Nhập số điện thoại"
                         />
                       ) : (
-                        <div className="p-3 border-2 border-transparent rounded-lg bg-gray-50">
-                          <span className="text-slate-700">{profile.phone}</span>
-                        </div>
+                        <Input
+                          type="tel"
+                          value={profile.phone}
+                          readOnly
+                          className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                        />
                       )}
                     </div>
 
                     {/* Address Field */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <label className="flex items-center text-sm font-semibold text-blue-900">
                         <MapPinIcon className="w-4 h-4 mr-2" />
                         Địa Chỉ
@@ -234,15 +426,18 @@ export const EditProfile = (): React.JSX.Element => {
                       {isEditing ? (
                         <Input
                           type="text"
-                          value={profile.address}
+                          value={profile.address === 'Chưa cập nhật' ? '' : profile.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
                           className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
                           placeholder="Nhập địa chỉ"
                         />
                       ) : (
-                        <div className="p-3 border-2 border-transparent rounded-lg bg-gray-50">
-                          <span className="text-slate-700">{profile.address}</span>
-                        </div>
+                        <Input
+                          type="text"
+                          value={profile.address}
+                          readOnly
+                          className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                        />
                       )}
                     </div>
                   </div>
@@ -253,7 +448,7 @@ export const EditProfile = (): React.JSX.Element => {
                       <Button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex-1 px-8 py-3 font-semibold text-white bg-blue-900 rounded-lg hover:bg-blue-800 sm:flex-none"
+                        className="flex-1 px-8 py-3 font-semibold !text-white bg-blue-900 rounded-lg hover:bg-blue-800 sm:flex-none"
                       >
                         {loading ? (
                           <div className="w-5 h-5 mr-2 border-2 rounded-full border-white/30 border-t-white animate-spin"></div>
@@ -282,6 +477,8 @@ export const EditProfile = (): React.JSX.Element => {
                       </div>
                     </div>
                   )}
+
+
                 </div>
               </CardContent>
             </Card>
