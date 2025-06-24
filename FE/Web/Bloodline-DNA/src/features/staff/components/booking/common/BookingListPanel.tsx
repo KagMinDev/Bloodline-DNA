@@ -1,20 +1,21 @@
-// components/booking/common/BookingListPanel.tsx
+'use client';
 import React from 'react';
 import { BsCalendarXFill } from 'react-icons/bs';
-import { getStatusColor } from '../utils/statusColor';
 import type { TestBookingResponse } from '../../../types/testBooking';
+import { getStatusLabel } from '../utils/statusUtils';
+import { getStatusColor } from '../constants/statusMapping';
 
 interface BookingListPanelProps {
   selectedDay: string;
   bookings: TestBookingResponse[];
-  selectedStatus: Record<string, string>;
+  selectedStatus: Record<string, string>; // Fixed to match usage
   statusOptions: string[];
   setSelectedStatus: (bookingId: string, value: string) => void;
 }
 
 const BookingListPanel: React.FC<BookingListPanelProps> = ({
   selectedDay,
-  bookings
+  bookings,
 }) => {
   return (
     <div className="flex h-full w-full flex-col rounded-xl bg-white shadow-lg">
@@ -29,15 +30,16 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
           </div>
         ) : (
           bookings.map((booking) => {
-            // booking.status là string từ API (ví dụ: "Chờ xử lý")
-            const currentStatusLabel = booking.status;
-
+            console.log('Booking status:', booking.status);
+            const statusLabel = getStatusLabel(booking.status);
             return (
               <div
                 key={booking.id}
                 className="rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow bg-gray-50"
               >
-                <div className="text-base font-semibold text-blue-700 mb-2">{booking.email}</div>
+                <div className="items-start mb-2">
+                  <div className="text-xs">Email: {booking.email}</div>
+                </div>
                 <div className="text-xs text-gray-400 mb-3">
                   Đặt lúc: {new Date(booking.createdAt).toLocaleString('vi-VN')}
                 </div>
@@ -49,13 +51,13 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
                     Trạng thái:{' '}
                     <span
                       className={`ml-2 inline-block rounded-full px-2 py-0.5 text-xs font-semibold text-white ${getStatusColor(
-                        currentStatusLabel
+                        booking.status
                       )}`}
                     >
-                      {currentStatusLabel}
+                      {statusLabel}
                     </span>
                   </div>
-                  <div>Giá: {booking.price.toLocaleString()} VNĐ</div>
+                  <div>Giá: {booking.price?.toLocaleString() || '0'} VNĐ</div>
                   <div>Ghi chú: {booking.note || 'Không có'}</div>
                 </div>
               </div>

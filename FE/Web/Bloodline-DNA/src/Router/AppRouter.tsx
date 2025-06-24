@@ -4,11 +4,11 @@ import { NotFound } from "../components";
 import { ForgotPasswordForm, Login, Register } from "../features";
 import BlogDetail from "../features/customer/pages/BlogDetails";
 import HomePage from "../features/home/pages/HomePage";
-import { Blogs, Contacts, DetailServices, Doctors, Services } from "../features/services";
 import AdminRouter from "./AdminRouter";
 import CustomerRouter from "./CustomerRouter";
 import ManagerRouter from "./ManagerRouter";
 import StaffRouter from "./StaffRouter";
+import { Blogs, Contacts, DetailServices, Doctors, Services } from "../features/customer";
 
 const App: React.FC = () => {
   return (

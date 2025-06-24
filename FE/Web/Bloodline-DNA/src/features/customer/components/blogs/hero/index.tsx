@@ -1,5 +1,5 @@
 import { BookmarkIcon, HeartIcon, TrendingUpIcon } from "lucide-react";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "../../../../services/components/ui/Breadcrumb";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "../../ui/Breadcrumb";
 
 interface BlogHeroProps {
   isVisible: boolean;

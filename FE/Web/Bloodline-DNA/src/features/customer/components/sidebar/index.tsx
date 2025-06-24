@@ -7,7 +7,7 @@ interface SidebarProps {
   formatDate: (dateString: string) => string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ blogPosts, formatDate }) => {
+export const Sidebar = ({ blogPosts, formatDate }: SidebarProps) => {
   return (
     <div className="lg:col-span-4">
       <div className="sticky space-y-8 top-8">
@@ -27,4 +27,4 @@ export const Sidebar: React.FC<SidebarProps> = ({ blogPosts, formatDate }) => {
       </div>
     </div>
   );
-};
+}; 
