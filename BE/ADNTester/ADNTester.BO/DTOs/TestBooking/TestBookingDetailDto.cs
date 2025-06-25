@@ -18,5 +18,8 @@ namespace ADNTester.BO.DTOs.TestBooking
         public DateTime? UpdatedAt { get; set; }
         public UserDto Client { get; set; }
         public TestServiceDto TestService { get; set; }
+        public string ClientName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
     }
 } 
