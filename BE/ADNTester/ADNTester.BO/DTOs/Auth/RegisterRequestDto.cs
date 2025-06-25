@@ -17,7 +17,7 @@ namespace ADNTester.BO.DTOs.Auth
         [EmailAddress(ErrorMessage = "Email không hợp lệ.")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Số điện thoại không được rỗng.")
+        [Required(ErrorMessage = "Số điện thoại không được rỗng.")]
         [RegularExpression(@"^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$", ErrorMessage = "Số điện thoại không hợp lệ")]
         public string Phone { get; set; }
 
