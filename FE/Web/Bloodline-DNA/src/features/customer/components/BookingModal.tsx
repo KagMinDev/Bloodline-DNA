@@ -20,6 +20,12 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit?: (bookingData: BookingData) => void;
+  selectedService?: {
+    id: string;
+    title: string;
+    category: string; // 'civil' or 'legal'
+    price: string;
+  };
 }
 
 interface BookingData {
@@ -38,6 +44,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  selectedService,
 }) => {
   const [formData, setFormData] = useState<BookingData>({
     serviceType: "home",
@@ -54,6 +61,22 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
 
+  // Update formData when selectedService changes
+  React.useEffect(() => {
+    if (selectedService) {
+      const availableServiceTypes = getAvailableServiceTypes();
+      const defaultServiceType = availableServiceTypes.includes('home') ? 'home' : (availableServiceTypes[0] || 'home') as 'home' | 'clinic';
+      const availableTests = testTypesByCategory[selectedService.category]?.[defaultServiceType] || [];
+      const defaultTestType = availableTests[0]?.id || 'civil-self';
+      
+      setFormData(prev => ({
+        ...prev,
+        serviceType: defaultServiceType,
+        testType: defaultTestType
+      }));
+    }
+  }, [selectedService]);
+
   interface TestType {
     id: string;
     name: string;
@@ -62,22 +85,47 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     category: string;
   }
 
-  // Gói xét nghiệm theo hình thức thu mẫu
-  const testTypesByServiceType: Record<string, TestType[]> = {
-    home: [
-      { id: "civil-self", name: "ADN Dân Sự - Tự Thu Mẫu (Kit)", price: "1.500.000đ", time: "5-7 ngày", category: "Dân sự" },
-      { id: "civil-center", name: "ADN Dân Sự - Thu Tại Trung Tâm", price: "2.000.000đ", time: "3-5 ngày", category: "Dân sự" },
-      { id: "civil-home", name: "ADN Dân Sự - Thu Tại Nhà", price: "2.500.000đ", time: "3-5 ngày", category: "Dân sự" },
-    ],
-    clinic: [
-      { id: "legal-center", name: "ADN Hành Chính - Thu Tại Trung Tâm", price: "3.500.000đ", time: "7-10 ngày", category: "Hành chính" },
-      { id: "legal-bone", name: "ADN Hành Chính - Giám Định Hài Cốt", price: "Liên hệ", time: "30+ ngày", category: "Hành chính" },
-    ]
+  // Gói xét nghiệm theo category và hình thức thu mẫu
+  const testTypesByCategory: Record<string, Record<string, TestType[]>> = {
+    civil: {
+      home: [
+        { id: "civil-self", name: "ADN Dân Sự - Tự Thu Mẫu (Kit)", price: "1.500.000đ", time: "5-7 ngày", category: "Dân sự" },
+        { id: "civil-home", name: "ADN Dân Sự - Thu Tại Nhà", price: "2.500.000đ", time: "3-5 ngày", category: "Dân sự" },
+      ],
+      clinic: [
+        { id: "civil-center", name: "ADN Dân Sự - Thu Tại Trung Tâm", price: "2.000.000đ", time: "3-5 ngày", category: "Dân sự" },
+      ]
+    },
+    legal: {
+      home: [
+        { id: "legal-home", name: "ADN Hành Chính - Thu Tại Nhà", price: "4.000.000đ", time: "7-10 ngày", category: "Hành chính" },
+      ],
+      clinic: [
+        { id: "legal-center", name: "ADN Hành Chính - Thu Tại Trung Tâm", price: "3.500.000đ", time: "7-10 ngày", category: "Hành chính" },
+        { id: "legal-bone", name: "ADN Hành Chính - Giám Định Hài Cốt", price: "Liên hệ", time: "30+ ngày", category: "Hành chính" },
+      ]
+    }
   };
 
-  // Lấy gói xét nghiệm theo hình thức đã chọn
+  // Lấy gói xét nghiệm theo category của service và hình thức thu mẫu đã chọn
   const getAvailableTestTypes = (): TestType[] => {
-    return testTypesByServiceType[formData.serviceType] || [];
+    const serviceCategory = selectedService?.category || 'civil';
+    const serviceType = formData.serviceType;
+    
+    return testTypesByCategory[serviceCategory]?.[serviceType] || [];
+  };
+
+  // Lấy tất cả service types khả dụng cho category đã chọn (để validate)
+  const getAvailableServiceTypes = (): string[] => {
+    const serviceCategory = selectedService?.category || 'civil';
+    const categoryData = testTypesByCategory[serviceCategory];
+    
+    if (!categoryData) return ['home'];
+    
+    return Object.keys(categoryData).filter(serviceType => {
+      const types = categoryData[serviceType];
+      return types && types.length > 0;
+    });
   };
 
   const timeSlots = [
@@ -107,8 +155,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       
       // Reset testType nếu đổi serviceType và testType hiện tại không có trong danh sách mới
       if (field === 'serviceType') {
-        const availableTypes = testTypesByServiceType[value] || [];
-        const currentTestTypeExists = availableTypes.some(type => type.id === prev.testType);
+        const serviceCategory = selectedService?.category || 'civil';
+        const availableTypes = testTypesByCategory[serviceCategory]?.[value] || [];
+        const currentTestTypeExists = availableTypes.some((type: TestType) => type.id === prev.testType);
         if (!currentTestTypeExists && availableTypes.length > 0) {
           newData.testType = availableTypes[0].id;
         }
@@ -229,70 +278,94 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     Chọn hình thức thu mẫu
                   </h3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {/* Home Service */}
-                    <label className="cursor-pointer">
-                      <input
-                        type="radio"
-                        name="serviceType"
-                        value="home"
-                        checked={formData.serviceType === "home"}
-                        onChange={(e) =>
-                          handleInputChange("serviceType", e.target.value)
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${
-                          formData.serviceType === "home"
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-300"
-                        }`}
-                      >
-                        <HomeIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
-                        <h4 className="mb-2 font-semibold text-slate-700">
-                          Tự thu mẫu / Thu tại nhà
-                        </h4>
-                        <p className="text-sm text-slate-600">
-                          Nhận bộ kit ADN hoặc nhân viên đến tận nhà thu mẫu
-                        </p>
-                        <div className="mt-3 text-sm font-medium text-blue-600">
-                          🧬 Phù hợp cho ADN Dân sự
+                    {/* Service Type Options */}
+                    {getAvailableServiceTypes().includes('home') && (
+                      <label className="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="serviceType"
+                          value="home"
+                          checked={formData.serviceType === "home"}
+                          onChange={(e) =>
+                            handleInputChange("serviceType", e.target.value)
+                          }
+                          className="sr-only"
+                        />
+                        <div
+                          className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${
+                            formData.serviceType === "home"
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-gray-200 hover:border-blue-300"
+                          }`}
+                        >
+                          <HomeIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
+                          <h4 className="mb-2 font-semibold text-slate-700">
+                            Tự thu mẫu / Thu tại nhà
+                          </h4>
+                          <p className="text-sm text-slate-600">
+                            Nhận bộ kit ADN hoặc nhân viên đến tận nhà thu mẫu
+                          </p>
+                          <div className="mt-3 text-sm font-medium text-blue-600">
+                            🧬 {selectedService?.category === 'civil' ? 'Phù hợp cho ADN Dân sự' : 'Phù hợp cho ADN Hành chính'}
+                          </div>
                         </div>
-                      </div>
-                    </label>
+                      </label>
+                    )}
 
                     {/* Clinic Service */}
-                    <label className="cursor-pointer">
-                      <input
-                        type="radio"
-                        name="serviceType"
-                        value="clinic"
-                        checked={formData.serviceType === "clinic"}
-                        onChange={(e) =>
-                          handleInputChange("serviceType", e.target.value)
-                        }
-                        className="sr-only"
-                      />
-                      <div
-                        className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${
-                          formData.serviceType === "clinic"
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-300"
-                        }`}
-                      >
-                        <BuildingIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
-                        <h4 className="mb-2 font-semibold text-slate-700">
-                          Thu mẫu tại trung tâm
-                        </h4>
-                        <p className="text-sm text-slate-600">
-                          Đến trung tâm để thu mẫu với quy trình chuẩn
-                        </p>
-                        <div className="mt-3 text-sm font-medium text-green-600">
-                          ⚖️ Có giá trị pháp lý
+                    {getAvailableServiceTypes().includes('clinic') && (
+                      <label className="cursor-pointer">
+                        <input
+                          type="radio"
+                          name="serviceType"
+                          value="clinic"
+                          checked={formData.serviceType === "clinic"}
+                          onChange={(e) =>
+                            handleInputChange("serviceType", e.target.value)
+                          }
+                          className="sr-only"
+                        />
+                        <div
+                          className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${
+                            formData.serviceType === "clinic"
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-gray-200 hover:border-blue-300"
+                          }`}
+                        >
+                          <BuildingIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
+                          <h4 className="mb-2 font-semibold text-slate-700">
+                            Thu mẫu tại trung tâm
+                          </h4>
+                          <p className="text-sm text-slate-600">
+                            Đến trung tâm để thu mẫu với quy trình chuẩn
+                          </p>
+                          <div className="mt-3 text-sm font-medium text-green-600">
+                            ⚖️ Có giá trị pháp lý
+                          </div>
+                        </div>
+                      </label>
+                    )}
+                  </div>
+                  
+                  {/* Show selected service info */}
+                  {selectedService && (
+                    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-semibold text-blue-900 mb-2">Dịch vụ đã chọn:</h4>
+                      <div className="text-sm text-blue-700">
+                        <div className="font-medium">{selectedService.title}</div>
+                        <div className="flex items-center gap-4 mt-1">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            selectedService.category === 'civil'
+                              ? 'bg-green-100 text-green-700' 
+                              : 'bg-orange-100 text-orange-700'
+                          }`}>
+                            {selectedService.category === 'civil' ? 'Dân Sự' : 'Hành Chính'}
+                          </span>
+                          <span className="font-semibold">{selectedService.price}</span>
                         </div>
                       </div>
-                    </label>
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

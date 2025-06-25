@@ -257,72 +257,27 @@ export const Doctors = (): React.JSX.Element => {
           <Header />
         </div>
 
-        {/* Hero Section - Medical Style */}
-        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
-          {/* Medical Pattern Background */}
+        {/* Hero Section */}
+        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="medical-cross-doctors" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
-                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#medical-cross-doctors)" />
-            </svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-
-          {/* Decorative Medical Elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            {/* Floating medical icons */}
-            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-blue-200/30 animate-pulse">
-              <StethoscopeIcon className="w-8 h-8 text-blue-600/60" />
+          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-6">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem><BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">Trang Chủ</BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem><span className="font-semibold text-blue-900">Đội Ngũ Bác Sĩ</span></BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
-            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-blue-200/30 animate-bounce" style={{animationDelay: '1s'}}>
-              <UserIcon className="w-6 h-6 text-blue-600/60" />
-            </div>
-            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-blue-200/30 animate-pulse" style={{animationDelay: '2s'}}>
-              <AwardIcon className="w-7 h-7 text-blue-600/60" />
-            </div>
-          </div>
-
-          {/* Content Container */}
-          <div className="relative z-10 flex items-center h-full">
-            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-              <div className={`transition-all duration-1000 ease-out ${
-                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-              }`}>
-                {/* Breadcrumb */}
-                <div className="mb-6">
-                  <Breadcrumb>
-                    <BreadcrumbList className="text-blue-600">
-                      <BreadcrumbItem>
-                        <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                          Trang Chủ
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                      <BreadcrumbSeparator className="text-blue-400" />
-                      <BreadcrumbItem>
-                        <span className="text-blue-900 font-semibold">Đội Ngũ Bác Sĩ</span>
-                      </BreadcrumbItem>
-                    </BreadcrumbList>
-                  </Breadcrumb>
-                </div>
-
-                {/* Title */}
-                <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl lg:text-5xl">
-                  Đội Ngũ Bác Sĩ
-                  <span className="block text-blue-700 text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
-                    Chuyên Gia Hàng Đầu
-                  </span>
-                </h1>
-
-                {/* Description */}
-                <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-blue-700">
-                  Gặp gỡ các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm và trình độ chuyên môn cao.
-                </p>
-              </div>
-            </div>
+            <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl lg:text-6xl">Đội Ngũ Bác Sĩ
+              <span className="block mt-2 text-2xl font-medium text-blue-700 md:text-3xl">
+                Chuyên Gia Hàng Đầu
+              </span>
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Gặp gỡ các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm và trình độ chuyên môn cao, cam kết mang lại dịch vụ chăm sóc sức khỏe tốt nhất.</p>
           </div>
         </section>
 
