@@ -48,19 +48,37 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     preferredDate: "",
     preferredTime: "",
     notes: "",
-    testType: "general",
+    testType: "civil-self",
   });
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
 
-  const testTypes = [
-    { id: "general", name: "Xét nghiệm tổng quát", price: "500.000đ" },
-    { id: "covid", name: "Test COVID-19", price: "300.000đ" },
-    { id: "blood", name: "Xét nghiệm máu", price: "400.000đ" },
-    { id: "urine", name: "Xét nghiệm nước tiểu", price: "200.000đ" },
-    { id: "genetic", name: "Xét nghiệm gen", price: "2.000.000đ" },
-  ];
+  interface TestType {
+    id: string;
+    name: string;
+    price: string;
+    time: string;
+    category: string;
+  }
+
+  // Gói xét nghiệm theo hình thức thu mẫu
+  const testTypesByServiceType: Record<string, TestType[]> = {
+    home: [
+      { id: "civil-self", name: "ADN Dân Sự - Tự Thu Mẫu (Kit)", price: "1.500.000đ", time: "5-7 ngày", category: "Dân sự" },
+      { id: "civil-center", name: "ADN Dân Sự - Thu Tại Trung Tâm", price: "2.000.000đ", time: "3-5 ngày", category: "Dân sự" },
+      { id: "civil-home", name: "ADN Dân Sự - Thu Tại Nhà", price: "2.500.000đ", time: "3-5 ngày", category: "Dân sự" },
+    ],
+    clinic: [
+      { id: "legal-center", name: "ADN Hành Chính - Thu Tại Trung Tâm", price: "3.500.000đ", time: "7-10 ngày", category: "Hành chính" },
+      { id: "legal-bone", name: "ADN Hành Chính - Giám Định Hài Cốt", price: "Liên hệ", time: "30+ ngày", category: "Hành chính" },
+    ]
+  };
+
+  // Lấy gói xét nghiệm theo hình thức đã chọn
+  const getAvailableTestTypes = (): TestType[] => {
+    return testTypesByServiceType[formData.serviceType] || [];
+  };
 
   const timeSlots = [
     "08:00",
@@ -81,10 +99,23 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   ];
 
   const handleInputChange = (field: keyof BookingData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+      
+      // Reset testType nếu đổi serviceType và testType hiện tại không có trong danh sách mới
+      if (field === 'serviceType') {
+        const availableTypes = testTypesByServiceType[value] || [];
+        const currentTestTypeExists = availableTypes.some(type => type.id === prev.testType);
+        if (!currentTestTypeExists && availableTypes.length > 0) {
+          newData.testType = availableTypes[0].id;
+        }
+      }
+      
+      return newData;
+    });
   };
 
   const handleSubmit = async () => {
@@ -101,7 +132,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const validateStep1 = () => {
-    return formData.testType && formData.serviceType;
+    return formData.serviceType && formData.testType && getAvailableTestTypes().length > 0;
   };
 
   const validateStep2 = () => {
@@ -125,7 +156,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       preferredDate: "",
       preferredTime: "",
       notes: "",
-      testType: "general",
+      testType: "civil-self",
     });
     setStep(1);
   };
@@ -139,15 +170,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-2xl max-h-[95vh] overflow-y-auto">
         <Card className="bg-white border-0 shadow-2xl">
           {/* Header */}
           <CardHeader className="p-6 text-white rounded-t-lg bg-gradient-to-r from-blue-900 to-blue-700">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Đặt Lịch Xét Nghiệm</h2>
+                <h2 className="text-2xl font-bold">Đặt Lịch Xét Nghiệm ADN</h2>
                 <p className="text-white/90">
-                  Chọn dịch vụ và thời gian phù hợp
+                  Chọn gói xét nghiệm ADN và phương thức thu mẫu phù hợp
                 </p>
               </div>
               <button
@@ -195,44 +226,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div className="space-y-6">
                 <div>
                   <h3 className="mb-4 text-lg font-semibold text-blue-900">
-                    Chọn loại xét nghiệm
-                  </h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    {testTypes.map((test) => (
-                      <label key={test.id} className="cursor-pointer">
-                        <input
-                          type="radio"
-                          name="testType"
-                          value={test.id}
-                          checked={formData.testType === test.id}
-                          onChange={(e) =>
-                            handleInputChange("testType", e.target.value)
-                          }
-                          className="sr-only"
-                        />
-                        <div
-                          className={`p-4 border-2 rounded-lg transition-all duration-200 ${
-                            formData.testType === test.id
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-gray-200 hover:border-blue-300"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-slate-700">
-                              {test.name}
-                            </span>
-                            <span className="font-semibold text-blue-900">
-                              {test.price}
-                            </span>
-                          </div>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="mb-4 text-lg font-semibold text-blue-900">
                     Chọn hình thức thu mẫu
                   </h3>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -257,13 +250,13 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       >
                         <HomeIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
                         <h4 className="mb-2 font-semibold text-slate-700">
-                          Tự thu mẫu tại nhà
+                          Tự thu mẫu / Thu tại nhà
                         </h4>
                         <p className="text-sm text-slate-600">
-                          Nhận bộ kit xét nghiệm tại nhà và tự thu mẫu
+                          Nhận bộ kit ADN hoặc nhân viên đến tận nhà thu mẫu
                         </p>
                         <div className="mt-3 text-sm font-medium text-blue-600">
-                          + 50.000đ phí vận chuyển
+                          🧬 Phù hợp cho ADN Dân sự
                         </div>
                       </div>
                     </label>
@@ -289,17 +282,75 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       >
                         <BuildingIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
                         <h4 className="mb-2 font-semibold text-slate-700">
-                          Thu mẫu tại cơ sở
+                          Thu mẫu tại trung tâm
                         </h4>
                         <p className="text-sm text-slate-600">
-                          Đến cơ sở y tế để thu mẫu xét nghiệm
+                          Đến trung tâm để thu mẫu với quy trình chuẩn
                         </p>
                         <div className="mt-3 text-sm font-medium text-green-600">
-                          Miễn phí
+                          ⚖️ Có giá trị pháp lý
                         </div>
                       </div>
                     </label>
                   </div>
+                </div>
+
+                <div>
+                  <h3 className="mb-4 text-lg font-semibold text-blue-900">
+                    Chọn gói xét nghiệm ADN
+                  </h3>
+                  {getAvailableTestTypes().length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3">
+                      {getAvailableTestTypes().map((test) => (
+                        <label key={test.id} className="cursor-pointer">
+                          <input
+                            type="radio"
+                            name="testType"
+                            value={test.id}
+                            checked={formData.testType === test.id}
+                            onChange={(e) =>
+                              handleInputChange("testType", e.target.value)
+                            }
+                            className="sr-only"
+                          />
+                          <div
+                            className={`p-4 border-2 rounded-lg transition-all duration-200 ${
+                              formData.testType === test.id
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-200 hover:border-blue-300"
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="font-medium text-slate-700">
+                                  {test.name}
+                                </div>
+                                <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                    test.category === 'Dân sự' 
+                                      ? 'bg-green-100 text-green-700' 
+                                      : 'bg-blue-100 text-blue-700'
+                                  }`}>
+                                    {test.category}
+                                  </span>
+                                  <span>⏱️ {test.time}</span>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-blue-900">
+                                {test.price}
+                              </span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                      <p className="text-gray-500">
+                        Vui lòng chọn hình thức thu mẫu để xem các gói xét nghiệm có sẵn
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex justify-end">
@@ -318,7 +369,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             {step === 2 && (
               <div className="space-y-6">
                 <h3 className="text-lg font-semibold text-blue-900">
-                  Thông tin đặt lịch
+                  Thông tin liên hệ và đặt lịch
                 </h3>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -374,7 +425,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     <div className="space-y-2 md:col-span-2">
                       <label className="flex items-center text-sm font-semibold text-blue-900">
                         <MapPinIcon className="w-4 h-4 mr-2" />
-                        Địa chỉ nhận kit *
+                        Địa chỉ nhận kit / Thu mẫu *
                       </label>
                       <Input
                         type="text"
@@ -382,7 +433,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                         onChange={(e) =>
                           handleInputChange("address", e.target.value)
                         }
-                        placeholder="Nhập địa chỉ nhận bộ kit xét nghiệm"
+                        placeholder="Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
                         className="w-full"
                       />
                     </div>
@@ -435,7 +486,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       onChange={(e) =>
                         handleInputChange("notes", e.target.value)
                       }
-                      placeholder="Nhập lưu ý hoặc yêu cầu đặc biệt (nếu có)"
+                      placeholder="Ví dụ: Cần xét nghiệm cha con, mẹ con... hoặc yêu cầu đặc biệt khác"
                       className="w-full h-24 p-3 border-2 border-gray-200 rounded-lg resize-none focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -472,15 +523,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               <div className="py-8 text-center">
                 <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 text-green-500" />
                 <h3 className="mb-2 text-2xl font-bold text-green-600">
-                  Đặt lịch thành công!
+                  Đăng ký thành công!
                 </h3>
                 <p className="mb-6 text-slate-600">
-                  Chúng tôi đã nhận được yêu cầu đặt lịch của bạn. Nhân viên sẽ
-                  liên hệ với bạn trong vòng 30 phút để xác nhận.
+                  Chúng tôi đã nhận được yêu cầu xét nghiệm ADN của bạn. Nhân viên tư vấn sẽ
+                  liên hệ với bạn trong vòng 30 phút để xác nhận và hướng dẫn chi tiết.
                 </p>
                 <div className="p-4 mb-6 rounded-lg bg-blue-50">
                   <p className="text-sm text-blue-800">
-                    <strong>Mã đặt lịch:</strong> BL
+                    <strong>Mã đăng ký:</strong> ADN
                     {Date.now().toString().slice(-6)}
                   </p>
                   <p className="mt-1 text-sm text-blue-800">
