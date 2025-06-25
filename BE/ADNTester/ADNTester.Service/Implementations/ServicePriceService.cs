@@ -71,9 +71,9 @@ namespace ADNTester.Service.Implementations
         {
             var prices = await _unitOfWork.ServicePriceRepository.GetAllAsync();
 
-            // Nhóm các giá theo ServiceId và lấy giá có EffectiveFrom gần nhất cho mỗi service
+            // Group by ServiceId and CollectionMethod, then get the latest price for each group
             var latestPrices = prices
-                .GroupBy(p => p.ServiceId)
+                .GroupBy(p => new { p.ServiceId, p.CollectionMethod })
                 .Select(g => g.OrderByDescending(p => p.EffectiveFrom).First())
                 .Where(p => p.EffectiveTo == null || p.EffectiveTo > p.EffectiveFrom);
 
