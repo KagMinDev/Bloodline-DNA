@@ -9,5 +9,7 @@ namespace ADNTester.Repository.Interfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+        Task<bool> EmailExistsAsync(string email);
+        Task<bool> PhoneExistsAsync(string phone);
     }
 }

@@ -32,6 +32,13 @@ namespace ADNTester.Service.Implementations
             if (existingUser != null)
                 return false; // hoặc throw exception
 
+            // Check for existing email
+            if (await _unitOfWork.UserRepository.EmailExistsAsync(dto.Email))
+                throw new InvalidOperationException("Email đã được sử dụng.");
+
+            // Check for existing phone number
+            if (await _unitOfWork.UserRepository.PhoneExistsAsync(dto.Phone))
+                throw new InvalidOperationException("Số điện thoại đã được sử dụng.");
             var user = new User
             {
                 FullName = dto.FullName,

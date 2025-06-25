@@ -14,5 +14,14 @@ namespace ADNTester.Repository.Implementations
         public UserRepository(ApplicationDbContext context) : base(context)
         {
         }
+        public async Task<bool> EmailExistsAsync(string email)
+        {
+            return await _dbSet.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> PhoneExistsAsync(string phone)
+        {
+            return await _dbSet.AnyAsync(u => u.Phone == phone);
+        }
     }
 }
