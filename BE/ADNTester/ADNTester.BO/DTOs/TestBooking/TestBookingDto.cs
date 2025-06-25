@@ -15,5 +15,8 @@ namespace ADNTester.BO.DTOs.TestBooking
         public string Note { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+         public string ClientName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
     }
 } 
