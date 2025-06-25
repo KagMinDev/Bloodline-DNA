@@ -7,59 +7,26 @@ interface BlogHeroProps {
 
 export const BlogHero: React.FC<BlogHeroProps> = ({ isVisible }) => {
   return (
-    <section className="relative h-[400px] overflow-hidden bg-gradient-to-br from-[#0066CC] to-[#003875]">
+    <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
       <div className="absolute inset-0 opacity-10">
-        <svg className="w-full h-full" viewBox="0 0 100 100">
-          <defs>
-            <pattern id="medical-cross-blog" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-              <rect x="8" y="4" width="4" height="12" fill="white" />
-              <rect x="4" y="8" width="12" height="4" fill="white" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#medical-cross-blog)" />
-        </svg>
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
       </div>
-
-      <div className="absolute inset-0">
-        <div className="absolute top-20 right-20 w-16 h-16 rounded-full bg-white/10 animate-pulse flex items-center justify-center">
-          <BookmarkIcon className="w-8 h-8 text-white/60" />
+      <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+        <div className="mb-6">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem><BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">Trang Chủ</BreadcrumbLink></BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem><span className="font-semibold text-blue-900">Blog Y Tế</span></BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
-        <div className="absolute bottom-32 right-32 w-12 h-12 rounded-full bg-white/10 animate-bounce flex items-center justify-center">
-          <TrendingUpIcon className="w-6 h-6 text-white/60" />
-        </div>
-        <div className="absolute top-32 left-32 w-14 h-14 rounded-full bg-white/10 animate-pulse flex items-center justify-center">
-          <HeartIcon className="w-7 h-7 text-white/60" />
-        </div>
-      </div>
-
-      <div className="relative flex items-center h-full">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className={`transition-all duration-1000 ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"}`}>
-            <Breadcrumb
-             className="mb-6">
-              <BreadcrumbList className="text-white/90">
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/" className="text-white/80 hover:text-white">
-                    Trang Chủ
-                  </BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="text-white/60" />
-                <BreadcrumbItem>
-                  <span className="text-[#00D4FF] font-semibold">Blog Y Tế</span>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-            <h1 className="mb-4 text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-              Blog Y Tế
-              <span className="block text-[#00D4FF] text-2xl md:text-3xl lg:text-4xl mt-1">
-                Kiến Thức Sức Khỏe
-              </span>
-            </h1>
-            <p className="max-w-lg mb-6 text-base md:text-lg text-white/90">
-              Khám phá những bài viết chuyên sâu về sức khỏe, y học và lối sống khỏe mạnh từ đội ngũ chuyên gia.
-            </p>
-          </div>
-        </div>
+        <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl lg:text-6xl">Blog Y Tế
+          <span className="block mt-2 text-2xl font-medium text-blue-700 md:text-3xl">
+            Kiến Thức Sức Khỏe
+          </span>
+        </h1>
+        <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Khám phá những bài viết chuyên sâu về sức khỏe, y học và lối sống khỏe mạnh từ đội ngũ chuyên gia hàng đầu.</p>
       </div>
     </section>
   );

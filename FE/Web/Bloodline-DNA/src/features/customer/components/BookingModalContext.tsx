@@ -1,8 +1,16 @@
 import React, { createContext, useState, useContext, type ReactNode } from 'react';
 
+interface SelectedService {
+  id: string;
+  title: string;
+  category: string;
+  price: string;
+}
+
 interface BookingModalContextType {
   isBookingModalOpen: boolean;
-  openBookingModal: () => void;
+  selectedService: SelectedService | null;
+  openBookingModal: (service?: SelectedService) => void;
   closeBookingModal: () => void;
 }
 
@@ -22,12 +30,27 @@ interface BookingModalProviderProps {
 
 export const BookingModalProvider: React.FC<BookingModalProviderProps> = ({ children }) => {
   const [isBookingModalOpen, setBookingModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<SelectedService | null>(null);
 
-  const openBookingModal = () => setBookingModalOpen(true);
-  const closeBookingModal = () => setBookingModalOpen(false);
+  const openBookingModal = (service?: SelectedService) => {
+    if (service) {
+      setSelectedService(service);
+    }
+    setBookingModalOpen(true);
+  };
+  
+  const closeBookingModal = () => {
+    setBookingModalOpen(false);
+    setSelectedService(null);
+  };
 
   return (
-    <BookingModalContext.Provider value={{ isBookingModalOpen, openBookingModal, closeBookingModal }}>
+    <BookingModalContext.Provider value={{ 
+      isBookingModalOpen, 
+      selectedService,
+      openBookingModal, 
+      closeBookingModal 
+    }}>
       {children}
     </BookingModalContext.Provider>
   );

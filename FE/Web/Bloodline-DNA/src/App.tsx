@@ -16,7 +16,7 @@ function App() {
 }
 
 function MainContent() {
-  const { isBookingModalOpen, closeBookingModal } = useBookingModal();
+  const { isBookingModalOpen, selectedService, closeBookingModal } = useBookingModal();
 
   return (
     <>
@@ -24,6 +24,7 @@ function MainContent() {
       <BookingModal
         isOpen={isBookingModalOpen}
         onClose={closeBookingModal}
+        selectedService={selectedService || undefined}
         onSubmit={() => {
           // Handle submission logic here
           closeBookingModal();
