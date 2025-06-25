@@ -41,13 +41,7 @@ export const getBlogByIdApi = async (id: string): Promise<BlogResponse> => {
     }
     return response.data.data;
   } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : "Unknown error",
-      response: error instanceof Error && "response" in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && "response" in error ? (error as any).response?.status : undefined,
-    };
-    console.error("getBlogByIdApi error:", errorDetails);
-    throw new Error(error instanceof Error ? `Failed to get blog: ${error.message}` : "Failed to get blog: Unknown error");
+    throw error;
   }
 };
 
@@ -76,13 +70,7 @@ export const createBlogApi = async (data: BlogCreateRequest): Promise<BlogRespon
 
     return response.data as BlogResponse;
   } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.error('createBlogApi error:', errorDetails);
-    throw new Error(error instanceof Error ? `Failed to create blog: ${error.message}` : 'Failed to create blog: Unknown error');
+    throw error;
   }
 };
 
@@ -113,13 +101,7 @@ export const updateBlogApi = async (id: string, data: BlogUpdateRequest): Promis
 
     return response.data as BlogResponse;
   } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.error('updateBlogApi error:', errorDetails);
-    throw new Error(error instanceof Error ? `Failed to update blog: ${error.message}` : 'Failed to update blog: Unknown error');
+      throw error;
   }
 };
 
@@ -128,12 +110,11 @@ export const deleteBlogApi = async (id: string): Promise<void> => {
   try {
     await rootApi.delete(`/Blog/${id}`);
   } catch (error) {
-    const errorDetails = {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      response: error instanceof Error && 'response' in error ? (error as any).response?.data : undefined,
-      status: error instanceof Error && 'response' in error ? (error as any).response?.status : undefined,
-    };
-    console.error('deleteBlogApi error:', errorDetails);
-    throw new Error(error instanceof Error ? `Failed to delete blog: ${error.message}` : 'Failed to delete blog: Unknown error');
+    if (error instanceof Error) {
+        console.error("Lỗi khi gọi getSessionsByBookingIdApi:", error.message);
+      } else {
+        console.error("Lỗi không xác định:", error);
+      }
+      throw error;
   }
 };

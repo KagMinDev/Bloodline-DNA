@@ -1,74 +1,85 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { formatDate, type DateSelectArg } from '@fullcalendar/core';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import { type DateSelectArg } from '@fullcalendar/core';
 import viLocale from '@fullcalendar/core/locales/vi';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import FullCalendar from '@fullcalendar/react';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 import { updateTestBookingStatusApi } from '../../api/testBookingApi';
+import type { CalendarProps, TestBookingResponse, TestBookingStatusRequest } from '../../types/testBooking';
 import BookingListPanel from '../booking/common/BookingListPanel';
 import BookingTable from '../booking/common/BookingTable';
 import { STATUS_MAPPING, type StatusOption } from '../booking/constants/statusMapping';
-import type { CalendarProps, TestBookingResponse, TestBookingStatusRequest } from '../../types/testBooking';
 import { getValidDate, renderCollectionMethod } from '../booking/utils/statusUtils';
 
 interface CalendarExtendedProps extends CalendarProps {
-  token: string; // Add token prop for API authentication
+  token: string;
+}
+
+function formatToYYYYMMDD(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, bookingsByDate, token }) => {
-  console.log('Initial props:', { events, bookingsByDate, token });
-
-  const today = formatDate(new Date(), {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-
+  const today = formatToYYYYMMDD(new Date());
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [localEvents, setLocalEvents] = useState<TestBookingResponse[]>([]);
   const [statusOptions] = useState<StatusOption[]>(STATUS_MAPPING);
   const [selectedStatuses, setSelectedStatuses] = useState<Record<string, string>>({});
+  const calendarRef = useRef<FullCalendar>(null);
 
   useEffect(() => {
-    console.log('Events from API:', events);
     setLocalEvents(events);
     setSelectedDay(today);
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(new Date());
+    }
   }, [events]);
 
-  const calendarEvents = localEvents.map((booking) => ({
-    id: booking.id,
-    start: getValidDate(booking.bookingDate),
-    title: booking.email || 'Không có email',
-    extendedProps: {
-      status: booking.status,
-      collectionMethod: booking.collectionMethod,
-    },
-  }));
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = formatToYYYYMMDD(new Date());
+      if (now !== selectedDay) {
+        setSelectedDay(now);
+        if (calendarRef.current) {
+          const calendarApi = calendarRef.current.getApi();
+          calendarApi.gotoDate(new Date());
+        }
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [selectedDay]);
 
-  const filteredBookings = localEvents.filter((booking) => {
-    if (!selectedDay) return false;
-    const bookingDate = getValidDate(booking.bookingDate);
-    const formattedBookingDate = formatDate(bookingDate, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
+  const calendarEvents = useMemo(() => {
+    return localEvents.map((booking) => ({
+      id: booking.id,
+      start: new Date(formatToYYYYMMDD(new Date(booking.bookingDate)) + 'T00:00:00'),
+      title: booking.email || 'Không có email',
+      extendedProps: {
+        status: booking.status,
+        collectionMethod: booking.collectionMethod,
+      },
+    }));
+  }, [localEvents]);
+
+  const filteredBookings = useMemo(() => {
+    return localEvents.filter((booking) => {
+      const bookingDate = getValidDate(booking.bookingDate);
+      const formattedBookingDate = formatToYYYYMMDD(bookingDate);
+      return formattedBookingDate === selectedDay;
     });
-    return formattedBookingDate === selectedDay;
-  });
-
-  console.log('Filtered bookings:', filteredBookings);
+  }, [localEvents, selectedDay]);
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    const selectedDate = formatDate(selectInfo.start, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
-    console.log('Selected date:', selectedDate);
+    const selectedDate = formatToYYYYMMDD(selectInfo.start);
     setSelectedDay(selectedDate);
   };
 
@@ -77,81 +88,67 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
     const statusOption = STATUS_MAPPING.find((option) => option.label === selectedStatusLabel);
 
     if (!statusOption) {
-      console.error(`Invalid status label: ${selectedStatusLabel}`);
       toast.error('Trạng thái không hợp lệ');
       return;
     }
 
     if (!token) {
-      console.error('No authentication token provided');
       toast.error('Thiếu token xác thực');
       return;
     }
 
-    // Store original booking for reversion
     const originalBooking = localEvents.find((booking) => booking.id === bookingId);
     if (!originalBooking) {
-      console.error(`Booking not found: ${bookingId}`);
       toast.error('Không tìm thấy đặt lịch');
       return;
     }
 
     try {
-      // Prepare API request
       const request: TestBookingStatusRequest = {
         bookingId,
         status: statusOption.value,
       };
 
-      // Optimistic UI update
       setLocalEvents((prev) =>
         prev.map((booking) =>
           booking.id === bookingId ? { ...booking, status: statusOption.value.toString() } : booking
         )
       );
 
-      // Call API to update status
       const updatedBooking = await updateTestBookingStatusApi(request, token);
-      console.log('API Response:', updatedBooking);
 
-      // Update state with API response
       setLocalEvents((prev) =>
         prev.map((booking) => (booking.id === bookingId ? updatedBooking : booking))
       );
 
-      // Clear selected status after update
       setSelectedStatuses((prev) => {
         const newStatuses = { ...prev };
         delete newStatuses[bookingId];
         return newStatuses;
       });
 
-      // Notify parent component
       if (onUpdateStatus) {
         onUpdateStatus(updatedBooking);
       }
 
       toast.success(`Đã cập nhật trạng thái thành ${selectedStatusLabel}`);
-    } catch (error) {
-      console.error('Error updating status:', error);
-
-      // Revert optimistic update on error
+    } catch {
       setLocalEvents((prev) =>
         prev.map((booking) =>
           booking.id === bookingId ? { ...booking, status: originalBooking.status } : booking
         )
       );
-
       toast.error('Cập nhật trạng thái thất bại');
     }
   };
 
   return (
-    <div className="relative flex h-full w-full items-start justify-start px-10 py-10 bg-blue-50">
+    <div className="relative flex items-start justify-start w-full h-full px-10 py-10 bg-blue-50">
       <ToastContainer />
-      <div className="mr-2 h-full w-2/3 flex flex-col rounded-lg bg-white p-5 shadow-lg">
+      <div className="flex flex-col w-2/3 h-full p-5 mr-2 bg-white rounded-lg shadow-lg">
         <div className="mb-6">
           <FullCalendar
+            ref={calendarRef}
             height={400}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             headerToolbar={{
@@ -159,6 +156,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
               center: 'title',
               right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
             }}
+            initialDate={new Date()}
             editable={false}
             selectable={true}
             selectMirror={true}
@@ -168,26 +166,22 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
             locale={viLocale}
             eventContent={(eventInfo) => (
               <div className="custom-event h-fit w-fit">
-                <div className="event-title font-semibold text-blue-600 truncate">
+                <div className="font-semibold text-blue-600 truncate event-title">
                   {eventInfo.event.title}
                 </div>
-                <div className="event-time text-xs">
+                <div className="text-xs event-time">
                   {renderCollectionMethod(eventInfo.event.extendedProps.collectionMethod)}
                 </div>
               </div>
             )}
             dayCellContent={(dayInfo) => {
-              const formattedDate = formatDate(dayInfo.date, {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-              });
+              const formattedDate = formatToYYYYMMDD(dayInfo.date);
               const bookingCount = bookingsByDate ? bookingsByDate[formattedDate] || 0 : 0;
               return (
                 <div className="relative">
                   <div>{dayInfo.dayNumberText}</div>
                   {bookingCount > 0 && (
-                    <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    <div className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 text-xs text-white bg-blue-600 rounded-full">
                       {bookingCount}
                     </div>
                   )}
@@ -195,25 +189,12 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
               );
             }}
             dayCellClassNames={({ date }) => {
-              const formattedDate = formatDate(date, {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-              });
-
-              if (formattedDate === today) {
-                return 'bg-blue-200';
-              }
-              if (formattedDate === selectedDay) {
-                return 'bg-orange-200 text-orange-400';
-              }
+              const formattedDate = formatToYYYYMMDD(date);
+              if (formattedDate === today) return 'bg-blue-200';
+              if (formattedDate === selectedDay) return 'bg-orange-200 text-orange-400';
               return localEvents.some((booking) => {
                 const bookingDate = getValidDate(booking.bookingDate);
-                return formatDate(bookingDate, {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                }) === formattedDate;
+                return formatToYYYYMMDD(bookingDate) === formattedDate;
               })
                 ? 'bg-blue-50 text-blue-700'
                 : '';
@@ -229,19 +210,11 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
           handleUpdateStatus={handleUpdateStatus}
         />
       </div>
-      <div className="ml-8 flex h-full w-1/3 flex-col rounded-lg bg-white shadow-lg">
+      <div className="flex flex-col w-1/3 h-full ml-8 bg-white rounded-lg shadow-lg">
         <BookingListPanel
           selectedDay={selectedDay}
           bookings={filteredBookings}
-          selectedStatuses={selectedStatuses}
           statusOptions={statusOptions.map((option) => option.label)}
-          setSelectedStatus={(bookingId: string, value: string) =>
-            setSelectedStatuses((prev) => ({
-              ...prev,
-              [bookingId]: value,
-            }))
-          }
-          handleUpdateStatus={handleUpdateStatus}
         />
       </div>
     </div>
