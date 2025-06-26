@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   CalendarIcon, 
   ClockIcon, 
@@ -25,6 +26,37 @@ import {
 } from "../components/ui/Breadcrumb";
 import { Header } from "../../../components";
 import { Footer } from "../../../components";
+import { 
+  updateBookingApi, 
+  mapFormDataToUpdateRequest,
+  formatDateForInput,
+  getStatusDisplayInfo,
+  statusToNumber
+} from "../api/bookingUpdateApi";
+import { 
+  getBookingByIdApi, 
+  formatBookingDate, 
+  formatPrice, 
+  getStatusDisplay 
+} from "../api/bookingListApi";
+
+// Local interface for BookingItem to avoid import issues
+interface BookingItem {
+  id: string;
+  testServiceId: string;
+  clientId: string;
+  email: string;
+  appointmentDate: string;
+  price: number;
+  collectionMethod: string;
+  status: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+  clientName: string;
+  address: string;
+  phone: string;
+}
 
 interface EditBookingData {
   id: string;
@@ -37,10 +69,13 @@ interface EditBookingData {
   preferredDate: string;
   preferredTime: string;
   notes: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'in_progress';
 }
 
 export const EditBooking = (): React.JSX.Element => {
+  const { id: bookingId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  
   const [formData, setFormData] = useState<EditBookingData>({
     id: '',
     testType: '',
@@ -59,9 +94,8 @@ export const EditBooking = (): React.JSX.Element => {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
-
-  // Get booking ID from URL (in real app, use useParams from react-router)
-  const bookingId = "BL001234";
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [originalBookingData, setOriginalBookingData] = useState<any>(null);
 
   const timeSlots = [
     '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
@@ -69,27 +103,119 @@ export const EditBooking = (): React.JSX.Element => {
     '16:00', '16:30', '17:00'
   ];
 
-  const sampleBookingData: EditBookingData = {
-    id: "BL001234",
-    testType: "Xét nghiệm tổng quát",
-    serviceType: "home",
-    name: "Nguyễn Văn An",
-    phone: "0123456789",
-    email: "nguyenvanan@gmail.com",
-    address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
-    preferredDate: "2024-02-15",
-    preferredTime: "09:00",
-    notes: "Vui lòng gọi trước khi đến. Tôi ở tầng 5, căn hộ A5-12",
-    status: "confirmed"
+  // Transform API data to form data - based on BookingItem interface
+  const transformApiDataToFormData = (apiData: BookingItem): EditBookingData => {
+    const { date, time } = formatDateForInput(apiData.appointmentDate);
+    
+    // Map collectionMethod to serviceType
+    let serviceType: 'home' | 'clinic' = 'home';
+    if (apiData.collectionMethod) {
+      const method = apiData.collectionMethod.toLowerCase();
+      if (method.includes('clinic') || method.includes('center') || method.includes('trung tâm')) {
+        serviceType = 'clinic';
+      } else if (method.includes('home') || method.includes('nhà') || method.includes('kit')) {
+        serviceType = 'home';
+      }
+    }
+    
+    return {
+      id: apiData.id || '',
+      testType: getTestTypeFromCollectionMethod(apiData.collectionMethod) || 'Unknown Service',
+      serviceType: serviceType,
+      name: apiData.clientName || '',
+      phone: apiData.phone || '',
+      email: apiData.email || '',
+      address: apiData.address || '',
+      preferredDate: date,
+      preferredTime: time,
+      notes: apiData.note || '',
+      status: mapApiStatusToUIStatus(apiData.status)
+    };
+  };
+
+  // Helper function to map API status to UI status
+  const mapApiStatusToUIStatus = (apiStatus: string): EditBookingData['status'] => {
+    const status = apiStatus.toLowerCase();
+    
+    switch (status) {
+      case 'pending':
+      case 'chờ xử lý':
+        return 'pending';
+      case 'confirmed':
+      case 'đã xác nhận':
+        return 'confirmed';
+      case 'in_progress':
+      case 'đang thực hiện':
+        return 'in_progress';
+      case 'completed':
+      case 'hoàn thành':
+        return 'completed';
+      case 'cancelled':
+      case 'đã hủy':
+        return 'cancelled';
+      default:
+        return 'pending';
+    }
+  };
+
+  // Helper function to get test type from collection method
+  const getTestTypeFromCollectionMethod = (collectionMethod: string): string => {
+    if (!collectionMethod) return 'Unknown Service';
+    
+    const method = collectionMethod.toLowerCase();
+    
+    if (method.includes('dân sự') || method.includes('civil')) {
+      if (method.includes('kit') || method.includes('tự thu')) {
+        return 'ADN Dân Sự - Tự Thu Mẫu (Kit)';
+      } else if (method.includes('nhà') || method.includes('home')) {
+        return 'ADN Dân Sự - Thu Tại Nhà';
+      } else if (method.includes('trung tâm') || method.includes('center') || method.includes('clinic')) {
+        return 'ADN Dân Sự - Thu Tại Trung Tâm';
+      }
+    } else if (method.includes('hành chính') || method.includes('legal')) {
+      if (method.includes('hài cốt') || method.includes('bone')) {
+        return 'ADN Hành Chính - Giám Định Hài Cốt';
+      } else {
+        return 'ADN Hành Chính - Thu Tại Trung Tâm';
+      }
+    }
+    
+    // Fallback: return the original collection method
+    return collectionMethod;
   };
 
   useEffect(() => {
     const fetchBookingData = async () => {
+      if (!bookingId) {
+        setApiError("ID đặt lịch không hợp lệ");
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setFormData(sampleBookingData);
-      setIsLoading(false);
+      setApiError(null);
+
+      try {
+        console.log('🔄 Fetching booking data for ID:', bookingId);
+        const bookingData = await getBookingByIdApi(bookingId);
+        
+        if (!bookingData) {
+          throw new Error('Không tìm thấy thông tin đặt lịch');
+        }
+        
+        console.log('✅ Received booking data:', bookingData);
+        setOriginalBookingData(bookingData);
+        
+        const transformedData = transformApiDataToFormData(bookingData);
+        console.log('📋 Transformed to form data:', transformedData);
+        
+        setFormData(transformedData);
+      } catch (error) {
+        console.error('❌ Failed to fetch booking data:', error);
+        setApiError(error instanceof Error ? error.message : "Có lỗi xảy ra khi tải thông tin đặt lịch");
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchBookingData();
@@ -158,22 +284,70 @@ export const EditBooking = (): React.JSX.Element => {
       return;
     }
 
+    if (!bookingId) {
+      setApiError("ID đặt lịch không hợp lệ");
+      return;
+    }
+
     setIsSaving(true);
+    setApiError(null);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('🚀 Starting update process...');
+      
+      // Map form data to API request format
+      const updateRequest = mapFormDataToUpdateRequest(
+        bookingId,
+        {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          preferredDate: formData.preferredDate,
+          preferredTime: formData.preferredTime,
+          notes: formData.notes,
+        },
+        formData.status
+      );
+      
+      console.log('📤 Sending update request:', updateRequest);
+      
+      // Call update API
+      const result = await updateBookingApi(updateRequest);
+      
+      console.log('✅ Update successful:', result);
       
       // Show success message
       setShowSuccess(true);
       
       // Auto redirect after 2 seconds
       setTimeout(() => {
-        window.location.href = `/booking-detail/${formData.id}`;
+        navigate(`/customer/booking-detail/${bookingId}`);
       }, 2000);
       
     } catch (error) {
-      console.error('Error updating booking:', error);
+      console.error('❌ Error updating booking:', error);
+      
+      // Handle specific error messages
+      if (error instanceof Error) {
+        const errorMessage = error.message;
+        
+        if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
+          setApiError("Bạn cần đăng nhập để cập nhật thông tin. Vui lòng đăng nhập và thử lại.");
+        } else if (errorMessage.includes('Access denied') || errorMessage.includes('403')) {
+          setApiError("Bạn không có quyền cập nhật đặt lịch này.");
+        } else if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+          setApiError("Không tìm thấy đặt lịch này. Có thể đặt lịch đã bị xóa hoặc không tồn tại.");
+        } else if (errorMessage.includes('Invalid data') || errorMessage.includes('400')) {
+          setApiError(`Dữ liệu không hợp lệ: ${errorMessage.split(':')[1] || 'Vui lòng kiểm tra lại thông tin đã nhập.'}`);
+        } else if (errorMessage.includes('Validation failed')) {
+          setApiError(`Lỗi validate: ${errorMessage.split(':')[1] || 'Vui lòng kiểm tra lại thông tin đã nhập.'}`);
+        } else {
+          setApiError(`Lỗi cập nhật: ${errorMessage}`);
+        }
+      } else {
+        setApiError("Đã xảy ra lỗi không xác định khi cập nhật đặt lịch. Vui lòng thử lại.");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -199,6 +373,39 @@ export const EditBooking = (): React.JSX.Element => {
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-slate-600">Đang tải thông tin...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (apiError && !formData.id) {
+    return (
+      <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
+        <div className="relative z-50">
+          <Header />
+        </div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md mx-auto">
+            <AlertCircleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-red-600 mb-2">Có lỗi xảy ra</h3>
+            <p className="text-slate-600 mb-6">{apiError}</p>
+            <div className="space-y-3">
+              <Button
+                onClick={() => window.location.reload()}
+                className="bg-blue-900 hover:bg-blue-800 text-white"
+              >
+                Thử lại
+              </Button>
+              <Button
+                onClick={() => navigate('/customer/booking-list')}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Quay về danh sách
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -262,13 +469,13 @@ export const EditBooking = (): React.JSX.Element => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <BreadcrumbLink href="/booking-list" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
+                      <BreadcrumbLink href="/customer/booking-list" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Danh Sách Đặt Lịch
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="text-blue-400" />
                     <BreadcrumbItem>
-                      <BreadcrumbLink href={`/booking-detail/${formData.id}`} className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
+                      <BreadcrumbLink href={`/customer/booking-detail/${formData.id}`} className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
                         Chi Tiết Đặt Lịch
                       </BreadcrumbLink>
                     </BreadcrumbItem>
@@ -291,7 +498,7 @@ export const EditBooking = (): React.JSX.Element => {
                   </h1>
                 </div>
                 <Button
-                  onClick={() => window.history.back()}
+                  onClick={() => navigate(`/customer/booking-detail/${bookingId}`)}
                   className="bg-white/20 hover:bg-white/30 text-white border-white/30"
                   variant="outline"
                 >
@@ -316,17 +523,33 @@ export const EditBooking = (): React.JSX.Element => {
                     <div>
                       <h2 className="text-2xl font-bold">Chỉnh Sửa Thông Tin Đặt Lịch</h2>
                       <p className="text-white/90">{formData.testType}</p>
+                      {originalBookingData && (
+                        <div className="flex items-center gap-4 mt-2 text-sm text-white/75">
+                          <span>Ngày tạo: {formatBookingDate(originalBookingData.createdAt)}</span>
+                          {originalBookingData.price && (
+                            <span>Giá: {formatPrice(originalBookingData.price)}</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {formData.serviceType === 'home' ? (
-                      <HomeIcon className="w-6 h-6 text-white" />
-                    ) : (
-                      <BuildingIcon className="w-6 h-6 text-white" />
+                  <div className="text-right">
+                    <div className="flex items-center gap-2 mb-2">
+                      {formData.serviceType === 'home' ? (
+                        <HomeIcon className="w-6 h-6 text-white" />
+                      ) : (
+                        <BuildingIcon className="w-6 h-6 text-white" />
+                      )}
+                      <span className="text-white/90">
+                        {formData.serviceType === 'home' ? 'Tại nhà' : 'Tại cơ sở'}
+                      </span>
+                    </div>
+                    {originalBookingData && (
+                      <div className="text-xs text-white/75">
+                        <div>ID: {originalBookingData.testServiceId}</div>
+                        <div>Status: {getStatusDisplay(originalBookingData.status).label}</div>
+                      </div>
                     )}
-                    <span className="text-white/90">
-                      {formData.serviceType === 'home' ? 'Tại nhà' : 'Tại cơ sở'}
-                    </span>
                   </div>
                 </div>
               </CardHeader>
@@ -346,6 +569,19 @@ export const EditBooking = (): React.JSX.Element => {
                       </div>
                     </div>
                   </div>
+
+                  {/* API Error Display */}
+                  {apiError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertCircleIcon className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-red-800 font-medium mb-1">Lỗi cập nhật</p>
+                          <p className="text-red-700 text-sm">{apiError}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Form Fields */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -514,7 +750,7 @@ export const EditBooking = (): React.JSX.Element => {
                       )}
                     </Button>
                     <Button
-                      onClick={() => window.history.back()}
+                      onClick={() => navigate(`/customer/booking-detail/${bookingId}`)}
                       variant="outline"
                       className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-lg font-semibold flex-1 sm:flex-none"
                       disabled={isSaving}
@@ -523,6 +759,25 @@ export const EditBooking = (): React.JSX.Element => {
                       Hủy Bỏ
                     </Button>
                   </div>
+
+                  {/* Booking Information Summary */}
+                  {originalBookingData && (
+                    <div className="pt-6 border-t border-gray-200">
+                      <div className="bg-slate-50 p-4 rounded-lg">
+                        <h4 className="text-sm font-semibold text-slate-700 mb-3">Thông tin đặt lịch từ API</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-600">
+                          <div><strong>ID:</strong> {originalBookingData.id}</div>
+                          <div><strong>Test Service ID:</strong> {originalBookingData.testServiceId}</div>
+                          <div><strong>Client ID:</strong> {originalBookingData.clientId}</div>
+                          <div><strong>Collection Method:</strong> {originalBookingData.collectionMethod}</div>
+                          <div><strong>Status:</strong> {originalBookingData.status} - {getStatusDisplay(originalBookingData.status).label}</div>
+                          <div><strong>Price:</strong> {originalBookingData.price ? formatPrice(originalBookingData.price) : 'N/A'}</div>
+                          <div><strong>Created:</strong> {formatBookingDate(originalBookingData.createdAt)}</div>
+                          <div><strong>Updated:</strong> {formatBookingDate(originalBookingData.updatedAt)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Info Note */}
                   <div className="pt-6 border-t border-gray-200">
