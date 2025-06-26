@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   CalendarIcon, 
   ClockIcon, 
@@ -27,6 +28,14 @@ import {
 import { Header } from "../../../components";
 import { Footer } from "../../../components";
 import { useBookingModal } from "../components/BookingModalContext";
+// Import booking list API
+import { 
+  getBookingListApi, 
+  formatBookingDate, 
+  formatPrice, 
+  getStatusDisplay,
+  type BookingItem 
+} from "../api/bookingListApi";
 
 interface Booking {
   id: string;
@@ -73,63 +82,79 @@ export const BookingList = (): React.JSX.Element => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { openBookingModal } = useBookingModal();
+  const navigate = useNavigate();
 
-  // Sample data
-  const sampleBookings: Booking[] = [
-    {
-      id: "BL001234",
-      testType: "Xét nghiệm tổng quát",
-      serviceType: "home",
-      name: "Nguyễn Văn An",
-      phone: "0123456789",
-      email: "nguyenvanan@gmail.com",
-      address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
-      preferredDate: "2024-02-15",
-      preferredTime: "09:00",
-      status: "confirmed",
-      notes: "Vui lòng gọi trước khi đến",
-      bookingDate: "2024-02-10",
-      price: "550.000đ"
-    },
-    {
-      id: "BL001235",
-      testType: "Test COVID-19",
-      serviceType: "clinic",
-      name: "Trần Thị Bình",
-      phone: "0987654321",
-      email: "tranthib@gmail.com",
-      preferredDate: "2024-02-16",
-      preferredTime: "14:30",
-      status: "pending",
-      bookingDate: "2024-02-11",
-      price: "300.000đ"
-    },
-    {
-      id: "BL001236",
-      testType: "Xét nghiệm máu",
-      serviceType: "home",
-      name: "Lê Minh Đức",
-      phone: "0912345678",
-      email: "leminhduc@gmail.com",
-      address: "456 Đường DEF, Phường UVW, Quận 3, TP.HCM",
-      preferredDate: "2024-02-12",
-      preferredTime: "08:00",
-      status: "completed",
-      bookingDate: "2024-02-08",
-      price: "450.000đ"
-    }
-  ];
+  // Helper function to transform API data to Booking interface
+  const transformApiDataToBooking = (item: BookingItem): Booking => {
+    // Parse appointmentDate to get date and time
+    const appointmentDate = new Date(item.appointmentDate);
+    const preferredDate = appointmentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const preferredTime = appointmentDate.toTimeString().substring(0, 5); // HH:MM
+    
+    // Parse createdAt for bookingDate
+    const createdAt = new Date(item.createdAt);
+    const bookingDate = createdAt.toISOString().split('T')[0];
+    
+    // Map collectionMethod to serviceType
+    const serviceType: 'home' | 'clinic' = 
+      item.collectionMethod?.toLowerCase().includes('home') || 
+      item.collectionMethod?.toLowerCase().includes('nhà') ? 'home' : 'clinic';
+    
+    // Normalize status to match expected values
+    const normalizeStatus = (status: string): 'pending' | 'confirmed' | 'completed' | 'cancelled' => {
+      const statusLower = status.toLowerCase();
+      if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'pending';
+      if (statusLower.includes('confirmed') || statusLower.includes('xác nhận')) return 'confirmed';
+      if (statusLower.includes('completed') || statusLower.includes('hoàn thành')) return 'completed';
+      if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'cancelled';
+      return 'pending'; // Default fallback
+    };
+    
+    return {
+      id: item.id,
+      testType: `Xét nghiệm ADN`, // Default since API doesn't have testType
+      serviceType,
+      name: item.clientName,
+      phone: item.phone,
+      email: item.email,
+      address: item.address || '',
+      preferredDate,
+      preferredTime,
+      status: normalizeStatus(item.status),
+      notes: item.note || '',
+      bookingDate,
+      price: formatPrice(item.price)
+    };
+  };
 
   useEffect(() => {
-    // Simulate API call
+    // Fetch bookings from API
     const fetchBookings = async () => {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setBookings(sampleBookings);
-      setFilteredBookings(sampleBookings);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        console.log('🔄 Fetching bookings from API...');
+        const apiData = await getBookingListApi();
+        console.log('✅ API data received:', apiData);
+        
+        const formattedBookings = apiData.map(transformApiDataToBooking);
+        console.log('✅ Formatted bookings:', formattedBookings);
+        
+        setBookings(formattedBookings);
+        setFilteredBookings(formattedBookings);
+      } catch (err) {
+        console.error('❌ Error fetching bookings:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load bookings');
+        // Use empty array as fallback
+        setBookings([]);
+        setFilteredBookings([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchBookings();
@@ -234,7 +259,7 @@ export const BookingList = (): React.JSX.Element => {
         </section>
 
         {/* Bookings List */}
-        <section className="py-16 md:py-20 bg-blue-50">
+        <section className="py-16 md:py-20 bg-white">
           <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-8">
               <p className="text-lg text-slate-600">
@@ -246,6 +271,18 @@ export const BookingList = (): React.JSX.Element => {
               <div className="text-center py-16">
                 <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-slate-600">Đang tải danh sách...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-16">
+                <AlertCircleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-slate-600 mb-2">Có lỗi xảy ra</h3>
+                <p className="text-slate-500 mb-4">{error}</p>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  className="bg-blue-900 hover:bg-blue-800 text-white"
+                >
+                  Thử Lại
+                </Button>
               </div>
             ) : filteredBookings.length === 0 ? (
               <div className="text-center py-16">
@@ -279,8 +316,9 @@ export const BookingList = (): React.JSX.Element => {
                                 <p className="text-blue-600 font-medium">{booking.name}</p>
                               </div>
                               <div className="text-right">
-                                <p className="text-2xl font-bold text-blue-900">{booking.price}</p>
-                                <p className="text-sm text-slate-500">Tổng chi phí</p>
+                              <p className="text-sm text-slate-500">Tổng chi phí</p>
+                                <p className="text-2xl font-bold text-green-600">{booking.price}</p>
+                                
                               </div>
                             </div>
 
@@ -321,7 +359,8 @@ export const BookingList = (): React.JSX.Element => {
                           <div className="flex flex-col gap-2 lg:min-w-[200px]">
                             <Button
                               variant="outline"
-                              className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white w-full"
+                              className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white w-full transition-colors duration-200"
+                              onClick={() => navigate(`/customer/booking-detail/${booking.id}`)}
                             >
                               <EyeIcon className="w-4 h-4 mr-2" />
                               Xem Chi Tiết
@@ -329,7 +368,8 @@ export const BookingList = (): React.JSX.Element => {
                             {(booking.status === 'pending' || booking.status === 'confirmed') && (
                               <Button
                                 variant="outline"
-                                className="border-gray-300 text-gray-700 hover:bg-gray-50 w-full"
+                                className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white w-full transition-colors duration-200"
+                                onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
                               >
                                 <EditIcon className="w-4 h-4 mr-2" />
                                 Cập Nhật

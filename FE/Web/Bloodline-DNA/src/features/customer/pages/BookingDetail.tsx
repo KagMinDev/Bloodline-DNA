@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { 
   CalendarIcon, 
   ClockIcon, 
@@ -28,6 +29,14 @@ import {
 import { Header } from "../../../components";
 import { Footer } from "../../../components";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
+// Import booking list API
+import { 
+  getBookingByIdApi, 
+  formatBookingDate, 
+  formatPrice, 
+  getStatusDisplay,
+  type BookingItem 
+} from "../api/bookingListApi";
 
 interface BookingDetail {
   id: string;
@@ -80,38 +89,97 @@ const statusConfig = {
 export const BookingDetail = (): React.JSX.Element => {
   const [booking, setBooking] = useState<BookingDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const { id: bookingId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-  // Get booking ID from URL (in real app, use useParams from react-router)
-  const bookingId = "BL001234";
-
-  const sampleBooking: BookingDetail = {
-    id: "BL001234",
-    testType: "Xét nghiệm tổng quát",
-    serviceType: "home",
-    name: "Nguyễn Văn An",
-    phone: "0123456789",
-    email: "nguyenvanan@gmail.com",
-    address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
-    preferredDate: "2024-02-15",
-    preferredTime: "09:00",
-    status: "confirmed",
-    notes: "Vui lòng gọi trước khi đến. Tôi ở tầng 5, căn hộ A5-12",
-    bookingDate: "2024-02-10T10:30:00",
-    basePrice: "500.000đ",
-    shippingFee: "50.000đ",
-    price: "550.000đ",
-    totalPrice: "550.000đ",
-    estimatedDelivery: "2024-02-14",
-    appointmentCode: "APT-001234"
+  // Helper function to transform API data to BookingDetail interface
+  const transformApiDataToBookingDetail = (item: BookingItem): BookingDetail => {
+    // Parse appointmentDate to get date and time
+    const appointmentDate = new Date(item.appointmentDate);
+    const preferredDate = appointmentDate.toISOString().split('T')[0]; // YYYY-MM-DD
+    const preferredTime = appointmentDate.toTimeString().substring(0, 5); // HH:MM
+    
+    // Parse createdAt for bookingDate
+    const createdAt = new Date(item.createdAt);
+    const bookingDate = createdAt.toISOString();
+    
+    // Map collectionMethod to serviceType
+    const serviceType: 'home' | 'clinic' = 
+      item.collectionMethod?.toLowerCase().includes('home') || 
+      item.collectionMethod?.toLowerCase().includes('nhà') ? 'home' : 'clinic';
+    
+    // Normalize status to match expected values
+    const normalizeStatus = (status: string): 'pending' | 'confirmed' | 'completed' | 'cancelled' => {
+      const statusLower = status.toLowerCase();
+      if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'pending';
+      if (statusLower.includes('confirmed') || statusLower.includes('xác nhận')) return 'confirmed';
+      if (statusLower.includes('completed') || statusLower.includes('hoàn thành')) return 'completed';
+      if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'cancelled';
+      return 'pending'; // Default fallback
+    };
+    
+    // Format pricing information
+    const formattedPrice = formatPrice(item.price);
+    const basePrice = formatPrice(item.price * 0.9); // Assume 10% is additional fees
+    const shippingFee = serviceType === 'home' ? formatPrice(item.price * 0.1) : undefined;
+    
+    return {
+      id: item.id,
+      testType: `Xét nghiệm ADN`, // Default since API doesn't have testType
+      serviceType,
+      name: item.clientName,
+      phone: item.phone,
+      email: item.email,
+      address: item.address || '',
+      preferredDate,
+      preferredTime,
+      status: normalizeStatus(item.status),
+      notes: item.note || '',
+      bookingDate,
+      basePrice,
+      shippingFee,
+      price: formattedPrice,
+      totalPrice: formattedPrice,
+      estimatedDelivery: serviceType === 'home' ? preferredDate : undefined,
+      appointmentCode: `APT-${item.id.slice(-6)}`
+    };
   };
 
   useEffect(() => {
     const fetchBookingDetail = async () => {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setBooking(sampleBooking);
-      setIsLoading(false);
+      if (!bookingId) {
+        setError('ID booking không hợp lệ');
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        console.log('🔍 Fetching booking detail for ID:', bookingId);
+        const apiData = await getBookingByIdApi(bookingId);
+        
+        if (!apiData) {
+          setError('Không tìm thấy thông tin booking');
+          setBooking(null);
+          return;
+        }
+
+        console.log('✅ API data received:', apiData);
+        const formattedBooking = transformApiDataToBookingDetail(apiData);
+        console.log('✅ Formatted booking detail:', formattedBooking);
+        
+        setBooking(formattedBooking);
+      } catch (err) {
+        console.error('❌ Error fetching booking detail:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load booking details');
+        setBooking(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchBookingDetail();
@@ -163,11 +231,29 @@ export const BookingDetail = (): React.JSX.Element => {
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <XCircleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-600 mb-2">Không tìm thấy lịch hẹn</h3>
-            <p className="text-slate-500 mb-6">Lịch hẹn không tồn tại hoặc đã bị xóa</p>
-            <Button onClick={() => window.history.back()} className="bg-blue-900 hover:bg-blue-800 text-white">
-              Quay Lại
-            </Button>
+            <h3 className="text-xl font-semibold text-slate-600 mb-2">
+              {error || "Không tìm thấy lịch hẹn"}
+            </h3>
+            <p className="text-slate-500 mb-6">
+              {error ? "Vui lòng thử lại sau hoặc liên hệ hỗ trợ." : "Lịch hẹn không tồn tại hoặc đã bị xóa"}
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button 
+                onClick={() => navigate('/customer/booking-list')} 
+                className="bg-blue-900 hover:bg-blue-800 text-white"
+              >
+                Về Danh Sách
+              </Button>
+              {error && (
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  variant="outline"
+                  className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white"
+                >
+                  Thử Lại
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -249,7 +335,7 @@ export const BookingDetail = (): React.JSX.Element => {
         </section>
 
         {/* Booking Detail Content */}
-        <section className="py-16 md:py-20 bg-blue-50">
+        <section className="py-16 md:py-20 bg-white">
           <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-6xl">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content */}
@@ -269,8 +355,8 @@ export const BookingDetail = (): React.JSX.Element => {
                       </div>
                       {(booking.status === 'pending' || booking.status === 'confirmed') && (
                         <Button
-                          onClick={() => window.location.href = `/booking-edit/${booking.id}`}
-                          className="bg-blue-900 hover:bg-blue-800 text-white"
+                          onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
+                          className="bg-blue-900 hover:bg-blue-800 !text-white"
                         >
                           <EditIcon className="w-4 h-4 mr-2" />
                           Cập Nhật
@@ -417,34 +503,6 @@ export const BookingDetail = (): React.JSX.Element => {
                           <span className="font-bold text-xl text-green-600">{booking.totalPrice}</span>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Actions */}
-                <Card className="bg-white shadow-lg border-0">
-                  <CardHeader className="bg-blue-50 p-6 border-b">
-                    <h3 className="text-xl font-bold text-blue-900">Thao Tác</h3>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-3">
-                      <Button variant="outline" className="w-full border-blue-900 text-blue-900 hover:bg-blue-900 hover:text-white">
-                        <PrinterIcon className="w-4 h-4 mr-2" />
-                        In Phiếu Hẹn
-                      </Button>
-                      <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
-                        <DownloadIcon className="w-4 h-4 mr-2" />
-                        Tải PDF
-                      </Button>
-                      {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                        <Button 
-                          className="w-full bg-blue-900 hover:bg-blue-800 text-white"
-                          onClick={() => window.location.href = `/booking-edit/${booking.id}`}
-                        >
-                          <EditIcon className="w-4 h-4 mr-2" />
-                          Cập Nhật Thông Tin
-                        </Button>
-                      )}
                     </div>
                   </CardContent>
                 </Card>

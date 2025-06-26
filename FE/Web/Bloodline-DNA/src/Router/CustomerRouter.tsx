@@ -30,9 +30,9 @@ export default function CustomerRouter() {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
-        <Route path="/booking-detail" element={<BookingDetail />} />
+        <Route path="/booking-detail/:id" element={<BookingDetail />} />
         <Route path="/test-progress" element={<TestProgress />} />
-        <Route path="/edit-booking" element={<EditBooking />} />
+        <Route path="/edit-booking/:id" element={<EditBooking />} />
         <Route path="/booking-list" element={<BookingList />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         {/* Not found */}
