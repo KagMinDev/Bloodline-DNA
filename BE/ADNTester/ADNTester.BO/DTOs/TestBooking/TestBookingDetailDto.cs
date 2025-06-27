@@ -9,7 +9,7 @@ namespace ADNTester.BO.DTOs.TestBooking
         public string TestServiceId { get; set; }
         public string ClientId { get; set; }
        
-        public DateTime BookingDate { get; set; }
+        public DateTime AppointmentDate { get; set; }
         public decimal Price { get; set; }
         public string CollectionMethod { get; set; }
         public string Status { get; set; }
@@ -18,5 +18,8 @@ namespace ADNTester.BO.DTOs.TestBooking
         public DateTime? UpdatedAt { get; set; }
         public UserDto Client { get; set; }
         public TestServiceDto TestService { get; set; }
+        public string ClientName { get; set; }
+        public string Address { get; set; }
+        public string Phone { get; set; }
     }
 } 

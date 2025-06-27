@@ -16,7 +16,7 @@ function App() {
 }
 
 function MainContent() {
-  const { isBookingModalOpen, closeBookingModal } = useBookingModal();
+  const { isBookingModalOpen, selectedService, closeBookingModal } = useBookingModal();
 
   return (
     <>
@@ -24,9 +24,11 @@ function MainContent() {
       <BookingModal
         isOpen={isBookingModalOpen}
         onClose={closeBookingModal}
+        selectedService={selectedService || undefined}
         onSubmit={() => {
           // Handle submission logic here
-          closeBookingModal();
+          // Don't close modal automatically - let user see success step and close manually
+          console.log('Booking submitted successfully - showing success step');
         }}
       />
       <div className="fixed bottom-0 right-0 p-4 z-50">

@@ -24,5 +24,9 @@ namespace ADNTester.BO.Entities
         public string Note { get; set; }
 
         public TestResult TestResult { get; set; }
+        //New Fields
+        public string? ClientName { get; set; }
+        public string? Address { get; set; }
+        public string? Phone { get; set; }
     }
 }

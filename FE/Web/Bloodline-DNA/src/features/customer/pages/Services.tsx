@@ -58,12 +58,12 @@ interface ServiceCategory {
 
 // ===== HELPER FUNCTIONS =====
 const categoryMappings: { [key: string]: string } = {
-  'Civil': 'diagnostic',
-  'Legal': 'consultation', 
-  'Emergency': 'emergency',
-  'Consultation': 'consultation',
-  'Checkup': 'checkup',
-  'Monitoring': 'monitoring'
+  'Civil': 'civil',
+  'Legal': 'legal', 
+  'Emergency': 'civil',
+  'Consultation': 'civil',
+  'Checkup': 'civil',
+  'Monitoring': 'civil'
 };
 
 const categoryDurations: { [key: string]: string } = {
@@ -126,28 +126,43 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
     const serviceInfo = apiService.testServiceInfor;
     const title = serviceInfo?.name || `Service ${apiService.id}`;
     const description = serviceInfo?.description || 'Không có mô tả';
-    const category = serviceInfo?.category || 'diagnostic';
+    const apiCategory = serviceInfo?.category || 'Civil';
     const isActive = apiService.isActive;
     
-    return {
+    // Map API category to UI category
+    const uiCategory = categoryMappings[apiCategory] || 'civil';
+    
+    // Debug logging
+    console.log(`📝 Service ${index + 1} mapping:`, {
+      id: apiService.id,
+      title: title,
+      apiCategory: apiCategory,
+      uiCategory: uiCategory,
+      isActive: isActive
+    });
+    
+    const transformedService = {
       id: apiService.id,
       title: title,
       description: description,
-      category: categoryMappings[category] || 'diagnostic',
+      category: uiCategory,
       price: `${apiService.price.toLocaleString('vi-VN')}đ`,
-      duration: categoryDurations[category] || '30-60 phút',
+      duration: categoryDurations[apiCategory] || '30-60 phút',
       rating: 4.7 + Math.random() * 0.3,
       reviews: Math.floor(Math.random() * 300) + 50,
-      image: categoryImages[category] || categoryImages['Civil'],
-      features: categoryFeatures[category] || ['Dịch vụ chất lượng cao', 'Đội ngũ chuyên nghiệp'],
-      doctor: categoryDoctors[category] || 'BS. Chuyên khoa',
-      location: categoryLocations[category] || 'Phòng khám',
+      image: categoryImages[apiCategory] || categoryImages['Civil'],
+      features: categoryFeatures[apiCategory] || ['Dịch vụ chất lượng cao', 'Đội ngũ chuyên nghiệp'],
+      doctor: categoryDoctors[apiCategory] || 'BS. Chuyên khoa',
+      location: categoryLocations[apiCategory] || 'Phòng khám',
       available: isActive,
       featured: apiService.price > 1000000,
       isActive: isActive,
       effectiveFrom: apiService.effectiveFrom,
       effectiveTo: apiService.effectiveTo
     };
+    
+    console.log(`✅ Transformed service:`, transformedService);
+    return transformedService;
   });
 };
 
@@ -168,7 +183,7 @@ const getMockServices = (): TestService[] => {
       testServiceInfor: {
         id: "mock-1",
         name: "Xét nghiệm máu cơ bản",
-        description: "Kiểm tra các chỉ số máu cơ bản",
+        description: "Kiểm tra các chỉ số máu cơ bản cho mục đích y tế",
         category: "Civil",
         isActive: true,
         createdAt: new Date().toISOString(),
@@ -184,7 +199,7 @@ const getMockServices = (): TestService[] => {
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      isActive: false,
+      isActive: true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       testServiceInfor: {
@@ -192,7 +207,51 @@ const getMockServices = (): TestService[] => {
         name: "Xét nghiệm ADN pháp lý",
         description: "Lấy mẫu tóc để xét nghiệm ADN cho mục đích pháp lý",
         category: "Legal",
-        isActive: false,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        priceServices: []
+      }
+    },
+    {
+      id: "mock-3",
+      serviceId: "mock-service-3", 
+      price: 800000,
+      collectionMethod: 0,
+      currency: "VND",
+      effectiveFrom: new Date().toISOString(),
+      effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      testServiceInfor: {
+        id: "mock-3",
+        name: "Xét nghiệm gen di truyền",
+        description: "Phân tích gen để xác định tính di truyền",
+        category: "Civil",
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        priceServices: []
+      }
+    },
+    {
+      id: "mock-4",
+      serviceId: "mock-service-4",
+      price: 1500000,
+      collectionMethod: 0,
+      currency: "VND",
+      effectiveFrom: new Date().toISOString(),
+      effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      testServiceInfor: {
+        id: "mock-4",
+        name: "Xác định quan hệ huyết thống",
+        description: "Xét nghiệm ADN để xác định quan hệ cha con hoặc họ hàng",
+        category: "Legal",
+        isActive: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         priceServices: []
@@ -212,7 +271,6 @@ export const Services = (): React.JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [detailLoading, setDetailLoading] = useState<string | null>(null);
-
   const { openBookingModal } = useBookingModal();
   const navigate = useNavigate();
 
@@ -306,34 +364,16 @@ export const Services = (): React.JSX.Element => {
       count: services.length
     },
     {
-      id: "emergency",
-      name: "Cấp Cứu",
+      id: "civil",
+      name: "Dân Sự",
       icon: <HeartIcon className="w-5 h-5" />,
-      count: services.filter(s => s.category === 'emergency').length
+      count: services.filter(s => s.category === 'civil').length
     },
     {
-      id: "checkup",
-      name: "Khám Định Kỳ",
+      id: "legal",
+      name: "Hành Chính",
       icon: <ShieldIcon className="w-5 h-5" />,
-      count: services.filter(s => s.category === 'checkup').length
-    },
-    {
-      id: "consultation",
-      name: "Tư Vấn",
-      icon: <ActivityIcon className="w-5 h-5" />,
-      count: services.filter(s => s.category === 'consultation').length
-    },
-    {
-      id: "diagnostic",
-      name: "Chẩn Đoán",
-      icon: <ClipboardCheckIcon className="w-5 h-5" />,
-      count: services.filter(s => s.category === 'diagnostic').length
-    },
-    {
-      id: "monitoring",
-      name: "Theo Dõi",
-      icon: <UserCheckIcon className="w-5 h-5" />,
-      count: services.filter(s => s.category === 'monitoring').length
+      count: services.filter(s => s.category === 'legal').length
     }
   ];
 
@@ -345,23 +385,45 @@ export const Services = (): React.JSX.Element => {
 
   // Filter services
   useEffect(() => {
+    console.log('🔍 Starting filter process...');
+    console.log('📊 Total services:', services.length);
+    console.log('🏷️ Selected category:', selectedCategory);
+    console.log('🔍 Search term:', searchTerm);
+    
+    // Log all services with their categories
+    services.forEach((service, index) => {
+      console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
+    });
+    
     let filtered = services;
     
     // Filter by category
     if (selectedCategory !== "all") {
+      console.log(`🔽 Filtering by category: ${selectedCategory}`);
+      const beforeCount = filtered.length;
       filtered = filtered.filter(service => service.category === selectedCategory);
+      console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
+      
+      // Log which services passed the filter
+      filtered.forEach((service, index) => {
+        console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
+      });
     }
     
     // Filter by search term
     if (searchTerm) {
+      console.log(`🔍 Filtering by search term: ${searchTerm}`);
+      const beforeCount = filtered.length;
       filtered = filtered.filter(service => 
         service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase())) ||
         service.doctor.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
     }
     
+    console.log('🎯 Final filtered services count:', filtered.length);
     setFilteredServices(filtered);
   }, [selectedCategory, searchTerm, services]);
 
@@ -432,82 +494,36 @@ export const Services = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
-          {/* Background Pattern */}
+        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="medical-cross" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
-                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#medical-cross)" />
-            </svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-
-          {/* Floating Icons */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-blue-200/30 animate-pulse">
-              <HeartIcon className="w-8 h-8 text-blue-600/60" />
+          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-6">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem><BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">Trang Chủ</BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem><span className="font-semibold text-blue-900">Dịch Vụ Y Tế</span></BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
-            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-blue-200/30 animate-bounce" style={{animationDelay: '1s'}}>
-              <StethoscopeIcon className="w-6 h-6 text-blue-600/60" />
-            </div>
-            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-blue-200/30 animate-pulse" style={{animationDelay: '2s'}}>
-              <ShieldIcon className="w-7 h-7 text-blue-600/60" />
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="relative z-10 flex items-center h-full">
-            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-              <div className="grid items-center grid-cols-1 gap-8 lg:grid-cols-2">
-                <div className={`transition-all duration-1000 ease-out ${
-                  isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-                }`}>
-                  {/* Breadcrumb */}
-                  <div className="mb-6">
-                    <Breadcrumb>
-                      <BreadcrumbList className="text-blue-600">
-                        <BreadcrumbItem>
-                          <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                            Trang Chủ
-                          </BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator className="text-blue-400" />
-                        <BreadcrumbItem>
-                          <span className="text-blue-900 font-semibold">Dịch Vụ Y Tế</span>
-                        </BreadcrumbItem>
-                      </BreadcrumbList>
-                    </Breadcrumb>
-                  </div>
-
-                  {/* Title */}
-                  <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl lg:text-5xl">
-                    Dịch Vụ Y Tế
-                    <span className="block text-blue-700 text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
-                      Chất Lượng Cao
-                    </span>
-                  </h1>
-
-                  {/* Description */}
-                  <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-blue-700">
-                    Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.
-                  </p>
-
-                  {/* Stats */}
-                  <div className="flex flex-wrap gap-4 mb-6">
-                    <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-200">
-                      <span className="text-2xl font-bold text-blue-900">{services.length}</span>
-                      <span className="block text-sm text-blue-600">Dịch vụ</span>
-                    </div>
-                    <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-200">
-                      <span className="text-2xl font-bold text-blue-900">{services.filter(s => s.isActive).length}</span>
-                      <span className="block text-sm text-blue-600">Đang hoạt động</span>
-                    </div>
-                  </div>
-                </div>
+            <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl lg:text-6xl">Dịch Vụ Y Tế
+              <span className="block mt-2 text-2xl font-medium text-blue-700 md:text-3xl">
+                Chất Lượng Cao
+              </span>
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.</p>
+            
+            {/* Stats */}
+            <div className="flex flex-wrap gap-4 mt-6">
+              <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-200">
+                <span className="text-2xl font-bold text-blue-900">{services.length}</span>
+                <span className="block text-sm text-blue-600">Dịch vụ</span>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-200">
+                <span className="text-2xl font-bold text-blue-900">{services.filter(s => s.isActive).length}</span>
+                <span className="block text-sm text-blue-600">Đang hoạt động</span>
               </div>
             </div>
           </div>
@@ -554,7 +570,7 @@ export const Services = (): React.JSX.Element => {
             </div>
 
             {/* Category Filter */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-3">
               {categories.map((category, index) => (
                 <button
                   key={category.id}
@@ -716,21 +732,36 @@ export const Services = (): React.JSX.Element => {
                         </div>
                       </div>
 
-                      {/* Action Button */}
-                      <Button 
-                        onClick={(e) => handleViewDetail(e, service.id)} 
-                        disabled={detailLoading === service.id}
-                        className="w-full font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-slate-800 hover:bg-slate-900 !text-white hover:shadow-lg hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:transform-none"
-                      >
-                        {detailLoading === service.id ? (
-                          <div className="flex items-center justify-center">
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                            Đang tải...
-                          </div>
-                        ) : (
-                          'Xem Chi Tiết'
-                        )}
-                      </Button>
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openBookingModal({
+                              id: service.id,
+                              title: service.title,
+                              category: service.category,
+                              price: service.price
+                            });
+                          }} 
+                          className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"
+                        >
+                          <CalendarIcon className="w-4 h-4 mr-2" />
+                          Đặt Lịch
+                        </Button>
+                        <Button 
+                          onClick={(e) => handleViewDetail(e, service.id)} 
+                          disabled={detailLoading === service.id}
+                          variant="outline"
+                          className="px-4 font-semibold transition-all duration-300 transform rounded-lg shadow-md border-slate-300 text-slate-600 hover:bg-slate-50 hover:shadow-lg hover:scale-105 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          {detailLoading === service.id ? (
+                            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            'Chi Tiết'
+                          )}
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -832,7 +863,7 @@ export const Services = (): React.JSX.Element => {
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
-                onClick={openBookingModal}
+                onClick={() => openBookingModal()}
                 className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900"
               >
                 <CalendarIcon className="w-5 h-5 mr-2" />
