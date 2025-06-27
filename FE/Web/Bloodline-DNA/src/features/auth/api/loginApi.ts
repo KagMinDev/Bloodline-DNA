@@ -17,10 +17,10 @@ import { BASE_URL } from "../../../apis/rootApi";
 //       }
 //     );
 
-//     console.log("Start response:", );
+//     console.log("Start response:", response);
     
-//     return response.data;
 //     console.log("Login response:", response.data);
+//     return response.data;
     
 //   } catch (error) {
 //     console.log("Error during login:", error);

@@ -41,8 +41,6 @@ namespace ADNTester.Service
             services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
             // Register PayOS service
-          
-
             return services;
         }
     }

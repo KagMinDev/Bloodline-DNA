@@ -75,7 +75,7 @@ namespace ADNTester.Service.Implementations
             var latestPrices = prices
                 .GroupBy(p => p.ServiceId)
                 .Select(g => g.OrderByDescending(p => p.EffectiveFrom).First())
-                .Where(p => p.EffectiveTo == null || p.EffectiveTo > DateTime.UtcNow);
+                .Where(p => p.EffectiveTo == null || p.EffectiveTo > p.EffectiveFrom);
 
             // Lấy thông tin TestService cho mỗi price
             var pricesWithService = new List<ServicePrice>();

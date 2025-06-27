@@ -1,19 +1,31 @@
 import {
   ActivityIcon,
+  ArrowLeftIcon,
   ArrowRightIcon,
   AwardIcon,
+  BriefcaseMedicalIcon,
+  BuildingIcon,
+  BoxIcon,
   CalendarIcon,
   CheckCircleIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ClipboardEditIcon,
   ClockIcon,
+  FileTextIcon,
+  FlaskConicalIcon,
   HeartIcon,
+  HomeIcon,
+  InfoIcon,
   ShieldIcon,
   StarIcon,
-  StethoscopeIcon
+  StethoscopeIcon,
+  TruckIcon,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Footer, Header } from "../../../components";
+import { type ServiceDetail, getServiceById } from "../api/servicesApi";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
@@ -25,6 +37,7 @@ import {
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 
+// ===== INTERFACES =====
 interface ServiceFeature {
   icon: React.ReactNode;
   title: string;
@@ -54,520 +67,409 @@ interface RelatedService {
   description: string;
 }
 
+// ===== HELPER FUNCTIONS =====
+const categoryMapping: { [key: string]: string } = {
+  'Civil': 'Dịch Vụ Dân Sự',
+  'Legal': 'Dịch Vụ Pháp Lý',
+  'Emergency': 'Dịch Vụ Cấp Cứu',
+  'Consultation': 'Dịch Vụ Tư Vấn',
+  'Checkup': 'Khám Sức Khỏe',
+  'Monitoring': 'Theo Dõi Sức Khỏe'
+};
+
+const durationMapping: { [key: string]: string } = {
+  'Civil': '45-60 phút',
+  'Legal': '1-2 giờ',
+  'Emergency': '24/7',
+  'Consultation': '30-45 phút',
+  'Checkup': '1-2 giờ',
+  'Monitoring': 'Theo tháng'
+};
+
+const getCategoryInVietnamese = (category: string): string => {
+  return categoryMapping[category] || category;
+};
+
+const getDurationByCategory = (category: string): string => {
+  return durationMapping[category] || '30-60 phút';
+};
+
+// ===== STATIC DATA =====
+const serviceFeatures: ServiceFeature[] = [
+  {
+    icon: <ShieldIcon className="w-8 h-8 text-blue-900" />,
+    title: "An Toàn & Tin Cậy",
+    description: "Quy trình chuẩn quốc tế, đảm bảo an toàn tuyệt đối cho người bệnh"
+  },
+  {
+    icon: <AwardIcon className="w-8 h-8 text-blue-900" />,
+    title: "Chuyên Gia Hàng Đầu",
+    description: "Đội ngũ bác sĩ chuyên khoa được đào tạo bài bản, kinh nghiệm nhiều năm"
+  },
+  {
+    icon: <ActivityIcon className="w-8 h-8 text-blue-900" />,
+    title: "Công Nghệ Hiện Đại",
+    description: "Trang thiết bị y tế tiên tiến, chính xác cao từ các thương hiệu hàng đầu"
+  },
+  {
+    icon: <HeartIcon className="w-8 h-8 text-blue-900" />,
+    title: "Chăm Sóc Tận Tâm",
+    description: "Dịch vụ chu đáo, tư vấn chi tiết và theo dõi sức khỏe lâu dài"
+  }
+];
+
+const doctors: Doctor[] = [
+  {
+    id: 1, name: "BS.CK1 Nguyễn Văn An", specialization: "Nội Tim Mạch", experience: "15 năm kinh nghiệm",
+    image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png", rating: 4.9, reviews: 234
+  },
+  {
+    id: 2, name: "BS.CK2 Trần Thị Bình", specialization: "Nội Tiết", experience: "12 năm kinh nghiệm",
+    image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png", rating: 4.8, reviews: 189
+  },
+  {
+    id: 3, name: "BS.CK1 Lê Minh Đức", specialization: "Chẩn Đoán Hình Ảnh", experience: "18 năm kinh nghiệm",
+    image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png", rating: 4.9, reviews: 312
+  }
+];
+
+const faqs: FAQ[] = [
+  { question: "Tôi cần chuẩn bị gì trước khi khám?", answer: "Bạn nên nhịn ăn 8-10 tiếng trước khi khám để đảm bảo kết quả xét nghiệm chính xác. Mang theo các kết quả khám trước đó (nếu có) và danh sách thuốc đang sử dụng." },
+  { question: "Khám sức khỏe định kỳ mất bao lâu?", answer: "Tùy vào gói khám bạn chọn, thời gian có thể từ 2-6 giờ. Gói cơ bản khoảng 2 giờ, gói nâng cao 3-4 giờ, và gói VIP có thể mất cả ngày." },
+  { question: "Khi nào tôi nhận được kết quả?", answer: "Hầu hết kết quả sẽ có ngay trong ngày khám. Một số xét nghiệm chuyên sâu có thể cần 1-2 ngày. Chúng tôi sẽ gọi điện thông báo khi có kết quả đầy đủ." },
+  { question: "Có bảo hiểm y tế được không?", answer: "Chúng tôi chấp nhận hầu hết các loại bảo hiểm y tế. Vui lòng liên hệ trước để xác nhận và biết chi tiết về mức hỗ trợ của bảo hiểm." }
+];
+
+const relatedServices: RelatedService[] = [
+  { id: 1, title: "Khám Tim Mạch", price: "2.500.000đ", image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png", description: "Khám và tầm soát các bệnh lý tim mạch" },
+  { id: 2, title: "Xét Nghiệm Tổng Quát", price: "1.200.000đ", image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png", description: "Xét nghiệm máu, nước tiểu toàn diện" },
+  { id: 3, title: "Siêu Âm 4D", price: "800.000đ", image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png", description: "Siêu âm chẩn đoán hình ảnh chất lượng cao" }
+];
+
+// ===== MAIN COMPONENT =====
 export const DetailServices = (): React.JSX.Element => {
-  const [scrollY, setScrollY] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+  // State
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [selectedPackage, setSelectedPackage] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [serviceDetail, setServiceDetail] = useState<ServiceDetail | null>(null);
+
   const { openBookingModal } = useBookingModal();
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Service data - this would typically come from props or API
-  const serviceData = {
-    title: "Khám Sức Khỏe Định Kỳ",
-    subtitle: "Chăm sóc sức khỏe toàn diện và phòng ngừa",
-    heroImage: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-    category: "Dịch Vụ Phòng Ngừa",
-    duration: "2-3 giờ",
-    description: "Dịch vụ khám sức khỏe định kỳ toàn diện của chúng tôi được thiết kế để phát hiện sớm các vấn đề sức khỏe tiềm ẩn và duy trì sức khỏe tối ưu cho bạn. Với đội ngũ bác sĩ chuyên khoa giàu kinh nghiệm và trang thiết bị y tế hiện đại.",
-    overview: "Chương trình khám sức khỏe định kỳ bao gồm các xét nghiệm cơ bản đến chuyên sâu, giúp đánh giá tình trạng sức khỏe tổng thể và đưa ra các khuyến nghị phù hợp cho từng cá nhân."
-  };
-
-  const serviceFeatures: ServiceFeature[] = [
-    {
-      icon: <ShieldIcon className="w-8 h-8 text-blue-900" />,
-      title: "An Toàn & Tin Cậy",
-      description: "Quy trình chuẩn quốc tế, đảm bảo an toàn tuyệt đối cho người bệnh"
-    },
-    {
-      icon: <AwardIcon className="w-8 h-8 text-blue-900" />,
-      title: "Chuyên Gia Hàng Đầu",
-      description: "Đội ngũ bác sĩ chuyên khoa được đào tạo bài bản, kinh nghiệm nhiều năm"
-    },
-    {
-      icon: <ActivityIcon className="w-8 h-8 text-blue-900" />,
-      title: "Công Nghệ Hiện Đại",
-      description: "Trang thiết bị y tế tiên tiến, chính xác cao từ các thương hiệu hàng đầu"
-    },
-    {
-      icon: <HeartIcon className="w-8 h-8 text-blue-900" />,
-      title: "Chăm Sóc Tận Tâm",
-      description: "Dịch vụ chu đáo, tư vấn chi tiết và theo dõi sức khỏe lâu dài"
-    }
-  ];
-
-  const pricingPackages = [
-    {
-      name: "Gói Cơ Bản",
-      price: "1.500.000",
-      duration: "2 giờ",
-      features: [
-        "Khám tổng quát",
-        "Xét nghiệm máu cơ bản",
-        "Đo huyết áp, nhịp tim",
-        "Tư vấn dinh dưỡng",
-        "Báo cáo kết quả"
-      ]
-    },
-    {
-      name: "Gói Nâng Cao",
-      price: "3.500.000",
-      duration: "3 giờ",
-      features: [
-        "Tất cả gói cơ bản",
-        "Siêu âm tổng quát",
-        "X-quang phổi",
-        "Xét nghiệm chuyên sâu",
-        "Khám chuyên khoa",
-        "Tư vấn từ chuyên gia"
-      ],
-      popular: true
-    },
-    {
-      name: "Gói VIP",
-      price: "6.500.000",
-      duration: "Cả ngày",
-      features: [
-        "Tất cả gói nâng cao",
-        "MRI/CT Scan",
-        "Nội soi dạ dày",
-        "Khám tim mạch chuyên sâu",
-        "Phòng khám riêng",
-        "Bữa ăn cao cấp",
-        "Theo dõi 1 năm"
-      ]
-    }
-  ];
-
-  const doctors: Doctor[] = [
-    {
-      id: 1,
-      name: "BS.CK1 Nguyễn Văn An",
-      specialization: "Nội Tim Mạch",
-      experience: "15 năm kinh nghiệm",
-      image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-      rating: 4.9,
-      reviews: 234
-    },
-    {
-      id: 2,
-      name: "BS.CK2 Trần Thị Bình",
-      specialization: "Nội Tiết",
-      experience: "12 năm kinh nghiệm",
-      image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-      rating: 4.8,
-      reviews: 189
-    },
-    {
-      id: 3,
-      name: "BS.CK1 Lê Minh Đức",
-      specialization: "Chẩn Đoán Hình Ảnh",
-      experience: "18 năm kinh nghiệm",
-      image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-      rating: 4.9,
-      reviews: 312
-    }
-  ];
-
-  const faqs: FAQ[] = [
-    {
-      question: "Tôi cần chuẩn bị gì trước khi khám?",
-      answer: "Bạn nên nhịn ăn 8-10 tiếng trước khi khám để đảm bảo kết quả xét nghiệm chính xác. Mang theo các kết quả khám trước đó (nếu có) và danh sách thuốc đang sử dụng."
-    },
-    {
-      question: "Khám sức khỏe định kỳ mất bao lâu?",
-      answer: "Tùy vào gói khám bạn chọn, thời gian có thể từ 2-6 giờ. Gói cơ bản khoảng 2 giờ, gói nâng cao 3-4 giờ, và gói VIP có thể mất cả ngày."
-    },
-    {
-      question: "Khi nào tôi nhận được kết quả?",
-      answer: "Hầu hết kết quả sẽ có ngay trong ngày khám. Một số xét nghiệm chuyên sâu có thể cần 1-2 ngày. Chúng tôi sẽ gọi điện thông báo khi có kết quả đầy đủ."
-    },
-    {
-      question: "Có bảo hiểm y tế được không?",
-      answer: "Chúng tôi chấp nhận hầu hết các loại bảo hiểm y tế. Vui lòng liên hệ trước để xác nhận và biết chi tiết về mức hỗ trợ của bảo hiểm."
-    }
-  ];
-
-  const relatedServices: RelatedService[] = [
-    {
-      id: 1,
-      title: "Khám Tim Mạch",
-      price: "2.500.000đ",
-      image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-      description: "Khám và tầm soát các bệnh lý tim mạch"
-    },
-    {
-      id: 2,
-      title: "Xét Nghiệm Tổng Quát",
-      price: "1.200.000đ",
-      image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-      description: "Xét nghiệm máu, nước tiểu toàn diện"
-    },
-    {
-      id: 3,
-      title: "Siêu Âm 4D",
-      price: "800.000đ",
-      image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
-      description: "Siêu âm chẩn đoán hình ảnh chất lượng cao"
-    }
-  ];
+  const passedServiceDetail = location.state?.serviceDetail;
+  const passedError = location.state?.error;
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(timer);
+    const loadServiceData = async () => {
+      setLoading(true);
+      try {
+        if (passedServiceDetail) {
+          setServiceDetail(passedServiceDetail);
+          return;
+        }
+        if (passedError) {
+          setError(passedError);
+          return;
+        }
+        if (id) {
+          const detail = await getServiceById(id);
+          setServiceDetail(detail);
+          setError(null);
+        } else {
+          throw new Error('Không tìm thấy ID dịch vụ');
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Không thể tải thông tin dịch vụ';
+        setError(errorMessage);
+        setServiceDetail(null);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, []);
-
+    loadServiceData();
+  }, [id, passedServiceDetail, passedError]);
+  
   const toggleFAQ = (index: number) => {
     setOpenFAQ(openFAQ === index ? null : index);
   };
+  
+  if (loading) {
+    return (
+      <div className="bg-white min-h-screen w-full">
+        <Header />
+        <div className="flex items-center justify-center" style={{height: 'calc(100vh - 80px)'}}>
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Đang tải thông tin dịch vụ...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !serviceDetail) {
+    return (
+      <div className="bg-white min-h-screen w-full">
+        <Header />
+        <div className="flex items-center justify-center" style={{height: 'calc(100vh - 80px)'}}>
+          <div className="text-center p-4">
+            <div className="text-red-500 mb-4">
+              <StethoscopeIcon className="w-16 h-16 mx-auto" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Không thể tải thông tin dịch vụ</h3>
+            <p className="text-gray-600 mb-4">{error || "Dịch vụ bạn tìm không tồn tại."}</p>
+            <Button onClick={() => navigate('/services')} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+              <ArrowLeftIcon className="w-4 h-4 mr-2" /> Quay lại danh sách
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Debug logging
+  console.log('🔍 ServiceDetail object:', serviceDetail);
+  console.log('📝 Service name:', serviceDetail.name);
+  console.log('📝 All object keys:', Object.keys(serviceDetail));
+  console.log('📝 PriceServices:', serviceDetail.priceServices);
+  console.log('📝 First priceService:', serviceDetail.priceServices?.[0]);
+  console.log('📝 TestServiceInfor from first price:', serviceDetail.priceServices?.[0]?.testServiceInfor);
+
+  // Try to get name from multiple possible sources
+  const serviceDetailAny = serviceDetail as any;
+  const serviceName = 
+    serviceDetail.name || 
+    serviceDetail.priceServices?.[0]?.testServiceInfor?.name ||
+    serviceDetailAny.title ||
+    serviceDetailAny.serviceName ||
+    serviceDetail.id ||
+    "Dịch vụ xét nghiệm ADN";
+
+  console.log('🎯 Final service name used:', serviceName);
+
+  const serviceData = {
+    title: "Chi Tiết Dịch Vụ Xét Nghiệm",
+    subtitle: serviceName,
+    description: serviceDetail.description || "Dịch vụ xét nghiệm ADN hàng đầu, cung cấp giải pháp chính xác, bảo mật và nhanh chóng cho cả mục đích dân sự và hành chính.",
+    heroImage: "https://i.postimg.cc/YSFzZ4VZ/9e0e121abaf50eab57e4.jpg",
+  };
+  
+  const collectionMethods = [
+      {
+          title: "Tự Thu Mẫu Tại Nhà (Bộ KIT)",
+          description: "Nhận bộ kit xét nghiệm chuyên dụng, tự thu mẫu theo hướng dẫn chi tiết. Tiện lợi, riêng tư và dễ dàng.",
+          icon: <BoxIcon className="w-10 h-10 text-blue-600" />,
+          type: 'self-collection',
+          price: '1.500.000đ',
+          tags: ["Chỉ cho Dân sự", "Tiện lợi", "Bảo mật"],
+          buttonText: "Chọn Gói Tự Thu Mẫu"
+      },
+      {
+          title: "Thu Mẫu Chuyên Nghiệp",
+          description: "Đặt hẹn để nhân viên y tế của chúng tôi thu mẫu tại nhà hoặc tại trung tâm. Đảm bảo quy trình chuẩn xác, an toàn.",
+          icon: <BriefcaseMedicalIcon className="w-10 h-10 text-green-600" />,
+          type: 'professional-collection',
+          price: '2.500.000đ',
+          tags: ["Dân sự & Hành chính", "Chính xác", "Pháp lý"],
+          buttonText: "Chọn Gói Chuyên Nghiệp"
+      }
+  ];
+
+  const processSteps = {
+      'self-collection': [
+          { icon: <ClipboardEditIcon/>, title: "Đăng Ký Dịch Vụ", description: "Chọn gói và đăng ký online." },
+          { icon: <BoxIcon/>, title: "Nhận Bộ Kit", description: "Chúng tôi gửi bộ kit đến tận nhà bạn." },
+          { icon: <FlaskConicalIcon/>, title: "Tự Thu Mẫu", description: "Làm theo hướng dẫn chi tiết trong kit." },
+          { icon: <TruckIcon/>, title: "Gửi Mẫu", description: "Gửi mẫu đã thu thập về trung tâm." },
+          { icon: <FileTextIcon/>, title: "Nhận Kết Quả", description: "Kết quả được trả online sau 5-7 ngày." },
+      ],
+      'professional-collection': [
+          { icon: <CalendarIcon/>, title: "Đặt Lịch Hẹn", description: "Chọn thời gian và địa điểm phù hợp." },
+          { icon: <StethoscopeIcon/>, title: "Thu Mẫu", description: "Nhân viên y tế tiến hành thu mẫu." },
+          { icon: <FlaskConicalIcon/>, title: "Phân Tích", description: "Mẫu được phân tích tại phòng lab hiện đại." },
+          { icon: <FileTextIcon/>, title: "Nhận Kết Quả", description: "Kết quả được trả sau 3-5 ngày." },
+      ]
+  };
+
+  const pricingTiers = [
+    { 
+      category: "Dân Sự",
+      items: [
+        { name: "Tự thu mẫu (bộ kit)", price: "1.500.000đ", time: "5-7 ngày", popular: true },
+        { name: "Thu mẫu tại trung tâm", price: "2.000.000đ", time: "3-5 ngày" },
+        { name: "Thu mẫu tại nhà", price: "2.500.000đ", time: "3-5 ngày" }
+      ]
+    },
+    { 
+      category: "Hành Chính (Pháp lý)",
+      items: [
+        { name: "Thu mẫu tại trung tâm", price: "3.500.000đ", time: "7-10 ngày", popular: true },
+        { name: "Giám định hài cốt", price: "Liên hệ", time: "30+ ngày" }
+      ],
+      note: "Quy trình nghiêm ngặt, có giá trị pháp lý."
+    }
+  ];
+
+  const faqs = [
+    { question: "Bộ kit tự thu mẫu có khó sử dụng không?", answer: "Không. Bộ kit được thiết kế để dễ sử dụng với hướng dẫn chi tiết từng bước. Bạn chỉ cần làm theo là có thể tự lấy mẫu một cách chính xác." },
+    { question: "Kết quả xét nghiệm ADN dân sự có dùng cho mục đích pháp lý được không?", answer: "Không. Xét nghiệm dân sự chỉ mang tính chất tham khảo cá nhân. Để có giá trị pháp lý (làm giấy khai sinh, tòa án), bạn phải sử dụng dịch vụ xét nghiệm ADN Hành chính với quy trình thu mẫu và giám sát nghiêm ngặt." },
+    { question: "Mất bao lâu để có kết quả?", answer: "Thời gian có kết quả phụ thuộc vào loại xét nghiệm và phương thức thu mẫu. Gói tự thu mẫu thường mất 5-7 ngày, trong khi gói thu mẫu chuyên nghiệp có kết quả sau 3-5 ngày. Các trường hợp giám định phức tạp sẽ cần nhiều thời gian hơn." },
+    { question: "Thông tin của tôi có được bảo mật không?", answer: "Tuyệt đối. Chúng tôi cam kết bảo mật 100% thông tin khách hàng và kết quả xét nghiệm theo quy định của pháp luật." }
+  ];
 
   return (
-    <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
+    <div className="bg-white min-h-screen w-full">
       <div className="relative w-full max-w-none">
-        {/* Header */}
-        <div className="relative z-50">
-          <Header />
-        </div>
+        <Header />
 
-        {/* Hero Section - Medical Style */}
-        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
-          {/* Medical Pattern Background */}
+        {/* Hero Section */}
+        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="medical-cross-detail" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
-                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#medical-cross-detail)" />
-            </svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-
-          {/* Decorative Medical Elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            {/* Floating medical icons */}
-            <div className="absolute flex items-center justify-center w-16 h-16 rounded-full top-20 right-20 bg-blue-200/30 animate-pulse">
-              <StethoscopeIcon className="w-8 h-8 text-blue-600/60" />
+          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-6">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem><BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">Trang Chủ</BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem><BreadcrumbLink href="/services" className="text-blue-600 hover:text-blue-800">Dịch Vụ</BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem><span className="font-semibold text-blue-900">{serviceData.title}</span></BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
-            <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bottom-32 right-32 bg-blue-200/30 animate-bounce" style={{animationDelay: '1s'}}>
-              <ActivityIcon className="w-6 h-6 text-blue-600/60" />
-            </div>
-            <div className="absolute flex items-center justify-center rounded-full top-32 left-32 w-14 h-14 bg-blue-200/30 animate-pulse" style={{animationDelay: '2s'}}>
-              <ShieldIcon className="w-7 h-7 text-blue-600/60" />
-            </div>
+            <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl lg:text-6xl">{serviceData.title}
+              <span className="block mt-2 text-2xl font-medium text-blue-700 md:text-3xl">
+                {serviceData.subtitle}
+                {/* Debug info */}
+                {!serviceData.subtitle && <span className="text-red-500">[Subtitle is empty]</span>}
+              </span>
+            </h1>
+            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">{serviceData.description}</p>
           </div>
+                </section>
 
-          {/* Content Container */}
-          <div className="relative z-10 flex items-center h-full">
-            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-              <div className={`transition-all duration-1000 ease-out ${
-                isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-10'
-              }`}>
-                {/* Breadcrumb */}
-                <div className="mb-6">
-                  <Breadcrumb>
-                    <BreadcrumbList className="text-blue-600">
-                      <BreadcrumbItem>
-                        <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                          Trang Chủ
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                      <BreadcrumbSeparator className="text-blue-400" />
-                      <BreadcrumbItem>
-                        <BreadcrumbLink href="/services" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                          Dịch Vụ
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                      <BreadcrumbSeparator className="text-blue-400" />
-                      <BreadcrumbItem>
-                        <span className="text-blue-900 font-semibold">{serviceData.title}</span>
-                      </BreadcrumbItem>
-                    </BreadcrumbList>
-                  </Breadcrumb>
-                </div>
-
-                {/* Title */}
-                <h1 className="mb-4 text-3xl font-bold leading-tight text-blue-900 md:text-4xl lg:text-5xl">
-                  {serviceData.title}
-                  <span className="block text-blue-700 text-2xl md:text-3xl lg:text-4xl font-medium mt-1">
-                    {serviceData.subtitle}
-                  </span>
-                </h1>
-
-                {/* Description */}
-                <p className="max-w-lg mb-6 text-base leading-relaxed md:text-lg text-blue-700">
-                  Dịch vụ chuyên nghiệp với đội ngũ bác sĩ chuyên khoa và trang thiết bị y tế hiện đại nhất.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Service Overview */}
-        <section className="py-16 bg-white md:py-20 lg:py-24">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            <div className="grid items-center grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
-              <div>
-                <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
-                  Tổng Quan Dịch Vụ
-                </h2>
-                <p className="mb-6 text-lg leading-relaxed text-black">
-                  {serviceData.description}
-                </p>
-                <p className="mb-8 text-lg leading-relaxed text-black">
-                  {serviceData.overview}
-                </p>
-                <Button className="bg-blue-900 hover:bg-blue-800 !text-white px-6 py-3 rounded-full transition-all duration-300">
-                  Tìm Hiểu Thêm
-                  <ArrowRightIcon className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
-              <div className="relative">
-                <img 
-                  src={serviceData.heroImage}
-                  alt="Service Overview"
-                  className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-2xl"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/20 to-transparent rounded-2xl"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Service Features */}
-        <section className="py-16 bg-blue-100 md:py-20">
+        {/* Process Section */}
+        <section className="py-16 bg-white md:py-20">
           <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-12 text-center md:mb-16">
-              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
-                Tại Sao Chọn Chúng Tôi?
-              </h2>
-              <p className="max-w-3xl mx-auto text-lg text-black whitespace-nowrap">
-                Chúng tôi cam kết mang đến dịch vụ chăm sóc sức khỏe chất lượng cao với những ưu điểm vượt trội
-              </p>
+              <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">Quy Trình Thực Hiện</h2>
+              <p className="max-w-2xl mx-auto text-lg text-gray-600">Minh bạch và đơn giản hóa các bước để bạn dễ dàng theo dõi.</p>
             </div>
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {serviceFeatures.map((feature, index) => (
-                <Card key={index} className="p-6 text-center transition-all duration-300 bg-white border-0 group hover:shadow-xl hover:-translate-y-2">
-                  <CardContent className="p-0">
-                    <div className="mb-6 transition-transform duration-300 group-hover:scale-110">
-                      <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 rounded-full bg-blue-50 group-hover:bg-blue-200">
-                        {feature.icon}
+            <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+              {Object.entries(processSteps).map(([type, steps]) => (
+                <Card key={type} className="p-8 bg-white border-2 border-blue-600 shadow-2xl rounded-xl transition-transform duration-300 hover:-translate-y-1">
+                  <h3 className="mb-8 text-2xl font-bold text-center text-blue-800 pb-4 border-b-2 border-gray-200">
+                    {type === 'self-collection' ? 'Quy Trình Tự Thu Mẫu' : 'Quy Trình Chuyên Nghiệp'}
+                  </h3>
+                  <div className="relative pt-4 pl-8 border-l-2 border-blue-200">
+                    {steps.map((step, index) => (
+                      <div key={index} className="relative mb-10">
+                        <div className="absolute -left-[42px] top-1 flex items-center justify-center w-12 h-12 rounded-full bg-blue-600 text-white shadow-md ring-4 ring-white">
+                          {React.cloneElement(step.icon, { className: 'w-6 h-6' })}
+                        </div>
+                        <div className="pl-4">
+                           <h4 className="text-lg font-semibold text-gray-900">{step.title}</h4>
+                           <p className="text-gray-600">{step.description}</p>
+                        </div>
                       </div>
-                    </div>
-                    <h3 className="mb-4 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
-                      {feature.title}
-                    </h3>
-                    <p className="leading-relaxed text-black">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Packages */}
-        <section className="py-16 bg-white md:py-20 lg:py-24">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            <div className="mb-12 text-center md:mb-16">
-              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
-                Gói Khám Sức Khỏe
-              </h2>
-              <p className="max-w-3xl mx-auto text-lg leading-relaxed text-black">
-                Chọn gói khám phù hợp với nhu cầu và ngân sách của bạn
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {pricingPackages.map((pkg, index) => (
-                <Card 
-                  key={index} 
-                  className={`relative flex flex-col h-full overflow-hidden transition-all duration-300 hover:-translate-y-4 hover:shadow-2xl cursor-pointer ${
-                    pkg.popular ? 'border-2 border-blue-500 shadow-xl scale-105' : 'border border-blue-200'
-                  } ${selectedPackage === index ? 'ring-4 ring-blue-300' : ''}`}
-                  onClick={() => setSelectedPackage(index)}
-                >
-                  {/* PHỔ BIẾN NHẤT Label */}
-                  {pkg.popular && (
-                    <div className="absolute top-0 left-0 right-0 z-10 py-2 text-sm font-semibold text-center text-white bg-blue-500">
-                      PHỔ BIẾN NHẤT
-                    </div>
-                  )}
-                  
-                  {/* Header */}
-                  <CardHeader className={`text-center ${pkg.popular ? 'pt-12' : 'pt-6'} pb-6`}>
-                    <h3 className="mb-2 text-2xl font-bold text-blue-900">{pkg.name}</h3>
-                    <div className="mb-4">
-                      <span className="text-4xl font-bold text-blue-700">{pkg.price}</span>
-                      <span className="ml-1 text-black">VNĐ</span>
-                    </div>
-                    <p className="text-black">
-                      <ClockIcon className="inline w-4 h-4 mr-1" />
-                      {pkg.duration}
-                    </p>
-                  </CardHeader>
-                  
-                  {/* Nội dung và Button - sử dụng flex để button luôn ở dưới */}
-                  <CardContent className="flex flex-col flex-grow px-6 pb-6">
-                    <ul className="flex-grow mb-6 space-y-3">
-                      {pkg.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center">
-                          <CheckCircleIcon className="flex-shrink-0 w-5 h-5 mr-3 text-green-500" />
-                          <span className="text-black">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    
-                    {/* Button luôn ở dưới cùng */}
-                    <Button 
-                      className={`w-full py-3 rounded-full font-semibold transition-all duration-300 mt-auto ${
-                        pkg.popular 
-                          ? 'bg-blue-500 !text-white hover:bg-blue-600' 
-                          : 'bg-blue-900 !text-white hover:bg-blue-800'
-                      }`}
-                    >
-                      Chọn Gói Này
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Doctor Profiles */}
-        <section className="py-16 bg-blue-100 md:py-20">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            <div className="mb-12 text-center md:mb-16">
-              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
-                Đội Ngũ Bác Sĩ
-              </h2>
-              <p className="max-w-3xl mx-auto text-lg leading-relaxed text-black">
-                Các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {doctors.map((doctor) => (
-                <Card key={doctor.id} className="overflow-hidden transition-all duration-300 bg-white border-0 group hover:shadow-xl hover:-translate-y-2">
-                  <div className="relative overflow-hidden h-80">
-                    <img 
-                      src={doctor.image}
-                      alt={doctor.name}
-                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-to-t from-blue-900/50 to-transparent group-hover:opacity-100"></div>
+                    ))}
                   </div>
-                  
-                  <CardContent className="p-6">
-                    <h3 className="mb-2 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
-                      {doctor.name}
-                    </h3>
-                    <p className="mb-2 font-semibold text-blue-600">{doctor.specialization}</p>
-                    <p className="mb-4 text-black">{doctor.experience}</p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <StarIcon className="w-5 h-5 text-yellow-400 fill-current" />
-                        <span className="ml-1 font-semibold text-black">{doctor.rating}</span>
-                        <span className="ml-1 text-black">({doctor.reviews} đánh giá)</span>
-                      </div>
-                      <Button variant="outline" size="sm" className="text-blue-900 border-blue-900 hover:bg-blue-900 hover:text-white">
-                        Xem Profile
-                      </Button>
-                    </div>
-                  </CardContent>
                 </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Table Section */}
+        <section className="py-16 md:py-20 bg-blue-50">
+            <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+                <div className="mb-12 text-center md:mb-16">
+                    <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">Bảng Giá Dịch Vụ</h2>
+                    <p className="max-w-2xl mx-auto text-lg text-gray-600">Rõ ràng, minh bạch và không có chi phí ẩn.</p>
+                </div>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                    {pricingTiers.map(tier => (
+                        <Card key={tier.category} className="flex flex-col p-8 bg-white shadow-2xl rounded-xl border-2 border-blue-600 transition-transform duration-300 hover:-translate-y-1">
+                            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-lg mb-6 -mx-2 -mt-2">
+                                <h3 className="text-2xl font-bold text-center">{tier.category}</h3>
+                            </div>
+                            <ul className="flex-grow space-y-4">
+                                {tier.items.map(item => (
+                                    <li key={item.name} className="flex justify-between items-center p-4 rounded-lg bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors duration-200">
+                                        <div>
+                                            <p className="font-semibold text-gray-800">{item.name}</p>
+                                            <p className="text-sm text-gray-500">⏱️ Thời gian: {item.time}</p>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="font-bold text-blue-600 text-lg">{item.price}</p>
+                                          {item.popular && (
+                                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                                              ⭐ Phổ biến
+                                            </span>
+                                          )}
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            {tier.note && (
+                                <div className="mt-6 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <p className="text-sm text-center text-amber-700 font-medium">ℹ️ {tier.note}</p>
+                                </div>
+                            )}
+                            <Button onClick={openBookingModal} variant="outline" className="w-full mt-8 py-3 font-semibold border-2 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all duration-300 hover:shadow-md">
+                              📞 Tư Vấn & Đặt Hẹn
+                            </Button>
+                                        </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Choose Collection Method Section */}
+        <section className="py-16 md:py-20 bg-gray-50">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-12 text-center md:mb-16">
+                    <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">Chọn Phương Thức Thu Mẫu</h2>
+                    <p className="max-w-2xl mx-auto text-lg text-gray-600">Chúng tôi cung cấp hai lựa chọn linh hoạt để phù hợp với nhu cầu của bạn.</p>
+                </div>
+                <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-2">
+                    {collectionMethods.map((method) => (
+                        <Card key={method.type} className="flex flex-col text-center p-8 bg-white border-2 border-blue-600 shadow-2xl rounded-xl transition-transform duration-300 hover:-translate-y-1">
+                            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100">{method.icon}</div>
+                            <h3 className="mb-3 text-2xl font-bold text-gray-800">{method.title}</h3>
+                            <p className="flex-grow mb-6 text-gray-600">{method.description}</p>
+                            <div className="flex justify-center gap-2 mb-6">
+                                {method.tags.map(tag => <span key={tag} className="px-3 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">{tag}</span>)}
+            </div>
+                            <Button onClick={openBookingModal} className="w-full py-3 font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg">{method.buttonText}</Button>
+                        </Card>
               ))}
             </div>
           </div>
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 bg-white md:py-20 lg:py-24">
+        <section className="py-16 bg-white md:py-20">
           <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
             <div className="mb-12 text-center md:mb-16">
-              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
-                Câu Hỏi Thường Gặp
-              </h2>
-              <p className="text-lg leading-relaxed text-black">
-                Những thắc mắc phổ biến về dịch vụ khám sức khỏe
-              </p>
+              <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">Câu Hỏi Thường Gặp</h2>
+              <p className="text-lg leading-relaxed text-gray-700">Giải đáp các thắc mắc phổ biến về dịch vụ của chúng tôi.</p>
             </div>
-
             <div className="space-y-4">
               {faqs.map((faq, index) => (
-                <Card key={index} className="overflow-hidden transition-colors duration-200 border border-blue-200 hover:border-blue-400">
-                  <CardHeader 
-                    className="transition-colors duration-200 cursor-pointer hover:bg-blue-50"
-                    onClick={() => toggleFAQ(index)}
-                  >
+                <Card key={index} className="overflow-hidden border border-gray-200 rounded-lg">
+                  <CardHeader className="p-6 cursor-pointer hover:bg-gray-50" onClick={() => toggleFAQ(index)}>
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-blue-900">{faq.question}</h3>
-                      {openFAQ === index ? (
-                        <ChevronUpIcon className="w-5 h-5 text-blue-600" />
-                      ) : (
-                        <ChevronDownIcon className="w-5 h-5 text-blue-600" />
-                      )}
+                      <h3 className="text-lg font-semibold text-gray-800">{faq.question}</h3>
+                      {openFAQ === index ? <ChevronUpIcon className="w-5 h-5 text-blue-600" /> : <ChevronDownIcon className="w-5 h-5 text-gray-500" />}
                     </div>
                   </CardHeader>
-                  
-                  {openFAQ === index && (
-                    <CardContent className="pt-0 pb-6">
-                      <p className="leading-relaxed text-black">{faq.answer}</p>
-                    </CardContent>
-                  )}
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Related Services */}
-        <section className="py-16 bg-blue-100 md:py-20">
-          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            <div className="mb-12 text-center md:mb-16">
-              <h2 className="mb-6 text-3xl font-bold text-blue-900 md:text-4xl lg:text-5xl">
-                Dịch Vụ Liên Quan
-              </h2>
-              <p className="text-lg leading-relaxed text-black">
-                Khám phá thêm các dịch vụ y tế khác
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {relatedServices.map((service) => (
-                <Card key={service.id} className="overflow-hidden transition-all duration-300 bg-white border-0 cursor-pointer group hover:shadow-xl hover:-translate-y-2">
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={service.image}
-                      alt={service.title}
-                      className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                  
-                  <CardContent className="p-6">
-                    <h3 className="mb-3 text-xl font-bold text-blue-900 transition-colors duration-300 group-hover:text-blue-700">
-                      {service.title}
-                    </h3>
-                    <p className="mb-4 leading-relaxed text-black">
-                      {service.description}
-                    </p>
-                    <Button variant="outline" className="w-full border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white">
-                      Xem Chi Tiết
-                      <ArrowRightIcon className="w-4 h-4 ml-2" />
-                    </Button>
-                  </CardContent>
+                  {openFAQ === index && <CardContent className="px-6 pt-0 pb-6"><p className="leading-relaxed text-gray-700">{faq.answer}</p></CardContent>}
                 </Card>
               ))}
             </div>
@@ -575,34 +477,19 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-r from-blue-900 to-blue-700">
-          <div className="w-full px-4 text-center md:px-6 lg:px-8">
-            <h2 className="block mb-6 text-3xl font-bold text-white md:text-4xl lg:text-5xl whitespace-nowrap">
-              Sẵn Sàng Bắt Đầu Hành Trình Chăm Sóc Sức Khỏe?
-            </h2>
-            <p className="mb-8 text-xl text-white/90 whitespace-nowrap">
-              Đặt lịch khám ngay hôm nay để nhận được sự chăm sóc tốt nhất từ đội ngũ chuyên gia của chúng tôi
-            </p>
+        <section className="py-16 md:py-20 lg:py-24 bg-gradient-to-r from-blue-800 to-blue-600">
+          <div className="container max-w-4xl px-4 mx-auto text-center md:px-6 lg:px-8">
+            <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">Bạn có câu hỏi hoặc sẵn sàng đặt lịch?</h2>
+            <p className="mb-8 text-lg text-white/90">Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn.</p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button
-                onClick={openBookingModal}
-                className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-100 hover:text-blue-900"
-              >
-                <CalendarIcon className="w-10 h-10 mr-2" />
-                Đặt Lịch Ngay
+              <Button onClick={openBookingModal} className="px-8 py-3 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-100">
+                <CalendarIcon className="w-5 h-5 mr-2" /> Đặt Lịch Ngay
               </Button>
-              {/* <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
-                <PhoneIcon className="w-5 h-5 mr-2" />
-                Hotline: 1900-xxxx
-              </Button> */}
             </div>
           </div>
         </section>
 
-        {/* Footer */}
-        <div className="relative">
-          <Footer />
-        </div>
+        <Footer />
       </div>
     </div>
   );
