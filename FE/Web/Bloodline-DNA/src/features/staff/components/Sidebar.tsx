@@ -21,6 +21,11 @@ const SidebarData: SidebarDataType[] = [
     href: '/staff/test-booking',
   },
   {
+    icon: GrTestDesktop,
+    heading: 'Quản lí Kit',
+    href: '/staff/test-kit',
+  },
+  {
     icon: TbTestPipe,
     heading: 'Quản lí mẫu xét nghiệm',
     href: '/staff/test-sample',

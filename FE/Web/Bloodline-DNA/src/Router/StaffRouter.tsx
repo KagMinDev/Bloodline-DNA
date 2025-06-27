@@ -4,6 +4,7 @@ import Sidebar from '../features/staff/components/Sidebar';
 import TestBooking from '../features/staff/pages/TestBooking';
 import TestResult from '../features/staff/pages/TestResult';
 import TestSample from '../features/staff/pages/TestSample';
+import TestKit from '../features/staff/pages/TestKit';
 
 export default function StaffRouter() {
     return (
@@ -15,6 +16,7 @@ export default function StaffRouter() {
                     <Route path="test-sample" element={<TestSample />} />
                     <Route path="test-booking" element={<TestBooking />} />
                     <Route path="test-result" element={<TestResult />} />
+                    <Route path="test-kit" element={<TestKit />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>
