@@ -8,6 +8,9 @@ export interface BlogResponse {
   authorName: string;
   createdAt: string;
   updatedAt: string;
+  tagIds?: string; 
+  tagName?: string; // Optional for GET
+  tagNames?: string[]; // Optional for GET
 }
 
 export interface BlogCreateRequest {
@@ -16,6 +19,7 @@ export interface BlogCreateRequest {
   thumbnailURL: File; // File for POST
   status: number;
   authorId: string;
+  tagIds: string;
 }
 
 export interface BlogUpdateRequest {
@@ -25,4 +29,5 @@ export interface BlogUpdateRequest {
   thumbnailURL?: string; // Optional string for PUT
   status: number;
   authorId: string;
+  tagIds?: string; // Optional for PUT
 }

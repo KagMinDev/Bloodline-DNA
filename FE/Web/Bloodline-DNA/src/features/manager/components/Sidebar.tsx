@@ -31,6 +31,11 @@ const SidebarData: SidebarDataType[] = [
     href: '/manager/test-management',
   },
   {
+    icon: MdDomainAdd,
+    heading: 'Quản lí thẻ bài viết',
+    href: '/manager/tags',
+  },
+  {
     icon: FaBookReader,
     heading: 'Quản lí bài viết',
     href: '/manager/blogs',
