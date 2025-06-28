@@ -1,20 +1,7 @@
 import { useEffect, useState } from 'react';
-import {
-  getTestsApi,
-  createTestApi,
-  updateTestApi,
-  deleteTestApi,
-  getTestByIdApi
-} from '../api/testApi';
+import { getTestsApi, createTestApi, updateTestApi, deleteTestApi, getTestByIdApi } from '../api/testApi';
 import { categoryToType } from '../utils/categoryMap';
-
-import type {
-  PriceServiceRequest,
-  TestRequest,
-  TestResponse,
-  TestUpdateRequest
-} from '../types/testService';
-
+import type { PriceServiceRequest, TestRequest, TestResponse, TestUpdateRequest } from '../types/testService';
 import ModalTest from '../components/testManagement/ModalTest';
 import ModalDetail from '../components/testManagement/ModalDetail';
 import TestList from '../components/testManagement/TestList';

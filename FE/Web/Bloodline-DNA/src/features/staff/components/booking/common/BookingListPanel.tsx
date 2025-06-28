@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import type { TestBookingResponse } from "../../../types/testBooking";

@@ -52,7 +52,7 @@ function TestBooking() {
 
     bookings.forEach((booking) => {
       try {
-        const date = new Date(booking.bookingDate);
+        const date = new Date(booking.appointmentDate);
         if (!isNaN(date.getTime())) {
           const dateStr = formatDate(date, {
             year: 'numeric',
@@ -62,7 +62,7 @@ function TestBooking() {
           counts[dateStr] = (counts[dateStr] || 0) + 1;
         }
       } catch (e) {
-        console.warn('Invalid booking date:', booking.bookingDate);
+        console.warn('Invalid booking date:', booking.appointmentDate);
       }
     });
 

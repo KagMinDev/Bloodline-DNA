@@ -3,7 +3,7 @@ export interface TestBookingResponse {
   testServiceId: string;
   clientId: string;
   email: string;
-  bookingDate: string;
+  appointmentDate: string;
   price: number;
   collectionMethod: string;
   status: string; // Sử dụng const enum

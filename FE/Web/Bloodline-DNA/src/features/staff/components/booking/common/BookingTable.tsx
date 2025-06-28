@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa";
