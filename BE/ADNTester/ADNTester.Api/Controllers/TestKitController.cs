@@ -38,6 +38,16 @@ namespace ADNTester.Api.Controllers
             return Ok(new ApiResponse<TestKitDto>(testKit, "Thông tin kit xét nghiệm"));
         }
 
+        [HttpGet("booking/{bookingId}")]
+        public async Task<ActionResult<TestKitDto>> GetByBookingId(string bookingId)
+        {
+            var testKit = await _testKitService.GetByBookingIdAsync(bookingId);
+            if (testKit == null)
+                return NotFound(new ApiResponse<string>("Không tìm thấy kit xét nghiệm cho booking này", 404));
+
+            return Ok(new ApiResponse<TestKitDto>(testKit, "Thông tin kit xét nghiệm theo booking"));
+        }
+
         [HttpPost]
         public async Task<ActionResult<string>> Create(CreateTestKitDto dto)
         {

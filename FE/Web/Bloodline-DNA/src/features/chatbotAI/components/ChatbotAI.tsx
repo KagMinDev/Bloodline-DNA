@@ -1,7 +1,7 @@
 import { CloseOutlined, WechatOutlined, WechatWorkOutlined } from "@ant-design/icons";
 import { Button, Input, Spin } from "antd";
-import axios, { AxiosError } from "axios";
 import { useState } from "react";
+import { sendMessage } from "../api/chatbotAI.api";
 
 const ChatbotAI: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -17,35 +17,34 @@ const ChatbotAI: React.FC = () => {
   const toggleChat = () => setIsChatOpen(!isChatOpen);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  if (!inputText.trim()) return;
 
-    // Thêm tin nhắn người dùng
-    setMessages((prev) => [...prev, { sender: "user", text: inputText }]);
-    setIsLoading(true);
+  setMessages((prev) => [...prev, { sender: "user", text: inputText }]);
+  setIsLoading(true);
 
-    try {
-      const response = await axios.post("http://localhost:5000/api/openai", {
-        message: inputText,
-        history: messages,
-      });
+  try {
+    const response = await sendMessage(inputText); // 👈 dùng service
+    const botReply = response.reply;
 
-      const botReply = response.data.reply;
-      setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
-    } catch (err) {
-      // Gõ err là AxiosError hoặc unknown
-      const error = err as AxiosError<{ error?: string; details?: string }>;
-      console.error("Lỗi gọi backend:", error.response?.data || error.message);
-
-      // Xử lý lỗi chi tiết
-      const errorMessage = error.response?.data?.details
-        ? `Lỗi: ${error.response.data.details}`
-        : "❗Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.";
-      setMessages((prev) => [...prev, { sender: "bot", text: errorMessage }]);
-    } finally {
-      setIsLoading(false);
-      setInputText("");
+    setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
+  } catch (error: unknown) {
+    let errorMessage = "Đã xảy ra lỗi.";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (typeof error === "object" && error !== null && "message" in error) {
+      errorMessage = String((error as { message?: unknown }).message);
     }
-  };
+    console.error("Lỗi gọi API:", errorMessage);
+
+    setMessages((prev) => [
+      ...prev,
+      { sender: "bot", text: `❗${errorMessage}` },
+    ]);
+  } finally {
+    setIsLoading(false);
+    setInputText("");
+  }
+};
 
   return (
     <>
