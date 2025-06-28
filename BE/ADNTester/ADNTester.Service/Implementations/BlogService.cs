@@ -6,6 +6,7 @@ using AutoMapper;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ADNTester.Service.Implementations
 {
@@ -38,6 +39,29 @@ namespace ADNTester.Service.Implementations
 
             blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
             return _mapper.Map<BlogDto>(blog);
+        }
+
+        public async Task<IEnumerable<BlogDto>> GetByTagIdAsync(string tagId)
+        {
+            // Get blog tags by tag ID
+            var blogTags = await _unitOfWork.BlogTagRepository.GetByTagIdAsync(tagId);
+            
+            // Extract unique blog IDs
+            var blogIds = blogTags.Select(bt => bt.BlogId).Distinct().ToList();
+            
+            // Get blogs by IDs
+            var blogs = new List<BlogDto>();
+            foreach (var blogId in blogIds)
+            {
+                var blog = await _unitOfWork.IBlogRepository.GetByIdAsync(blogId);
+                if (blog != null)
+                {
+                    blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
+                    blogs.Add(_mapper.Map<BlogDto>(blog));
+                }
+            }
+            
+            return blogs;
         }
 
         public async Task<string> CreateAsync(CreateBlogWithUrlDto dto)

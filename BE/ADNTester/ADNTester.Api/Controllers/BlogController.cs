@@ -39,6 +39,13 @@ namespace ADNTester.API.Controllers
             return Ok(new ApiResponse<BlogDto>(blog, "Thông tin Blog"));
         }
 
+        [HttpGet("tag/{tagId}")]
+        public async Task<ActionResult<IEnumerable<BlogDto>>> GetByTagId(string tagId)
+        {
+            var blogs = await _blogService.GetByTagIdAsync(tagId);
+            return Ok(new ApiResponse<IEnumerable<BlogDto>>(blogs, "Danh sách blog theo tag"));
+        }
+
         [HttpPost]
         public async Task<ActionResult<string>> Create([FromForm] CreateBlogDto dto)
         {
