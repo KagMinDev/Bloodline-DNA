@@ -9,6 +9,7 @@ namespace ADNTester.Service.Interfaces
     {
         Task<IEnumerable<TestKitDto>> GetAllAsync();
         Task<TestKitDto> GetByIdAsync(string id);
+        Task<TestKitDto> GetByBookingIdAsync(string bookingId);
         Task<string> CreateAsync(CreateTestKitDto dto);
         Task<bool> UpdateAsync(UpdateTestKitDto dto);
         Task<bool> DeleteAsync(string id);

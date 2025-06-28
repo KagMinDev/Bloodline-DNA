@@ -4,6 +4,7 @@ using ADNTester.BO.Entities;
 using ADNTester.Repository.Interfaces;
 using ADNTester.Service.Interfaces;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -30,6 +31,13 @@ namespace ADNTester.Service.Implementations
         {
             var testKit = await _unitOfWork.TestKitRepository.GetByIdAsync(id);
             return testKit == null ? null : _mapper.Map<TestKitDto>(testKit);
+        }
+
+        public async Task<TestKitDto> GetByBookingIdAsync(string bookingId)
+        {
+            var testKit = await _unitOfWork.TestKitRepository.GetAllAsync();
+            var result = testKit.FirstOrDefault(tk => tk.BookingId == bookingId);
+            return result == null ? null : _mapper.Map<TestKitDto>(result);
         }
 
         public async Task<string> CreateAsync(CreateTestKitDto dto)

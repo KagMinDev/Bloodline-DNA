@@ -9,6 +9,7 @@ namespace ADNTester.Service.Interfaces
         Task<IEnumerable<BlogDto>> GetAllAsync();
         Task<BlogDto> GetByIdAsync(string id);
         Task<string> CreateAsync(CreateBlogWithUrlDto dto);
+        Task<string> CreateWithTagsAsync(CreateBlogWithTagsDto dto);
         Task<bool> UpdateAsync(UpdateBlogDto dto);
         Task<bool> DeleteAsync(string id);
     }

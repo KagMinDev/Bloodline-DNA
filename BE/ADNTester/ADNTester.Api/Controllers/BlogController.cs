@@ -74,6 +74,42 @@ namespace ADNTester.API.Controllers
             }
         }
 
+        [HttpPost("with-tags")]
+        public async Task<ActionResult<string>> CreateWithTags([FromForm] CreateBlogDto dto, [FromForm] List<string> tagIds)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse<string>("Dữ liệu không hợp lệ", 400));
+
+            try
+            {
+                var blogWithTags = new CreateBlogWithTagsDto
+                {
+                    Title = dto.Title,
+                    Content = dto.Content,
+                    Status = dto.Status,
+                    AuthorId = dto.AuthorId,
+                    TagIds = tagIds ?? new List<string>()
+                };
+
+                if (dto.ThumbnailURL != null)
+                {
+                    var thumbnailUrl = await _cloudinaryService.UploadImageAsync(dto.ThumbnailURL, "Image/Thumbnail");
+                    if (!string.IsNullOrEmpty(thumbnailUrl))
+                    {
+                        blogWithTags.ThumbnailURL = thumbnailUrl;
+                    }
+                }
+
+                var id = await _blogService.CreateWithTagsAsync(blogWithTags);
+
+                return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo blog với tags thành công", 201));
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new ApiResponse<string>(ex.Message, 400));
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateBlogDto dto)
         {

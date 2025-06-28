@@ -53,6 +53,49 @@ namespace ADNTester.Service.Implementations
             return blog.Id;
         }
 
+        public async Task<string> CreateWithTagsAsync(CreateBlogWithTagsDto dto)
+        {
+            // Validate author exists
+            var author = await _unitOfWork.UserRepository.GetByIdAsync(dto.AuthorId);
+            if (author == null)
+                throw new Exception("Author not found");
+
+            // Create blog
+            var blog = new Blog
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                ThumbnailURL = dto.ThumbnailURL,
+                Status = dto.Status,
+                AuthorId = dto.AuthorId
+            };
+
+            await _unitOfWork.IBlogRepository.AddAsync(blog);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Create blog tags if tag IDs are provided
+            if (dto.TagIds != null && dto.TagIds.Count > 0)
+            {
+                foreach (var tagId in dto.TagIds)
+                {
+                    // Validate tag exists
+                    var tag = await _unitOfWork.TagRepository.GetByIdAsync(tagId);
+                    if (tag != null)
+                    {
+                        var blogTag = new BlogTag
+                        {
+                            BlogId = blog.Id,
+                            TagId = tagId
+                        };
+                        await _unitOfWork.BlogTagRepository.AddAsync(blogTag);
+                    }
+                }
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            return blog.Id;
+        }
+
         public async Task<bool> UpdateAsync(UpdateBlogDto dto)
         {
             var blog = await _unitOfWork.IBlogRepository.GetByIdAsync(dto.Id);
