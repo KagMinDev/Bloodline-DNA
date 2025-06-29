@@ -139,6 +139,28 @@ namespace ADNTester.API.Controllers
             }
         }
 
+        [HttpPut("{id}/with-file")]
+        public async Task<IActionResult> UpdateWithFile(string id, [FromForm] UpdateBlogWithFileDto dto)
+        {
+            if (id != dto.Id)
+                return BadRequest(new ApiResponse<string>("Id không khớp", 400));
+
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse<string>("Dữ liệu không hợp lệ", 400));
+
+            try
+            {
+                var success = await _blogService.UpdateWithFileAsync(dto);
+                if (!success)
+                    return NotFound(new ApiResponse<string>("Không tìm thấy blog để cập nhật", 404));
+                return Ok(new ApiResponse<string>(dto.Id, "Cập nhật blog với hình ảnh thành công"));
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new ApiResponse<string>(ex.Message, 400));
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {
@@ -147,6 +169,28 @@ namespace ADNTester.API.Controllers
                 return NotFound(new ApiResponse<string>("Không tìm thấy blog để xóa", 404));
 
             return Ok(new ApiResponse<string>(id, "Xóa blog thành công"));
+        }
+
+        [HttpPost("{id}/add-tags")]
+        public async Task<IActionResult> AddTagsToBlog(string id, [FromBody] AddTagsToBlogDto dto)
+        {
+            if (id != dto.BlogId)
+                return BadRequest(new ApiResponse<string>("Id không khớp", 400));
+
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse<string>("Dữ liệu không hợp lệ", 400));
+
+            try
+            {
+                var success = await _blogService.AddTagsToBlogAsync(dto);
+                if (!success)
+                    return NotFound(new ApiResponse<string>("Không tìm thấy blog hoặc tag không hợp lệ", 404));
+                return Ok(new ApiResponse<string>(dto.BlogId, "Thêm tag cho blog thành công"));
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new ApiResponse<string>(ex.Message, 400));
+            }
         }
     }
 } 
