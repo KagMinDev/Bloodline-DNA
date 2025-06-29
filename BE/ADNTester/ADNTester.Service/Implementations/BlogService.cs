@@ -14,21 +14,32 @@ namespace ADNTester.Service.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ITagService _tagService;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public BlogService(IUnitOfWork unitOfWork, IMapper mapper)
+        public BlogService(IUnitOfWork unitOfWork, IMapper mapper, ITagService tagService, ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _tagService = tagService;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<IEnumerable<BlogDto>> GetAllAsync()
         {
             var blogs = await _unitOfWork.IBlogRepository.GetAllAsync();
+            var blogDtos = new List<BlogDto>();
+            
             foreach (var blog in blogs)
             {
                 blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
+                var blogDto = _mapper.Map<BlogDto>(blog);
+                var tags = await _tagService.GetTagsByBlogIdAsync(blog.Id);
+                blogDto.Tags = tags.ToList();
+                blogDtos.Add(blogDto);
             }
-            return _mapper.Map<IEnumerable<BlogDto>>(blogs);
+            
+            return blogDtos;
         }
 
         public async Task<BlogDto> GetByIdAsync(string id)
@@ -38,26 +49,28 @@ namespace ADNTester.Service.Implementations
                 return null;
 
             blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
-            return _mapper.Map<BlogDto>(blog);
+            var blogDto = _mapper.Map<BlogDto>(blog);
+            var tags = await _tagService.GetTagsByBlogIdAsync(blog.Id);
+            blogDto.Tags = tags.ToList();
+            return blogDto;
         }
 
         public async Task<IEnumerable<BlogDto>> GetByTagIdAsync(string tagId)
         {
-            // Get blog tags by tag ID
             var blogTags = await _unitOfWork.BlogTagRepository.GetByTagIdAsync(tagId);
-            
-            // Extract unique blog IDs
             var blogIds = blogTags.Select(bt => bt.BlogId).Distinct().ToList();
-            
-            // Get blogs by IDs
             var blogs = new List<BlogDto>();
+            
             foreach (var blogId in blogIds)
             {
                 var blog = await _unitOfWork.IBlogRepository.GetByIdAsync(blogId);
                 if (blog != null)
                 {
                     blog.Author = await _unitOfWork.UserRepository.GetByIdAsync(blog.AuthorId);
-                    blogs.Add(_mapper.Map<BlogDto>(blog));
+                    var blogDto = _mapper.Map<BlogDto>(blog);
+                    var tags = await _tagService.GetTagsByBlogIdAsync(blog.Id);
+                    blogDto.Tags = tags.ToList();
+                    blogs.Add(blogDto);
                 }
             }
             
@@ -126,8 +139,78 @@ namespace ADNTester.Service.Implementations
             if (blog == null)
                 return false;
 
+            // Update basic blog information
             _mapper.Map(dto, blog);
             _unitOfWork.IBlogRepository.Update(blog);
+
+            // Handle tag updates
+            if (dto.TagIds != null)
+            {
+                // Remove existing blog tags
+                await _unitOfWork.BlogTagRepository.RemoveByBlogIdAsync(blog.Id);
+
+                // Add new blog tags
+                foreach (var tagId in dto.TagIds)
+                {
+                    // Validate tag exists
+                    var tag = await _unitOfWork.TagRepository.GetByIdAsync(tagId);
+                    if (tag != null)
+                    {
+                        var blogTag = new BlogTag
+                        {
+                            BlogId = blog.Id,
+                            TagId = tagId
+                        };
+                        await _unitOfWork.BlogTagRepository.AddAsync(blogTag);
+                    }
+                }
+            }
+
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateWithFileAsync(UpdateBlogWithFileDto dto)
+        {
+            var blog = await _unitOfWork.IBlogRepository.GetByIdAsync(dto.Id);
+            if (blog == null)
+                return false;
+
+            // Upload new image if provided
+            if (dto.ThumbnailURL != null)
+            {
+                var imageUrl = await _cloudinaryService.UploadImageAsync(dto.ThumbnailURL, "blogs");
+                blog.ThumbnailURL = imageUrl;
+            }
+
+            // Update other blog information
+            blog.Title = dto.Title;
+            blog.Content = dto.Content;
+            blog.Status = dto.Status;
+            _unitOfWork.IBlogRepository.Update(blog);
+
+            // Handle tag updates
+            if (dto.TagIds != null)
+            {
+                // Remove existing blog tags
+                await _unitOfWork.BlogTagRepository.RemoveByBlogIdAsync(blog.Id);
+
+                // Add new blog tags
+                foreach (var tagId in dto.TagIds)
+                {
+                    // Validate tag exists
+                    var tag = await _unitOfWork.TagRepository.GetByIdAsync(tagId);
+                    if (tag != null)
+                    {
+                        var blogTag = new BlogTag
+                        {
+                            BlogId = blog.Id,
+                            TagId = tagId
+                        };
+                        await _unitOfWork.BlogTagRepository.AddAsync(blogTag);
+                    }
+                }
+            }
+
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
 
@@ -139,6 +222,39 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.IBlogRepository.Remove(blog);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> AddTagsToBlogAsync(AddTagsToBlogDto dto)
+        {
+            var blog = await _unitOfWork.IBlogRepository.GetByIdAsync(dto.BlogId);
+            if (blog == null)
+                return false;
+
+            // Lấy các tag đã có của blog
+            var existingBlogTags = await _unitOfWork.BlogTagRepository.GetByBlogIdAsync(dto.BlogId);
+            var existingTagIds = existingBlogTags.Select(bt => bt.TagId).ToHashSet();
+
+            bool added = false;
+            foreach (var tagId in dto.TagIds)
+            {
+                if (!existingTagIds.Contains(tagId))
+                {
+                    var tag = await _unitOfWork.TagRepository.GetByIdAsync(tagId);
+                    if (tag != null)
+                    {
+                        var blogTag = new BlogTag
+                        {
+                            BlogId = dto.BlogId,
+                            TagId = tagId
+                        };
+                        await _unitOfWork.BlogTagRepository.AddAsync(blogTag);
+                        added = true;
+                    }
+                }
+            }
+            if (added)
+                return await _unitOfWork.SaveChangesAsync() > 0;
+            return true;
         }
     }
 } 

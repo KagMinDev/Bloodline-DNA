@@ -12,6 +12,8 @@ namespace ADNTester.Service.Interfaces
         Task<string> CreateAsync(CreateBlogWithUrlDto dto);
         Task<string> CreateWithTagsAsync(CreateBlogWithTagsDto dto);
         Task<bool> UpdateAsync(UpdateBlogDto dto);
+        Task<bool> UpdateWithFileAsync(UpdateBlogWithFileDto dto);
         Task<bool> DeleteAsync(string id);
+        Task<bool> AddTagsToBlogAsync(AddTagsToBlogDto dto);
     }
 } 
