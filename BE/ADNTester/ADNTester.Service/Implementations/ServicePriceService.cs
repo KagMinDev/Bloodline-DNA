@@ -77,12 +77,12 @@ namespace ADNTester.Service.Implementations
                 .Select(g => g.OrderByDescending(p => p.EffectiveFrom).First())
                 .Where(p => p.EffectiveTo == null || p.EffectiveTo > p.EffectiveFrom);
 
-            // Lấy thông tin TestService cho mỗi price
+            // Lấy thông tin TestService cho mỗi price, chỉ lấy service IsActive = true
             var pricesWithService = new List<ServicePrice>();
             foreach (var price in latestPrices)
             {
                 var service = await _unitOfWork.TestServiceRepository.GetByIdAsync(price.ServiceId);
-                if (service != null)
+                if (service != null && service.IsActive)
                 {
                     price.Service = service;
                     pricesWithService.Add(price);
