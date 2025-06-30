@@ -1,4 +1,3 @@
-'use client';
 import { type DateSelectArg } from '@fullcalendar/core';
 import viLocale from '@fullcalendar/core/locales/vi';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -8,7 +7,6 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import { updateTestBookingStatusApi } from '../../api/testBookingApi';
 import type { CalendarProps, TestBookingResponse, TestBookingStatusRequest } from '../../types/testBooking';
 import BookingListPanel from '../booking/common/BookingListPanel';
@@ -61,7 +59,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
   const calendarEvents = useMemo(() => {
     return localEvents.map((booking) => ({
       id: booking.id,
-      start: new Date(formatToYYYYMMDD(new Date(booking.bookingDate)) + 'T00:00:00'),
+      start: new Date(formatToYYYYMMDD(new Date(booking.appointmentDate)) + 'T00:00:00'),
       title: booking.email || 'Không có email',
       extendedProps: {
         status: booking.status,
@@ -72,8 +70,8 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
 
   const filteredBookings = useMemo(() => {
     return localEvents.filter((booking) => {
-      const bookingDate = getValidDate(booking.bookingDate);
-      const formattedBookingDate = formatToYYYYMMDD(bookingDate);
+      const appointmentDate = getValidDate(booking.appointmentDate);
+      const formattedBookingDate = formatToYYYYMMDD(appointmentDate);
       return formattedBookingDate === selectedDay;
     });
   }, [localEvents, selectedDay]);
@@ -193,8 +191,8 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
               if (formattedDate === today) return 'bg-blue-200';
               if (formattedDate === selectedDay) return 'bg-orange-200 text-orange-400';
               return localEvents.some((booking) => {
-                const bookingDate = getValidDate(booking.bookingDate);
-                return formatToYYYYMMDD(bookingDate) === formattedDate;
+                const appointmentDate = getValidDate(booking.appointmentDate);
+                return formatToYYYYMMDD(appointmentDate) === formattedDate;
               })
                 ? 'bg-blue-50 text-blue-700'
                 : '';

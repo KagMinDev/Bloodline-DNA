@@ -1,4 +1,3 @@
-"use client";
 import React, { useState } from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa";
@@ -12,9 +11,7 @@ interface BookingTableProps {
   filteredBookings: TestBookingResponse[];
   selectedStatuses: Record<string, string>;
   statusOptions: StatusOption[];
-  setSelectedStatuses: React.Dispatch<
-    React.SetStateAction<Record<string, string>>
-  >;
+  setSelectedStatuses: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   handleUpdateStatus: (bookingId: string) => void;
 }
 
@@ -26,10 +23,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
   setSelectedStatuses,
   handleUpdateStatus,
 }) => {
-  const [loadingBookings, setLoadingBookings] = useState<Set<string>>(
-    new Set()
-  );
-  console.log("Booking in booking table:", filteredBookings);
+  const [loadingBookings, setLoadingBookings] = useState<Set<string>>(new Set());
 
   const handleClickUpdate = async (bookingId: string) => {
     setLoadingBookings((prev) => new Set(prev).add(bookingId));
@@ -42,6 +36,29 @@ const BookingTable: React.FC<BookingTableProps> = ({
         return newSet;
       });
     }
+  };
+
+  // ⚠️ Trạng thái giới hạn cho "Tự lấy mẫu"
+  const internalStatuses = [
+    "Chờ xử lý",
+    "Đã nhận mẫu",
+    "Đang xét nghiệm",
+    "Hoàn tất",
+    "Đã huỷ",
+  ];
+
+  const getAvailableStatusOptions = (
+    collectionMethod: string,
+    currentStatus: string
+  ): string[] => {
+    const allStatuses = statusOptions.map((s) => s.label);
+
+    const statusList =
+      collectionMethod === "0" ? internalStatuses : allStatuses;
+
+    // ❌ Không được chọn lại trạng thái trước đó
+    const currentIndex = statusList.indexOf(currentStatus);
+    return currentIndex >= 0 ? statusList.slice(currentIndex) : statusList;
   };
 
   return (
@@ -68,23 +85,26 @@ const BookingTable: React.FC<BookingTableProps> = ({
             {filteredBookings.map((booking) => {
               const currentStatusLabel = getStatusLabel(booking.status);
               const isLoading = loadingBookings.has(booking.id);
-              console.log("Booking", booking);
+              const collectionMethod = booking.collectionMethod; // string
+
+              const options = getAvailableStatusOptions(
+                collectionMethod,
+                currentStatusLabel
+              );
 
               return (
                 <tr key={booking.id} className="border-b">
+                  <td className="px-2 py-1">{booking.email || "Không có email"}</td>
                   <td className="px-2 py-1">
-                    {booking.email || "Không có email"}
+                    {new Date(booking.appointmentDate).toLocaleString("vi-VN")}
                   </td>
                   <td className="px-2 py-1">
-                    {new Date(booking.bookingDate).toLocaleString("vi-VN")}
-                  </td>
-                  <td className="px-2 py-1">
-                    {renderCollectionMethod(booking.collectionMethod)}
+                    {renderCollectionMethod(collectionMethod)}
                   </td>
                   <td className="flex items-center gap-2 px-2 py-1">
                     <StatusSelect
                       value={selectedStatuses[booking.id] || currentStatusLabel}
-                      options={statusOptions.map((option) => option.label)}
+                      options={options}
                       onChange={(value) =>
                         setSelectedStatuses((prev) => ({
                           ...prev,
@@ -101,12 +121,11 @@ const BookingTable: React.FC<BookingTableProps> = ({
                         selectedStatuses[booking.id] === currentStatusLabel
                       }
                       className={`flex items-center justify-center rounded-full p-2 transition-all duration-200 shadow-md
-                        ${
-                          isLoading ||
+                        ${isLoading ||
                           !selectedStatuses[booking.id] ||
                           selectedStatuses[booking.id] === currentStatusLabel
-                            ? "bg-gray-400 text-gray-500 cursor-not-allowed"
-                            : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700"
+                          ? "bg-gray-400 text-gray-500 cursor-not-allowed"
+                          : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700"
                         }`}
                       title="Cập nhật trạng thái"
                     >

@@ -18,14 +18,35 @@ const getStatusText = (status: string) => {
 
 const BlogCard: React.FC<BlogCardProps> = ({ blog, onEdit, onDelete }) => (
   <Card className="shadow-md border border-blue-100 relative">
-    <CardContent className=" space-y-3 flex flex-col">
-      <img src={blog.thumbnailURL} alt={blog.title} className="w-full h-70 object-cover rounded-md" />
-      <h2 className="text-xl font-semibold text-blue-700 truncate" title={blog.title}>{blog.title}</h2>
+    <CardContent className="space-y-3 flex flex-col">
+      <img
+        src={blog.thumbnailURL}
+        alt={blog.title}
+        className="w-full h-70 object-cover rounded-md"
+      />
+      <h2 className="text-xl font-semibold text-blue-700 truncate" title={blog.title}>
+        {blog.title}
+      </h2>
+
+      {/* Hiển thị Tag (nếu có) */}
+      {blog.tagName && (
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+            {blog.tagName}
+          </span>
+        </div>
+      )}
+
       <p className="text-sm text-gray-600">
         Trạng thái: <span className="font-medium">{getStatusText(blog.status)}</span>
       </p>
-      <p className="text-sm text-gray-600">Tác giả: <span className="font-medium">{blog.authorName}</span></p>
-      <p className="text-sm text-gray-500">Ngày tạo: {format(new Date(blog.createdAt), 'dd/MM/yyyy')}</p>
+      <p className="text-sm text-gray-600">
+        Tác giả: <span className="font-medium">{blog.authorName}</span>
+      </p>
+      <p className="text-sm text-gray-500">
+        Ngày tạo: {format(new Date(blog.createdAt), 'dd/MM/yyyy')}
+      </p>
+
       <div className="flex gap-3 pt-2">
         <Button
           variant="outline"

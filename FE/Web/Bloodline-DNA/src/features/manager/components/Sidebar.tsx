@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  FaAngleDown,
-  FaAngleRight,
-  FaBookReader,
-  FaChartBar,
-  FaFlag,
-} from 'react-icons/fa';
+import {  FaAngleDown,  FaAngleRight, FaBookReader, FaChartBar, FaFlag,} from 'react-icons/fa';
 import { Dna } from 'lucide-react';
 import { MdDomainAdd } from "react-icons/md";
 import { BsBuildingCheck } from 'react-icons/bs';
@@ -29,6 +23,11 @@ const SidebarData: SidebarDataType[] = [
     icon: MdDomainAdd,
     heading: 'Quản lí dịch vụ',
     href: '/manager/test-management',
+  },
+  {
+    icon: MdDomainAdd,
+    heading: 'Quản lí thẻ bài viết',
+    href: '/manager/tags',
   },
   {
     icon: FaBookReader,
