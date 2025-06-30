@@ -8,26 +8,30 @@ import Result from "../features/manager/pages/Result";
 import Dashboard from "../features/manager/pages/Dashboard";
 import Feedbacks from "../features/manager/pages/Feedbacks";
 import Tags from "../features/manager/pages/Tags";
+import SampleIns from "../features/manager/pages/SampleIns";
+import TestKitPage from "../features/manager/pages/TestKit";
 
 export default function ManagerRouter() {
     return (
         <div className="flex min-h-screen overflow-hidden">
-        <Sidebar />
-        <div className="flex-1 overflow-y-auto">
-            <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="blogs" element={<Blogs />} />
-            <Route path="tags" element={<Tags />} />
-            <Route path="test-management" element={<TestManagement />} />
-            <Route path="report" element={<Report />} />
-            <Route path="test-results" element={<Result />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="feedback" element={<Feedbacks />} />
+            <Sidebar />
+            <div className="flex-1 overflow-y-auto">
+                <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="blogs" element={<Blogs />} />
+                    <Route path="tags" element={<Tags />} />
+                    <Route path="test-management" element={<TestManagement />} />
+                    <Route path="test-kit" element={<TestKitPage />} />
+                    <Route path="sample-ins" element={<SampleIns />} />
+                    <Route path="report" element={<Report />} />
+                    <Route path="test-results" element={<Result />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="feedback" element={<Feedbacks />} />
 
-            {/* Not found */}
-            <Route path="*" element={<NotFound />} />
-            </Routes>
-        </div>
+                    {/* Not found */}
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </div>
         </div>
     );
 }

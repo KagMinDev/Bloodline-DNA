@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { getTestsApi, createTestApi, updateTestApi, deleteTestApi, getTestByIdApi } from '../api/testApi';
-import { categoryToType } from '../utils/categoryMap';
 import type { PriceServiceRequest, TestRequest, TestResponse, TestUpdateRequest } from '../types/testService';
 import ModalTest from '../components/testManagement/ModalTest';
 import ModalDetail from '../components/testManagement/ModalDetail';
@@ -22,7 +21,9 @@ export default function TestManagement() {
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    getTestsApi(token).then(setTests).catch(() => { });
+    getTestsApi(token)
+      .then(setTests)
+      .catch(() => {});
   }, [token]);
 
   // Thêm dịch vụ mới (POST)
@@ -31,16 +32,16 @@ export default function TestManagement() {
     description: string;
     category: string;
     isActive: boolean;
+    sampleCount: number;
     priceService: PriceServiceRequest;
   }) => {
     try {
-      // Transform the form data to match TestRequest type
       const requestData: TestRequest = {
         name: data.name,
         description: data.description,
-        type: categoryToType(data.category), // Convert category to type
         isActive: data.isActive,
-        priceServices: [data.priceService] // Note the plural 'priceServices' here
+        sampleCount: data.sampleCount,
+        priceServices: [data.priceService],
       };
 
       await createTestApi(requestData, token);
@@ -66,24 +67,24 @@ export default function TestManagement() {
   };
 
   // Sửa dịch vụ (PUT)
-const handleUpdateTest = async (data: TestUpdateRequest) => {
-  try {
-    await updateTestApi(data, token);
-    setShowEditTest(false);
-    const newTests = await getTestsApi(token);
-    console.log("Updated tests:", newTests); // Log danh sách tests mới
-    setTests(newTests);
-    alert('Cập nhật dịch vụ thành công!');
-  } catch (err) {
-    alert('Có lỗi xảy ra khi cập nhật dịch vụ!');
-  }
-};
+  const handleUpdateTest = async (data: TestUpdateRequest) => {
+    try {
+      console.log('Update request:', data);
+      await updateTestApi(data, token);
+      setShowEditTest(false);
+      const newTests = await getTestsApi(token);
+      setTests(newTests);
+      alert('Cập nhật dịch vụ thành công!');
+    } catch (err) {
+      alert('Có lỗi xảy ra khi cập nhật dịch vụ!');
+    }
+  };
 
   // Xóa dịch vụ
   const handleDeleteTest = async (id: string) => {
     try {
       await deleteTestApi(id, token);
-      setTests(tests.filter(t => t.id !== id));
+      setTests(tests.filter((t) => t.id !== id));
       alert('Đã xóa dịch vụ!');
     } catch (err) {
       alert('Có lỗi xảy ra khi xóa dịch vụ!');

@@ -22,3 +22,14 @@ export interface CalendarProps {
   events: TestBookingResponse[];
   onUpdateStatus?: (updatedBooking: TestBookingResponse) => void;
 }
+
+export function renderCollectionMethod(method: string) {
+  switch (method) {
+    case "0":
+      return "Tự lấy mẫu";
+    case "1":
+      return "Tại cơ sở";
+    default:
+      return "Không rõ";
+  }
+}

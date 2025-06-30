@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import type { TestResponse, PriceServiceResponse, TestUpdateRequest } from "../../types/testService";
+import type { TestResponse, TestUpdateRequest } from "../../types/testService";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../staff/components/sample/ui/dialog";
 import { Label } from "../../../staff/components/booking/ui/label";
 import { Input } from "../../../staff/components/booking/ui/input";
@@ -15,32 +15,7 @@ interface ModalEditProps {
   collectionMethods?: string[];
 }
 
-const defaultCollectionMethods = ["Trực tiếp", "Khác"];
-
-const defaultPrice: PriceServiceResponse = {
-  id: "",
-  serviceId: "",
-  price: 0,
-  collectionMethod: 0,
-  currency: "",
-  effectiveFrom: "",
-  effectiveTo: "",
-  isActive: true,
-  createdAt: "",
-  updatedAt: "",
-  testServiceInfor: "",
-};
-
-const defaultForm: TestResponse = {
-  id: "",
-  name: "",
-  description: "",
-  category: "",
-  isActive: true,
-  priceServices: [defaultPrice],
-  createdAt: "",
-  updatedAt: "",
-};
+const defaultCollectionMethods = ["Tự lấy mẫu", "Lấy mẫu tại cơ sở"];
 
 const ModalEdit: React.FC<ModalEditProps> = ({
   open,
@@ -49,60 +24,53 @@ const ModalEdit: React.FC<ModalEditProps> = ({
   initialData,
   collectionMethods = defaultCollectionMethods,
 }) => {
-  const [form, setForm] = useState<TestResponse>(defaultForm);
+  const [form, setForm] = useState<TestResponse | null>(null);
 
   useEffect(() => {
-    if (initialData) {
+    if (open && initialData) {
       setForm({
         ...initialData,
-        priceServices:
-          initialData.priceServices && initialData.priceServices.length > 0
-            ? [{ ...initialData.priceServices[0] }]
-            : [{ ...defaultPrice }],
+        priceServices: initialData.priceServices?.length > 0
+          ? [{ ...initialData.priceServices[0] }]
+          : [],
       });
-      console.log("Initial isActive:", initialData?.priceServices[0]?.isActive ?? defaultPrice.isActive);
-    } else {
-      setForm(defaultForm);
-      console.log("Initial isActive:", defaultPrice.isActive);
     }
   }, [initialData, open]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  if (!form) return null;
+
+  const price = form.priceServices[0];
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
-    if (
-      [
-        "price",
-        "collectionMethod",
-        "currency",
-        "effectiveFrom",
-        "effectiveTo",
-      ].includes(name)
-    ) {
-      setForm((prev) => ({
+    if (["price", "collectionMethod", "currency", "effectiveFrom", "effectiveTo"].includes(name)) {
+      setForm(prev => prev ? {
         ...prev,
         priceServices: prev.priceServices.map((ps, idx) =>
           idx === 0
             ? {
-                ...ps,
-                [name]: type === "number" ? Number(value) : value,
-              }
+              ...ps,
+              [name]: name === "price" || name === "collectionMethod" ? Number(value) : value,
+            }
             : ps
-        ),
-      }));
+        )
+      } : null);
     } else {
-      setForm((prev) => ({
+      setForm(prev => prev ? {
         ...prev,
-        [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
-      }));
+        [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value
+      } : null);
     }
   };
-
-  const price = form.priceServices[0] || defaultPrice;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const oldPriceServiceId = form.priceServices[0]?.id || "";
+    if (!form) return;
+
+    const price = form.priceServices[0];
 
     const payload: TestUpdateRequest = {
       id: form.id,
@@ -112,24 +80,21 @@ const ModalEdit: React.FC<ModalEditProps> = ({
       isActive: form.isActive,
       priceServices: [
         {
-          id: oldPriceServiceId,
+          id: price.id, // ✅ Thêm dòng này để tránh lỗi thiếu Id
           price: price.price,
           collectionMethod: price.collectionMethod,
-          effectiveFrom: new Date(price.effectiveFrom).toISOString(),
-          effectiveTo: new Date(price.effectiveTo).toISOString(),
+          effectiveFrom: price.effectiveFrom,
+          effectiveTo: price.effectiveTo,
           isActive: price.isActive,
-          currency: price.currency || "VND",
-        },
-      ],
+          currency: price.currency || "VND"
+        }
+      ]
     };
-
-    console.log("Payload sent to API:", JSON.stringify(payload, null, 2));
 
     await onSubmit(payload);
     onClose();
   };
 
-  if (!open) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -142,6 +107,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({
             <Label htmlFor="name">Tên dịch vụ</Label>
             <Input id="name" name="name" value={form.name} onChange={handleChange} required />
           </div>
+
           <div>
             <Label htmlFor="description">Mô tả</Label>
             <textarea
@@ -154,6 +120,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({
               required
             />
           </div>
+
           <div>
             <Label htmlFor="category">Loại</Label>
             <select
@@ -169,22 +136,24 @@ const ModalEdit: React.FC<ModalEditProps> = ({
               ))}
             </select>
           </div>
+
           <div>
             <Label>Giá dịch vụ</Label>
             <Input
               type="number"
               name="price"
-              value={price.price}
+              value={price?.price ?? 0}
               onChange={handleChange}
               required
             />
           </div>
+
           <div>
             <Label htmlFor="collectionMethod">Phương thức thu</Label>
             <select
               id="collectionMethod"
               name="collectionMethod"
-              value={price.collectionMethod}
+              value={price?.collectionMethod ?? 0}
               onChange={handleChange}
               className="w-full border border-input rounded-md px-3 py-2"
               required
@@ -196,13 +165,14 @@ const ModalEdit: React.FC<ModalEditProps> = ({
               ))}
             </select>
           </div>
+
           <div className="flex gap-4">
             <div className="flex-1">
               <Label>Hiệu lực từ</Label>
               <Input
                 type="date"
                 name="effectiveFrom"
-                value={price.effectiveFrom?.slice(0, 10) || ""}
+                value={price?.effectiveFrom?.slice(0, 10) || ""}
                 onChange={handleChange}
                 required
               />
@@ -212,27 +182,32 @@ const ModalEdit: React.FC<ModalEditProps> = ({
               <Input
                 type="date"
                 name="effectiveTo"
-                value={price.effectiveTo?.slice(0, 10) || ""}
+                value={price?.effectiveTo?.slice(0, 10) || ""}
                 onChange={handleChange}
                 required
               />
             </div>
           </div>
+
           <div className="flex items-center space-x-2">
             <Checkbox
-              checked={price.isActive}
+              checked={form.isActive && price?.isActive}
               onChange={(checked: boolean) => {
-                console.log("isActive changed to:", checked);
-                setForm((prev) => ({
-                  ...prev,
-                  priceServices: prev.priceServices.map((ps, idx) =>
-                    idx === 0 ? { ...ps, isActive: checked } : ps
-                  ),
-                }));
+                setForm(prev => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    isActive: checked,
+                    priceServices: prev.priceServices.map((ps, idx) =>
+                      idx === 0 ? { ...ps, isActive: checked } : ps
+                    )
+                  };
+                });
               }}
-              label="Giá đang áp dụng"
+              label="Đang áp dụng dịch vụ và bảng giá"
             />
           </div>
+
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
             <Button type="submit" className="bg-blue-600 text-white">Lưu</Button>

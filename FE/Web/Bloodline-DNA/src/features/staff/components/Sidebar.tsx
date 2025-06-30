@@ -30,7 +30,6 @@ const SidebarData: SidebarDataType[] = [
     heading: 'Quản lí kết quả xét nghiệm',
     href: '/staff/test-result',
   },
-
 ];
 
 const Sidebar = () => {
