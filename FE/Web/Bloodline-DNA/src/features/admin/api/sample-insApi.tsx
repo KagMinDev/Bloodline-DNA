@@ -1,5 +1,5 @@
 import rootApi from "../../../apis/rootApi";
-import type { SampleInsRequest, SampleInsResponse, SampleInsUpdateRequest } from "../types/sample-ins";
+import type { SampleInsResponse, SampleInsUpdateRequest } from "../types/sample-ins";
 
 // GET: Lấy tất cả SampleIns
 export const getSampleInsListApi = async (): Promise<SampleInsResponse[]> => {
@@ -16,30 +16,25 @@ export const getSampleInsByIdApi = async (id: string): Promise<SampleInsResponse
   return response.data.data;
 };
 
-// POST: Tạo mới SampleIns
-export const createSampleInsApi = async (data: SampleInsRequest): Promise<SampleInsResponse> => {
-  const response = await rootApi.post("/sample-instruction", data, {
+// PUT: Cập nhật SampleIns theo id
+export const updateSampleInsApi = async (
+  data: SampleInsUpdateRequest
+): Promise<SampleInsResponse> => {
+  if (!data.id) {
+    throw new Error("Invalid request: Missing id");
+  }
+  // Debug log để chắc chắn id tồn tại
+  console.log("Gửi update với data:", data);
+
+  const response = await rootApi.put(`/sample-instruction`, data, {
     headers: { "Content-Type": "application/json" },
   });
   if (!response.data) {
-    throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
+    throw new Error(`Invalid response: ${JSON.stringify(response.data)}`);
   }
   return response.data as SampleInsResponse;
 };
 
-// PUT: Cập nhật SampleIns theo id
-export const updateSampleInsApi = async (data: SampleInsUpdateRequest): Promise<SampleInsResponse> => {
-  if (!data.id) {
-    throw new Error("Invalid request: Missing id");
-  }
-  const response = await rootApi.put(`/sample-instruction/${data.id}`, data, {
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!response.data) {
-    throw new Error(`Invalid response structure: ${JSON.stringify(response.data)}`);
-  }
-  return response.data as SampleInsResponse;
-};
 
 // DELETE: Xóa SampleIns theo id
 export const deleteSampleInsApi = async (id: string): Promise<void> => {

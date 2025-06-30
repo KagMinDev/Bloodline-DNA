@@ -8,8 +8,6 @@ import Result from "../features/manager/pages/Result";
 import Dashboard from "../features/manager/pages/Dashboard";
 import Feedbacks from "../features/manager/pages/Feedbacks";
 import Tags from "../features/manager/pages/Tags";
-import SampleIns from "../features/manager/pages/SampleIns";
-import TestKitPage from "../features/manager/pages/TestKit";
 
 export default function ManagerRouter() {
     return (
@@ -21,8 +19,6 @@ export default function ManagerRouter() {
                     <Route path="blogs" element={<Blogs />} />
                     <Route path="tags" element={<Tags />} />
                     <Route path="test-management" element={<TestManagement />} />
-                    <Route path="test-kit" element={<TestKitPage />} />
-                    <Route path="sample-ins" element={<SampleIns />} />
                     <Route path="report" element={<Report />} />
                     <Route path="test-results" element={<Result />} />
                     <Route path="dashboard" element={<Dashboard />} />

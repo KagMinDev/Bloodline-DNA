@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  FaAngleDown,
-  FaAngleRight,
-  FaBookReader,
-  FaChartBar,
-  FaFlag,
-} from 'react-icons/fa';
+import {  FaAngleDown,  FaAngleRight, FaBookReader, FaChartBar, FaFlag,} from 'react-icons/fa';
 import { Dna } from 'lucide-react';
 import { MdDomainAdd } from "react-icons/md";
 import { BsBuildingCheck } from 'react-icons/bs';
 import { TiStarHalfOutline } from "react-icons/ti";
-import { TbTestPipe } from 'react-icons/tb';
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -30,16 +23,6 @@ const SidebarData: SidebarDataType[] = [
     icon: MdDomainAdd,
     heading: 'Quản lí dịch vụ',
     href: '/manager/test-management',
-  },
-  {
-    icon: MdDomainAdd,
-    heading: 'Hướng dẫn lấy mẫu xét nghiệm',
-    href: '/manager/sample-ins',
-  },
-  {
-    icon: TbTestPipe,
-    heading: 'Quản lí bộ kit xét nghiệm',
-    href: '/manager/test-kit',
   },
   {
     icon: MdDomainAdd,

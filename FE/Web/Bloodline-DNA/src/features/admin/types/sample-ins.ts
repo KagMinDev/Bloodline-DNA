@@ -1,5 +1,3 @@
-// types/sample-ins.ts
-
 export interface SampleInsRequest {
   sampleType: number;
   instructionText: string;
