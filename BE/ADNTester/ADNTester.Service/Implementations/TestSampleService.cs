@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using System;
 using ADNTester.BO.Enums;
+using ADNTester.Service.Helper;
 
 namespace ADNTester.Service.Implementations
 {
@@ -48,22 +49,43 @@ namespace ADNTester.Service.Implementations
                 throw new Exception("Không tìm thấy thông tin đặt lịch");
 
             // Kiểm tra trạng thái booking
-            if (booking.Status != BookingStatus.SampleReceived)
+            if (booking.Status != BookingStatus.StaffGettingSample)
             {
                 throw new Exception($"Không thể tạo sample. Trạng thái đặt lịch hiện tại là {booking.Status}, cần phải ở trạng thái SampleReceived.");
             }
 
-            // Đếm số lượng sample hiện tại của kit
-            var existingSamples = await _unitOfWork.TestSampleRepository.GetAllAsync();
-            var currentSampleCount = existingSamples.Count(s => s.KitId == dto.KitId);
+            // Lấy toàn bộ sample của kit này
+            var existingSamples = (await _unitOfWork.TestSampleRepository.GetAllAsync())
+                                    .Where(s => s.KitId == dto.KitId)
+                                    .ToList();
 
-            // Kiểm tra số lượng sample có vượt quá giới hạn không
-            if (currentSampleCount >= kit.SampleCount)
+            // Kiểm tra số lượng sample hiện tại
+            if (existingSamples.Count >= kit.SampleCount)
+                throw new Exception($"Kit này chỉ cho phép tối đa {kit.SampleCount} sample. Hiện tại đã có {existingSamples.Count}.");
+
+            // Kiểm tra 1 người tối đa 2 mẫu
+            var donorSampleCount = existingSamples.Count(s => s.DonorName == dto.DonorName);
+            if (donorSampleCount >= 2)
+                throw new Exception($"Người có tên \"{dto.DonorName}\" đã có {donorSampleCount} mẫu. Mỗi người chỉ được tối đa 2 mẫu.");
+
+            // Nếu đã có n - 1 sample rồi, đảm bảo có ít nhất 2 người khác nhau
+            var currentUniqueDonors = existingSamples.Select(s => s.DonorName).Distinct().ToList();
+            if (existingSamples.Count == kit.SampleCount - 1 && !currentUniqueDonors.Contains(dto.DonorName) && currentUniqueDonors.Count == 1)
+                throw new Exception("Cần ít nhất 2 người cho mẫu thử. Hãy thêm mẫu từ người khác.");
+
+            // Sinh SampleCode không trùng
+            string generatedCode;
+            var existingCodes = existingSamples.Select(s => s.SampleCode).ToHashSet();
+
+            do
             {
-                throw new Exception($"Kit này chỉ cho phép tạo tối đa {kit.SampleCount} sample. Hiện tại đã có {currentSampleCount} sample.");
+                generatedCode = SampleCodeHelper.Generate();
             }
+            while (existingCodes.Contains(generatedCode));
 
             var testSample = _mapper.Map<TestSample>(dto);
+            testSample.SampleCode = generatedCode;
+
             await _unitOfWork.TestSampleRepository.AddAsync(testSample);
             await _unitOfWork.SaveChangesAsync();
             return testSample.Id;
@@ -94,22 +116,22 @@ namespace ADNTester.Service.Implementations
         {
             // Lấy tất cả kit
             var kits = await _unitOfWork.TestKitRepository.GetAllAsync();
-            
+
             // Lấy tất cả booking của user
             var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
             var userBookings = bookings.Where(b => b.ClientId == userId).ToList();
             var userBookingIds = userBookings.Select(b => b.Id).ToList();
-            
+
             // Lọc các kit thuộc booking của user
             var userKits = kits.Where(k => userBookingIds.Contains(k.BookingId)).ToList();
             var userKitIds = userKits.Select(k => k.Id).ToList();
-            
+
             // Lấy tất cả sample
             var samples = await _unitOfWork.TestSampleRepository.GetAllAsync();
-            
+
             // Lọc các sample thuộc kit của user
             var userSamples = samples.Where(s => userKitIds.Contains(s.KitId)).ToList();
-            
+
             foreach (var sample in userSamples)
             {
                 // Lấy thông tin kit
@@ -131,7 +153,7 @@ namespace ADNTester.Service.Implementations
                     sample.Kit = kit;
                 }
             }
-            
+
             return _mapper.Map<IEnumerable<TestSampleDetailDto>>(userSamples);
         }
 
@@ -144,7 +166,7 @@ namespace ADNTester.Service.Implementations
 
             var sample = await _unitOfWork.TestSampleRepository.GetAllAsync();
             var targetSample = sample.FirstOrDefault(s => s.KitId == kitId);
-            
+
             if (targetSample == null)
                 return null;
 
@@ -159,11 +181,59 @@ namespace ADNTester.Service.Implementations
                 // Gán thông tin booking vào kit
                 kit.Booking = booking;
             }
-            
+
             // Gán thông tin kit vào sample
             targetSample.Kit = kit;
-            
+
             return _mapper.Map<TestSampleDetailDto>(targetSample);
         }
+
+        public async Task<string> CreateSampleFromClientAsync(CreateTestSampleFromClientDto dto)
+        {
+            // Lấy kit và booking như bình thường
+            var kit = await _unitOfWork.TestKitRepository.GetByIdAsync(dto.KitId)
+                      ?? throw new Exception("Kit không tồn tại");
+
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(kit.BookingId)
+                         ?? throw new Exception("Không tìm thấy thông tin đặt lịch");
+
+            // Kiểm tra trạng thái booking
+            if (booking.Status != BookingStatus.WaitingForSample)
+                throw new Exception($"Không thể tạo sample. Trạng thái phải là {BookingStatus.WaitingForSample}");
+
+            // Lấy các sample hiện có của kit
+            var allSamples = await _unitOfWork.TestSampleRepository.GetAllAsync();
+            var kitSamples = allSamples.Where(s => s.KitId == dto.KitId).ToList();
+
+            // Kiểm tra giới hạn mẫu
+            if (kitSamples.Count >= kit.SampleCount)
+                throw new Exception($"Kit này chỉ cho phép tối đa {kit.SampleCount} mẫu. Hiện tại đã có {kitSamples.Count}.");
+
+            // Kiểm tra giới hạn theo người
+            var donorSamples = kitSamples.Count(s => s.DonorName.Trim().ToLower() == dto.DonorName.Trim().ToLower());
+            if (donorSamples >= 2)
+                throw new Exception($"Mỗi người chỉ có thể lấy tối đa 2 mẫu. '{dto.DonorName}' đã có {donorSamples} mẫu.");
+
+            // Kiểm tra tối thiểu từ 2 người nếu đây là mẫu thứ cuối cùng
+            if (kitSamples.Count == kit.SampleCount - 1)
+            {
+                var distinctDonors = kitSamples.Select(s => s.DonorName.Trim().ToLower()).Distinct().ToList();
+                if (!distinctDonors.Contains(dto.DonorName.Trim().ToLower()))
+                    distinctDonors.Add(dto.DonorName.Trim().ToLower());
+
+                if (distinctDonors.Count < 2)
+                    throw new Exception("Cần ít nhất 2 người cung cấp mẫu để thực hiện xét nghiệm.");
+            }
+
+            // Map và tạo sample
+            var sample = _mapper.Map<TestSample>(dto);
+            sample.SampleCode = SampleCodeHelper.Generate(); // helper tạo mã
+            sample.CollectedAt = DateTime.UtcNow;
+
+            await _unitOfWork.TestSampleRepository.AddAsync(sample);
+            await _unitOfWork.SaveChangesAsync();
+
+            return sample.Id;
+        }
     }
-} 
+}

@@ -17,6 +17,8 @@ namespace ADNTester.BO.Enums
         SampleReceived = 6,         // Nhận được sample
         Testing = 7,                // đang kiểm tra sample
         Completed = 8,              // hoàn thành có Test Result
-        Cancelled = 9               // bị hủy
+        Cancelled = 9,              // bị hủy 
+        StaffGettingSample = 10,    // staff lấy mẫu từ người dùng tại cơ sở
+        CheckIn = 11,               // client check in với staff và trả tiền dịch vụ đã đặt trước
     }
 }

@@ -14,5 +14,6 @@ namespace ADNTester.Service.Interfaces
         Task<bool> DeleteAsync(string id);
         Task<IEnumerable<TestSampleDetailDto>> GetTestSampleByUserId(string userId);
         Task<TestSampleDetailDto> GetTestSampleByKitId(string kitId);
+        Task<string> CreateSampleFromClientAsync(CreateTestSampleFromClientDto dto);
     }
 } 
