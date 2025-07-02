@@ -11,5 +11,7 @@ namespace ADNTester.BO.DTOs.TestKit
         public DateTime? LabReceivedAt { get; set; }
         public string? Note { get; set; }
         public int SampleCount { get; set; }
+        public string? DeliveryInfoId { get; set; }
+        public ADNTester.BO.Enums.SampleCollectionMethod CollectionMethod { get; set; }
     }
 } 

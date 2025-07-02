@@ -78,7 +78,22 @@ namespace ADNTester.Service.Implementations
 
         public async Task<string> CreateAsync(CreateTestBookingDto dto)
         {
+            // Lấy thông tin TestService bao gồm cả PriceServices
+            var testService = await _testServiceService.GetByIdAsync(dto.TestServiceId);
+            if (testService == null)
+                throw new Exception("TestService not found");
+
+            if (testService.PriceServices == null || !testService.PriceServices.Any())
+                throw new Exception("TestService has no pricing information");
+
+            // Lấy PriceService theo PriceServiceId truyền lên
+            var priceService = testService.PriceServices.FirstOrDefault(ps => ps.Id == dto.PriceServiceId);
+            if (priceService == null)
+                throw new Exception("PriceService not found for this TestService");
+
             var booking = _mapper.Map<TestBooking>(dto);
+            booking.Price = priceService.Price;
+            booking.CollectionMethod = priceService.CollectionMethod;
             await _unitOfWork.TestBookingRepository.AddAsync(booking);
             await _unitOfWork.SaveChangesAsync();
             return booking.Id;
@@ -94,8 +109,10 @@ namespace ADNTester.Service.Implementations
             if (testService.PriceServices == null || !testService.PriceServices.Any())
                 throw new Exception("TestService has no pricing information");
 
-            // Lấy PriceService đầu tiên để lấy CollectionMethod và giá
-            var priceService = testService.PriceServices.First();
+            // Lấy PriceService theo PriceServiceId truyền lên
+            var priceService = testService.PriceServices.FirstOrDefault(ps => ps.Id == dto.PriceServiceId);
+            if (priceService == null)
+                throw new Exception("PriceService not found for this TestService");
 
             // Tạo TestBooking với giá từ PriceService
             var booking = _mapper.Map<TestBooking>(dto);
@@ -143,7 +160,7 @@ namespace ADNTester.Service.Implementations
                 throw new Exception("Booking not found");
 
             // Nếu chuyển sang Confirm và là AtFacility, tạo TestKit nếu chưa có
-            if (newStatus == BookingStatus.PreparingKit && booking.CollectionMethod == SampleCollectionMethod.AtFacility)
+            if (newStatus == BookingStatus.CheckIn && booking.CollectionMethod == SampleCollectionMethod.AtFacility)
             {
                 // Kiểm tra đã có kit cho booking này chưa
                 var existingKits = await _unitOfWork.TestKitRepository.GetAllAsync();
@@ -157,6 +174,7 @@ namespace ADNTester.Service.Implementations
                         SentToLabAt = DateTime.UtcNow,
                         LabReceivedAt = null,
                         SampleCount = testService?.SampleCount ?? 1,
+                        CollectionMethod = SampleCollectionMethod.AtFacility,
                     };
                     await _testKitService.CreateAsync(testKit);
                 }
