@@ -160,7 +160,7 @@ namespace ADNTester.Service.Implementations
                 throw new Exception("Booking not found");
 
             // Nếu chuyển sang Confirm và là AtFacility, tạo TestKit nếu chưa có
-            if (newStatus == BookingStatus.PreparingKit && booking.CollectionMethod == SampleCollectionMethod.AtFacility)
+            if (newStatus == BookingStatus.CheckIn && booking.CollectionMethod == SampleCollectionMethod.AtFacility)
             {
                 // Kiểm tra đã có kit cho booking này chưa
                 var existingKits = await _unitOfWork.TestKitRepository.GetAllAsync();
@@ -174,6 +174,7 @@ namespace ADNTester.Service.Implementations
                         SentToLabAt = DateTime.UtcNow,
                         LabReceivedAt = null,
                         SampleCount = testService?.SampleCount ?? 1,
+                        CollectionMethod = SampleCollectionMethod.AtFacility,
                     };
                     await _testKitService.CreateAsync(testKit);
                 }
