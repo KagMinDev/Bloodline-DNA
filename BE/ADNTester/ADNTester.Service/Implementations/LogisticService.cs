@@ -66,5 +66,12 @@ namespace ADNTester.Service.Implementations
         {
             return await _unitOfWork.LogisticInfoRepository.GetByIdAsync(id);
         }
+
+        public async Task<LogisticsInfo> CreateAsync(LogisticsInfo info)
+        {
+            await _unitOfWork.LogisticInfoRepository.AddAsync(info);
+            await _unitOfWork.SaveChangesAsync();
+            return info;
+        }
     }
 }
