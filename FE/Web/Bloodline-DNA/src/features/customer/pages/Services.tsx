@@ -6,6 +6,8 @@ import {
   ClipboardCheckIcon,
   ClockIcon,
   HeartIcon,
+  HomeIcon,
+  MapPinIcon,
   PhoneIcon,
   SearchIcon,
   ShieldIcon,
@@ -47,6 +49,7 @@ interface Service {
   isActive: boolean;
   effectiveFrom?: string;
   effectiveTo?: string;
+  collectionMethod: number;
 }
 
 interface ServiceCategory {
@@ -158,7 +161,8 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
       featured: apiService.price > 1000000,
       isActive: isActive,
       effectiveFrom: apiService.effectiveFrom,
-      effectiveTo: apiService.effectiveTo
+      effectiveTo: apiService.effectiveTo,
+      collectionMethod: apiService.collectionMethod
     };
     
     console.log(`✅ Transformed service:`, transformedService);
@@ -195,7 +199,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-2", 
       serviceId: "mock-service-2",
       price: 2000000,
-      collectionMethod: 0,
+      collectionMethod: 1,
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -239,7 +243,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-4",
       serviceId: "mock-service-4",
       price: 1500000,
-      collectionMethod: 0,
+      collectionMethod: 1,
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -437,6 +441,34 @@ export const Services = (): React.JSX.Element => {
     if (price.includes("đ")) return price;
     const numericPrice = parseFloat(price.replace(/[^\d]/g, ''));
     return !isNaN(numericPrice) ? `${numericPrice.toLocaleString('vi-VN')}đ` : `${price}đ`;
+  };
+
+  const getCollectionMethodInfo = (collectionMethod: number) => {
+    if (collectionMethod === 0) {
+      return {
+        text: "Tự thu mẫu / Thu tại nhà",
+        icon: <HomeIcon className="w-4 h-4 mr-1.5 text-green-600" />,
+        bgColor: "bg-green-50",
+        textColor: "text-green-700",
+        borderColor: "border-green-200"
+      };
+    } else if (collectionMethod === 1) {
+      return {
+        text: "Thu mẫu tại trung tâm",
+        icon: <MapPinIcon className="w-4 h-4 mr-1.5 text-blue-600" />,
+        bgColor: "bg-blue-50",
+        textColor: "text-blue-700",
+        borderColor: "border-blue-200"
+      };
+    } else {
+      return {
+        text: "Phương thức chưa xác định",
+        icon: <ClockIcon className="w-4 h-4 mr-1.5 text-gray-500" />,
+        bgColor: "bg-gray-50",
+        textColor: "text-gray-700",
+        borderColor: "border-gray-200"
+      };
+    }
   };
 
   // ===== RENDER FUNCTIONS =====
@@ -709,17 +741,17 @@ export const Services = (): React.JSX.Element => {
                         </p>
                       </div>
 
-                      {/* Meta Info */}
-                      <div className="flex items-center justify-between mb-4 text-sm text-gray-700">
-                        <div className="flex items-center">
-                          <ClockIcon className="w-4 h-4 mr-1.5 text-gray-500" />
-                          <span>{service.duration}</span>
+                      {/* Collection Method Info */}
+                      <div className="mb-4">
+                        {(() => {
+                          const methodInfo = getCollectionMethodInfo(service.collectionMethod);
+                          return (
+                            <div className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium ${methodInfo.bgColor} ${methodInfo.textColor} ${methodInfo.borderColor}`}>
+                              {methodInfo.icon}
+                              <span>{methodInfo.text}</span>
                         </div>
-                        <div className="flex items-center">
-                          <StarIcon className="w-4 h-4 mr-1 text-yellow-500 fill-current" />
-                          <span className="font-semibold">{service.rating.toFixed(1)}</span>
-                          <span className="text-gray-500 ml-1">({service.reviews} reviews)</span>
-                        </div>
+                          );
+                        })()}
                       </div>
                       
                       {/* Divider */}
@@ -741,7 +773,8 @@ export const Services = (): React.JSX.Element => {
                               id: service.id,
                               title: service.title,
                               category: service.category,
-                              price: service.price
+                              price: service.price,
+                              collectionMethod: service.collectionMethod
                             });
                           }} 
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"

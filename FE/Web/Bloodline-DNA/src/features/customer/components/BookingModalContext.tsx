@@ -5,6 +5,7 @@ interface SelectedService {
   title: string;
   category: string;
   price: string;
+  collectionMethod: number;
 }
 
 interface BookingModalContextType {
