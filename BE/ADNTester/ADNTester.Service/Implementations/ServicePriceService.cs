@@ -75,7 +75,7 @@ namespace ADNTester.Service.Implementations
             var latestPrices = prices
                 .GroupBy(p => new { p.ServiceId, p.CollectionMethod })
                 .Select(g => g.OrderByDescending(p => p.EffectiveFrom).First())
-                .Where(p => p.EffectiveTo == null || p.EffectiveTo > p.EffectiveFrom);
+                .Where(p => !p.EffectiveTo.HasValue || p.EffectiveTo > DateTime.Now); // Only not expired
 
             // Lấy thông tin TestService cho mỗi price, chỉ lấy service IsActive = true
             var pricesWithService = new List<ServicePrice>();
