@@ -1,4 +1,3 @@
-'use client';
 import { useState, useEffect } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -13,36 +12,37 @@ function TestBooking() {
   const [error, setError] = useState<string | null>(null);
   const token = localStorage.getItem('token') || '';
 
+  // Define fetchBookings outside useEffect
+  const fetchBookings = async () => {
+    if (!token) {
+      setError('Không tìm thấy token xác thực');
+      setIsLoading(false);
+      toast.error('Vui lòng đăng nhập lại');
+      return;
+    }
+
+    try {
+      const response = await getTestBookingApi(token);
+      console.log('API Response:', response);
+
+      if (!Array.isArray(response)) {
+        console.error('Dữ liệu không phải mảng:', response);
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+
+      setBookings(response);
+      setError(null);
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBookings = async () => {
-      if (!token) {
-        setError('Không tìm thấy token xác thực');
-        setIsLoading(false);
-        toast.error('Vui lòng đăng nhập lại');
-        return;
-      }
-
-      try {
-        const response = await getTestBookingApi(token);
-        console.log('API Response:', response);
-
-        if (!Array.isArray(response)) {
-          console.error('Dữ liệu không phải mảng:', response);
-          throw new Error('Dữ liệu trả về không hợp lệ');
-        }
-
-        setBookings(response);
-        setError(null);
-      } catch (error) {
-        console.error('Lỗi khi lấy dữ liệu:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định';
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchBookings();
   }, [token]);
 
@@ -105,6 +105,7 @@ function TestBooking() {
             onUpdateStatus={handleUpdateStatus}
             bookingsByDate={bookingsByDate}
             token={token}
+            refetchBookings={fetchBookings}
           />
         )}
       </div>

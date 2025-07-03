@@ -5,10 +5,9 @@ import interactionPlugin from '@fullcalendar/interaction';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { updateTestBookingStatusApi } from '../../api/testBookingApi';
-import type { CalendarProps, TestBookingResponse, TestBookingStatusRequest } from '../../types/testBooking';
+import type { CalendarProps, TestBookingResponse } from '../../types/testBooking';
 import BookingListPanel from '../booking/common/BookingListPanel';
 import BookingTable from '../booking/common/BookingTable';
 import { STATUS_MAPPING, type StatusOption } from '../booking/constants/statusMapping';
@@ -16,6 +15,8 @@ import { getValidDate, renderCollectionMethod } from '../booking/utils/statusUti
 
 interface CalendarExtendedProps extends CalendarProps {
   token: string;
+  refetchBookings: () => Promise<void>; // ✅ THÊM
+
 }
 
 function formatToYYYYMMDD(date: Date): string {
@@ -25,7 +26,7 @@ function formatToYYYYMMDD(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, bookingsByDate, token }) => {
+const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, token, refetchBookings }) => {
   const today = formatToYYYYMMDD(new Date());
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [localEvents, setLocalEvents] = useState<TestBookingResponse[]>([]);
@@ -79,65 +80,6 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     const selectedDate = formatToYYYYMMDD(selectInfo.start);
     setSelectedDay(selectedDate);
-  };
-
-  const handleUpdateStatus = async (bookingId: string) => {
-    const selectedStatusLabel = selectedStatuses[bookingId];
-    const statusOption = STATUS_MAPPING.find((option) => option.label === selectedStatusLabel);
-
-    if (!statusOption) {
-      toast.error('Trạng thái không hợp lệ');
-      return;
-    }
-
-    if (!token) {
-      toast.error('Thiếu token xác thực');
-      return;
-    }
-
-    const originalBooking = localEvents.find((booking) => booking.id === bookingId);
-    if (!originalBooking) {
-      toast.error('Không tìm thấy đặt lịch');
-      return;
-    }
-
-    try {
-      const request: TestBookingStatusRequest = {
-        bookingId,
-        status: statusOption.value,
-      };
-
-      setLocalEvents((prev) =>
-        prev.map((booking) =>
-          booking.id === bookingId ? { ...booking, status: statusOption.value.toString() } : booking
-        )
-      );
-
-      const updatedBooking = await updateTestBookingStatusApi(request, token);
-
-      setLocalEvents((prev) =>
-        prev.map((booking) => (booking.id === bookingId ? updatedBooking : booking))
-      );
-
-      setSelectedStatuses((prev) => {
-        const newStatuses = { ...prev };
-        delete newStatuses[bookingId];
-        return newStatuses;
-      });
-
-      if (onUpdateStatus) {
-        onUpdateStatus(updatedBooking);
-      }
-
-      toast.success(`Đã cập nhật trạng thái thành ${selectedStatusLabel}`);
-    } catch {
-      setLocalEvents((prev) =>
-        prev.map((booking) =>
-          booking.id === bookingId ? { ...booking, status: originalBooking.status } : booking
-        )
-      );
-      toast.error('Cập nhật trạng thái thất bại');
-    }
   };
 
   return (
@@ -205,8 +147,11 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, onUpdateStatus, boo
           selectedStatuses={selectedStatuses}
           statusOptions={statusOptions}
           setSelectedStatuses={setSelectedStatuses}
-          handleUpdateStatus={handleUpdateStatus}
+          setFilteredBookings={setLocalEvents}
+          token={token}
+          refetchBookings={refetchBookings} // ✅ THÊM
         />
+
       </div>
       <div className="flex flex-col w-1/3 h-full ml-8 bg-white rounded-lg shadow-lg">
         <BookingListPanel

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {  FaAngleDown,  FaAngleRight, FaBookReader, FaChartBar, FaFlag,} from 'react-icons/fa';
+import {  FaAngleDown,  FaAngleRight, FaBookReader, FaChartBar,} from 'react-icons/fa';
 import { Dna } from 'lucide-react';
 import { MdDomainAdd } from "react-icons/md";
-import { BsBuildingCheck } from 'react-icons/bs';
 import { TiStarHalfOutline } from "react-icons/ti";
 
 interface SidebarDataType {
@@ -38,16 +37,6 @@ const SidebarData: SidebarDataType[] = [
     icon: TiStarHalfOutline,
     heading: 'Các đánh giá',
     href: '/manager/feedback',
-  },
-  {
-    icon: FaFlag,
-    heading: 'Quản lí báo cáo',
-    href: '/manager/report',
-  },
-  {
-    icon: BsBuildingCheck,
-    heading: 'Quản lí kết quả xét nghiệm',
-    href: '/manager/test-results',
   },
 
 ];

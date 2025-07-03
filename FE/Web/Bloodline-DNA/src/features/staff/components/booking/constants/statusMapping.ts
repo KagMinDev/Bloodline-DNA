@@ -14,6 +14,8 @@ export const STATUS_MAPPING: StatusOption[] = [
   { label: 'Đang xét nghiệm', value: 7 },        // Testing
   { label: 'Hoàn tất', value: 8 },               // Completed
   { label: 'Đã huỷ', value: 9 },                 // Cancelled
+  { label: 'Nhân viên đang lấy mẫu', value: 10 },    // StaffGettingSample
+  { label: 'Đã check-in', value: 11 },            // CheckIn
 ];
 
 export const getStatusColor = (status: string | number): string => {
@@ -40,6 +42,10 @@ export const getStatusColor = (status: string | number): string => {
       return 'bg-green-600';
     case 9: // Cancelled
       return 'bg-red-500';
+    case 10: // StaffGettingSample
+      return 'bg-yellow-500';
+    case 11: // CheckIn
+      return 'bg-blue-700';
     default:
       return 'bg-gray-300';
   }
@@ -62,6 +68,8 @@ const statusToNumber = (status: string | number): number => {
     Testing: 7,
     Completed: 8,
     Cancelled: 9,
+    StaffGettingSample: 10,
+    CheckIn: 11,
   };
   return statusMap[status] !== undefined ? statusMap[status] : -1;
 };

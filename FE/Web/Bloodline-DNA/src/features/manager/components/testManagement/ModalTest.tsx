@@ -174,7 +174,7 @@ const ModalTest: React.FC<ModalAddTestProps> = ({
           </div>
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
-            <Button type="submit" className="bg-blue-700 text-white">Thêm</Button>
+            <Button type="submit" className="bg-blue-700 text-white"><span className="text-white">Thêm</span></Button>
           </div>
         </form>
       </DialogContent>
