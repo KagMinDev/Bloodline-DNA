@@ -3,8 +3,6 @@ import { NotFound } from "../components";
 import Sidebar from "../features/manager/components/Sidebar";
 import Blogs from "../features/manager/pages/Blogs";
 import TestManagement from "../features/manager/pages/TestManagement";
-import Report from "../features/manager/pages/Report";
-import Result from "../features/manager/pages/Result";
 import Dashboard from "../features/manager/pages/Dashboard";
 import Feedbacks from "../features/manager/pages/Feedbacks";
 import Tags from "../features/manager/pages/Tags";
@@ -19,8 +17,6 @@ export default function ManagerRouter() {
                     <Route path="blogs" element={<Blogs />} />
                     <Route path="tags" element={<Tags />} />
                     <Route path="test-management" element={<TestManagement />} />
-                    <Route path="report" element={<Report />} />
-                    <Route path="test-results" element={<Result />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="feedback" element={<Feedbacks />} />
 
