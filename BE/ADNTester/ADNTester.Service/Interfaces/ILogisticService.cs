@@ -15,5 +15,6 @@ namespace ADNTester.Service.Interfaces
         Task CompleteLogisticsTaskAsync(string logisticsInfoId, string staffId);
         Task<List<LogisticsInfo>> GetAllAsync(LogisticsType? type = null);
         Task<LogisticsInfo?> GetByIdAsync(string id);
+        Task<LogisticsInfo> CreateAsync(LogisticsInfo info);
     }
 }

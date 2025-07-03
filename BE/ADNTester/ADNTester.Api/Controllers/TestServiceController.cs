@@ -42,6 +42,10 @@ namespace ADNTester.Api.Controllers
         public async Task<ActionResult<string>> Create(CreateTestServiceDto dto)
         {
             var id = await _testServiceService.CreateAsync(dto);
+            if (id == null)
+            {
+                return BadRequest(new ApiResponse<string>(null, "Không thể tạo dịch vụ pháp lý với phương thức tự lấy mẫu.", 400));
+            }
             return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo dịch vụ xét nghiệm thành công", 201));
         }
 

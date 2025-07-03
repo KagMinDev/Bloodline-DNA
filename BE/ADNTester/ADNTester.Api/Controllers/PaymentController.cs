@@ -21,19 +21,22 @@ namespace ADNTester.API.Controllers
         private readonly IConfiguration _configuration;
         private readonly ITestKitService _testKitService;
         private readonly ITestServiceService _testServiceService;
+        private readonly ILogisticService _logisticService;
 
         public PaymentController(
             IPaymentService paymentService,
             ITestBookingService bookingService,
             IConfiguration configuration,
             ITestKitService testKitService,
-            ITestServiceService testServiceService)
+            ITestServiceService testServiceService,
+            ILogisticService logisticService)
         {
             _paymentService = paymentService;
             _bookingService = bookingService;
             _configuration = configuration;
             _testKitService = testKitService;
             _testServiceService = testServiceService;
+            _logisticService = logisticService;
         }
 
         [HttpPost("{bookingId}/checkout")]
@@ -277,9 +280,20 @@ namespace ADNTester.API.Controllers
                     // Cập nhật trạng thái booking thành PreparingKit
                     await _bookingService.UpdateBookingStatusAsync(callback.bookingId, BookingStatus.PreparingKit);
 
-                    // Nếu là lấy mẫu tại nhà, tạo TestKit sau khi thanh toán cọc
+                    // Nếu là lấy mẫu tại nhà, tạo LogisticsInfo và TestKit sau khi thanh toán cọc
                     if (booking.CollectionMethod == SampleCollectionMethod.SelfSample.ToString())
                     {
+                        // Tạo LogisticsInfo giao kit
+                        var logisticsInfo = new LogisticsInfo
+                        {
+                            Address = booking.Address,
+                            Phone = booking.Phone,
+                            Type = LogisticsType.Delivery,
+                            ScheduledAt = DateTime.UtcNow,
+                            Note = $"Giao kit cho booking {booking.Id}"
+                        };
+                        var createdLogistics = await _logisticService.CreateAsync(logisticsInfo);
+
                         // Lấy thông tin TestService để lấy SampleCount
                         var testService = await _testServiceService.GetByIdAsync(booking.TestServiceId);
                         if (testService == null)
@@ -292,7 +306,9 @@ namespace ADNTester.API.Controllers
                             BookingId = booking.Id,
                             ShippedAt = DateTime.UtcNow,
                             ReceivedAt = null,
-                            SampleCount = testService.SampleCount // Thêm SampleCount từ TestService
+                            SampleCount = testService.SampleCount, // Thêm SampleCount từ TestService
+                            DeliveryInfoId = createdLogistics.Id,
+                            CollectionMethod = SampleCollectionMethod.SelfSample
                         };
 
                         await _testKitService.CreateAsync(testKit);

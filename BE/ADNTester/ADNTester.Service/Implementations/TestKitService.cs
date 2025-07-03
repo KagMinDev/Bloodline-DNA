@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace ADNTester.Service.Implementations
 {
@@ -67,6 +68,14 @@ namespace ADNTester.Service.Implementations
 
             _unitOfWork.TestKitRepository.Remove(testKit);
             return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<IEnumerable<TestKitDto>> GetAllByPreparingKitAndSelfSampleAsync()
+        {
+            var testKits = await _unitOfWork.TestKitRepository.GetAllAsync();
+            var filtered = testKits.Where(tk => tk.CollectionMethod == BO.Enums.SampleCollectionMethod.SelfSample &&
+                tk.Booking != null && tk.Booking.Status == BO.Enums.BookingStatus.PreparingKit);
+            return _mapper.Map<IEnumerable<TestKitDto>>(filtered);
         }
     }
 } 

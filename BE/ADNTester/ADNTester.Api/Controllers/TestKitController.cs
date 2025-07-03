@@ -74,5 +74,12 @@ namespace ADNTester.Api.Controllers
 
             return Ok(new ApiResponse<string>(id, "Xóa kit xét nghiệm thành công"));
         }
+
+        [HttpGet("preparekit-selfsample")]
+        public async Task<ActionResult<IEnumerable<TestKitDto>>> GetAllByPreparingKitAndSelfSample()
+        {
+            var testKits = await _testKitService.GetAllByPreparingKitAndSelfSampleAsync();
+            return Ok(new ApiResponse<IEnumerable<TestKitDto>>(testKits, "Lấy danh sách kit xét nghiệm chuẩn bị và tự lấy mẫu thành công"));
+        }
     }
 } 

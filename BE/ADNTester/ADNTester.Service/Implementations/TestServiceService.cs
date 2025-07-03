@@ -57,12 +57,18 @@ namespace ADNTester.Service.Implementations
 
         public async Task<string> CreateAsync(CreateTestServiceDto dto)
         {
-            // Create TestService
+            // Nếu là Legal và có PriceService là SelfSample thì trả về null (hoặc throw exception tuỳ ý)
+            if (dto.Type == ADNTester.BO.Enums.TestServiceType.Legal && dto.PriceServices != null && dto.PriceServices.Any(p => p.CollectionMethod == ADNTester.BO.Enums.SampleCollectionMethod.SelfSample))
+            {
+                return null;
+            }
+
+            // Tạo TestService
             var service = _mapper.Map<TestService>(dto);
             await _unitOfWork.TestServiceRepository.AddAsync(service);
             await _unitOfWork.SaveChangesAsync();
 
-            // Create PriceServices if provided
+            // Tạo PriceServices nếu có
             if (dto.PriceServices != null && dto.PriceServices.Count > 0)
             {
                 foreach (var priceDto in dto.PriceServices)
