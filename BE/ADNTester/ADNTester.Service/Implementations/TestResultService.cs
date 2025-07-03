@@ -35,16 +35,35 @@ namespace ADNTester.Service.Implementations
             _emailService = emailService;
         }
 
-        public async Task<IEnumerable<TestResultDto>> GetAllAsync()
+        public async Task<IEnumerable<TestResultDetailDto>> GetAllAsync()
         {
             var testResults = await _unitOfWork.TestResultRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<TestResultDto>>(testResults);
+            var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
+            var users = await _unitOfWork.UserRepository.GetAllAsync();
+            // Ensure navigation properties are set
+            foreach (var result in testResults)
+            {
+                result.TestBooking = bookings.FirstOrDefault(b => b.Id == result.TestBookingId);
+                if (result.TestBooking != null)
+                {
+                    result.TestBooking.Client = users.FirstOrDefault(u => u.Id == result.TestBooking.ClientId);
+                }
+            }
+            return _mapper.Map<IEnumerable<TestResultDetailDto>>(testResults);
         }
 
-        public async Task<TestResultDto> GetByIdAsync(string id)
+        public async Task<TestResultDetailDto> GetByIdAsync(string id)
         {
             var testResult = await _unitOfWork.TestResultRepository.GetByIdAsync(id);
-            return testResult == null ? null : _mapper.Map<TestResultDto>(testResult);
+            if (testResult == null)
+                return null;
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(testResult.TestBookingId);
+            if (booking != null)
+            {
+                booking.Client = await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+                testResult.TestBooking = booking;
+            }
+            return _mapper.Map<TestResultDetailDto>(testResult);
         }
 
         public async Task<string> CreateAsync(CreateTestResultDto dto)
