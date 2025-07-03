@@ -7,8 +7,8 @@ namespace ADNTester.Service.Interfaces
 {
     public interface ITestResultService
     {
-        Task<IEnumerable<TestResultDto>> GetAllAsync();
-        Task<TestResultDto> GetByIdAsync(string id);
+        Task<IEnumerable<TestResultDetailDto>> GetAllAsync();
+        Task<TestResultDetailDto> GetByIdAsync(string id);
         Task<string> CreateAsync(CreateTestResultDto dto);
         Task<bool> UpdateAsync(UpdateTestResultDto dto);
         Task<bool> DeleteAsync(string id);
