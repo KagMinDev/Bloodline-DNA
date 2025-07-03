@@ -134,12 +134,14 @@ export default function TestManagement() {
       </div>
 
       {/* Danh sách dịch vụ */}
-      <TestList
-        tests={tests}
-        onShowDetail={handleShowDetail}
-        onEditTest={handleEditTest}
-        onDeleteTest={handleDeleteTest}
-      />
+      <div className="overflow-x-auto max-h-[80vh]">
+              <TestList
+                tests={tests}
+                onShowDetail={handleShowDetail}
+                onEditTest={handleEditTest}
+                onDeleteTest={handleDeleteTest}
+              />
+            </div>
     </div>
   );
 }

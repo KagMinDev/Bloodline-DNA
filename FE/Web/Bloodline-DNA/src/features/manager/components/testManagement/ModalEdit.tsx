@@ -210,7 +210,7 @@ const ModalEdit: React.FC<ModalEditProps> = ({
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
-            <Button type="submit" className="bg-blue-600 text-white">Lưu</Button>
+            <Button type="submit" className="bg-blue-600 text-white"><span className="text-white">Lưu</span></Button>
           </div>
         </form>
       </DialogContent>

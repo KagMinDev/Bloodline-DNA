@@ -5,7 +5,7 @@ interface ModalTestResultProps {
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
   form: {
-    id: string;
+    id?: string;
     testBookingId: string;
     resultSummary: string;
     resultDate: string;
@@ -96,7 +96,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               type="submit"
               className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700"
             >
-              {editIndex === null ? 'Tạo mới' : 'Cập nhật'}
+              <span className='text-white'>{editIndex === null ? 'Tạo mới' : 'Cập nhật'}</span>
             </button>
           </div>
         </form>

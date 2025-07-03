@@ -1,10 +1,13 @@
+// ✅ BookingTable.tsx
 import React, { useState } from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa";
+import { toast } from "react-toastify";
 import type { TestBookingResponse } from "../../../types/testBooking";
 import { type StatusOption } from "../constants/statusMapping";
 import { getStatusLabel, renderCollectionMethod } from "../utils/statusUtils";
 import StatusSelect from "./StatusSelect";
+import { updateTestBookingStatusApi } from "../../../api/testBookingApi";
 
 interface BookingTableProps {
   selectedDay: string;
@@ -12,7 +15,9 @@ interface BookingTableProps {
   selectedStatuses: Record<string, string>;
   statusOptions: StatusOption[];
   setSelectedStatuses: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  handleUpdateStatus: (bookingId: string) => void;
+  setFilteredBookings: React.Dispatch<React.SetStateAction<TestBookingResponse[]>>;
+  token: string;
+  refetchBookings: () => Promise<void>;
 }
 
 const BookingTable: React.FC<BookingTableProps> = ({
@@ -21,42 +26,58 @@ const BookingTable: React.FC<BookingTableProps> = ({
   selectedStatuses,
   statusOptions,
   setSelectedStatuses,
-  handleUpdateStatus,
+  token,
+  refetchBookings,
 }) => {
   const [loadingBookings, setLoadingBookings] = useState<Set<string>>(new Set());
 
   const handleClickUpdate = async (bookingId: string) => {
+    const newStatusLabel = selectedStatuses[bookingId];
+    const statusOption = statusOptions.find((s) => s.label === newStatusLabel);
+    if (!statusOption) {
+      toast.error("Trạng thái không hợp lệ");
+      return;
+    }
+
     setLoadingBookings((prev) => new Set(prev).add(bookingId));
     try {
-      await handleUpdateStatus(bookingId);
+      await updateTestBookingStatusApi({ bookingId, status: statusOption.value }, token);
+      await refetchBookings();
+
+      setSelectedStatuses((prev) => {
+        const next = { ...prev };
+        delete next[bookingId];
+        return next;
+      });
+
+      toast.success(`Đã cập nhật trạng thái thành: ${newStatusLabel}`);
+    } catch (err) {
+      toast.error("Cập nhật trạng thái thất bại");
     } finally {
       setLoadingBookings((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(bookingId);
-        return newSet;
+        const next = new Set(prev);
+        next.delete(bookingId);
+        return next;
       });
     }
   };
-
-  // ⚠️ Trạng thái giới hạn cho "Tự lấy mẫu"
-  const internalStatuses = [
-    "Chờ xử lý",
-    "Đã nhận mẫu",
-    "Đang xét nghiệm",
-    "Hoàn tất",
-    "Đã huỷ",
-  ];
 
   const getAvailableStatusOptions = (
     collectionMethod: string,
     currentStatus: string
   ): string[] => {
-    const allStatuses = statusOptions.map((s) => s.label);
+    const facilityStatusLabels = [
+      "Chờ xử lý",
+      "Đã nhận mẫu",
+      "Nhân viên đang lấy mẫu",
+      "Đang xét nghiệm",
+      "Hoàn tất",
+      "Đã huỷ",
+    ];
 
-    const statusList =
-      collectionMethod === "0" ? internalStatuses : allStatuses;
+    const fullLabels = statusOptions.map((s) => s.label);
+    const statusList = collectionMethod === "AtFacility" ? facilityStatusLabels : fullLabels;
 
-    // ❌ Không được chọn lại trạng thái trước đó
     const currentIndex = statusList.indexOf(currentStatus);
     return currentIndex >= 0 ? statusList.slice(currentIndex) : statusList;
   };
@@ -85,12 +106,8 @@ const BookingTable: React.FC<BookingTableProps> = ({
             {filteredBookings.map((booking) => {
               const currentStatusLabel = getStatusLabel(booking.status);
               const isLoading = loadingBookings.has(booking.id);
-              const collectionMethod = booking.collectionMethod; // string
-
-              const options = getAvailableStatusOptions(
-                collectionMethod,
-                currentStatusLabel
-              );
+              const collectionMethod = booking.collectionMethod;
+              const options = getAvailableStatusOptions(collectionMethod, currentStatusLabel);
 
               return (
                 <tr key={booking.id} className="border-b">
@@ -121,12 +138,13 @@ const BookingTable: React.FC<BookingTableProps> = ({
                         selectedStatuses[booking.id] === currentStatusLabel
                       }
                       className={`flex items-center justify-center rounded-full p-2 transition-all duration-200 shadow-md
-                        ${isLoading ||
-                          !selectedStatuses[booking.id] ||
-                          selectedStatuses[booking.id] === currentStatusLabel
+                      ${
+                        isLoading ||
+                        !selectedStatuses[booking.id] ||
+                        selectedStatuses[booking.id] === currentStatusLabel
                           ? "bg-gray-400 text-gray-500 cursor-not-allowed"
                           : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700"
-                        }`}
+                      }`}
                       title="Cập nhật trạng thái"
                     >
                       {isLoading ? (
