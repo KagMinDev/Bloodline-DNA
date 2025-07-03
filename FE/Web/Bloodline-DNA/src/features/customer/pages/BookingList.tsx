@@ -357,22 +357,24 @@ export const BookingList = (): React.JSX.Element => {
                           </div>
 
                           <div className="flex flex-col gap-2 lg:min-w-[200px]">
-                            <Button
-                              variant="outline"
-                              className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white w-full transition-colors duration-200"
-                              onClick={() => navigate(`/customer/booking-detail/${booking.id}`)}
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                              onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
                             >
                               <EyeIcon className="w-4 h-4 mr-2" />
-                              Xem Chi Tiết
+                              Xem
                             </Button>
                             {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                              <Button
-                                variant="outline"
-                                className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white w-full transition-colors duration-200"
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="border-blue-600 text-blue-600 hover:bg-blue-100"
                                 onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
                               >
                                 <EditIcon className="w-4 h-4 mr-2" />
-                                Cập Nhật
+                                Sửa
                               </Button>
                             )}
                           </div>
