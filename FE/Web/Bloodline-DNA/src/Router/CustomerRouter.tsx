@@ -4,7 +4,6 @@ import { NotFound } from "../components";
 import AboutPage from "../features/about/pages/AboutPage";
 import {
     Blogs,
-    BookingDetail,
     BookingList,
     Contacts,
     DetailServices,
@@ -12,9 +11,9 @@ import {
     EditBooking,
     EditProfile,
     Services,
-    TestProgress,
 } from "../features/customer";
 import BlogDetail from "../features/customer/pages/BlogDetails";
+import { BookingStatusPage } from "../features/customer/pages/BookingStatusPage";
 import HomePage from "../features/home/pages/HomePage";
 
 export default function CustomerRouter() {
@@ -30,8 +29,7 @@ export default function CustomerRouter() {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
-        <Route path="/booking-detail/:id" element={<BookingDetail />} />
-        <Route path="/test-progress" element={<TestProgress />} />
+        <Route path="/booking-status/:id" element={<BookingStatusPage />} />
         <Route path="/edit-booking/:id" element={<EditBooking />} />
         <Route path="/booking-list" element={<BookingList />} />
         <Route path="/edit-profile" element={<EditProfile />} />

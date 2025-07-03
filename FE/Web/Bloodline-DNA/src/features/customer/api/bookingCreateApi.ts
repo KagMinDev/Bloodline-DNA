@@ -7,7 +7,7 @@ export interface CreateBookingRequest {
   clientName: string;
   address: string;
   phone: string;
-  email?: string; // Add email as optional field in case API needs it
+  priceServiceId: string; // Service ID for pricing
 }
 
 // Interface cho response (có thể customize dựa trên actual response)
@@ -296,17 +296,7 @@ export const mapFormDataToBookingRequest = async (
     throw new Error('Missing required contact information');
   }
   
-  if (!formData.email) {
-    console.error('❌ Missing email:', formData.email);
-    throw new Error('Missing required email information');
-  }
-  
-  // Basic email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email)) {
-    console.error('❌ Invalid email format:', formData.email);
-    throw new Error('Invalid email format');
-  }
+  // No longer need email validation since it's removed
   
   // Validate phone format (basic)
   const phoneRegex = /^[0-9+\-\s()]{10,15}$/;
@@ -404,6 +394,9 @@ export const mapFormDataToBookingRequest = async (
     willIncludeClientId: !!realClientId
   });
   
+  // Get priceServiceId (same as selected service ID)
+  const priceServiceId = selectedService?.id || selectedService?.serviceId || testServiceId;
+  
   // Build request object conditionally
   const bookingRequest: CreateBookingRequest = {
     testServiceId: testServiceId, // Now guaranteed to be string
@@ -412,7 +405,7 @@ export const mapFormDataToBookingRequest = async (
     clientName: formData.name.trim(),
     address: (formData.address || "").trim(),
     phone: formData.phone.replace(/\s/g, ''), // Remove spaces from phone
-    email: formData.email.trim().toLowerCase(),
+    priceServiceId: priceServiceId,
   };
   
   // Include clientId if we have one (API requires it)
@@ -444,9 +437,9 @@ export const mapFormDataToBookingRequest = async (
     throw new Error('Invalid phone number in request');
   }
   
-  if (!bookingRequest.email || !bookingRequest.email.includes('@')) {
-    console.error('❌ Invalid email in final request:', bookingRequest.email);
-    throw new Error('Invalid email in request');
+  if (!bookingRequest.priceServiceId || bookingRequest.priceServiceId.length < 10) {
+    console.error('❌ Invalid priceServiceId in final request:', bookingRequest.priceServiceId);
+    throw new Error('Invalid price service ID in request');
   }
   
   if (!bookingRequest.appointmentDate || !bookingRequest.appointmentDate.includes('T')) {

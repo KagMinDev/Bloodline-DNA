@@ -5,7 +5,6 @@ import {
   CheckCircleIcon,
   ClockIcon,
   HomeIcon,
-  MailIcon,
   MapPinIcon,
   PhoneIcon,
   UserIcon,
@@ -33,6 +32,7 @@ interface BookingModalProps {
     title: string;
     category: string; // 'civil' or 'legal'
     price: string;
+    collectionMethod: number; // 0 = home/self, 1 = clinic
     testServiceInfo?: {
       id: string;
       [key: string]: any;
@@ -44,7 +44,6 @@ interface BookingModalProps {
 interface BookingData {
   serviceType: "home" | "clinic";
   name: string;
-  email: string;
   phone: string;
   address: string;
   preferredDate: string;
@@ -62,7 +61,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [formData, setFormData] = useState<BookingData>({
     serviceType: "home",
     name: "",
-    email: "",
     phone: "",
     address: "",
     preferredDate: "",
@@ -112,23 +110,38 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // Update formData when selectedService changes
   React.useEffect(() => {
     if (selectedService) {
-      const serviceCategory = selectedService.category;
-      
-      // Determine default service type based on category
+      // Determine default service type based on collectionMethod
       let defaultServiceType: 'home' | 'clinic';
-      if (serviceCategory === 'civil') {
-        defaultServiceType = 'home'; // Civil has both options, default to home
+      if (selectedService.collectionMethod === 0) {
+        defaultServiceType = 'home'; // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
+      } else if (selectedService.collectionMethod === 1) {
+        defaultServiceType = 'clinic'; // collectionMethod 1 = Thu mẫu tại trung tâm
       } else {
-        defaultServiceType = 'clinic'; // Legal only has clinic option
+        // Fallback to home if collectionMethod is unexpected or undefined
+        console.warn('Unexpected collectionMethod value:', selectedService.collectionMethod);
+        defaultServiceType = 'home';
       }
       
       // Set testType to the selected service id
       const defaultTestType = selectedService.id;
       
+      console.log('🔧 Setting form data based on collectionMethod:', {
+        collectionMethod: selectedService.collectionMethod,
+        defaultServiceType,
+        defaultTestType
+      });
+      
       setFormData(prev => ({
         ...prev,
         serviceType: defaultServiceType,
         testType: defaultTestType
+      }));
+    } else {
+      // Reset to default if no selectedService
+      setFormData(prev => ({
+        ...prev,
+        serviceType: 'home',
+        testType: 'civil-self'
       }));
     }
   }, [selectedService]);
@@ -139,6 +152,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       console.log('=== BOOKING MODAL DEBUG ===');
       console.log('selectedService object structure:', selectedService);
       console.log('selectedService.testServiceInfo:', selectedService?.testServiceInfo);
+      console.log('selectedService.collectionMethod:', selectedService?.collectionMethod);
       console.log('Does selectedService have testServiceInfo?', !!selectedService?.testServiceInfo);
       console.log('selectedService keys:', selectedService ? Object.keys(selectedService) : 'no selectedService');
       
@@ -168,7 +182,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               testServiceInfo: {
                 id: matchingTestService.id,
                 ...matchingTestService
-              }
+              },
+              // Ensure collectionMethod is preserved
+              collectionMethod: selectedService.collectionMethod
             };
             setEnhancedSelectedService(enhancedService);
             console.log('🚀 Enhanced selectedService with testServiceInfo:', enhancedService);
@@ -275,45 +291,71 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return selectedTest ? [selectedTest] : [];
   };
 
-  // Lấy tất cả service types khả dụng cho category đã chọn (để validate)
+  // Lấy tất cả service types khả dụng cho collectionMethod đã chọn (để validate)
   const getAvailableServiceTypes = (): string[] => {
-    const serviceCategory = selectedService?.category || 'civil';
-    const categoryData = testTypesByCategory[serviceCategory];
+    if (!selectedService) {
+      // Nếu không có selectedService, trả về cả hai option
+      return ['home', 'clinic'];
+    }
     
-    if (!categoryData) return ['home']; // Default to home for civil
+    const { collectionMethod } = selectedService;
     
-    return Object.keys(categoryData).filter(serviceType => {
-      const types = categoryData[serviceType];
-      return types && types.length > 0;
-    });
+    // Dựa vào collectionMethod để trả về service types khả dụng
+    if (collectionMethod === 0) {
+      return ['home']; // collectionMethod 0 = chỉ home
+    } else if (collectionMethod === 1) {
+      return ['clinic']; // collectionMethod 1 = chỉ clinic
+    }
+    
+    // Fallback: nếu collectionMethod không rõ, trả về cả hai
+    return ['home', 'clinic'];
   };
 
   // Đếm số lượng service types có sẵn
   const getAvailableServiceTypesCount = (): number => {
-    const serviceCategory = selectedService?.category || 'civil';
-    let count = 0;
+    if (!selectedService) {
+      // Nếu không có selectedService, hiển thị cả hai option
+      return 2;
+    }
     
-    if (shouldShowServiceType('home')) count++;
-    if (shouldShowServiceType('clinic')) count++;
+    const { collectionMethod } = selectedService;
     
-    return count;
+    // Với logic mới dựa vào collectionMethod, luôn chỉ có 1 option
+    // vì mỗi service chỉ có 1 collectionMethod cố định
+    if (collectionMethod === 0 || collectionMethod === 1) {
+      return 1;
+    }
+    
+    // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
+    return 2;
   };
 
-  // Kiểm tra xem có nên hiển thị service type không dựa vào category
+  // Kiểm tra xem có nên hiển thị service type không dựa vào collectionMethod
   const shouldShowServiceType = (serviceType: string): boolean => {
-    const serviceCategory = selectedService?.category || 'civil';
-    
-    // Nếu là civil, hiển thị cả home và clinic
-    if (serviceCategory === 'civil') {
+    if (!selectedService) {
+      // Nếu không có selectedService, hiển thị cả hai option (fallback cho compatibility)
       return ['home', 'clinic'].includes(serviceType);
     }
     
-    // Nếu là legal, chỉ hiển thị clinic
-    if (serviceCategory === 'legal') {
+    const { collectionMethod } = selectedService;
+    
+    console.log('🔍 Checking service type visibility:', {
+      serviceType,
+      collectionMethod,
+      selectedService: selectedService.title
+    });
+    
+    // Dựa vào collectionMethod để quyết định hiển thị
+    if (collectionMethod === 0) {
+      // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
+      return serviceType === 'home';
+    } else if (collectionMethod === 1) {
+      // collectionMethod 1 = Thu mẫu tại trung tâm  
       return serviceType === 'clinic';
     }
     
-    return false;
+    // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
+    return ['home', 'clinic'].includes(serviceType);
   };
 
   const timeSlots = [
@@ -392,8 +434,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         
         if (errorMessage.includes('Missing required')) {
           setApiError("Vui lòng điền đầy đủ thông tin bắt buộc.");
-        } else if (errorMessage.includes('Invalid email format')) {
-          setApiError("Định dạng email không hợp lệ. Vui lòng nhập email đúng định dạng.");
+        } else if (errorMessage.includes('Invalid priceServiceId')) {
+          setApiError("ID dịch vụ không hợp lệ. Vui lòng thử chọn lại dịch vụ.");
         } else if (errorMessage.includes('Invalid phone')) {
           setApiError("Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại từ 10-15 chữ số.");
         } else if (errorMessage.includes('Name must be at least')) {
@@ -449,7 +491,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return (
       formData.name &&
       formData.phone &&
-      formData.email &&
       formData.preferredDate &&
       formData.preferredTime &&
       (formData.serviceType === "clinic" || formData.address)
@@ -460,7 +501,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     setFormData({
       serviceType: "home",
       name: "",
-      email: "",
       phone: "",
       address: "",
       preferredDate: "",
@@ -742,21 +782,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     />
                   </div>
 
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="flex items-center text-sm font-semibold text-blue-900">
-                      <MailIcon className="w-4 h-4 mr-2" />
-                      Email *
-                    </label>
-                    <Input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      placeholder="Nhập địa chỉ email"
-                      className="w-full"
-                    />
-                  </div>
+
 
                   {formData.serviceType === "home" && (
                     <div className="space-y-2 md:col-span-2">
