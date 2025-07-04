@@ -3,11 +3,11 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fcfefe", // Gradient not directly supported, using solid color
+    backgroundColor: "#fcfefe",
   },
   header: {
     position: "absolute",
-    top: 0,
+    top: 30,
     left: 0,
     right: 0,
     zIndex: 50,
@@ -18,9 +18,7 @@ const styles = StyleSheet.create({
   },
   section: {
     width: "100%",
-  },
-  servicesSection: {
-    marginTop: -32, // Equivalent to -mt-8 in Tailwind
+    marginTop: 30, // Equivalent to mt-4 in Tailwind
   },
   contactSection: {
     marginTop: -16, // Equivalent to -mt-4 in Tailwind

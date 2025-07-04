@@ -10,11 +10,14 @@ export type RootStackParamList = {
   News: undefined;
   BlogDetail: { id: string };
   Main: undefined;
+  AllService: undefined;
+  DetailsService: { id: string };
+  AppointmentScreen: { serviceId: string };
 };
 
 
 export type MainTabParamList = {
   Home: undefined;
-  Appointments: undefined;
+  Services: undefined;
   Profile: undefined;
 };

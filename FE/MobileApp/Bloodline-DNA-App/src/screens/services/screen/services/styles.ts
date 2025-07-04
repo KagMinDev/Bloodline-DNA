@@ -170,6 +170,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  AllService: {
+    alignSelf: "center",
+    marginTop: 7,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  AllServiceText: {
+    color: "#1e3a8a",
+    fontSize: 16,
+    fontWeight: "800",
+    marginRight: 8,
+  },
 });
 
 export default styles;
