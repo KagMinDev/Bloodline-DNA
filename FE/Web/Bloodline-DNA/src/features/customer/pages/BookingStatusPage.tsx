@@ -23,7 +23,8 @@ import {
   CreditCardIcon,
   SendIcon,
   SearchIcon,
-  DnaIcon
+  DnaIcon,
+  StarIcon
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
@@ -45,8 +46,11 @@ import {
 import { 
   checkoutPaymentApi, 
   calculateDeposit, 
-  formatPaymentAmount 
+  formatPaymentAmount,
+  checkoutRemainingPaymentApi
 } from "../api/paymentApi";
+import { submitFeedbackApi } from "../api/feedbackApi";
+import { getUserInfoApi } from "../api/userApi";
 
 // --- Interfaces from both files ---
 
@@ -60,6 +64,7 @@ type DetailedBookingStatus =
   | 'returningsample'
   | 'samplereceived'
   | 'testing'
+  | 'finalpayment' // Added this new status
   | 'completed'
   | 'cancelled';
 
@@ -118,6 +123,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     returningsample: { label: 'Đang vận chuyển mẫu', color: 'bg-orange-100 text-orange-800', icon: TruckIcon, description: 'Mẫu của bạn đang được vận chuyển đến phòng lab' },
     samplereceived: { label: 'Đã nhận mẫu', color: 'bg-indigo-100 text-indigo-800', icon: DnaIcon, description: 'Phòng lab đã nhận được mẫu của bạn' },
     testing: { label: 'Đang phân tích', color: 'bg-purple-100 text-purple-800', icon: FlaskConicalIcon, description: 'Mẫu của bạn đang được phân tích' },
+    finalpayment: { label: 'Chờ thanh toán', color: 'bg-rose-100 text-rose-800', icon: CreditCardIcon, description: 'Vui lòng thanh toán số tiền còn lại để xem kết quả.' },
     completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, description: 'Dịch vụ đã được thực hiện hoàn tất' },
     cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800', icon: XCircleIcon, description: 'Lịch hẹn đã bị hủy bỏ' }
   };
@@ -130,6 +136,14 @@ export const BookingStatusPage = (): React.JSX.Element => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   
+  // Feedback state
+  const [userId, setUserId] = useState<string | null>(null);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -163,9 +177,15 @@ export const BookingStatusPage = (): React.JSX.Element => {
     setPaymentError(null);
     
     try {
-      // Call payment API with current booking ID
-      console.log('🚀 Calling payment API with bookingId:', booking.id);
-      const result = await checkoutPaymentApi(booking.id);
+      let result;
+      // Differentiate between deposit and remaining payment
+      if (payload?.type === 'remaining' || booking.status === 'finalpayment') {
+        console.log('🚀 Calling REMAINING payment API with bookingId:', booking.id);
+        result = await checkoutRemainingPaymentApi(booking.id);
+      } else {
+        console.log('🚀 Calling DEPOSIT payment API with bookingId:', booking.id);
+        result = await checkoutPaymentApi(booking.id);
+      }
       
       console.log('✅ Payment API response:', result);
       
@@ -199,6 +219,44 @@ export const BookingStatusPage = (): React.JSX.Element => {
     }
   };
 
+  const handleFeedbackSubmit = async () => {
+    if (!userId || !bookingId) {
+      setFeedbackError("Không thể xác định người dùng hoặc đơn hàng.");
+      return;
+    }
+    if (rating === 0) {
+      setFeedbackError("Vui lòng chọn số sao đánh giá.");
+      return;
+    }
+    if (comment.trim() === "") {
+      setFeedbackError("Vui lòng nhập nội dung bình luận.");
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+    setFeedbackError(null);
+    setFeedbackSuccess(null);
+
+    try {
+      const payload = {
+        userId,
+        testServiceId: bookingId,
+        rating,
+        comment,
+      };
+      const response = await submitFeedbackApi(payload);
+      if (response.success) {
+        setFeedbackSuccess("Cảm ơn bạn đã gửi đánh giá!");
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : "Đã có lỗi xảy ra.");
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   // --- Data Transformation and Fetching Logic ---
 
   const transformApiDataToBookingDetail = (item: BookingItem): BookingDetail => {
@@ -214,6 +272,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
       const statusLower = (status || '').toLowerCase().replace(/[^a-z0-9]/gi, '');
       if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'cancelled';
       if (statusLower.includes('completed') || statusLower.includes('hoànthành')) return 'completed';
+      if (statusLower.includes('finalpayment')) return 'finalpayment';
       if (statusLower.includes('testing')) return 'testing';
       if (statusLower.includes('samplereceived')) return 'samplereceived';
       if (statusLower.includes('returningsample')) return 'returningsample';
@@ -367,7 +426,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
       icon: CreditCardIcon,
       status: remainingPaymentStatus,
       actionRequired: remainingPaymentStatus === 'current',
-      actionText: 'Thanh toán còn lại',
+      actionText: 'Thanh toán số tiền còn lại',
       actionPayload: { type: 'remaining' },
     });
 
@@ -427,7 +486,16 @@ export const BookingStatusPage = (): React.JSX.Element => {
         setIsLoading(true);
         setError(null);
         
-        const apiData = await getBookingByIdApi(bookingId);
+        // Fetch booking and user info in parallel
+        const [apiData, userData] = await Promise.all([
+          getBookingByIdApi(bookingId),
+          getUserInfoApi()
+        ]);
+
+        if (userData) {
+          setUserId(userData.id);
+        }
+
         if (!apiData) {
           setError('Không tìm thấy thông tin booking');
           setBooking(null);
@@ -605,9 +673,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
     const progressPercentage = Math.round((completedSteps / progressData.steps.length) * 100);
     
     return (
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
             {/* Timeline */}
-            <div className="flex-grow space-y-1 relative">
+            <div className="flex-grow space-y-1 relative lg:w-2/3">
                 {progressData.steps.map((step, index) => {
                     const Icon = step.icon;
                     const isLast = index === progressData.steps.length - 1;
@@ -693,10 +761,10 @@ export const BookingStatusPage = (): React.JSX.Element => {
             </div>
             
             {/* Overview */}
-            <div className="w-1/3">
-                <Card className="sticky top-4">
+            <div className="lg:w-1/3">
+                <Card className="sticky top-24">
                     <CardHeader>
-                        <h3 className="font-bold text-slate-800">Tổng Quan Tiến Trình</h3>
+                        <h3 className="!font-bold text-slate-800">Tổng Quan Tiến Trình</h3>
                     </CardHeader>
                     <CardContent>
                         <div className="text-center mb-6">
@@ -741,10 +809,59 @@ export const BookingStatusPage = (): React.JSX.Element => {
                                 </div>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+
+                        {/* --- Feedback Section --- */}
+                        {booking.status === 'completed' && (
+                          <div className="pt-4 mt-4 border-t">
+                            
+                            {feedbackSuccess ? (
+                              <div className="p-3 bg-green-100 border border-green-200 rounded-lg text-center">
+                                <p className="font-semibold text-green-800">{feedbackSuccess}</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                <div>
+                                  <p className="font-bold text-slate-800">Đánh giá của bạn</p>
+                                  <div className="flex items-center space-x-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                      <StarIcon
+                                        key={star}
+                                        className={`w-6 h-6 cursor-pointer transition-colors ${
+                                          rating >= star ? 'text-yellow-400 fill-yellow-400 stroke-black' : 'text-gray-300'
+                                        }`}
+                                        onClick={() => setRating(star)}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label htmlFor="comment" className="text-sm font-medium text-slate-600">Bình luận</label>
+                                  <textarea
+                                    id="comment"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    className="mt-1 w-full p-2 border rounded-md min-h-[80px] focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Chia sẻ cảm nhận của bạn về dịch vụ..."
+                                  />
+                                </div>
+                                {feedbackError && (
+                                  <p className="text-sm text-red-600">{feedbackError}</p>
+                                )}
+                                <Button 
+                                  onClick={handleFeedbackSubmit}
+                                  disabled={isSubmittingFeedback}
+                                  className="w-full bg-blue-500 !text-white hover:bg-blue-600"
+                                >
+                                  {isSubmittingFeedback ? 'Đang gửi...' : 'Gửi đánh giá'}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                     </CardContent>
+                 </Card>
+             </div>
+         </div>
     );
   };
 
