@@ -12,7 +12,8 @@ import {
   AlertCircleIcon,
   CheckCircleIcon,
   HomeIcon,
-  BuildingIcon
+  BuildingIcon,
+  XCircleIcon
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
@@ -30,7 +31,6 @@ import {
   updateBookingApi, 
   mapFormDataToUpdateRequest,
   formatDateForInput,
-  getStatusDisplayInfo,
   statusToNumber
 } from "../api/bookingUpdateApi";
 import { 
@@ -71,6 +71,18 @@ interface EditBookingData {
   notes: string;
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'in_progress';
 }
+
+const statusConfig: Record<EditBookingData['status'], { label: string; color: string; icon: React.ElementType }> = {
+  pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircleIcon },
+  confirmed: { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-800', icon: CheckCircleIcon },
+  in_progress: { label: 'Đang thực hiện', color: 'bg-indigo-100 text-indigo-800', icon: ClockIcon },
+  completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800', icon: CheckCircleIcon },
+  cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800', icon: XCircleIcon }
+};
+
+const getStatusDisplayInfo = (status: EditBookingData['status']) => {
+  return statusConfig[status] || statusConfig.pending;
+};
 
 export const EditBooking = (): React.JSX.Element => {
   const { id: bookingId } = useParams<{ id: string }>();
@@ -432,369 +444,196 @@ export const EditBooking = (): React.JSX.Element => {
     );
   }
 
+  const statusDisplay = getStatusDisplayInfo(formData.status);
+  
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
         <div className="relative z-50">
           <Header />
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-16 md:py-20 bg-blue-50 overflow-hidden">
-          {/* Medical Pattern Background */}
+        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <pattern id="medical-cross-edit" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                  <rect x="8" y="4" width="4" height="12" fill="#1e40af"/>
-                  <rect x="4" y="8" width="12" height="4" fill="#1e40af"/>
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#medical-cross-edit)" />
-            </svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
+          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="mb-6">
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem><BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">Trang Chủ</BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem><BreadcrumbLink href="/customer/booking-list" className="text-blue-600 hover:text-blue-800">Tài khoản của tôi</BreadcrumbLink></BreadcrumbItem>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem><span className="font-semibold text-blue-900">Chỉnh Sửa Lịch Hẹn</span></BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+            <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl lg:text-6xl">Chỉnh Sửa Lịch Hẹn
+              <span className="block mt-2 text-2xl font-medium text-blue-700 md:text-3xl">
+                Cập nhật thông tin cho đơn hẹn #{formData.id.slice(-6)}
+              </span>
+            </h1>
+          </div>
+        </section>
 
-          {/* Content Container */}
-          <div className="relative z-10 h-full flex items-center">
-            <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-              {/* Breadcrumb */}
-              <div className="mb-6">
-                <Breadcrumb>
-                  <BreadcrumbList className="text-blue-600">
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="/" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                        Trang Chủ
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-blue-400" />
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="/customer/booking-list" className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                        Danh Sách Đặt Lịch
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-blue-400" />
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href={`/customer/booking-detail/${formData.id}`} className="transition-colors duration-200 text-blue-600 hover:text-blue-800">
-                        Chi Tiết Đặt Lịch
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="text-blue-400" />
-                    <BreadcrumbItem>
-                      <span className="text-blue-900 font-semibold">Cập Nhật Thông Tin</span>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
-
-              {/* Title */}
+        {/* Main Content */}
+        <main className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl py-12">
+          <Card className="shadow-2xl border-0 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-blue-900 leading-tight mb-4">
-                    Cập Nhật Thông Tin
-                    <span className="block text-blue-700 text-xl md:text-2xl font-medium mt-1">
-                      Đặt lịch #{formData.id}
-                    </span>
-                  </h1>
+                  <h2 className="text-2xl font-bold text-white">Thông Tin Lịch Hẹn</h2>
+                  <p className="text-white/80">Cập nhật thông tin chi tiết cho lịch hẹn của bạn.</p>
                 </div>
-                <Button
-                  onClick={() => navigate(`/customer/booking-detail/${bookingId}`)}
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                <div className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${statusDisplay.color}`}>
+                  <statusDisplay.icon className="w-4 h-4" />
+                  {statusDisplay.label}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8 space-y-8">
+
+              {/* API Error Display */}
+              {apiError && (
+                <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+                  <div className="flex items-center">
+                    <AlertCircleIcon className="w-5 h-5 text-red-600 mr-3" />
+                    <div>
+                      <p className="font-semibold text-red-800">Đã có lỗi xảy ra</p>
+                      <p className="text-red-700">{apiError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                {/* Form Fields */}
+                <div className="md:col-span-2">
+                  <label className="font-semibold text-gray-700">Dịch vụ</label>
+                  <p className="text-lg text-blue-800 font-medium mt-1">{formData.testType}</p>
+                </div>
+
+                <div>
+                  <label htmlFor="name" className="font-semibold text-gray-700">Họ và tên</label>
+                  <Input 
+                    id="name" 
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="mt-1"
+                    icon={<UserIcon />}
+                  />
+                  {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                </div>
+                
+                <div>
+                  <label htmlFor="phone" className="font-semibold text-gray-700">Số điện thoại</label>
+                  <Input 
+                    id="phone" 
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className="mt-1"
+                    icon={<PhoneIcon />}
+                  />
+                  {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="email" className="font-semibold text-gray-700">Email</label>
+                  <Input 
+                    id="email" 
+                    value={formData.email}
+                    readOnly
+                    className="mt-1 bg-gray-100 cursor-not-allowed"
+                    icon={<MailIcon />}
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="address" className="font-semibold text-gray-700">Địa chỉ lấy mẫu (nếu tại nhà)</label>
+                  <Input 
+                    id="address" 
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    className="mt-1"
+                    icon={<MapPinIcon />}
+                  />
+                  {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="preferredDate" className="font-semibold text-gray-700">Ngày hẹn</label>
+                  <Input 
+                    id="preferredDate" 
+                    type="date"
+                    value={formData.preferredDate}
+                    onChange={(e) => handleInputChange('preferredDate', e.target.value)}
+                    className="mt-1"
+                  />
+                  {errors.preferredDate && <p className="text-red-600 text-sm mt-1">{errors.preferredDate}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="preferredTime" className="font-semibold text-gray-700">Giờ hẹn</label>
+                   <select
+                    id="preferredTime"
+                    value={formData.preferredTime}
+                    onChange={(e) => handleInputChange('preferredTime', e.target.value)}
+                    className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Chọn giờ hẹn</option>
+                    {timeSlots.map(slot => <option key={slot} value={slot}>{slot}</option>)}
+                  </select>
+                  {errors.preferredTime && <p className="text-red-600 text-sm mt-1">{errors.preferredTime}</p>}
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="notes" className="font-semibold text-gray-700">Ghi chú</label>
+                  <textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    className="mt-1 w-full p-2 border rounded-md min-h-[80px] focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Thêm ghi chú cho lịch hẹn (nếu có)..."
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                <Button 
+                  onClick={() => navigate('/customer/booking-list')}
                   variant="outline"
+                  className="w-full sm:w-auto"
                 >
                   <ArrowLeftIcon className="w-4 h-4 mr-2" />
-                  Quay Lại
+                  Quay lại
+                </Button>
+                <Button 
+                  onClick={handleSave}
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin mr-2"></div>
+                      Đang lưu...
+                    </>
+                  ) : (
+                    <>
+                      <SaveIcon className="w-4 h-4 mr-2" />
+                      Lưu thay đổi
+                    </>
+                  )}
                 </Button>
               </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Edit Form */}
-        <section className="py-16 md:py-20 bg-blue-50">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl">
-            <Card className="bg-white shadow-xl border-0">
-              <CardHeader className="bg-gradient-to-r from-blue-900 to-blue-700 text-white p-6 rounded-t-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                      <CalendarIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold">Chỉnh Sửa Thông Tin Đặt Lịch</h2>
-                      <p className="text-white/90">{formData.testType}</p>
-                      {originalBookingData && (
-                        <div className="flex items-center gap-4 mt-2 text-sm text-white/75">
-                          <span>Ngày tạo: {formatBookingDate(originalBookingData.createdAt)}</span>
-                          {originalBookingData.price && (
-                            <span>Giá: {formatPrice(originalBookingData.price)}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center gap-2 mb-2">
-                      {formData.serviceType === 'home' ? (
-                        <HomeIcon className="w-6 h-6 text-white" />
-                      ) : (
-                        <BuildingIcon className="w-6 h-6 text-white" />
-                      )}
-                      <span className="text-white/90">
-                        {formData.serviceType === 'home' ? 'Tại nhà' : 'Tại cơ sở'}
-                      </span>
-                    </div>
-                    {originalBookingData && (
-                      <div className="text-xs text-white/75">
-                        <div>ID: {originalBookingData.testServiceId}</div>
-                        <div>Status: {getStatusDisplay(originalBookingData.status).label}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  {/* Warning */}
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <AlertCircleIcon className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-amber-800 font-medium mb-1">Lưu ý quan trọng</p>
-                        <p className="text-amber-700 text-sm">
-                          Việc thay đổi thông tin có thể ảnh hưởng đến lịch trình xét nghiệm. 
-                          Vui lòng kiểm tra kỹ trước khi lưu.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* API Error Display */}
-                  {apiError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <AlertCircleIcon className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="text-red-800 font-medium mb-1">Lỗi cập nhật</p>
-                          <p className="text-red-700 text-sm">{apiError}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Form Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Name Field */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-blue-900 flex items-center">
-                        <UserIcon className="w-4 h-4 mr-2" />
-                        Họ và Tên *
-                      </label>
-                      <Input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        className={`w-full border-2 rounded-lg p-3 ${
-                          errors.name ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                        }`}
-                        placeholder="Nhập họ và tên"
-                      />
-                      {errors.name && (
-                        <p className="text-red-500 text-sm">{errors.name}</p>
-                      )}
-                    </div>
-
-                    {/* Phone Field */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-blue-900 flex items-center">
-                        <PhoneIcon className="w-4 h-4 mr-2" />
-                        Số Điện Thoại *
-                      </label>
-                      <Input
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className={`w-full border-2 rounded-lg p-3 ${
-                          errors.phone ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                        }`}
-                        placeholder="Nhập số điện thoại"
-                      />
-                      {errors.phone && (
-                        <p className="text-red-500 text-sm">{errors.phone}</p>
-                      )}
-                    </div>
-
-                    {/* Email Field */}
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-semibold text-blue-900 flex items-center">
-                        <MailIcon className="w-4 h-4 mr-2" />
-                        Email *
-                      </label>
-                      <Input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        className={`w-full border-2 rounded-lg p-3 ${
-                          errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                        }`}
-                        placeholder="Nhập địa chỉ email"
-                      />
-                      {errors.email && (
-                        <p className="text-red-500 text-sm">{errors.email}</p>
-                      )}
-                    </div>
-
-                    {/* Address Field - Only for home service */}
-                    {formData.serviceType === 'home' && (
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-sm font-semibold text-blue-900 flex items-center">
-                          <MapPinIcon className="w-4 h-4 mr-2" />
-                          Địa Chỉ Nhận Kit *
-                        </label>
-                        <Input
-                          type="text"
-                          value={formData.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          className={`w-full border-2 rounded-lg p-3 ${
-                            errors.address ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                          }`}
-                          placeholder="Nhập địa chỉ nhận bộ kit xét nghiệm"
-                        />
-                        {errors.address && (
-                          <p className="text-red-500 text-sm">{errors.address}</p>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Date Field */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-blue-900 flex items-center">
-                        <CalendarIcon className="w-4 h-4 mr-2" />
-                        Ngày Hẹn *
-                      </label>
-                      <Input
-                        type="date"
-                        value={formData.preferredDate}
-                        onChange={(e) => handleInputChange('preferredDate', e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                        className={`w-full border-2 rounded-lg p-3 ${
-                          errors.preferredDate ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                        }`}
-                      />
-                      {errors.preferredDate && (
-                        <p className="text-red-500 text-sm">{errors.preferredDate}</p>
-                      )}
-                      {formData.preferredDate && (
-                        <p className="text-blue-600 text-sm">
-                          {formatDate(formData.preferredDate)}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Time Field */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-blue-900 flex items-center">
-                        <ClockIcon className="w-4 h-4 mr-2" />
-                        Thời Gian Hẹn *
-                      </label>
-                      <select
-                        value={formData.preferredTime}
-                        onChange={(e) => handleInputChange('preferredTime', e.target.value)}
-                        className={`w-full border-2 rounded-lg p-3 focus:outline-none ${
-                          errors.preferredTime ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                        }`}
-                      >
-                        <option value="">Chọn thời gian</option>
-                        {timeSlots.map((time) => (
-                          <option key={time} value={time}>{time}</option>
-                        ))}
-                      </select>
-                      {errors.preferredTime && (
-                        <p className="text-red-500 text-sm">{errors.preferredTime}</p>
-                      )}
-                    </div>
-
-                    {/* Notes Field */}
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="text-sm font-semibold text-blue-900 flex items-center">
-                        <AlertCircleIcon className="w-4 h-4 mr-2" />
-                        Lưu Ý Thêm
-                      </label>
-                      <textarea
-                        value={formData.notes}
-                        onChange={(e) => handleInputChange('notes', e.target.value)}
-                        placeholder="Nhập lưu ý hoặc yêu cầu đặc biệt (nếu có)"
-                        className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none h-24 resize-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
-                    <Button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="bg-blue-900 hover:bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold flex-1 sm:flex-none"
-                    >
-                      {isSaving ? (
-                        <div className="flex items-center">
-                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                          Đang lưu...
-                        </div>
-                      ) : (
-                        <>
-                          <SaveIcon className="w-5 h-5 mr-2" />
-                          Lưu Thay Đổi
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={() => navigate(`/customer/booking-detail/${bookingId}`)}
-                      variant="outline"
-                      className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-3 rounded-lg font-semibold flex-1 sm:flex-none"
-                      disabled={isSaving}
-                    >
-                      <ArrowLeftIcon className="w-5 h-5 mr-2" />
-                      Hủy Bỏ
-                    </Button>
-                  </div>
-
-                  {/* Booking Information Summary */}
-                  {originalBookingData && (
-                    <div className="pt-6 border-t border-gray-200">
-                      <div className="bg-slate-50 p-4 rounded-lg">
-                        <h4 className="text-sm font-semibold text-slate-700 mb-3">Thông tin đặt lịch từ API</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-600">
-                          <div><strong>ID:</strong> {originalBookingData.id}</div>
-                          <div><strong>Test Service ID:</strong> {originalBookingData.testServiceId}</div>
-                          <div><strong>Client ID:</strong> {originalBookingData.clientId}</div>
-                          <div><strong>Collection Method:</strong> {originalBookingData.collectionMethod}</div>
-                          <div><strong>Status:</strong> {originalBookingData.status} - {getStatusDisplay(originalBookingData.status).label}</div>
-                          <div><strong>Price:</strong> {originalBookingData.price ? formatPrice(originalBookingData.price) : 'N/A'}</div>
-                          <div><strong>Created:</strong> {formatBookingDate(originalBookingData.createdAt)}</div>
-                          <div><strong>Updated:</strong> {formatBookingDate(originalBookingData.updatedAt)}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Info Note */}
-                  <div className="pt-6 border-t border-gray-200">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        <strong>Lưu ý:</strong> Sau khi cập nhật thông tin, hệ thống sẽ gửi email xác nhận đến địa chỉ email của bạn.
-                        Nếu có thay đổi về thời gian, nhân viên sẽ liên hệ lại để xác nhận.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Footer */}
+            </CardContent>
+          </Card>
+        </main>
+        
         <div className="relative">
           <Footer />
         </div>

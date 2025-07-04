@@ -29,9 +29,9 @@ interface BookingModalProps {
   onSubmit?: (bookingData: BookingData) => void;
   selectedService?: {
     id: string;
-    title: string;
+    name: string;
     category: string; // 'civil' or 'legal'
-    price: string;
+    price: number;
     collectionMethod: number; // 0 = home/self, 1 = clinic
     testServiceInfo?: {
       id: string;
@@ -172,7 +172,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
             ts.serviceId === selectedService.id ||
             ts.relatedServiceId === selectedService.id ||
             ts.id === selectedService.id ||
-            (ts.name || ts.title || '').toLowerCase().includes((selectedService.title || '').toLowerCase().substring(0, 5))
+            (ts.name || ts.title || '').toLowerCase().includes((selectedService.name || '').toLowerCase().substring(0, 5))
           );
           
           if (matchingTestService) {
@@ -278,8 +278,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     // Tạo TestType object từ selectedService
     return {
       id: selectedService.id,
-      name: selectedService.title,
-      price: selectedService.price,
+      name: selectedService.name,
+      price: `${selectedService.price.toLocaleString('vi-VN')}đ`,
       time: "3-7 ngày", // Default time, có thể customize
       category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
     };
@@ -342,7 +342,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     console.log('🔍 Checking service type visibility:', {
       serviceType,
       collectionMethod,
-      selectedService: selectedService.title
+      selectedService: selectedService.name
     });
     
     // Dựa vào collectionMethod để quyết định hiển thị

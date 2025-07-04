@@ -356,27 +356,22 @@ export const BookingList = (): React.JSX.Element => {
                             )}
                           </div>
 
-                          <div className="flex flex-col gap-2 lg:min-w-[200px]">
+                          <div className="flex flex-col sm:flex-row gap-3 mt-4">
                             <Button 
                               variant="outline" 
-                              size="sm" 
-                              className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                              className="w-full sm:w-auto"
                               onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
                             >
                               <EyeIcon className="w-4 h-4 mr-2" />
-                              Xem
+                              Xem chi tiết
                             </Button>
-                            {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="border-blue-600 text-blue-600 hover:bg-blue-100"
-                                onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
-                              >
-                                <EditIcon className="w-4 h-4 mr-2" />
-                                Sửa
-                              </Button>
-                            )}
+                            <Button 
+                              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+                              onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
+                            >
+                              <EditIcon className="w-4 h-4 mr-2" />
+                              Sửa
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
