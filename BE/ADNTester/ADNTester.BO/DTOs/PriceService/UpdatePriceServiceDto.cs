@@ -6,9 +6,10 @@ namespace ADNTester.BO.DTOs
     {
         public string Id { get; set; }
         public decimal Price { get; set; }
-        public string Currency { get; set; }
-        public DateTime ValidFrom { get; set; }
-        public DateTime? ValidTo { get; set; }
+       
+        public DateTime EffectiveFrom { get; set; } 
+
+        public DateTime? EffectiveTo { get; set; }
         public bool IsActive { get; set; }
     }
 } 

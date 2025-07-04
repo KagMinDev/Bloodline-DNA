@@ -21,14 +21,14 @@ namespace ADNTester.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TestResultDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<TestResultDetailDto>>> GetAll()
         {
             var testResults = await _testResultService.GetAllAsync();
             return Ok(testResults);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<TestResultDto>> GetById(string id)
+        public async Task<ActionResult<TestResultDetailDto>> GetById(string id)
         {
             var testResult = await _testResultService.GetByIdAsync(id);
             if (testResult == null)
