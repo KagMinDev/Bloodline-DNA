@@ -22,7 +22,9 @@ namespace ADNTester.Repository.Implementations
 
         public async Task<LogisticsInfo?> GetByIdAsync(string id)
         {
-            return await _context.LogisticsInfos.FindAsync(id);
+            return await _context.LogisticsInfos
+             .Include(x => x.Staff) // 👈 Optional include
+             .FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<List<LogisticsInfo>> GetAllAsync()
@@ -66,6 +68,34 @@ namespace ADNTester.Repository.Implementations
                 _context.LogisticsInfos.Remove(entity);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<List<LogisticsInfo>> GetAllAsync(LogisticsType? type = null, LogisticStatus? status = null)
+        {
+            var query = _context.LogisticsInfos
+                .Include(x => x.Staff)
+                .AsQueryable();
+
+            if (type.HasValue)
+                query = query.Where(x => x.Type == type.Value);
+
+            if (status.HasValue)
+                query = query.Where(x => x.Status == status.Value);
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<List<LogisticsInfo>> GetAssignedLogisticsAsync(string staffId, LogisticsType? type = null, LogisticStatus? status = null)
+        {
+            var query = _context.LogisticsInfos
+                .Where(x => x.StaffId == staffId);
+
+            if (type.HasValue)
+                query = query.Where(x => x.Type == type.Value);
+
+            if (status.HasValue)
+                query = query.Where(x => x.Status == status.Value);
+
+            return await query.ToListAsync();
         }
     }
 }

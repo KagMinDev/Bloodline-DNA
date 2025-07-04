@@ -289,6 +289,7 @@ namespace ADNTester.API.Controllers
                             Address = booking.Address,
                             Phone = booking.Phone,
                             Type = LogisticsType.Delivery,
+                            Status = LogisticStatus.PreparingKit,
                             ScheduledAt = DateTime.UtcNow,
                             Note = $"Giao kit cho booking {booking.Id}"
                         };
