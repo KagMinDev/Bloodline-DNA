@@ -1,5 +1,6 @@
 ﻿using ADNTester.BO.DTOs.Auth;
 using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.User;
 using ADNTester.BO.Enums;
 using ADNTester.Service.Implementations;
 using ADNTester.Service.Interfaces;
@@ -21,7 +22,9 @@ namespace ADNTester.Api.Controllers
             _authService = authService;
             _userService = userService;
         }
-        
+        /// <summary>
+        /// Tạo tài khoản nhân viên mới (chỉ dành cho Admin)
+        /// </summary>
         [Authorize(Roles = nameof(UserRole.Admin))]
         [HttpPost("create-staff")]
         public async Task<IActionResult> CreateStaff([FromBody] CreateStaffRequestDto dto)
@@ -31,7 +34,9 @@ namespace ADNTester.Api.Controllers
                 ? Ok(new ApiResponse<string>("Tạo tài khoản thành công"))
                 : BadRequest(new ApiResponse<string>("Email đã tồn tại"));
         }
-
+        /// <summary>
+        /// Bật / tắt trạng thái hoạt động của người dùng (chỉ dành cho Admin)
+        /// </summary>
         [Authorize(Roles = nameof(UserRole.Admin))]
         [HttpPost("toggle-active/{userId}")]
         public async Task<IActionResult> ToggleUserActive(string userId)
@@ -47,6 +52,16 @@ namespace ADNTester.Api.Controllers
 
             return Ok(new ApiResponse<string>(message));
         }
-
+        /// <summary>
+        /// Lấy danh sách nhân viên đang hoạt động (chỉ dành cho Admin)
+        /// </summary>
+        /// <returns>Danh sách nhân viên đang hoạt động</returns>
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        [HttpGet("active-staff")]
+        public async Task<IActionResult> GetActiveStaff()
+        {
+            var staffList = await _userService.GetActiveStaffAsync();
+            return Ok(new ApiResponse<IEnumerable<UserDto>>(staffList, "Lấy danh sách nhân viên đang hoạt động thành công"));
+        }
     }
 }
