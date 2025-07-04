@@ -138,6 +138,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
   
   // Feedback state
   const [userId, setUserId] = useState<string | null>(null);
+  const [testServiceId, setTestServiceId] = useState<string | null>(null); // State for the actual service ID
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
@@ -220,8 +221,8 @@ export const BookingStatusPage = (): React.JSX.Element => {
   };
 
   const handleFeedbackSubmit = async () => {
-    if (!userId || !bookingId) {
-      setFeedbackError("Không thể xác định người dùng hoặc đơn hàng.");
+    if (!userId || !testServiceId) { // Changed from bookingId to testServiceId
+      setFeedbackError("Không thể xác định người dùng hoặc dịch vụ.");
       return;
     }
     if (rating === 0) {
@@ -240,7 +241,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     try {
       const payload = {
         userId,
-        testServiceId: bookingId,
+        testServiceId, // Use the state variable
         rating,
         comment,
       };
@@ -287,6 +288,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
       return 'pending';
     };
     
+    // Set the testServiceId when transforming data
+    setTestServiceId(item.testServiceId || null);
+
     return {
       id: item.id,
       testType: 'Xét nghiệm ADN',
