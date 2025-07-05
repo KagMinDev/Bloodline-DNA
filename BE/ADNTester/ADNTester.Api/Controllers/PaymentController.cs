@@ -82,7 +82,7 @@ namespace ADNTester.API.Controllers
 
                 // Khởi tạo PayOS với thông tin cấu hình
                 var payOS = new PayOS(clientId, apiKey, checksumKey);
-                var domain = "https://colordanhub.site";
+                var domain = "http://localhost:5173";
 
                 // Chuyển đổi `orderCode` sang một giá trị hợp lệ
                 var orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -99,9 +99,9 @@ namespace ADNTester.API.Controllers
                     amount: (int)Math.Round(depositAmount),
                     description: description,
                     items: [new("Đặt cọc dịch vụ xét nghiệm", 1, (int)Math.Round(depositAmount))],
-                    returnUrl: $"{domain}/checkout-success",
+                    returnUrl: $"{domain}/customer/checkout-success",
                     
-                    cancelUrl: $"{domain}/checkcancel"
+                    cancelUrl: $"{domain}/customer/checkout-error"
 
                 );
 
@@ -187,7 +187,7 @@ namespace ADNTester.API.Controllers
 
                 // Khởi tạo PayOS
                 var payOS = new PayOS(clientId, apiKey, checksumKey);
-                var domain = "https://colordanhub.site";
+               var domain = "http://localhost:5173";
 
                 // Tạo orderCode mới
                 var orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -204,9 +204,9 @@ namespace ADNTester.API.Controllers
      amount: (int)Math.Round(currentPayment.RemainingAmount ?? 0), // Handle null case
      description: description,
      items: [new("Thanh toán số tiền còn lại", 1, (int)Math.Round(currentPayment.RemainingAmount ?? 0))], // Handle null case
-     returnUrl: $"{domain}/checkout-success",
-                    
-                    cancelUrl: $"{domain}/checkcancel"
+      returnUrl: $"{domain}/customer/checkout-success",
+ 
+      cancelUrl: $"{domain}/customer/checkout-error"
  );
 
                 // Gọi API để tạo liên kết thanh toán
@@ -289,6 +289,7 @@ namespace ADNTester.API.Controllers
                             Address = booking.Address,
                             Phone = booking.Phone,
                             Type = LogisticsType.Delivery,
+                            Status = LogisticStatus.PreparingKit,
                             ScheduledAt = DateTime.UtcNow,
                             Note = $"Giao kit cho booking {booking.Id}"
                         };

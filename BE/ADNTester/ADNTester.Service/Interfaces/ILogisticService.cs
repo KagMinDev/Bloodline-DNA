@@ -10,11 +10,11 @@ namespace ADNTester.Service.Interfaces
 {
     public interface ILogisticService
     {
-        Task AssignStaffAsync(string logisticsInfoId, string staffId);
-        Task<List<LogisticsInfo>> GetAssignedLogisticsAsync(string staffId, LogisticsType? type = null);
-        Task CompleteLogisticsTaskAsync(string logisticsInfoId, string staffId);
-        Task<List<LogisticsInfo>> GetAllAsync(LogisticsType? type = null);
-        Task<LogisticsInfo?> GetByIdAsync(string id);
         Task<LogisticsInfo> CreateAsync(LogisticsInfo info);
+        Task<List<LogisticsInfo>> GetAllAsync(LogisticsType? type = null, LogisticStatus? status = null);
+        Task<List<LogisticsInfo>> GetAssignedLogisticsAsync(string staffId, LogisticsType? type = null, LogisticStatus? status = null);
+        Task<LogisticsInfo?> GetByIdAsync(string id);
+        Task AssignStaffAsync(string logisticsInfoId, string staffId);
+        Task CompleteLogisticsTaskAsync(string logisticsInfoId, string staffId);
     }
 }

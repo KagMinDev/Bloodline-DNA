@@ -85,6 +85,13 @@ namespace ADNTester.Service
                 .ForMember(dest => dest.RelationshipToSubject, opt => opt.MapFrom(src => src.RelationshipToSubject.ToString()))
                 .ForMember(dest => dest.SampleType, opt => opt.MapFrom(src => src.SampleType.ToString()));
             CreateMap<CreateTestSampleDto, TestSample>();
+
+            CreateMap<CreateTestSampleFromClientDto, TestSample>()
+                .ForMember(dest => dest.SampleCode, opt => opt.Ignore())
+                .ForMember(dest => dest.CollectedById, opt => opt.Ignore())
+                .ForMember(dest => dest.CollectedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.LabReceivedAt, opt => opt.Ignore());
+
             CreateMap<UpdateTestSampleDto, TestSample>();
             #endregion
 
