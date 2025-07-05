@@ -56,7 +56,7 @@ namespace ADNTester.Api.Controllers
         /// Lấy danh sách nhân viên đang hoạt động (chỉ dành cho Admin)
         /// </summary>
         /// <returns>Danh sách nhân viên đang hoạt động</returns>
-        [Authorize(Roles = nameof(UserRole.Admin))]
+        [Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Manager)}")]
         [HttpGet("active-staff")]
         public async Task<IActionResult> GetActiveStaff()
         {
