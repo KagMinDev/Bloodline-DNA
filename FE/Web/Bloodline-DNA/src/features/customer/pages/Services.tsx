@@ -37,6 +37,7 @@ interface Service {
   description: string;
   category: string;
   price: string;
+  priceNumeric: number;
   duration: string;
   rating: number;
   reviews: number;
@@ -150,6 +151,7 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
       description: description,
       category: uiCategory,
       price: `${apiService.price.toLocaleString('vi-VN')}đ`,
+      priceNumeric: apiService.price,
       duration: categoryDurations[apiCategory] || '30-60 phút',
       rating: 4.7 + Math.random() * 0.3,
       reviews: Math.floor(Math.random() * 300) + 50,
@@ -366,6 +368,7 @@ export const Services = (): React.JSX.Element => {
       name: "Tất Cả",
       icon: <StethoscopeIcon className="w-5 h-5" />,
       count: services.length
+      //sasasasas
     },
     {
       id: "civil",
@@ -771,10 +774,10 @@ export const Services = (): React.JSX.Element => {
                             e.stopPropagation();
                             openBookingModal({
                               id: service.id,
-                              title: service.title,
+                              name: service.title,
                               category: service.category,
-                              price: service.price,
-                              collectionMethod: service.collectionMethod
+                              price: Number(service.priceNumeric),
+                              collectionMethod: Number(service.collectionMethod)
                             });
                           }} 
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"

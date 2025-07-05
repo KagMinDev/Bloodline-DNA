@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
   CalendarIcon, 
@@ -23,7 +23,9 @@ import {
   CreditCardIcon,
   SendIcon,
   SearchIcon,
-  DnaIcon
+  DnaIcon,
+  StarIcon,
+  FilePenIcon
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
@@ -36,6 +38,7 @@ import {
 } from "../components/ui/Breadcrumb";
 import { Header, Footer } from "../../../components";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
+import { SampleInfoModal } from "../components/SampleInfoModal";
 import { 
   getBookingByIdApi, 
   formatBookingDate, 
@@ -45,8 +48,11 @@ import {
 import { 
   checkoutPaymentApi, 
   calculateDeposit, 
-  formatPaymentAmount 
+  formatPaymentAmount,
+  checkoutRemainingPaymentApi
 } from "../api/paymentApi";
+import { submitFeedbackApi } from "../api/feedbackApi";
+import { getUserInfoApi } from "../api/userApi";
 
 // --- Interfaces from both files ---
 
@@ -60,6 +66,7 @@ type DetailedBookingStatus =
   | 'returningsample'
   | 'samplereceived'
   | 'testing'
+  | 'finalpayment' // Added this new status
   | 'completed'
   | 'cancelled';
 
@@ -118,6 +125,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     returningsample: { label: 'Đang vận chuyển mẫu', color: 'bg-orange-100 text-orange-800', icon: TruckIcon, description: 'Mẫu của bạn đang được vận chuyển đến phòng lab' },
     samplereceived: { label: 'Đã nhận mẫu', color: 'bg-indigo-100 text-indigo-800', icon: DnaIcon, description: 'Phòng lab đã nhận được mẫu của bạn' },
     testing: { label: 'Đang phân tích', color: 'bg-purple-100 text-purple-800', icon: FlaskConicalIcon, description: 'Mẫu của bạn đang được phân tích' },
+    finalpayment: { label: 'Chờ thanh toán', color: 'bg-rose-100 text-rose-800', icon: CreditCardIcon, description: 'Vui lòng thanh toán số tiền còn lại để xem kết quả.' },
     completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, description: 'Dịch vụ đã được thực hiện hoàn tất' },
     cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800', icon: XCircleIcon, description: 'Lịch hẹn đã bị hủy bỏ' }
   };
@@ -130,8 +138,34 @@ export const BookingStatusPage = (): React.JSX.Element => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   
+  // Feedback state
+  const [userId, setUserId] = useState<string | null>(null);
+  const [testServiceId, setTestServiceId] = useState<string | null>(null); // State for the actual service ID
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
+
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const handleStepAction = (payload: any) => {
+    if (!payload || !payload.type) return;
+
+    switch (payload.type) {
+      case 'deposit':
+      case 'remaining':
+        handlePayment(payload);
+        break;
+      case 'fill_sample_info':
+        setIsSampleModalOpen(true);
+        break;
+      default:
+        console.warn('Unknown step action type:', payload.type);
+    }
+  };
 
   // --- Payment Handler ---
   const handlePayment = async (payload?: any) => {
@@ -163,9 +197,15 @@ export const BookingStatusPage = (): React.JSX.Element => {
     setPaymentError(null);
     
     try {
-      // Call payment API with current booking ID
-      console.log('🚀 Calling payment API with bookingId:', booking.id);
-      const result = await checkoutPaymentApi(booking.id);
+      let result;
+      // Differentiate between deposit and remaining payment
+      if (payload?.type === 'remaining' || booking.status === 'finalpayment') {
+        console.log('🚀 Calling REMAINING payment API with bookingId:', booking.id);
+        result = await checkoutRemainingPaymentApi(booking.id);
+      } else {
+        console.log('🚀 Calling DEPOSIT payment API with bookingId:', booking.id);
+        result = await checkoutPaymentApi(booking.id);
+      }
       
       console.log('✅ Payment API response:', result);
       
@@ -199,6 +239,44 @@ export const BookingStatusPage = (): React.JSX.Element => {
     }
   };
 
+  const handleFeedbackSubmit = async () => {
+    if (!userId || !testServiceId) { // Changed from bookingId to testServiceId
+      setFeedbackError("Không thể xác định người dùng hoặc dịch vụ.");
+      return;
+    }
+    if (rating === 0) {
+      setFeedbackError("Vui lòng chọn số sao đánh giá.");
+      return;
+    }
+    if (comment.trim() === "") {
+      setFeedbackError("Vui lòng nhập nội dung bình luận.");
+      return;
+    }
+
+    setIsSubmittingFeedback(true);
+    setFeedbackError(null);
+    setFeedbackSuccess(null);
+
+    try {
+      const payload = {
+        userId,
+        testServiceId, // Use the state variable
+        rating,
+        comment,
+      };
+      const response = await submitFeedbackApi(payload);
+      if (response.success) {
+        setFeedbackSuccess("Cảm ơn bạn đã gửi đánh giá!");
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (err) {
+      setFeedbackError(err instanceof Error ? err.message : "Đã có lỗi xảy ra.");
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
+  };
+
   // --- Data Transformation and Fetching Logic ---
 
   const transformApiDataToBookingDetail = (item: BookingItem): BookingDetail => {
@@ -214,11 +292,12 @@ export const BookingStatusPage = (): React.JSX.Element => {
       const statusLower = (status || '').toLowerCase().replace(/[^a-z0-9]/gi, '');
       if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'cancelled';
       if (statusLower.includes('completed') || statusLower.includes('hoànthành')) return 'completed';
+      if (statusLower.includes('finalpayment')) return 'finalpayment';
       if (statusLower.includes('testing')) return 'testing';
       if (statusLower.includes('samplereceived')) return 'samplereceived';
       if (statusLower.includes('returningsample')) return 'returningsample';
       if (statusLower.includes('waitingforsample')) return 'waitingforsample';
-      if (statusLower.includes('kitdelivered')) return 'kitdelivered';
+      if (statusLower.includes('kitdelivered') || statusLower.includes('đãnhậnkit')) return 'kitdelivered';
       if (statusLower.includes('deliveringkit')) return 'deliveringkit';
       if (statusLower.includes('preparingkit')) return 'preparingkit';
       if (statusLower.includes('confirmed') || statusLower.includes('xácnhận')) return 'confirmed';
@@ -228,6 +307,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
       return 'pending';
     };
     
+    // Set the testServiceId when transforming data
+    setTestServiceId(item.testServiceId || null);
+
     return {
       id: item.id,
       testType: 'Xét nghiệm ADN',
@@ -301,13 +383,13 @@ export const BookingStatusPage = (): React.JSX.Element => {
     });
 
     // Step 3: Receive TestKit
-    const kitStatuses: DetailedBookingStatus[] = ['kitdelivered', 'waitingforsample', 'returningsample', 'samplereceived', 'testing', 'completed'];
+    const kitCompletedStatuses: DetailedBookingStatus[] = ['kitdelivered', 'waitingforsample', 'returningsample', 'samplereceived', 'testing', 'completed', 'finalpayment'];
     const kitCurrentStatuses: DetailedBookingStatus[] = ['confirmed', 'preparingkit', 'deliveringkit'];
     
     let kitStatus: ProgressStep['status'] = 'pending';
     let kitDetails: string[] = [];
     
-    if (kitStatuses.includes(bookingStatus)) {
+    if (kitCompletedStatuses.includes(bookingStatus)) {
       kitStatus = 'completed';
     } else if (kitCurrentStatuses.includes(bookingStatus)) {
       kitStatus = 'current';
@@ -327,7 +409,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     });
 
     // Step 4: Send Sample
-    const sampleStatuses: DetailedBookingStatus[] = ['samplereceived', 'testing', 'completed'];
+    const sampleStatuses: DetailedBookingStatus[] = ['samplereceived', 'testing', 'completed', 'finalpayment'];
     const sampleCurrentStatuses: DetailedBookingStatus[] = ['waitingforsample', 'returningsample'];
 
     let sampleStatus: ProgressStep['status'] = 'pending';
@@ -367,7 +449,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
       icon: CreditCardIcon,
       status: remainingPaymentStatus,
       actionRequired: remainingPaymentStatus === 'current',
-      actionText: 'Thanh toán còn lại',
+      actionText: 'Thanh toán số tiền còn lại',
       actionPayload: { type: 'remaining' },
     });
 
@@ -415,42 +497,71 @@ export const BookingStatusPage = (): React.JSX.Element => {
     };
   };
 
-  useEffect(() => {
-    const fetchBookingData = async () => {
-      if (!bookingId) {
-        setError('ID booking không hợp lệ');
-        setIsLoading(false);
+  const fetchBookingData = useCallback(async () => {
+    if (!bookingId) {
+      setError('ID booking không hợp lệ');
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Fetch booking and user info in parallel
+      const [apiData, userData] = await Promise.all([
+        getBookingByIdApi(bookingId),
+        getUserInfoApi()
+      ]);
+
+      if (userData) {
+        setUserId(userData.id);
+      }
+
+      if (!apiData) {
+        setError('Không tìm thấy thông tin booking');
+        setBooking(null);
         return;
       }
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        const apiData = await getBookingByIdApi(bookingId);
-        if (!apiData) {
-          setError('Không tìm thấy thông tin booking');
-          setBooking(null);
-          return;
-        }
+      const formattedBooking = transformApiDataToBookingDetail(apiData);
+      setBooking(formattedBooking);
 
-        const formattedBooking = transformApiDataToBookingDetail(apiData);
-        setBooking(formattedBooking);
+      // Generate progress data based on booking
+      const progressData = generateProgressData(formattedBooking);
+      setProgressData(progressData);
 
-        // Generate progress data based on booking
-        const progressData = generateProgressData(formattedBooking);
-        setProgressData(progressData);
-
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load booking details');
-        setBooking(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBookingData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load booking details');
+      setBooking(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, [bookingId]);
+
+  useEffect(() => {
+    fetchBookingData();
+  }, [fetchBookingData]);
+
+  const handleSampleSubmitSuccess = async () => {
+    setIsSampleModalOpen(false);
+    if(bookingId) {
+        try {
+            setIsLoading(true);
+            const apiData = await getBookingByIdApi(bookingId);
+            if (apiData) {
+                const formattedBooking = transformApiDataToBookingDetail(apiData);
+                setBooking(formattedBooking);
+                const progressData = generateProgressData(formattedBooking);
+                setProgressData(progressData);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to reload booking details');
+        } finally {
+            setIsLoading(false);
+        }
+    }
+  };
 
   // --- Helper Functions ---
 
@@ -605,9 +716,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
     const progressPercentage = Math.round((completedSteps / progressData.steps.length) * 100);
     
     return (
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
             {/* Timeline */}
-            <div className="flex-grow space-y-1 relative">
+            <div className="flex-grow space-y-1 relative lg:w-2/3">
                 {progressData.steps.map((step, index) => {
                     const Icon = step.icon;
                     const isLast = index === progressData.steps.length - 1;
@@ -655,29 +766,34 @@ export const BookingStatusPage = (): React.JSX.Element => {
                                     </div>
                                 </div>
                                 
-                                {/* Action Button */}
+                                {/* Action Button for CURRENT steps */}
                                 {step.actionRequired && step.status === 'current' && (
                                     <div className="mt-4">
                                         <Button 
-                                            onClick={() => handlePayment(step.actionPayload)}
+                                            onClick={() => handleStepAction(step.actionPayload)}
                                             disabled={paymentLoading}
                                             className="bg-orange-600 hover:bg-orange-700 text-white font-semibold"
                                         >
-                                            {paymentLoading ? (
+                                            {paymentLoading && (step.actionPayload?.type === 'deposit' || step.actionPayload?.type === 'remaining') ? (
                                                 <div className="flex items-center">
                                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                                                    Đang xử lý thanh toán...
+                                                    Đang xử lý...
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <CreditCardIcon className="w-4 h-4 mr-2" />
+                                                    {step.actionPayload?.type === 'fill_sample_info' ? 
+                                                        <FilePenIcon className="w-4 h-4 mr-2" /> :
+                                                        <CreditCardIcon className="w-4 h-4 mr-2" />
+                                                    }
                                                     {step.actionText}
                                                 </>
                                             )}
                                         </Button>
-                                        <p className="text-xs text-slate-500 mt-2">
-                                            ID: {booking.id} | VNPay, MoMo, Banking
-                                        </p>
+                                        {step.actionPayload?.type !== 'fill_sample_info' &&
+                                          <p className="text-xs text-slate-500 mt-2">
+                                              ID: {booking.id} | VNPay, MoMo, Banking
+                                          </p>
+                                        }
                                         {paymentError && (
                                             <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
                                                 <AlertCircleIcon className="w-4 h-4 inline mr-1" />
@@ -686,6 +802,22 @@ export const BookingStatusPage = (): React.JSX.Element => {
                                         )}
                                     </div>
                                 )}
+                                
+                                {/* Action button for COMPLETED Step 3 */}
+                                {step.id === 3 && step.status === 'completed' && ['kitdelivered', 'waitingforsample'].includes(booking.status) && (
+                                  <div className="mt-4">
+                                      <Button 
+                                          onClick={() => setIsSampleModalOpen(true)}
+                                          className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
+                                      >
+                                          <FilePenIcon className="w-4 h-4 mr-2 text-white" />
+                                          {booking.status === 'kitdelivered' ? 'Điền thông tin mẫu' : 'Điền thông tin mẫu'}
+                                      </Button>
+                                      <p className="text-xs text-slate-500 mt-2">
+                                        Sau khi điền thông tin, bạn có thể gửi mẫu cho chúng tôi.
+                                      </p>
+                                  </div>
+                                )}
                             </div>
                         </div>
                     );
@@ -693,10 +825,10 @@ export const BookingStatusPage = (): React.JSX.Element => {
             </div>
             
             {/* Overview */}
-            <div className="w-1/3">
-                <Card className="sticky top-4">
+            <div className="lg:w-1/3">
+                <Card className="sticky top-24">
                     <CardHeader>
-                        <h3 className="font-bold text-slate-800">Tổng Quan Tiến Trình</h3>
+                        <h3 className="!font-bold text-slate-800">Tổng Quan Tiến Trình</h3>
                     </CardHeader>
                     <CardContent>
                         <div className="text-center mb-6">
@@ -741,10 +873,76 @@ export const BookingStatusPage = (): React.JSX.Element => {
                                 </div>
                             )}
                         </div>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
+
+                        {/* --- Feedback Section --- */}
+                        {booking.status === 'completed' && (
+                          <div className="pt-4 mt-4 border-t">
+                            
+                            {feedbackSuccess ? (
+                              <div className="p-3 bg-green-100 border border-green-200 rounded-lg text-center">
+                                <p className="font-semibold text-green-800">{feedbackSuccess}</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                <div>
+                                  <p className="font-bold text-slate-800">Đánh giá của bạn</p>
+                                  <div className="flex items-center space-x-1">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                      <StarIcon
+                                        key={star}
+                                        className={`w-6 h-6 cursor-pointer transition-colors ${
+                                          rating >= star ? 'text-yellow-400 fill-yellow-400 stroke-black' : 'text-gray-300'
+                                        }`}
+                                        onClick={() => setRating(star)}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label htmlFor="comment" className="text-sm font-medium text-slate-600">Bình luận</label>
+                                  <textarea
+                                    id="comment"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    className="mt-1 w-full p-2 border rounded-md min-h-[80px] focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Chia sẻ cảm nhận của bạn về dịch vụ..."
+                                  />
+                                </div>
+                                {feedbackError && (
+                                  <p className="text-sm text-red-600">{feedbackError}</p>
+                                )}
+                                <Button 
+                                  onClick={handleFeedbackSubmit}
+                                  disabled={isSubmittingFeedback}
+                                  className="w-full bg-blue-500 !text-white hover:bg-blue-600"
+                                >
+                                  {isSubmittingFeedback ? 'Đang gửi...' : 'Gửi đánh giá'}
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* --- Sample Info Section --- */}
+                        {booking.status === 'kitdelivered' && (
+                          <div className="pt-4 mt-4 border-t">
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center space-y-3">
+                              <p className="font-semibold text-blue-800">Cập nhật thông tin mẫu</p>
+                              <p className="text-sm text-blue-700">Bạn đã nhận được Kit. Vui lòng điền thông tin mẫu của bạn để tiếp tục.</p>
+                              <Button
+                                onClick={() => setIsSampleModalOpen(true)}
+                                className="w-full bg-blue-600 hover:bg-blue-700 !text-white"
+                              >
+                                <FilePenIcon className="w-4 h-4 mr-2" />
+                                Điền thông tin mẫu
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                     </CardContent>
+                 </Card>
+             </div>
+         </div>
     );
   };
 
@@ -774,7 +972,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/booking-list" className="text-blue-600 hover:text-blue-800">
+                    <BreadcrumbLink href="/customer/booking-list" className="text-blue-600 hover:text-blue-800">
                       Danh Sách Đặt Lịch
                     </BreadcrumbLink>
                   </BreadcrumbItem>
@@ -868,6 +1066,13 @@ export const BookingStatusPage = (): React.JSX.Element => {
         
         <Footer />
       </div>
+
+      <SampleInfoModal
+        isOpen={isSampleModalOpen}
+        onClose={() => setIsSampleModalOpen(false)}
+        bookingId={booking.id}
+        onSubmitSuccess={handleSampleSubmitSuccess}
+      />
     </div>
   );
 };

@@ -1,8 +1,12 @@
 import { Button } from "antd";
-import { useBookingModal } from "../../customer/components/BookingModalContext";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection: React.FC = () => {
-  const { openBookingModal } = useBookingModal();
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/services");
+  };
   return (
     <section className="relative py-20 overflow-hidden md:py-24">
       <div className="flex flex-col items-center px-4 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8">
@@ -19,7 +23,7 @@ const HeroSection: React.FC = () => {
             type="primary"
             size="large"
             className="px-4 py-2 md:px-6 md:py-3 md:text-sm"
-            onClick={openBookingModal}
+            onClick={handleBookNow}
           >
             Đặt lịch xét nghiệm
           </Button>

@@ -1,8 +1,13 @@
 import { Button } from "antd";
-import { useBookingModal } from "../../customer/components/BookingModalContext";
+import { useNavigate } from "react-router-dom";
 
 const CTASection: React.FC = () => {
-  const { openBookingModal } = useBookingModal();
+  const navigate = useNavigate();
+
+  const handleBookNow = () => {
+    navigate("/services");
+  };
+
   return (
     <section className="py-12 bg-white md:py-16">
       <h2 className="mb-4 text-2xl font-bold text-center text-gray-800 md:text-3xl">
@@ -16,13 +21,13 @@ const CTASection: React.FC = () => {
           type="primary"
           size="large"
           className="px-4 py-2 md:px-6 md:py-3"
-          onClick={openBookingModal}
+          onClick={handleBookNow}
         >
           Đặt lịch ngay
         </Button>
       </div>
     </section>
-  )
+  );
 };
 
 export default CTASection;
