@@ -150,7 +150,7 @@ namespace ADNTester.API.Controllers
                     return BadRequest(new { error = "Đơn đặt lịch đã được xác nhận, không thể thanh toán thêm." });
                 }
 
-                if (booking.Status != "KitSend")
+                if (booking.Status != "SampleReceived")
                 {
                     Console.WriteLine($"Trạng thái booking không hợp lệ: {booking.Status}");
                     return BadRequest(new { error = "Chỉ có thể thanh toán số tiền còn lại khi đã nhận mẫu xét nghiệm." });
