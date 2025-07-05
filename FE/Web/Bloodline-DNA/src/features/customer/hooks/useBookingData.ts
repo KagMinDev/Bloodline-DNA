@@ -136,6 +136,12 @@ export const useBookingData = () => {
     }
 
     if (result.paymentUrl) {
+      console.log('💳 Payment URL received:', {
+        url: result.paymentUrl,
+        orderCode: result.orderCode,
+        timestamp: new Date().toISOString()
+      });
+      
       const redirectData = {
         url: result.paymentUrl,
         orderCode: result.orderCode,
