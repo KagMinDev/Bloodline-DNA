@@ -14,6 +14,8 @@ import {
 } from "../features/customer";
 import BlogDetail from "../features/customer/pages/BlogDetails";
 import { BookingStatusPage } from "../features/customer/pages/BookingStatusPage";
+import CheckoutSuccess from "../features/customer/pages/CheckoutSuccess";
+import CheckoutError from "../features/customer/pages/CheckoutError";
 
 export default function CustomerRouter() {
   return (
@@ -31,6 +33,8 @@ export default function CustomerRouter() {
         <Route path="/edit-booking/:id" element={<EditBooking />} />
         <Route path="/booking-list" element={<BookingList />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/checkout-success" element={<CheckoutSuccess />} />
+        <Route path="/checkout-error" element={<CheckoutError />} />
         {/* Not found */}
         <Route path="*" element={<NotFound />} />
       </Routes>
