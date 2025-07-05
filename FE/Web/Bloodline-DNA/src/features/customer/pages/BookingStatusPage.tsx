@@ -116,7 +116,7 @@ interface TestProgressData {
 
 export const BookingStatusPage = (): React.JSX.Element => {
   const statusConfig: Record<DetailedBookingStatus, { label: string; color: string; icon: React.ElementType; description: string; }> = {
-    pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircleIcon, description: 'Yêu cầu đặt lịch đang được xử lý' },
+  pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircleIcon, description: 'Yêu cầu đặt lịch đang được xử lý' },
     confirmed: { label: 'Đã xác nhận', color: 'bg-sky-100 text-sky-800', icon: CheckCircleIcon, description: 'Lịch hẹn đã được xác nhận' },
     preparingkit: { label: 'Đang chuẩn bị Kit', color: 'bg-sky-100 text-sky-800', icon: ClipboardCheckIcon, description: 'Bộ kit xét nghiệm đang được chuẩn bị' },
     deliveringkit: { label: 'Đang giao Kit', color: 'bg-blue-100 text-blue-800', icon: TruckIcon, description: 'Bộ kit đang được giao đến bạn' },
@@ -126,9 +126,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
     samplereceived: { label: 'Đã nhận mẫu', color: 'bg-indigo-100 text-indigo-800', icon: DnaIcon, description: 'Phòng lab đã nhận được mẫu của bạn' },
     testing: { label: 'Đang phân tích', color: 'bg-purple-100 text-purple-800', icon: FlaskConicalIcon, description: 'Mẫu của bạn đang được phân tích' },
     finalpayment: { label: 'Chờ thanh toán', color: 'bg-rose-100 text-rose-800', icon: CreditCardIcon, description: 'Vui lòng thanh toán số tiền còn lại để xem kết quả.' },
-    completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, description: 'Dịch vụ đã được thực hiện hoàn tất' },
-    cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800', icon: XCircleIcon, description: 'Lịch hẹn đã bị hủy bỏ' }
-  };
+  completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800', icon: CheckCircleIcon, description: 'Dịch vụ đã được thực hiện hoàn tất' },
+  cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800', icon: XCircleIcon, description: 'Lịch hẹn đã bị hủy bỏ' }
+};
 
   const [booking, setBooking] = useState<BookingDetail | null>(null);
   const [progressData, setProgressData] = useState<TestProgressData | null>(null);
@@ -147,7 +147,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
   const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
-
+  
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -309,7 +309,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     
     // Set the testServiceId when transforming data
     setTestServiceId(item.testServiceId || null);
-
+    
     return {
       id: item.id,
       testType: 'Xét nghiệm ADN',
@@ -498,16 +498,16 @@ export const BookingStatusPage = (): React.JSX.Element => {
   };
 
   const fetchBookingData = useCallback(async () => {
-    if (!bookingId) {
-      setError('ID booking không hợp lệ');
-      setIsLoading(false);
-      return;
-    }
+      if (!bookingId) {
+        setError('ID booking không hợp lệ');
+        setIsLoading(false);
+        return;
+      }
 
-    try {
-      setIsLoading(true);
-      setError(null);
-      
+      try {
+        setIsLoading(true);
+        setError(null);
+        
       // Fetch booking and user info in parallel
       const [apiData, userData] = await Promise.all([
         getBookingByIdApi(bookingId),
@@ -518,25 +518,25 @@ export const BookingStatusPage = (): React.JSX.Element => {
         setUserId(userData.id);
       }
 
-      if (!apiData) {
-        setError('Không tìm thấy thông tin booking');
-        setBooking(null);
-        return;
-      }
+        if (!apiData) {
+          setError('Không tìm thấy thông tin booking');
+          setBooking(null);
+          return;
+        }
 
-      const formattedBooking = transformApiDataToBookingDetail(apiData);
-      setBooking(formattedBooking);
+        const formattedBooking = transformApiDataToBookingDetail(apiData);
+        setBooking(formattedBooking);
 
       // Generate progress data based on booking
       const progressData = generateProgressData(formattedBooking);
       setProgressData(progressData);
 
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load booking details');
-      setBooking(null);
-    } finally {
-      setIsLoading(false);
-    }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load booking details');
+        setBooking(null);
+      } finally {
+        setIsLoading(false);
+      }
   }, [bookingId]);
 
   useEffect(() => {
@@ -574,7 +574,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     return (
       <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
         <div className="fixed z-50 w-full">
-          <Header />
+        <Header />
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -590,7 +590,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     return (
       <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
         <div className="fixed z-50 w-full">
-          <Header />
+        <Header />
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
@@ -647,14 +647,14 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                     <div className="space-y-2">
-                        <div className="flex justify-between text-slate-600"><span>Giá dịch vụ</span><span>{booking.price}</span></div>
+                    <div className="flex justify-between text-slate-600"><span>Giá dịch vụ</span><span>{booking.price}</span></div>
                         {booking.priceNumeric && (
                             <div className="flex justify-between text-slate-600 text-sm">
                                 <span>Đặt cọc (20%)</span>
                                 <span className="font-medium text-orange-600">{formatPaymentAmount(calculateDeposit(booking.priceNumeric))}</span>
                             </div>
                         )}
-                        <div className="flex justify-between font-bold text-slate-800 pt-2 border-t"><span>Tổng cộng</span><span className="text-lg text-green-600">{booking.totalPrice}</span></div>
+                    <div className="flex justify-between font-bold text-slate-800 pt-2 border-t"><span>Tổng cộng</span><span className="text-lg text-green-600">{booking.totalPrice}</span></div>
                     </div>
                     
                     {/* Payment Button */}
@@ -939,10 +939,10 @@ export const BookingStatusPage = (): React.JSX.Element => {
                             </div>
                           </div>
                         )}
-                     </CardContent>
-                 </Card>
-             </div>
-         </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
     );
   };
 
@@ -963,26 +963,26 @@ export const BookingStatusPage = (): React.JSX.Element => {
           </div>
           <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
-              <Breadcrumb>
+            <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
                     <BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">
                       Trang Chủ
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator />
+                    <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbLink href="/customer/booking-list" className="text-blue-600 hover:text-blue-800">
                       Danh Sách Đặt Lịch
                     </BreadcrumbLink>
                   </BreadcrumbItem>
-                  <BreadcrumbSeparator />
+                    <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <span className="font-semibold text-blue-900">Trạng Thái Đơn Hẹn</span>
                   </BreadcrumbItem>
                 </BreadcrumbList>
-              </Breadcrumb>
-            </div>
+            </Breadcrumb>
+                </div>
             
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -1006,15 +1006,15 @@ export const BookingStatusPage = (): React.JSX.Element => {
                     <span className="font-medium">Mã đơn:</span> #{booking.id.slice(-8)}
                   </div>
                 </div>
-              </div>
+                </div>
             </div>
-          </div>
+        </div>
         </section>
 
         {/* Main Content */}
         <main className="container mx-auto px-4 md:px-6 lg:px-8 py-8">
-          {/* Tab Navigation */}
-          <div className="mb-8 flex border-b">
+        {/* Tab Navigation */}
+        <div className="mb-8 flex border-b">
             <button 
               onClick={() => setActiveTab('detail')} 
               className={`px-4 py-3 font-semibold transition-colors duration-200 ${
@@ -1023,7 +1023,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Chi Tiết Đơn Hẹn
+                Chi Tiết Đơn Hẹn
             </button>
             <button 
               onClick={() => setActiveTab('progress')} 
@@ -1033,15 +1033,15 @@ export const BookingStatusPage = (): React.JSX.Element => {
                   : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              Theo Dõi Tiến Trình
+                Theo Dõi Tiến Trình
             </button>
-          </div>
+        </div>
 
-          {/* Tab Content */}
-          <div>
+        {/* Tab Content */}
+        <div>
             {activeTab === 'detail' ? renderDetailTab() : renderProgressTab()}
-          </div>
-        </main>
+        </div>
+      </main>
         
         {/* Floating Action Buttons (Mobile) */}
         <div className="fixed bottom-20 right-4 md:hidden flex flex-col gap-3">
@@ -1064,7 +1064,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
           <ChatbotAI />
         </div>
         
-        <Footer />
+      <Footer />
       </div>
 
       <SampleInfoModal

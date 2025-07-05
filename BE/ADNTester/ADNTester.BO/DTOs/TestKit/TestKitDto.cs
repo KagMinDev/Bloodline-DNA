@@ -1,4 +1,5 @@
 using ADNTester.BO.DTOs.TestSample;
+using ADNTester.BO.Entities;
 using System;
 using System.Collections.Generic;
 
@@ -17,5 +18,7 @@ namespace ADNTester.BO.DTOs.TestKit
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public int SampleCount { get; set; }
+        public string? PickupInfoId { get; set; }
+        public string? DeliveryInfoId { get; set; }
     }
 } 
