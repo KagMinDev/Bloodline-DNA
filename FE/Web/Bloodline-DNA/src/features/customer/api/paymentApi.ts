@@ -153,6 +153,66 @@ export const checkoutPaymentApi = async (bookingId: string): Promise<CheckoutRes
   }
 };
 
+export const checkoutRemainingPaymentApi = async (bookingId: string): Promise<CheckoutResponse> => {
+  try {
+    if (!bookingId || bookingId.trim() === '') {
+      throw new Error('Booking ID không hợp lệ');
+    }
+
+    const token = localStorage.getItem('token') || 
+                  localStorage.getItem('authToken') || 
+                  sessionStorage.getItem('token') ||
+                  sessionStorage.getItem('authToken');
+
+    if (!token) {
+      throw new Error('Yêu cầu xác thực. Vui lòng đăng nhập lại.');
+    }
+    
+    console.log('🚀 Starting REMAINING payment for booking:', { bookingId });
+
+    const endpoint = `${BASE_URL}/Payment/${bookingId}/remaining-payment`;
+    
+    const response = await axios.post(
+      endpoint,
+      { bookingId },
+      {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
+      }
+    );
+
+    const responseData = response.data;
+    return {
+      success: responseData.success !== false,
+      message: responseData.message || 'Thanh toán thành công',
+      paymentUrl: responseData.checkoutUrl || responseData.url || responseData.redirectUrl,
+      ...responseData
+    };
+
+  } catch (error) {
+    console.error('❌ Remaining payment error:', error);
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const responseData = error.response?.data;
+
+      if (status === 401) {
+        throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      } else if (status === 404) {
+        throw new Error(`Không tìm thấy booking ID "${bookingId}" hoặc booking không ở trạng thái chờ thanh toán.`);
+      } else {
+        const serverMessage = responseData?.message || `Lỗi ${status}: Không thể thực hiện thanh toán`;
+        throw new Error(serverMessage);
+      }
+    } else {
+      throw new Error(`Lỗi thanh toán: ${(error as Error)?.message || 'Lỗi không xác định'}`);
+    }
+  }
+};
+
 // Helper function to format payment amount
 export const formatPaymentAmount = (amount: number): string => {
   return new Intl.NumberFormat('vi-VN', {

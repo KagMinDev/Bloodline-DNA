@@ -14,14 +14,12 @@ import {
 } from "../features/customer";
 import BlogDetail from "../features/customer/pages/BlogDetails";
 import { BookingStatusPage } from "../features/customer/pages/BookingStatusPage";
-import HomePage from "../features/home/pages/HomePage";
 
 export default function CustomerRouter() {
   return (
     <div className="flex-1">
       <Routes>
-        <Route path="/" element={<HomePage />} />{" "}
-        {/* 👈 route homepage trong customer */}
+        <Route path="/" element={<BookingList />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<DetailServices />} />

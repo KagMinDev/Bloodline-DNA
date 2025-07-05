@@ -35,6 +35,9 @@ export interface ServiceDetail {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  price: number; // Add price at the top level
+  turnaroundTime?: string; // Optional: e.g., "3-5 business days"
+  faqs?: { question: string; answer: string }[]; // Optional: for service-specific FAQs
   priceServices: {
     id: string;
     serviceId: string;
@@ -231,58 +234,30 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
         console.log('🔍 Raw data.name:', rawData?.name);
         console.log('🔍 Raw data.testServiceInfor:', rawData?.testServiceInfor);
         
-        // Check if this is already a ServiceDetail format (has name and priceServices)
-        if (rawData.name && rawData.priceServices) {
-          console.log('✅ Found proper ServiceDetail format');
-          return rawData as ServiceDetail;
-        }
-        
-        // Check if this is a TestService format that needs conversion
-        if (rawData.id && rawData.serviceId && rawData.price !== undefined) {
-          console.log('🔄 Converting TestService to ServiceDetail format');
+        // --- Data Transformation Logic ---
+        const transformToServiceDetail = (data: any): ServiceDetail => {
+          const firstPriceService = data.priceServices?.[0];
           
-          // If testServiceInfor exists, use it
-          if (rawData.testServiceInfor) {
-            const serviceDetail: ServiceDetail = {
-              id: rawData.testServiceInfor.id,
-              name: rawData.testServiceInfor.name,
-              description: rawData.testServiceInfor.description,
-              category: rawData.testServiceInfor.category,
-              isActive: rawData.testServiceInfor.isActive,
-              createdAt: rawData.testServiceInfor.createdAt,
-              updatedAt: rawData.testServiceInfor.updatedAt,
-              priceServices: [{
-                id: rawData.id,
-                serviceId: rawData.serviceId,
-                price: rawData.price,
-                collectionMethod: rawData.collectionMethod,
-                currency: rawData.currency,
-                effectiveFrom: rawData.effectiveFrom,
-                effectiveTo: rawData.effectiveTo,
-                isActive: rawData.isActive,
-                createdAt: rawData.createdAt,
-                updatedAt: rawData.updatedAt,
-                testServiceInfor: {
-                  ...rawData.testServiceInfor,
-                  sampleCount: 0
-                }
-              }],
-              sampleCount: 0
-            };
-            console.log('✅ Converted with testServiceInfor, name:', serviceDetail.name);
-            return serviceDetail;
-          } else {
-            // testServiceInfor is null, need to get it from another source
-            console.log('⚠️ testServiceInfor is null, need fallback data');
-            throw new Error('testServiceInfor_is_null'); // Special error to trigger fallback
-          }
-        }
-        
-        console.log('❌ Unknown data format, cannot convert');
-        throw new Error('Định dạng dữ liệu không được hỗ trợ');
-        
+          return {
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            category: data.category,
+            isActive: data.isActive,
+            createdAt: data.createdAt,
+            updatedAt: data.updatedAt,
+            price: firstPriceService?.price || 0, // Extract price
+            turnaroundTime: data.turnaroundTime || "3-5 ngày", // Add default
+            faqs: data.faqs || [], // Add default
+            priceServices: data.priceServices || [],
+            sampleCount: data.sampleCount || 0,
+          };
+        };
+
+        return transformToServiceDetail(rawData);
+
       } catch (endpointError) {
-        console.log('❌ Endpoint failed:', endpoint, endpointError);
+        console.warn('Endpoint failed:', endpoint, (endpointError as Error).message);
         lastError = endpointError;
         
         // If this is the special case where testServiceInfor is null, 
@@ -323,6 +298,9 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
             isActive: matchedService.testServiceInfor.isActive,
             createdAt: matchedService.testServiceInfor.createdAt,
             updatedAt: matchedService.testServiceInfor.updatedAt,
+            price: matchedService.price, // Assuming price is directly available
+            turnaroundTime: "3-5 ngày", // Default for fallback
+            faqs: [], // Default for fallback
             priceServices: [{
               id: matchedService.id,
               serviceId: matchedService.serviceId,
@@ -354,6 +332,9 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
             isActive: matchedService.isActive,
             createdAt: matchedService.createdAt,
             updatedAt: matchedService.updatedAt,
+            price: matchedService.price, // Assuming price is directly available
+            turnaroundTime: "3-5 ngày", // Default for fallback
+            faqs: [], // Default for fallback
             priceServices: [{
               id: matchedService.id,
               serviceId: matchedService.serviceId,
