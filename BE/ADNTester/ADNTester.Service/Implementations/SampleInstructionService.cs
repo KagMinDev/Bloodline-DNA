@@ -45,7 +45,6 @@ namespace ADNTester.Service.Implementations
         {
             var entity = _mapper.Map<SampleTypeInstruction>(dto);
             _unitOfWork.SampleInstructionRepository.Update(entity);
-            await _unitOfWork.SaveChangesAsync();
             return await _unitOfWork.SaveChangesAsync() > 0;
         }
         public async Task<bool> SeedDefaultInstructionsAsync()

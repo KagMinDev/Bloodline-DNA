@@ -75,6 +75,11 @@ namespace ADNTester.Service.Implementations
 
             return user.IsActive;
         }
+        public async Task<IEnumerable<UserDto>> GetActiveStaffAsync()
+        {
+            var users = await _unitOfWork.UserRepository.GetActiveStaffAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
 
     }
 }
