@@ -1,16 +1,17 @@
+﻿using ADNTester.BO.Enums;
 using System;
-using ADNTester.BO.Enums;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ADNTester.BO.DTOs.TestSample
 {
-    public class CreateTestSampleDto
+    public class CreateTestSampleFromClientDto
     {
         public string KitId { get; set; }
         public string DonorName { get; set; }
         public RelationshipToSubject RelationshipToSubject { get; set; }
         public SampleType SampleType { get; set; }
-        public string CollectedById { get; set; }
-        public DateTime? CollectedAt { get; set; }
-        public DateTime? LabReceivedAt { get; set; }
     }
-} 
+}

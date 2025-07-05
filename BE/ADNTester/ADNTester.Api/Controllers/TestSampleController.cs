@@ -38,12 +38,30 @@ namespace ADNTester.Api.Controllers
             return Ok(new ApiResponse<TestSampleDto>(testSample, "Thông tin mẫu xét nghiệm"));
         }
 
-        [HttpPost]
-        public async Task<ActionResult<string>> Create(CreateTestSampleDto dto)
+        /// <summary>
+        /// Nhân viên tạo mẫu xét nghiệm cho kit tại cơ sở.
+        /// </summary>
+        /// <param name="dto">Thông tin mẫu xét nghiệm</param>
+        /// <returns>Id mẫu xét nghiệm đã tạo</returns>
+        [HttpPost("staff-create")]
+        public async Task<ActionResult<string>> CreateFromStaff(CreateTestSampleDto dto)
         {
             var id = await _testSampleService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo mẫu xét nghiệm thành công", 201));
+            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Tạo mẫu xét nghiệm thành công (nhân viên)", 201));
         }
+
+        /// <summary>
+        /// Người dùng tự gửi mẫu xét nghiệm về hệ thống.
+        /// </summary>
+        /// <param name="dto">Thông tin mẫu xét nghiệm từ người dùng</param>
+        /// <returns>Id mẫu xét nghiệm đã tạo</returns>
+        [HttpPost("client-create")]
+        public async Task<ActionResult<string>> CreateFromClient(CreateTestSampleFromClientDto dto)
+        {
+            var id = await _testSampleService.CreateSampleFromClientAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id }, new ApiResponse<string>(id, "Người dùng đã gửi mẫu xét nghiệm thành công", 201));
+        }
+
 
         [HttpPut]
         public async Task<IActionResult> Update(UpdateTestSampleDto dto)

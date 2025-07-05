@@ -18,5 +18,7 @@ namespace ADNTester.Repository.Interfaces
         Task AddAsync(LogisticsInfo info);
         Task UpdateAsync(LogisticsInfo info);
         Task DeleteAsync(string id);
+        Task<List<LogisticsInfo>> GetAllAsync(LogisticsType? type = null, LogisticStatus? status = null);
+        Task<List<LogisticsInfo>> GetAssignedLogisticsAsync(string staffId, LogisticsType? type = null, LogisticStatus? status = null);
     }
 }
