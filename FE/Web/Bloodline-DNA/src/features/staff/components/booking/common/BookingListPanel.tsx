@@ -33,7 +33,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
                 key={booking.id}
                 className="p-4 transition-shadow border border-gray-200 shadow-sm rounded-xl hover:shadow-md bg-gray-50"
               >
-                <div className="text-xs">Email: {booking.email}</div>
+                <div className="text-xs">Tên khách hàng: {booking.clientName}</div>
                 <div className="mb-3 text-xs text-gray-400">
                   Đặt lúc: {new Date(booking.createdAt).toLocaleString("vi-VN")}
                 </div>

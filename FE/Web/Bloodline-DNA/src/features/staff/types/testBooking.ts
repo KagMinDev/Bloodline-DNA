@@ -2,6 +2,7 @@ export interface TestBookingResponse {
   id: string;
   testServiceId: string;
   clientId: string;
+  clientName: string;
   email: string;
   appointmentDate: string;
   price: number;
