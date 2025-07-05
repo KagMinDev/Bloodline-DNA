@@ -1,4 +1,3 @@
-// ✅ BookingTable.tsx
 import React, { useState } from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa";
@@ -82,12 +81,16 @@ const BookingTable: React.FC<BookingTableProps> = ({
     return currentIndex >= 0 ? statusList.slice(currentIndex) : statusList;
   };
 
+  const sortedBookings = [...filteredBookings].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
     <div className="flex-1 overflow-auto">
       <div className="pb-1 mb-2 text-base font-semibold text-blue-600 border-b-2 border-blue-600">
         Lịch hẹn trong ngày {selectedDay}
       </div>
-      {filteredBookings.length === 0 ? (
+      {sortedBookings.length === 0 ? (
         <div className="flex flex-col items-center py-8 italic text-center">
           <BsCalendarXFill className="mb-4 text-6xl text-gray-200" />
           <div className="mt-2 text-gray-400">Không có lịch hẹn</div>
@@ -103,21 +106,27 @@ const BookingTable: React.FC<BookingTableProps> = ({
             </tr>
           </thead>
           <tbody>
-            {filteredBookings.map((booking) => {
+            {sortedBookings.map((booking) => {
               const currentStatusLabel = getStatusLabel(booking.status);
               const isLoading = loadingBookings.has(booking.id);
               const collectionMethod = booking.collectionMethod;
               const options = getAvailableStatusOptions(collectionMethod, currentStatusLabel);
 
+              // ✅ Nếu selectedStatuses chưa có booking.id, thì set giá trị mặc định từ API
+              if (!selectedStatuses[booking.id]) {
+                setSelectedStatuses((prev) => ({
+                  ...prev,
+                  [booking.id]: currentStatusLabel,
+                }));
+              }
+
               return (
                 <tr key={booking.id} className="border-b">
-                  <td className="px-2 py-1">{booking.email || "Không có email"}</td>
+                  <td className="px-2 py-1">{booking.clientName || "Không có tên"}</td>
                   <td className="px-2 py-1">
                     {new Date(booking.appointmentDate).toLocaleString("vi-VN")}
                   </td>
-                  <td className="px-2 py-1">
-                    {renderCollectionMethod(collectionMethod)}
-                  </td>
+                  <td className="px-2 py-1">{renderCollectionMethod(collectionMethod)}</td>
                   <td className="flex items-center gap-2 px-2 py-1">
                     <StatusSelect
                       value={selectedStatuses[booking.id] || currentStatusLabel}
