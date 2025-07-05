@@ -4,14 +4,26 @@ import { FaPlus } from 'react-icons/fa';
 import { getTagsApi, createTagApi, updateTagApi, deleteTagApi } from '../api/tagApi';
 import type { TagRequest, TagResponse, TagUpdateRequest } from '../types/tags';
 import { Loading } from '../../../components';
-import { MoreVertical } from 'lucide-react';
+import TagDialog from '../components/blogs/TagDialog';
+import {
+  Card,
+  CardContent,
+} from '../../staff/components/sample/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from '../../staff/components/sample/ui/table';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from '../../staff/components/sample/ui/dropdown-menu';
-import TagDialog from '../components/blogs/TagDialog';
+import { MoreVertical } from 'lucide-react';
 
 function Tags() {
   const [tags, setTags] = useState<TagResponse[]>([]);
@@ -25,7 +37,7 @@ function Tags() {
       setIsLoading(true);
       const tagsData = await getTagsApi();
       setTags(Array.isArray(tagsData) ? tagsData : []);
-    } catch (error) {
+    } catch {
       alert('Không thể tải danh sách tag');
       setTags([]);
     } finally {
@@ -92,68 +104,79 @@ function Tags() {
 
   return (
     <>
-      <div className="min-h-screen bg-blue-50 p-6 overflow-auto">
-        <div className="max-w-3xl mx-auto w-full">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <h1 className="text-3xl font-bold text-[#1F2B6C]">Quản lý Tag</h1>
-            <Button
-              onClick={handleAddNewTag}
-              className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-[#26388c] px-4 py-2 text-white shadow rounded-md"
-              disabled={isLoading}
-            >
-              <FaPlus className="text-white" />
-              <span className="text-white">Thêm tag</span>
-            </Button>
-          </div>
-
-          {isLoading ? (
-            <Loading message="Đang tải danh sách tag..." fullScreen={false} />
-          ) : tags.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
-              {tags.map((tag) => (
-                <div
-                  key={tag.id}
-                  className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition"
+      <div className="min-h-screen bg-blue-50 py-8 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+                <h1 className="text-3xl font-bold text-blue-700 ml-5">Quản lý Tag</h1>
+                <Button
+                  onClick={handleAddNewTag}
+                  className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 px-4 py-2 text-white shadow rounded-md"
+                  disabled={isLoading}
                 >
-                  <div>
-                    <h3 className="text-lg font-semibold text-blue-800">{tag.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      Tạo: {tag.createdAt ? new Date(tag.createdAt).toLocaleString() : 'N/A'} <br />
-                      Cập nhật: {tag.updatedAt ? new Date(tag.updatedAt).toLocaleString() : 'N/A'}
-                    </p>
-                  </div>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        className="p-2 rounded-md hover:bg-gray-100 transition"
-                        aria-label="Tùy chọn"
-                      >
-                        <MoreVertical className="w-5 h-5 text-gray-600" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-32">
-                      <DropdownMenuItem onClick={() => handleEdit(tag)}>
-                        ✏️ <span className="ml-1">Sửa</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(tag.id)}
-                        className="text-red-600"
-                      >
-                        🗑️ <span className="ml-1">Xóa</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <FaPlus className="text-white" />
+                  <span className="text-white">Thêm tag</span>
+                </Button>
+              </div>
+          <Card className="shadow-md border rounded-2xl">
+            <CardContent className="p-6">
+              {/* Bảng */}
+              {isLoading ? (
+                <Loading message="Đang tải danh sách tag..." fullScreen={false} />
+              ) : tags.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-center">Tên</TableHead>
+                        <TableHead className="text-center">Ngày tạo</TableHead>
+                        <TableHead className="text-center">Ngày cập nhật</TableHead>
+                        <TableHead className="text-center">Hành động</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tags.map((tag) => (
+                        <TableRow key={tag.id}>
+                          <TableCell className="text-center font-semibold text-blue-800">{tag.name}</TableCell>
+                          <TableCell className="text-center text-sm text-gray-600">
+                            {tag.createdAt ? new Date(tag.createdAt).toLocaleString() : 'N/A'}
+                          </TableCell>
+                          <TableCell className="text-center text-sm text-gray-600">
+                            {tag.updatedAt ? new Date(tag.updatedAt).toLocaleString() : 'N/A'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreVertical className="h-5 w-5 text-blue-700" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-32">
+                                <DropdownMenuItem onClick={() => handleEdit(tag)}>
+                                  ✏️ <span className="ml-1">Sửa</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDelete(tag.id)}
+                                  className="text-red-600"
+                                >
+                                  🗑️ <span className="ml-1">Xóa</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-500 italic">Không có tag nào để hiển thị.</p>
-          )}
+              ) : (
+                <p className="text-center text-gray-500 italic">Không có tag nào để hiển thị.</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Modal Dialog */}
+      {/* Dialog */}
       <TagDialog
         open={showDialog}
         onClose={() => setShowDialog(false)}
