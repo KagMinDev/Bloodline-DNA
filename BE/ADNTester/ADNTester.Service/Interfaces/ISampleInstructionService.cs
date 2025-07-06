@@ -1,5 +1,6 @@
 ﻿using ADNTester.BO.DTOs.SampleInstruction;
 using ADNTester.BO.Entities;
+using ADNTester.BO.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +15,7 @@ namespace ADNTester.Service.Interfaces
         Task<SampleInstructionDto?> GetByIdAsync(string id);
         Task<SampleInstructionDto> CreateAsync(CreateSampleInstructionDto dto);
         Task<bool> UpdateAsync(UpdateSampleInstructionDto dto);
+        Task<SampleInstructionDto?> GetLatestBySampleTypeAsync(SampleType type);
+        Task<bool> SeedDefaultInstructionsAsync();
     }
 }

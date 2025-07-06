@@ -293,31 +293,36 @@ namespace ADNTester.API.Controllers
                 // Nếu là lấy mẫu tại nhà, tạo LogisticsInfo và TestKit sau khi thanh toán cọc
                 if (booking.CollectionMethod == SampleCollectionMethod.SelfSample.ToString())
                 {
+                    // Tạo LogisticsInfo giao kit
                     var logisticsInfo = new LogisticsInfo
                     {
                         Address = booking.Address,
                         Phone = booking.Phone,
                         Type = LogisticsType.Delivery,
+                        Status = LogisticStatus.PreparingKit,
                         ScheduledAt = DateTime.UtcNow,
                         Note = $"Giao kit cho booking {booking.Id}"
                     };
                     var createdLogistics = await _logisticService.CreateAsync(logisticsInfo);
 
+                    // Lấy thông tin TestService để lấy SampleCount
                     var testService = await _testServiceService.GetByIdAsync(booking.TestServiceId);
-                    if (testService != null)
+                    if (testService == null)
                     {
-                        var testKit = new CreateTestKitDto
-                        {
-                            BookingId = booking.Id,
-                            ShippedAt = DateTime.UtcNow,
-                            ReceivedAt = null,
-                            SampleCount = testService.SampleCount,
-                            DeliveryInfoId = createdLogistics.Id,
-                            CollectionMethod = SampleCollectionMethod.SelfSample
-                        };
-
-                        await _testKitService.CreateAsync(testKit);
+                        return BadRequest(new { error = "Không tìm thấy thông tin dịch vụ xét nghiệm." });
                     }
+
+                    var testKit = new CreateTestKitDto
+                    {
+                        BookingId = booking.Id,
+                        ShippedAt = DateTime.UtcNow,
+                        ReceivedAt = null,
+                        SampleCount = testService.SampleCount,
+                        DeliveryInfoId = createdLogistics.Id,
+                        CollectionMethod = SampleCollectionMethod.SelfSample
+                    };
+
+                    await _testKitService.CreateAsync(testKit);
                 }
 
                 return Ok(new { message = "Xử lý thanh toán thành công." });

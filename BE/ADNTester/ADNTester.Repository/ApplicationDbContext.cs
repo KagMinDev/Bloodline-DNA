@@ -152,7 +152,9 @@ namespace ADNTester.Repository
                 .Property(l => l.Type)
                 .HasConversion<string>()
                 .HasMaxLength(30);// store enum as string
-
+            modelBuilder.Entity<LogisticsInfo>()
+                .Property(l => l.Status)
+                .HasConversion<string>();
             // TestKit config
             modelBuilder.Entity<TestKit>(entity =>
             {
