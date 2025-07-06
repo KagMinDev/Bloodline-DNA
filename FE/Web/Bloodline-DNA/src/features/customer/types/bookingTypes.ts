@@ -1,16 +1,17 @@
 export type DetailedBookingStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'preparingkit'
-  | 'deliveringkit'
-  | 'kitdelivered'
-  | 'waitingforsample'
-  | 'returningsample'
-  | 'samplereceived'
-  | 'testing'
-  | 'finalpayment'
-  | 'completed'
-  | 'cancelled';
+  | 'Pending'
+  | 'PreparingKit'
+  | 'DeliveringKit'
+  | 'KitDelivered'
+  | 'WaitingForSample'
+  | 'ReturningSample'
+  | 'SampleReceived'
+  | 'Testing'
+  | 'Completed'
+  | 'Cancelled'
+  | 'StaffGettingSample'
+  | 'CheckIn';
+
 
 export interface BookingDetail {
   id: string;

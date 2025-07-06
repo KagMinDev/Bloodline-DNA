@@ -14,6 +14,11 @@ interface BookingDetailTabProps {
 }
 
 export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymentError, handlePayment }: BookingDetailTabProps) => {
+  console.log('BookingDetailTab rendered with booking:', booking);
+  console.log('BookingDetailTab rendered with progressData:', progressData);
+  console.log('BookingDetailTab rendered with paymentLoading:', paymentLoading);
+  console.log('BookingDetailTab rendered with paymentError:', paymentError);
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <div className="lg:col-span-2 space-y-6">
