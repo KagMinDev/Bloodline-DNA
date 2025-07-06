@@ -37,36 +37,40 @@ const CheckoutSuccess = () => {
   };
 
   useEffect(() => {
-    const query = new URLSearchParams(location.search);
-    const queryOrderCode = query.get("orderCode");
-    const queryAmount = query.get("amount");
+  const query = new URLSearchParams(location.search);
+  const queryOrderCode = query.get("orderCode");
+  const queryAmount = query.get("amount");
+  const queryStatus = query.get("status")?.toUpperCase();
 
-    setOrderCode(queryOrderCode);
-    setAmount(queryAmount);
+  setOrderCode(queryOrderCode);
+  setAmount(queryAmount);
 
-    const storedBookingId = getBookingIdFromStorage();
-    if (storedBookingId) {
-      setBookingId(storedBookingId);
-    }
+  const storedBookingId = getBookingIdFromStorage();
+  if (storedBookingId) {
+    setBookingId(storedBookingId);
+  }
 
-    console.log("CheckoutSuccess mounted with:", {
-      orderCode: queryOrderCode,
-      amount: queryAmount,
-      bookingId: storedBookingId,
-      timestamp: new Date().toISOString(),
+  const normalizedStatus = queryStatus === "PAID" ? "PAID" : "CANCELLED";
+
+  console.log("CheckoutSuccess mounted with:", {
+    orderCode: queryOrderCode,
+    amount: queryAmount,
+    bookingId: storedBookingId,
+    status: normalizedStatus,
+    timestamp: new Date().toISOString(),
+  });
+
+  if (queryOrderCode && storedBookingId) {
+    handlePaymentCallback(queryOrderCode, normalizedStatus, storedBookingId);
+  } else {
+    setUpdateStatus({
+      isLoading: false,
+      isSuccess: false,
+      message: "Thiếu thông tin thanh toán để xác nhận.",
     });
+  }
+}, [location.search]);
 
-    // ✅ Gọi API callback
-    if (queryOrderCode && storedBookingId) {
-      handlePaymentCallback(queryOrderCode, "SUCCESS", storedBookingId);
-    } else {
-      setUpdateStatus({
-        isLoading: false,
-        isSuccess: false,
-        message: "Thiếu thông tin thanh toán để xác nhận.",
-      });
-    }
-  }, [location.search]);
 
   const handlePaymentCallback = async (
   orderCode: string,
@@ -74,43 +78,32 @@ const CheckoutSuccess = () => {
   bookingId: string
 ) => {
   try {
-    const response = await callPaymentCallbackApi({
+    await callPaymentCallbackApi({
       orderCode,
       status,
       bookingId,
     });
 
-    if (response.success) {
-      console.log("✅ Callback success");
+    // 👉 Dù callback trả về lỗi, vẫn kiểm tra lại trạng thái thật từ backend
+    const bookingData = await getBookingByIdApi(bookingId);
+    const normalizedStatus = (bookingData?.status || "").toUpperCase();
+    const isPaid = normalizedStatus === "PAID" || normalizedStatus === "SUCCESS" || normalizedStatus === "PREPARINGKIT" || normalizedStatus === "CANCELLED";
 
-      // Gọi lại API để kiểm tra trạng thái booking thực sự đã PAID chưa
-      const bookingData = await getBookingByIdApi(bookingId);
-      const normalizedStatus = (bookingData?.status || bookingData?.status || "").toUpperCase();
-      const isPaid = normalizedStatus === "PAID" || normalizedStatus === "SUCCESS";
-
-      if (isPaid) {
-        setUpdateStatus({
-          isLoading: false,
-          isSuccess: true,
-          message: "Đã xác nhận thanh toán thành công.",
-        });
-      } else {
-        setUpdateStatus({
-          isLoading: false,
-          isSuccess: false,
-          message: "Thanh toán chưa được ghi nhận thành công.",
-        });
-      }
-
-      localStorage.removeItem("paymentData");
+    if (isPaid) {
+      setUpdateStatus({
+        isLoading: false,
+        isSuccess: true,
+        message: "Đã xác nhận thanh toán thành công.",
+      });
     } else {
-      console.error("❌ Callback error:", response.error);
       setUpdateStatus({
         isLoading: false,
         isSuccess: false,
-        message: "Lỗi callback: " + response.error,
+        message: "Thanh toán chưa được ghi nhận thành công.",
       });
     }
+
+    localStorage.removeItem("paymentData");
   } catch (err) {
     console.error("❌ Callback exception:", err);
     setUpdateStatus({
@@ -120,6 +113,7 @@ const CheckoutSuccess = () => {
     });
   }
 };
+
 
 
   const formatCurrency = (value: string | null) => {

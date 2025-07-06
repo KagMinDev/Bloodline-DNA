@@ -179,12 +179,6 @@ const CheckoutError = () => {
                   )}
                 </div>
 
-                {updateStatus.message && (
-                  <p className="text-center text-sm text-red-600 mb-6">
-                    {updateStatus.message}
-                  </p>
-                )}
-
                 <div className="flex justify-center">
                   <Button
                     onClick={() => navigate("/")}

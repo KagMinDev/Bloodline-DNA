@@ -54,17 +54,6 @@ export const useBookingData = () => {
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const normalizePaymentStatus = (status: string): string => {
-    const map: Record<string, string> = {
-      SUCCESS: 'PAID',
-      COMPLETED: 'PAID',
-      CANCELLED: 'CANCELLED',
-      FAILED: 'CANCELLED',
-      EXPIRED: 'CANCELLED',
-    };
-    return map[status.toUpperCase()] || status;
-  };
-
   const fetchBookingData = useCallback(async () => {
     if (!bookingId) {
       setError('Booking ID không hợp lệ');
@@ -137,7 +126,6 @@ export const useBookingData = () => {
         orderCode: result.orderCode,
         bookingId: booking.id,
         isRemainingPayment: isRemaining,
-        amount: result.amount,
         timestamp: new Date().toISOString(),
       };
 
@@ -155,31 +143,36 @@ export const useBookingData = () => {
   };
 
   const handlePaymentCallback = useCallback(async (orderCode: string, status: string) => {
-    try {
-      const paymentDataStr = localStorage.getItem('paymentData');
-      const paymentData = paymentDataStr ? JSON.parse(paymentDataStr) : null;
-      const effectiveBookingId = paymentData?.bookingId || bookingId;
-      if (!effectiveBookingId) throw new Error('Không tìm thấy bookingId');
+  try {
+    const paymentDataStr = localStorage.getItem('paymentData');
+    const paymentData = paymentDataStr ? JSON.parse(paymentDataStr) : null;
+    const effectiveBookingId = paymentData?.bookingId || bookingId;
+    if (!effectiveBookingId) throw new Error('Không tìm thấy bookingId');
 
-      const normalizedStatus = normalizePaymentStatus(status);
-      const response = await callPaymentCallbackApi({
-        orderCode,
-        status: normalizedStatus,
-        bookingId: effectiveBookingId,
-      });
+    const normalizedStatus = status.toUpperCase() === 'PAID' ? 'PAID' : 'CANCELLED';
 
-      if (response.success) {
-        await fetchBookingData();
-        localStorage.removeItem('paymentData');
-        return true;
-      } else {
-        throw new Error(response.error || 'Lỗi callback từ server');
-      }
-    } catch (err) {
-      console.error('❌ Callback Error:', err);
-      return false;
+    const response = await callPaymentCallbackApi({
+      orderCode,
+      status: normalizedStatus,
+      bookingId: effectiveBookingId,
+    });
+
+    if (response.success && response.status === 'PAID') {
+      setPaymentStatus('PAID');
+    } else {
+      setPaymentStatus('CANCELLED');
+      setPaymentError('Thanh toán thất bại hoặc bị hủy');
     }
-  }, [bookingId, fetchBookingData]);
+
+    await fetchBookingData();
+    localStorage.removeItem('paymentData');
+    return true;
+  } catch (err) {
+    console.error('❌ Callback Error:', err);
+    setPaymentError('Lỗi callback thanh toán');
+    return false;
+  }
+}, [bookingId, fetchBookingData]);
 
   useEffect(() => {
     const processPaymentReturn = async () => {
