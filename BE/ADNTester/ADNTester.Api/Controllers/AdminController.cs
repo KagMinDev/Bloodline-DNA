@@ -53,7 +53,7 @@ namespace ADNTester.Api.Controllers
             return Ok(new ApiResponse<string>(message));
         }
         /// <summary>
-        /// Lấy danh sách nhân viên đang hoạt động (chỉ dành cho Admin)
+        /// Lấy danh sách nhân viên đang hoạt động (chỉ dành cho Admin và Manager)
         /// </summary>
         /// <returns>Danh sách nhân viên đang hoạt động</returns>
         [Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Manager)}")]

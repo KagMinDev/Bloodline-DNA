@@ -304,6 +304,25 @@ namespace ADNTester.Service.Implementations
 
             return _mapper.Map<IEnumerable<TestBookingDto>>(bookings);
         }
+        public async Task<bool> CheckInAsync(string bookingId)
+        {
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(bookingId);
+            if (booking == null || booking.CollectionMethod != SampleCollectionMethod.AtFacility)
+                return false;
+
+            // Optional: validate current status
+            if (booking.Status != BookingStatus.Pending)
+                return false;
+
+            booking.Status = BookingStatus.CheckIn;
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.TestBookingRepository.Update(booking);
+            await _unitOfWork.CommitAsync();
+
+            return true;
+        }
+
         #region Helper methods
         private string GetStatusText(BookingStatus status)
         {

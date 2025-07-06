@@ -8,13 +8,12 @@ namespace ADNTester.BO.Enums
 {
     public enum LogisticStatus
     {
-        Pending = 0,             // Default state (chờ xử lý)
-        PreparingKit = 1,        // Đang chuẩn bị bộ kit
-        DeliveringKit = 2,       // Đang giao bộ kit đến client
-        KitDelivered = 3,        // Client đã nhận bộ kit
-        WaitingForPickup = 4,    // Đợi staff đến lấy mẫu (từ client)
-        PickingUpSample = 5,     // Staff đang lấy mẫu (hoặc nhận kit lại)
-        SampleReceived = 6,      // Đã nhận được mẫu tại cơ sở
-        Cancelled = 7            // Hủy giao hoặc lấy mẫu
+        PreparingKit = 0,        // Đang chuẩn bị bộ kit
+        DeliveringKit = 1,       // Đang giao bộ kit đến client
+        KitDelivered = 2,        // Client đã nhận bộ kit
+        WaitingForPickup = 3,    // Đợi staff đến lấy mẫu (từ client)
+        PickingUpSample = 4,     // Staff đang lấy mẫu (hoặc nhận kit lại)
+        SampleReceived = 5,      // Đã nhận được mẫu tại cơ sở
+        Cancelled = 6            // Hủy giao hoặc lấy mẫu
     }
 }
