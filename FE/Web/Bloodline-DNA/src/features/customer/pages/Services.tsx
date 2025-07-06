@@ -32,7 +32,9 @@ import { servicesApi, getServiceById, type TestService, type ServiceDetail } fro
 
 // UI Interface for displaying services
 interface Service {
-  id: string;
+  id: string;               // priceServiceId
+  serviceId?: string;       // real testServiceId
+  testServiceInfo?: { id: string; [key:string]: any };
   title: string;
   description: string;
   category: string;
@@ -117,7 +119,7 @@ const categoryLocations: { [key: string]: string } = {
 
 // Transform API data to UI format
 const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
-  console.log('🔄 Transforming API data to UI format...');
+  // console.log('🔄 Transforming API data to UI format...');
   
   if (!Array.isArray(apiServices)) {
     console.warn('⚠️ API services is not an array, using empty array');
@@ -125,7 +127,7 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
   }
   
   return apiServices.map((apiService, index) => {
-    console.log(`🔄 Processing service ${index + 1}:`, apiService);
+    // console.log(`🔄 Processing service ${index + 1}:`, apiService);
     
     const serviceInfo = apiService.testServiceInfor;
     const title = serviceInfo?.name || `Service ${apiService.id}`;
@@ -136,17 +138,18 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
     // Map API category to UI category
     const uiCategory = categoryMappings[apiCategory] || 'civil';
     
-    // Debug logging
-    console.log(`📝 Service ${index + 1} mapping:`, {
+    /* console.log(`📝 Service ${index + 1} mapping:`, {
       id: apiService.id,
       title: title,
       apiCategory: apiCategory,
       uiCategory: uiCategory,
       isActive: isActive
-    });
+    }); */
     
     const transformedService = {
       id: apiService.id,
+      serviceId: apiService.serviceId,
+      testServiceInfo: apiService.testServiceInfor,
       title: title,
       description: description,
       category: uiCategory,
@@ -167,7 +170,7 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
       collectionMethod: apiService.collectionMethod
     };
     
-    console.log(`✅ Transformed service:`, transformedService);
+    // console.log(`✅ Transformed service:`, transformedService);
     return transformedService;
   });
 };
@@ -315,11 +318,11 @@ export const Services = (): React.JSX.Element => {
   useEffect(() => {
     const loadServices = async () => {
       try {
-        console.log('🚀 Loading services...');
+        // console.log('🚀 Loading services...');
         setLoading(true);
         
         const apiResponse = await servicesApi();
-        console.log('📦 API response:', apiResponse);
+        // console.log('📦 API response:', apiResponse);
         
         // Handle different response structures
         let apiServices: TestService[] = [];
@@ -332,10 +335,10 @@ export const Services = (): React.JSX.Element => {
         const transformedServices = transformAPIDataToUIFormat(apiServices);
         setServices(transformedServices);
         setError(null);
-        console.log('✅ Services loaded successfully!');
+        // console.log('✅ Services loaded successfully!');
         
       } catch (err) {
-        console.error('❌ Error loading services:', err);
+        console.error('Error loading services:', err);
         
         // Fallback to mock data
         const mockServices = getMockServices();
@@ -392,34 +395,34 @@ export const Services = (): React.JSX.Element => {
 
   // Filter services
   useEffect(() => {
-    console.log('🔍 Starting filter process...');
-    console.log('📊 Total services:', services.length);
-    console.log('🏷️ Selected category:', selectedCategory);
-    console.log('🔍 Search term:', searchTerm);
+    // console.log('🔍 Starting filter process...');
+    // console.log('📊 Total services:', services.length);
+    // console.log('🏷️ Selected category:', selectedCategory);
+    // console.log('🔍 Search term:', searchTerm);
     
     // Log all services with their categories
-    services.forEach((service, index) => {
-      console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
-    });
+    // services.forEach((service, index) => {
+    //   console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
+    // });
     
     let filtered = services;
     
     // Filter by category
     if (selectedCategory !== "all") {
-      console.log(`🔽 Filtering by category: ${selectedCategory}`);
+      // console.log(`🔽 Filtering by category: ${selectedCategory}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(service => service.category === selectedCategory);
-      console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
+      // console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
       
       // Log which services passed the filter
-      filtered.forEach((service, index) => {
-        console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
-      });
+      // filtered.forEach((service, index) => {
+      //   console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
+      // });
     }
     
     // Filter by search term
     if (searchTerm) {
-      console.log(`🔍 Filtering by search term: ${searchTerm}`);
+      // console.log(`🔍 Filtering by search term: ${searchTerm}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(service => 
         service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -427,10 +430,10 @@ export const Services = (): React.JSX.Element => {
         service.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase())) ||
         service.doctor.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
+      // console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
     }
     
-    console.log('🎯 Final filtered services count:', filtered.length);
+    // console.log('🎯 Final filtered services count:', filtered.length);
     setFilteredServices(filtered);
   }, [selectedCategory, searchTerm, services]);
 
@@ -773,11 +776,13 @@ export const Services = (): React.JSX.Element => {
                           onClick={(e) => {
                             e.stopPropagation();
                             openBookingModal({
-                              id: service.id,
+                              id: service.id, // priceServiceId
+                              serviceId: service.serviceId, // real testServiceId if available
                               name: service.title,
                               category: service.category,
                               price: Number(service.priceNumeric),
-                              collectionMethod: Number(service.collectionMethod)
+                              collectionMethod: Number(service.collectionMethod),
+                              testServiceInfo: service.testServiceInfo ?? (service.serviceId ? { id: service.serviceId } : undefined)
                             });
                           }} 
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"

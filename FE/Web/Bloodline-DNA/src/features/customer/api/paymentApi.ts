@@ -1,5 +1,6 @@
 import axios from "axios";
 import { BASE_URL } from "../../../apis/rootApi";
+import { paymentLogger } from "../utils/paymentLogger";
 
 // ===== INTERFACES =====
 export interface CheckoutRequest {
@@ -31,13 +32,22 @@ export const checkoutPaymentApi = async (bookingId: string): Promise<CheckoutRes
                   // Fallback token for testing
                   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI2MDNCN0Q2OUFFMTgxNzAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGFsYWxhbGEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJsYTEyQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkNsaWVudCIsImp0aSI6IjBkZjM5ZTEwLTRhNTktNDFlMC1hZGIzLTE4OWM1Mjg1Mjg3MCIsImV4cCI6MTc1MDIyNDgwNSwiaXNzIjoieW91cmRvbWFpbi5jb20iLCJhdWQiOiJ5b3VyZG9tYWluLmNvbSJ9.6ucR2Zmu8Ti5hyUUxVmMfytX37uAkfQ86LsKcDtwV-0';
     
-    console.log('🚀 Starting payment checkout for booking:', {
+    const startData = {
       bookingId: bookingId,
       bookingIdLength: bookingId.length,
       bookingIdType: typeof bookingId,
       hasToken: !!token,
-      tokenPrefix: token ? token.substring(0, 20) + '...' : 'no token'
+      tokenPrefix: token ? token.substring(0, 20) + '...' : 'no token',
+      baseUrl: BASE_URL,
+      paymentType: 'deposit' as const
+    };
+
+    console.log('🚀 Starting payment checkout for booking:', {
+      ...startData,
+      timestamp: new Date().toISOString()
     });
+
+    paymentLogger.logPaymentStart(startData);
 
     // Try different possible endpoints
     const possibleEndpoints = [
@@ -52,7 +62,24 @@ export const checkoutPaymentApi = async (bookingId: string): Promise<CheckoutRes
 
     for (const endpoint of possibleEndpoints) {
       try {
-        console.log('🔄 Trying payment endpoint:', endpoint);
+        const apiCallData = {
+          url: endpoint,
+          method: 'POST',
+          requestBody: { bookingId },
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token ? token.substring(0, 20) + '...' : 'no token'}`,
+            'Content-Type': 'application/json',
+          },
+          bookingId: bookingId
+        };
+
+        console.log('🔄 Trying payment endpoint:', {
+          ...apiCallData,
+          timestamp: new Date().toISOString()
+        });
+
+        paymentLogger.logPaymentApiCall(endpoint, apiCallData);
 
         const response = await axios.post(
           endpoint,
@@ -67,22 +94,65 @@ export const checkoutPaymentApi = async (bookingId: string): Promise<CheckoutRes
           }
         );
 
-        console.log('✅ Payment checkout success at endpoint:', endpoint);
-        console.log('📦 Payment response:', response.data);
+        const responseData = {
+          url: endpoint,
+          status: response.status.toString(),
+          statusText: response.statusText,
+          bookingId: bookingId,
+          responseData: response.data
+        };
+
+        console.log('✅ Payment checkout success at endpoint:', {
+          ...responseData,
+          timestamp: new Date().toISOString()
+        });
+        console.log('📦 Payment response data:', {
+          ...response.data,
+          timestamp: new Date().toISOString()
+        });
+
+        paymentLogger.logPaymentApiResponse(responseData);
         
         // Handle different response structures
         if (response.data && typeof response.data === 'object') {
           // Ensure we have a proper response structure
           const responseData = response.data;
-          
-          return {
+          const paymentUrl = responseData.paymentUrl || responseData.url || responseData.redirectUrl || responseData.checkoutUrl;
+
+          const urlData = {
+            paymentUrl: paymentUrl,
+            bookingId: bookingId,
+            originalResponse: {
+              paymentUrl: responseData.paymentUrl,
+              url: responseData.url,
+              redirectUrl: responseData.redirectUrl,
+              checkoutUrl: responseData.checkoutUrl
+            }
+          };
+
+          console.log('🔗 Payment URL extracted:', {
+            ...urlData,
+            timestamp: new Date().toISOString()
+          });
+
+          paymentLogger.logPaymentRedirect(paymentUrl || 'no-url', urlData);
+
+          const finalResponse = {
             success: responseData.success !== false, // Default to true unless explicitly false
             message: responseData.message || 'Checkout thành công',
-            paymentUrl: responseData.paymentUrl || responseData.url || responseData.redirectUrl,
+            paymentUrl: paymentUrl,
+            checkoutUrl: paymentUrl, // Add checkoutUrl for compatibility
             orderId: responseData.orderId || responseData.order_id || responseData.id,
             amount: responseData.amount || responseData.totalAmount,
             ...responseData
           };
+
+          console.log('📤 Final payment response:', {
+            ...finalResponse,
+            timestamp: new Date().toISOString()
+          });
+
+          return finalResponse;
         }
         
         // Fallback response if data structure is unexpected
@@ -93,7 +163,14 @@ export const checkoutPaymentApi = async (bookingId: string): Promise<CheckoutRes
         };
 
       } catch (endpointError) {
-        console.log('❌ Endpoint failed:', endpoint, endpointError);
+        console.log('❌ Endpoint failed:', {
+          url: endpoint,
+          error: endpointError,
+          status: (endpointError as any)?.response?.status,
+          statusText: (endpointError as any)?.response?.statusText,
+          responseData: (endpointError as any)?.response?.data,
+          timestamp: new Date().toISOString()
+        });
         lastError = endpointError;
         continue; // Try next endpoint
       }
@@ -168,10 +245,33 @@ export const checkoutRemainingPaymentApi = async (bookingId: string): Promise<Ch
       throw new Error('Yêu cầu xác thực. Vui lòng đăng nhập lại.');
     }
     
-    console.log('🚀 Starting REMAINING payment for booking:', { bookingId });
+    const remainingStartData = {
+      bookingId,
+      baseUrl: BASE_URL,
+      paymentType: 'remaining' as const
+    };
+
+    console.log('🚀 Starting REMAINING payment for booking:', {
+      ...remainingStartData,
+      timestamp: new Date().toISOString()
+    });
+
+    paymentLogger.logPaymentStart(remainingStartData);
 
     const endpoint = `${BASE_URL}/Payment/${bookingId}/remaining-payment`;
-    
+
+    console.log('🔄 Remaining payment request:', {
+      url: endpoint,
+      method: 'POST',
+      requestBody: { bookingId },
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token ? token.substring(0, 20) + '...' : 'no token'}`,
+        'Content-Type': 'application/json',
+      },
+      timestamp: new Date().toISOString()
+    });
+
     const response = await axios.post(
       endpoint,
       { bookingId },
@@ -185,19 +285,60 @@ export const checkoutRemainingPaymentApi = async (bookingId: string): Promise<Ch
       }
     );
 
+    console.log('✅ Remaining payment success:', {
+      status: response.status,
+      statusText: response.statusText,
+      timestamp: new Date().toISOString()
+    });
+
     const responseData = response.data;
-    return {
+    const paymentUrl = responseData.checkoutUrl || responseData.url || responseData.redirectUrl || responseData.paymentUrl;
+
+    console.log('🔗 Remaining payment URL extracted:', {
+      paymentUrl: paymentUrl,
+      originalResponse: {
+        checkoutUrl: responseData.checkoutUrl,
+        url: responseData.url,
+        redirectUrl: responseData.redirectUrl,
+        paymentUrl: responseData.paymentUrl
+      },
+      timestamp: new Date().toISOString()
+    });
+
+    const finalResponse = {
       success: responseData.success !== false,
       message: responseData.message || 'Thanh toán thành công',
-      paymentUrl: responseData.checkoutUrl || responseData.url || responseData.redirectUrl,
+      paymentUrl: paymentUrl,
+      checkoutUrl: paymentUrl, // Add checkoutUrl for compatibility
       ...responseData
     };
 
+    console.log('📤 Final remaining payment response:', {
+      ...finalResponse,
+      timestamp: new Date().toISOString()
+    });
+
+    return finalResponse;
+
   } catch (error) {
-    console.error('❌ Remaining payment error:', error);
+    console.error('❌ Remaining payment error:', {
+      error: error,
+      timestamp: new Date().toISOString(),
+      bookingId: bookingId
+    });
+
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
       const responseData = error.response?.data;
+
+      console.error('📊 Detailed remaining payment error:', {
+        status,
+        statusText: error.response?.statusText,
+        responseData,
+        requestUrl: error.config?.url,
+        requestData: error.config?.data,
+        timestamp: new Date().toISOString()
+      });
 
       if (status === 401) {
         throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');

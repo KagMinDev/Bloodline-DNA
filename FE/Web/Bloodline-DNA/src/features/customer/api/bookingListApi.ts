@@ -154,20 +154,25 @@ export const getBookingByIdApi = async (bookingId: string): Promise<BookingItem 
 
     const result = await response.json();
     console.log('✅ Booking details fetched successfully:', result);
-    
-    // Handle different response structures
-    if (result.data) {
+
+    // ✅ Ưu tiên trả về result.data nếu có
+    if (result?.data) {
       return result.data;
-    } else if (result.id) {
-      return result;
-    } else {
-      return null;
     }
+
+    // Nếu không có .data, mà result là object đúng kiểu BookingDetail
+    if (result?.id && result?.status) {
+      return result;
+    }
+
+    console.warn("⚠️ Unexpected booking response structure:", result);
+    return null;
   } catch (error) {
     console.error('❌ Error fetching booking details:', error);
     throw error;
   }
 };
+
 
 // Function để filter booking theo status
 export const getBookingsByStatusApi = async (status: string): Promise<BookingItem[]> => {

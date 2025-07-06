@@ -298,7 +298,12 @@ namespace ADNTester.Service.Implementations
 
             return emailTemplate;
         }
+        public async Task<IEnumerable<TestBookingDto>> GetFilteredBookingsAsync(SampleCollectionMethod? method, DateTime? appointDate)
+        {
+            var bookings = await _unitOfWork.TestBookingRepository.GetFilteredBookingsAsync(method, appointDate);
 
+            return _mapper.Map<IEnumerable<TestBookingDto>>(bookings);
+        }
         #region Helper methods
         private string GetStatusText(BookingStatus status)
         {

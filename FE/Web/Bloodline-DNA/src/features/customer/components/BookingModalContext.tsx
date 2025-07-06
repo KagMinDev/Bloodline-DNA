@@ -1,11 +1,16 @@
 import React, { createContext, useState, useContext, type ReactNode } from 'react';
 
 interface SelectedService {
-  id: string;
-  name: string; // Changed from title to name
-  category?: string; // Made optional
-  price: number; // Changed from string to number
-  collectionMethod?: number; // Made optional
+  id: string;               // priceServiceId
+  serviceId?: string;       // real testServiceId if available
+  name: string;
+  category?: string;
+  price: number;
+  collectionMethod?: number;
+  testServiceInfo?: {
+    id: string;
+    [key: string]: any;
+  };
 }
 
 interface BookingModalContextType {

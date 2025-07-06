@@ -27,6 +27,7 @@ namespace ADNTester.BO.Entities
 
         // Optional: add a discriminator if needed
         public LogisticsType Type { get; set; } // Enum: Delivery or Pickup
+        public LogisticStatus Status { get; set; } = LogisticStatus.Pending;
 
         private static string GenerateUniqueId()
         {

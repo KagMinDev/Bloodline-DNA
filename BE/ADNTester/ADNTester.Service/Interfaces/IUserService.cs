@@ -15,6 +15,7 @@ namespace ADNTester.Service.Interfaces
 
         Task<bool> UpdateProfileAsync(string id, UpdateProfileDto dto);
         Task<bool?> ToggleUserActiveStatusAsync(string userId);
+        Task<IEnumerable<UserDto>> GetActiveStaffAsync();
 
     }
 }

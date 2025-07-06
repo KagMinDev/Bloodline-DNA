@@ -160,6 +160,10 @@ namespace ADNTester.Repository.Migrations
                     b.Property<string>("StaffId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(30)
