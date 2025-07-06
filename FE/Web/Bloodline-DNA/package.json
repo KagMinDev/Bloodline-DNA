@@ -26,6 +26,8 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
+    "@tiptap/react": "^2.24.2",
+    "@tiptap/starter-kit": "^2.24.2",
     "antd": "^5.25.2",
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",

@@ -31,10 +31,20 @@ const getSampleTypeLabel = (type: number): string => {
   }
 };
 
+const convertYouTubeUrlToEmbed = (url: string): string => {
+  const videoIdMatch = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{11})/
+  );
+  const videoId = videoIdMatch?.[1];
+  return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+};
+
 const SampleIns = () => {
   const [list, setList] = useState<SampleInsResponse[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<SampleInsUpdateRequest | null>(null);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   const fetchData = async () => {
     const res = await getSampleInsListApi();
@@ -46,24 +56,22 @@ const SampleIns = () => {
   }, []);
 
   const handleSubmit = async () => {
-  try {
-    if (editing && 'id' in editing) {
-            console.log("📤 Gửi update với:", editing);
-      const { id, sampleType, instructionText, mediaUrl } = editing;
-      await updateSampleInsApi({
-        id,
-        sampleType,
-        instructionText,
-        mediaUrl,
-      });
-
-      setOpen(false);
-      fetchData();
+    try {
+      if (editing && "id" in editing) {
+        const { id, sampleType, instructionText, mediaUrl } = editing;
+        await updateSampleInsApi({
+          id,
+          sampleType,
+          instructionText,
+          mediaUrl,
+        });
+        setOpen(false);
+        fetchData();
+      }
+    } catch (err) {
+      console.error("Submit error", err);
     }
-  } catch (err) {
-    console.error("Submit error", err);
-  }
-};
+  };
 
   const handleDelete = async (id: number) => {
     if (confirm("Bạn có chắc chắn muốn xoá?")) {
@@ -93,8 +101,8 @@ const SampleIns = () => {
             <TableBody>
               {list.map((item) => (
                 <TableRow key={item.id} className="text-center">
-                  <TableCell className="text-center">
-                    <span className="inline-block px-2 py-1 text-sm font-bold ">
+                  <TableCell>
+                    <span className="inline-block px-2 py-1 text-sm font-bold">
                       {getSampleTypeLabel(item.sampleType)}
                     </span>
                   </TableCell>
@@ -103,18 +111,34 @@ const SampleIns = () => {
                   </TableCell>
                   <TableCell className="text-center">
                     {item.mediaUrl?.includes("youtube") ? (
-                      <iframe
-                        className="w-32 h-20 mx-auto"
-                        src={item.mediaUrl}
-                        title="Video"
-                        allowFullScreen
-                      />
-                    ) : (
+                      <div
+                        className="w-32 h-20 mx-auto cursor-pointer relative group"
+                        onClick={() => {
+                          setVideoUrl(convertYouTubeUrlToEmbed(item.mediaUrl));
+                          setIsVideoOpen(true);
+                        }}
+                      >
+                        <iframe
+                          className="w-full h-full pointer-events-none rounded"
+                          src={convertYouTubeUrlToEmbed(item.mediaUrl)}
+                          title="Video hướng dẫn"
+                        />
+                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 flex items-center justify-center rounded">
+                          <span className="text-white text-xs font-semibold">
+                            Xem lớn
+                          </span>
+                        </div>
+                      </div>
+                    ) : item.mediaUrl ? (
                       <img
                         src={item.mediaUrl}
                         alt="media"
                         className="w-20 h-14 object-cover rounded mx-auto"
                       />
+                    ) : (
+                      <span className="text-gray-400 italic">
+                        Không có media
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
@@ -127,9 +151,14 @@ const SampleIns = () => {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() => {
-                            console.log("📝 Set editing item:", item);
-                            const { id, sampleType, instructionText, mediaUrl } = item;
-                            setEditing({ id, sampleType, instructionText, mediaUrl });
+                            const { id, sampleType, instructionText, mediaUrl } =
+                              item;
+                            setEditing({
+                              id,
+                              sampleType,
+                              instructionText,
+                              mediaUrl,
+                            });
                             setOpen(true);
                           }}
                         >
@@ -147,12 +176,11 @@ const SampleIns = () => {
                 </TableRow>
               ))}
             </TableBody>
-
           </Table>
         </CardContent>
       </Card>
 
-      {/* Dialog chỉnh sửa */}
+      {/* Dialog chỉnh sửa hướng dẫn */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -174,8 +202,13 @@ const SampleIns = () => {
                   )
                 }
               />
-            </div>
+              {editing?.sampleType !== undefined && (
+                <p className="text-sm text-gray-500 mt-1 italic">
+                  ➤ {getSampleTypeLabel(editing.sampleType)}
+                </p>
+              )}
 
+            </div>
             <div>
               <label className="text-sm font-medium">Hướng dẫn chi tiết</label>
               <Textarea
@@ -184,14 +217,18 @@ const SampleIns = () => {
                 value={editing?.instructionText ?? ""}
                 onChange={(e) =>
                   setEditing((prev) =>
-                    prev ? { ...prev, instructionText: e.target.value } : prev
+                    prev
+                      ? { ...prev, instructionText: e.target.value }
+                      : prev
                   )
                 }
               />
             </div>
 
             <div>
-              <label className="text-sm font-medium">Media URL (ảnh hoặc video)</label>
+              <label className="text-sm font-medium">
+                Media URL (ảnh hoặc video)
+              </label>
               <Input
                 placeholder="https://..."
                 value={editing?.mediaUrl ?? ""}
@@ -208,10 +245,23 @@ const SampleIns = () => {
                 onClick={handleSubmit}
                 className="w-full bg-blue-700 text-white hover:bg-blue-800"
               >
-                Cập nhật hướng dẫn
+               <span className="text-white"> Cập nhật hướng dẫn</span>
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog xem video lớn */}
+      <Dialog open={isVideoOpen} onOpenChange={setIsVideoOpen}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          <iframe
+            className="w-full aspect-video"
+            src={videoUrl || ""}
+            title="Video hướng dẫn"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
         </DialogContent>
       </Dialog>
     </div>
