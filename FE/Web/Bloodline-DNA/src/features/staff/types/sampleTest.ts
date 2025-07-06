@@ -1,12 +1,14 @@
 // 🧪 Gửi dữ liệu mẫu test
 export interface SampleTestRequest {
   kitId: string;
-  sampleCode: string;
   donorName: string;
-  relationshipToSubject: number; // gửi dưới dạng số
+  relationshipToSubject: number;
+  sampleType: number;
+}
+
+export interface SampleTestFromStaffRequest extends SampleTestRequest {
   collectedById: string;
   collectedAt: Date;
-  sampleType: number; // gửi dưới dạng số
   labReceivedAt: Date;
 }
 
@@ -16,8 +18,8 @@ export interface SampleTestResponse {
   kitId: string;
   sampleCode: string;
   donorName: string;
-  relationshipToSubject: number; // giữ nguyên số để map label
-  sampleType: number;            // giữ nguyên số để map label
+  relationshipToSubject: string; // giữ nguyên số để map label
+  sampleType: string;            // giữ nguyên số để map label
   collectedById: string;
   collectedAt: Date;
   labReceivedAt: Date;
@@ -78,9 +80,36 @@ export const SampleTypeLabelVi: Record<number, string> = {
   6: "Mẫu khác",
 };
 
-// 🧠 (Tùy chọn) Hàm lấy chuỗi từ mã số:
-export const getRelationshipLabelVi = (value: number) =>
-  RelationshipToSubjectLabelVi[value] || "Không xác định";
+export const SampleTypeLabelViByKey: Record<string, string> = {
+  Unknown: "Không xác định",
+  BuccalSwab: "Tăm bông miệng",
+  Blood: "Máu",
+  HairWithRoot: "Tóc có chân",
+  Fingernail: "Móng tay",
+  Saliva: "Nước bọt",
+  Other: "Mẫu khác",
+};
 
-export const getSampleTypeLabelVi = (value: number) =>
-  SampleTypeLabelVi[value] || "Không xác định";
+export const RelationshipToSubjectLabelViByKey: Record<string, string> = {
+  Unknown: "Không xác định",
+  Father: "Cha",
+  Mother: "Mẹ",
+  Child: "Con",
+  Grandfather: "Ông",
+  Grandmother: "Bà",
+  Grandchild: "Cháu",
+  Brother: "Anh/Em trai",
+  Sister: "Chị/Em gái",
+  Uncle: "Chú/Bác/Cậu",
+  Aunt: "Cô/Dì",
+  Nephew: "Cháu trai",
+  Niece: "Cháu gái",
+  Other: "Khác",
+};
+
+// Cập nhật hàm lấy nhãn:
+export const getRelationshipLabelViByKey = (key: string) =>
+  RelationshipToSubjectLabelViByKey[key] || "Không xác định";
+
+export const getSampleTypeLabelViByKey = (key: string) =>
+  SampleTypeLabelViByKey[key] || "Không xác định";

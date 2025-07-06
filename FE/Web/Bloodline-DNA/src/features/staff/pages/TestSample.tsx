@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
-import { getRelationshipLabelVi, getSampleTypeLabelVi, type SampleTestResponse } from "../types/sampleTest";
+import { getRelationshipLabelViByKey, getSampleTypeLabelViByKey, type SampleTestResponse} from "../types/sampleTest";
 import { getAllTestSampleApi } from "../api/testSampleApi";
 import { Button } from "antd";
 import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
@@ -34,7 +34,7 @@ export default function TestSamplePage() {
       <TestSampleModal open={open} onClose={() => { setOpen(false); fetchData(); }} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-[#1F2B6C]">Quản lý mẫu xét nghiệm</h1>
-        <Button
+        <Button 
           className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 text-white"
           onClick={() => setOpen(true)}
         >
@@ -70,10 +70,12 @@ export default function TestSamplePage() {
                   <TableRow key={item.id}>
                     <TableCell className="font-medium text-blue-700">{item.sampleCode}</TableCell>
                     <TableCell>{item.donorName}</TableCell>
-                    <TableCell>{getRelationshipLabelVi(item.relationshipToSubject)}</TableCell>
-                    <TableCell>{getSampleTypeLabelVi(item.sampleType)}</TableCell>
+                    <TableCell>{getRelationshipLabelViByKey(item.relationshipToSubject)}</TableCell>
+                    <TableCell>{getSampleTypeLabelViByKey(item.sampleType)}</TableCell>
                     <TableCell>{format(new Date(item.collectedAt), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>{format(new Date(item.labReceivedAt), "dd/MM/yyyy")}</TableCell>
+                    <TableCell>
+                      {item.labReceivedAt ? format(new Date(item.labReceivedAt), "dd/MM/yyyy") : "—"}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
