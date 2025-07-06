@@ -1,66 +1,70 @@
 // src/features/customer/api/checkoutApi.ts
 const BASE_URL = 'https://api.adntester.duckdns.org';
 
-interface CallbackPayload {
-    orderCode: string;
-    status: string;
-    bookingId: string;
-}
+export const callPaymentCallbackApi = async (payload: {
+  orderCode: string;
+  status: string;
+  bookingId: string;
+}): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const response = await fetch(`${BASE_URL}/api/Payment/callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+      body: JSON.stringify(payload),
+    });
 
-const callPaymentCallbackApi = async (payload: CallbackPayload): Promise<any> => {
-    const url = `${BASE_URL}/api/Payment/callback`;
-    console.log('Calling payment callback API:', url);
-    console.log('Payload:', payload);
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("Failed to call callback API, server responded with:", errorText);
-            throw new Error(`Error calling payment callback API: ${response.statusText}`);
-        }
-        
-        const responseText = await response.text();
-        if (responseText) {
-            try {
-                const responseData = JSON.parse(responseText);
-                console.log("Callback API response:", responseData);
-                return responseData;
-            } catch (e) {
-                console.warn("Could not parse JSON from response:", responseText);
-                return { success: true, data: responseText };
-            }
-        }
-
-        console.log("Callback API call successful with no content in response.");
-        return { success: true };
-    } catch (error) {
-        console.error("Error in callPaymentCallbackApi:", error);
-        throw error;
+    if (!response.ok) {
+      const data = await response.json();
+      return { success: false, error: data.message || `HTTP ${response.status}` };
     }
+
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
 };
 
-export const updateErrorStatusApi = async (orderCode: string, status: string): Promise<any> => {
-    const payload: CallbackPayload = {
-        orderCode: orderCode,
-        status: status,
-        bookingId: orderCode, // Assuming orderCode is the bookingId
-    };
-    return callPaymentCallbackApi(payload);
-};
+/**
+ * Helper function to handle payment return from gateway
+ * (Dùng localStorage thay vì sessionStorage)
+ */
+export const handlePaymentReturn = async (params: URLSearchParams) => {
+  const status = params.get('status');
+  const orderCode = params.get('orderCode');
 
-export const updateSuccessStatusApi = async (orderCode: string): Promise<any> => {
-    const payload: CallbackPayload = {
-        orderCode: orderCode,
-        status: "PAID", // Assuming a fixed status for success cases
-        bookingId: orderCode, // Assuming orderCode is the bookingId
+  if (!status || !orderCode) {
+    return {
+      success: false,
+      error: {
+        code: 'INVALID_PARAMS',
+        message: 'Missing status or orderCode in URL parameters',
+      },
     };
-    return callPaymentCallbackApi(payload);
-}; 
+  }
+
+  // 🔁 Đọc từ localStorage thay vì sessionStorage
+  const paymentDataStr = localStorage.getItem('paymentData');
+  const paymentData = paymentDataStr ? JSON.parse(paymentDataStr) : null;
+
+  if (!paymentData?.bookingId) {
+    return {
+      success: false,
+      error: {
+        code: 'MISSING_BOOKING_ID',
+        message: 'No paymentData or bookingId found in localStorage',
+      },
+    };
+  }
+
+  return callPaymentCallbackApi({
+    orderCode,
+    status,
+    bookingId: paymentData.bookingId,
+  });
+};

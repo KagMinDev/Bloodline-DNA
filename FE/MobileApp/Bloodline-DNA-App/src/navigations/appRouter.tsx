@@ -11,16 +11,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import {
-  ForgotPasswordScreen,
-  HomePageScreen,
-  LoginScreen,
-  RegisterScreen,
-} from "../screens";
-import {
-  MainTabParamList,
-  RootStackParamList,
-} from "../types/root-stack/stack.types";
+import { ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen } from "../screens";
+import { MainTabParamList, RootStackParamList,} from "../types/root-stack/stack.types";
+import DetailService from "@/screens/services/components/AllServices/DetailService";
+import AllServiceScreen from "@/screens/services/screen/AllServiceScreen";
+import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
 
 // ... (giữ nguyên các component Placeholder screens)
 const ProfileScreen: React.FC = () => (
@@ -33,21 +28,6 @@ const ProfileScreen: React.FC = () => (
     }}
   >
     <Text style={{ fontSize: 24, fontWeight: "bold" }}>Profile Screen</Text>
-  </View>
-);
-
-const AppointmentsScreen: React.FC = () => (
-  <View
-    style={{
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#F0F9FF",
-    }}
-  >
-    <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-      Appointments Screen
-    </Text>
   </View>
 );
 
@@ -73,7 +53,7 @@ const MainTabs: React.FC = () => {
         },
         tabBarIcon: ({ color, size }: { color: string; size: number }) => {
           let iconName: string;
-          if (route.name === "Appointments") {
+          if (route.name === "Services") {
             iconName = "calendar";
           } else {
             iconName = "account";
@@ -88,9 +68,9 @@ const MainTabs: React.FC = () => {
         options={{ tabBarLabel: "Trang chủ" }}
       />
       <Tab.Screen
-        name="Appointments"
-        component={AppointmentsScreen}
-        options={{ tabBarLabel: "Lịch hẹn" }}
+        name="Services"
+        component={Services}
+        options={{ tabBarLabel: "Dịch vụ" }}
       />
       <Tab.Screen
         name="Profile"
@@ -117,11 +97,14 @@ const AppRouter: React.FC = () => {
       {isLoggedIn ? (
         <>
           <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="Services" component={Services} />
           <Stack.Screen name="About" component={AboutScreen} />
           <Stack.Screen name="Doctors" component={DoctorsScreen} />
           <Stack.Screen name="News" component={NewsScreen} />
           <Stack.Screen name="Contact" component={ContactScreen} />
+
+          <Stack.Screen name="AllService" component={AllServiceScreen} />
+          <Stack.Screen name="DetailsService" component={DetailService} />
+          <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
         </>
       ) : (
         <>

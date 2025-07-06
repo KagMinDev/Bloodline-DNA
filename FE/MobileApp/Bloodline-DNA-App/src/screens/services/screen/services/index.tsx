@@ -1,32 +1,23 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useRef } from "react";
-import {
-  Animated,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
-import {
-  Activity,
-  ArrowRight,
-  Clipboard,
-  Heart,
-  Shield,
-  UserCheck
-} from "react-native-feather";
+import { Animated, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Activity, ArrowRight, Clipboard, Heart, Shield, UserCheck } from "react-native-feather";
 import styles from "./styles";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "@/types/root-stack/stack.types"; // sửa lại đúng đường dẫn types nếu khác
 
 export const ServicesSection: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  // Enhanced service card data with Vietnamese content
   const serviceCards = [
     {
       id: 1,
       title: "Cấp Cứu 24/7",
-      description: "Dịch vụ y tế cấp cứu 24/7 với đội ngũ chuyên gia y tế giàu kinh nghiệm sẵn sàng xử lý các tình huống nguy cấp.",
+      description:
+        "Dịch vụ y tế cấp cứu 24/7 với đội ngũ chuyên gia y tế giàu kinh nghiệm sẵn sàng xử lý các tình huống nguy cấp.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: true,
       hasFloatingIcon: false,
@@ -37,7 +28,8 @@ export const ServicesSection: React.FC = () => {
     {
       id: 2,
       title: "Khám Sức Khỏe Định Kỳ",
-      description: "Khám sức khỏe toàn diện và chăm sóc phòng ngừa để giúp duy trì sức khỏe tối ưu.",
+      description:
+        "Khám sức khỏe toàn diện và chăm sóc phòng ngừa để giúp duy trì sức khỏe tối ưu.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -48,7 +40,8 @@ export const ServicesSection: React.FC = () => {
     {
       id: 3,
       title: "Tư Vấn Chuyên Khoa",
-      description: "Tư vấn chuyên sâu với các bác sĩ chuyên khoa được chứng nhận trong nhiều lĩnh vực y tế.",
+      description:
+        "Tư vấn chuyên sâu với các bác sĩ chuyên khoa được chứng nhận trong nhiều lĩnh vực y tế.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -59,7 +52,8 @@ export const ServicesSection: React.FC = () => {
     {
       id: 4,
       title: "Theo Dõi Sức Khỏe",
-      description: "Theo dõi sức khỏe liên tục và các kế hoạch chăm sóc cá nhân hóa.",
+      description:
+        "Theo dõi sức khỏe liên tục và các kế hoạch chăm sóc cá nhân hóa.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -70,7 +64,8 @@ export const ServicesSection: React.FC = () => {
     {
       id: 5,
       title: "Dịch Vụ Xét Nghiệm",
-      description: "Xét nghiệm và chẩn đoán hiện đại với kết quả nhanh chóng, chính xác.",
+      description:
+        "Xét nghiệm và chẩn đoán hiện đại với kết quả nhanh chóng, chính xác.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -81,7 +76,8 @@ export const ServicesSection: React.FC = () => {
     {
       id: 6,
       title: "Khám Từ Xa",
-      description: "Tư vấn sức khỏe trực tuyến tại nhà với các nhà cung cấp dịch vụ chăm sóc sức khỏe.",
+      description:
+        "Tư vấn sức khỏe trực tuyến tại nhà với các nhà cung cấp dịch vụ chăm sóc sức khỏe.",
       image: "https://c.animaapp.com/mbgey19id5YPrV/img/rectangle-20-5.png",
       hasOverlay: false,
       hasFloatingIcon: true,
@@ -93,7 +89,6 @@ export const ServicesSection: React.FC = () => {
 
   const handleCardPress = (cardId: number) => {
     console.log("Card pressed:", cardId);
-    // Navigation logic would go here
   };
 
   return (
@@ -104,21 +99,24 @@ export const ServicesSection: React.FC = () => {
         <Text style={styles.title}>Dịch Vụ Y Tế Chất Lượng Cao</Text>
         <View style={styles.divider} />
         <Text style={styles.description}>
-          Giải pháp chăm sóc sức khỏe toàn diện được thiết kế riêng để đáp ứng nhu cầu cá nhân của bạn.
+          Giải pháp chăm sóc sức khỏe toàn diện được thiết kế riêng để đáp ứng
+          nhu cầu cá nhân của bạn.
         </Text>
       </View>
 
       {/* Services grid */}
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.gridContainer}
       >
         {serviceCards.map((card, index) => {
-          const IconComponent = card.hasOverlay ? card.overlayIcon : card.floatingIcon;
+          const IconComponent = card.hasOverlay
+            ? card.overlayIcon
+            : card.floatingIcon;
           const animatedValue = new Animated.Value(0);
-          
+
           const translateY = animatedValue.interpolate({
             inputRange: [0, 1],
             outputRange: [50, 0],
@@ -145,11 +143,12 @@ export const ServicesSection: React.FC = () => {
                   opacity,
                   transform: [{ translateY }],
                   marginLeft: index === 0 ? 20 : 0,
-                  marginRight: index === serviceCards.length - 1 ? 20 : 15,
+                  marginRight:
+                    index === serviceCards.length - 1 ? 20 : 15,
                 },
               ]}
             >
-              <TouchableOpacity 
+              <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => handleCardPress(card.id)}
               >
@@ -161,30 +160,22 @@ export const ServicesSection: React.FC = () => {
                     resizeMode="cover"
                   />
 
-                  {/* Gradient overlay */}
                   <LinearGradient
-                    colors={['rgba(0,0,0,0)', 'rgba(0,0,0,0.5)']}
+                    colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.5)"]}
                     style={styles.imageOverlay}
                   />
 
-                  {/* Category tag */}
                   <View style={styles.categoryTag}>
                     <Text style={styles.categoryText}>{card.category}</Text>
                   </View>
 
-                  {/* Price tag */}
                   <View style={styles.priceTag}>
                     <Text style={styles.priceText}>{card.price}</Text>
                   </View>
 
-                  {/* Floating icon */}
                   {card.hasFloatingIcon && IconComponent && (
                     <View style={styles.floatingIcon}>
-                      <IconComponent 
-                        width={24} 
-                        height={24} 
-                        color="white" 
-                      />
+                      <IconComponent width={24} height={24} color="white" />
                     </View>
                   )}
                 </View>
@@ -192,7 +183,7 @@ export const ServicesSection: React.FC = () => {
                 {/* Card Content */}
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{card.title}</Text>
-                  <Text 
+                  <Text
                     style={styles.cardDescription}
                     numberOfLines={3}
                     ellipsizeMode="tail"
@@ -211,9 +202,19 @@ export const ServicesSection: React.FC = () => {
         })}
       </ScrollView>
 
+      {/* 👇 Nút chuyển trang Tất Cả Dịch Vụ */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("AllService")}
+        style={styles.AllService}>
+        <Text style={styles.AllServiceText}>
+          Tất Cả Dịch Vụ
+        </Text>
+        <ArrowRight width={18} height={18} color="#1e3a8a" />
+      </TouchableOpacity>
+
       {/* Call to action */}
       <LinearGradient
-        colors={['#2563eb', '#1d4ed8']}
+        colors={["#2563eb", "#1d4ed8"]}
         style={styles.ctaContainer}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}

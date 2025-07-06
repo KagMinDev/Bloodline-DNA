@@ -88,13 +88,14 @@ const TestList: React.FC<TestListProps> = ({ tests, onEditTest, onShowDetail, on
                         </TableCell>
                         <TableCell className="text-center">
                           <span
-                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${price.isActive
+                            className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${price.testServiceInfor.isActive
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-red-100 text-red-700'
                               }`}
                           >
-                            {price.isActive && test.isActive ? 'Hoạt động' : 'Tạm ngưng'}
+                            {price.testServiceInfor.isActive ? 'Hoạt động' : 'Tạm ngưng'}
                           </span>
+
                         </TableCell>
                         <TableCell className="text-center">
                           <DropdownMenu>

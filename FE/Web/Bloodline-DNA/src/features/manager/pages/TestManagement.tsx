@@ -22,8 +22,11 @@ export default function TestManagement() {
 
   useEffect(() => {
     getTestsApi(token)
-      .then(setTests)
-      .catch(() => {});
+      .then((res) => {
+        const sortedTests = [...res].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setTests(sortedTests);
+      })
+      .catch(() => { });
   }, [token]);
 
   // Thêm dịch vụ mới (POST)
@@ -48,7 +51,8 @@ export default function TestManagement() {
       alert('Thêm dịch vụ thành công!');
       setShowAddTest(false);
       const newTests = await getTestsApi(token);
-      setTests(newTests);
+      const sortedTests = [...newTests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setTests(sortedTests);
     } catch (err) {
       console.error('Error adding test:', err);
       alert(`Có lỗi xảy ra: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -73,7 +77,8 @@ export default function TestManagement() {
       await updateTestApi(data, token);
       setShowEditTest(false);
       const newTests = await getTestsApi(token);
-      setTests(newTests);
+      const sortedTests = [...newTests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setTests(sortedTests);
       alert('Cập nhật dịch vụ thành công!');
     } catch (err) {
       alert('Có lỗi xảy ra khi cập nhật dịch vụ!');
@@ -135,13 +140,13 @@ export default function TestManagement() {
 
       {/* Danh sách dịch vụ */}
       <div className="overflow-x-auto max-h-[80vh]">
-              <TestList
-                tests={tests}
-                onShowDetail={handleShowDetail}
-                onEditTest={handleEditTest}
-                onDeleteTest={handleDeleteTest}
-              />
-            </div>
+        <TestList
+          tests={tests}
+          onShowDetail={handleShowDetail}
+          onEditTest={handleEditTest}
+          onDeleteTest={handleDeleteTest}
+        />
+      </div>
     </div>
   );
 }
