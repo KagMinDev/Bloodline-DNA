@@ -12,7 +12,7 @@ export type RootStackParamList = {
   Main: undefined;
   AllService: undefined;
   DetailsService: { id: string };
-  AppointmentScreen: { serviceId: string };
+  AppointmentScreen: { testServiceId: string; priceServiceId: string; };
 };
 
 

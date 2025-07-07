@@ -28,3 +28,22 @@ export const loginApi = async (email: string, password: string) => {
     throw new Error("Đã xảy ra lỗi không mong muốn");
   }
 };
+
+export const getUserInfoApi = async (token: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/user/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage =
+        error.response?.data?.message || "Lỗi không xác định từ server";
+      throw new Error(serverMessage);
+    }
+    throw new Error("Đã xảy ra lỗi không mong muốn");
+  }
+};

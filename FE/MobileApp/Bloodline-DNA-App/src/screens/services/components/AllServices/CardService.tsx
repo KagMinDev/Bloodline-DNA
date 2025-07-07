@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../../types/root-stack/stack.types";
 import { getCategoryLabel, getCollectionMethodLabel, TestResponse } from "../../types/TestService";
 
-interface Props { data: TestResponse; onPress?: () => void;}
+interface Props { data: TestResponse; onPress?: () => void; }
 
 const CardService: React.FC<Props> = ({ data, onPress }) => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -39,10 +39,10 @@ const CardService: React.FC<Props> = ({ data, onPress }) => {
                 {/* Giá + mũi tên */}
                 <View style={styles.infoRow}>
                     <View style={styles.infoBox}>
-                        <Text style={styles.label}>Giá</Text>
+                        <Text style={styles.label}>Giá: </Text>
                         <Text style={styles.value}>
                             {priceInfo
-                                ? `${priceInfo.price.toLocaleString()} ${priceInfo.currency}`
+                                ? `${priceInfo.price.toLocaleString()}`
                                 : "Không rõ"}
                         </Text>
                     </View>
@@ -54,7 +54,11 @@ const CardService: React.FC<Props> = ({ data, onPress }) => {
             <TouchableOpacity
                 style={styles.bookButton}
                 onPress={() => {
-                    navigation.navigate("AppointmentScreen", { serviceId: data.id });
+                    const priceServiceId = data.priceServices?.[0]?.id || "";
+                    navigation.navigate("AppointmentScreen", {
+                        testServiceId: data.id,
+                        priceServiceId,
+                    });
                 }}
             >
                 <Text style={styles.bookButtonText}>Đặt lịch</Text>
@@ -125,10 +129,13 @@ const styles = StyleSheet.create({
     },
     infoBox: {
         flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
     },
     label: {
         fontSize: 12,
         color: "#9CA3AF",
+        marginRight: 5,
     },
     value: {
         fontSize: 14,

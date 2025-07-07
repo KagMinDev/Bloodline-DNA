@@ -15,8 +15,9 @@ import { PageLoading } from "../../../components/common/loading";
 import { useAuth } from "../../../context/auth/AuthContext"; // Import hàm login từ
 import { Login } from "../../../types/auth/auth.types";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
-import { loginApi } from "../apis/loginApi";
+import { getUserInfoApi, loginApi } from "../apis/loginApi";
 import styles from "./styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -73,12 +74,20 @@ const handleLogin = async (data: Login) => {
 
   setLoading(true);
   try {
-    const response = await loginApi(data.email, data.password); // Gọi API thật
+    const response = await loginApi(data.email, data.password); 
     const token = response.data.token;
 
-    await login(token); // Lưu token vào AsyncStorage và cập nhật trạng thái đăng nhập
+    await login(token); 
+
+    const userInfo = await getUserInfoApi(token);
+    
+    const clientId = userInfo.id;
+    
+    await AsyncStorage.setItem("clientId", clientId);
+
+    
   } catch (error: any) {
-    console.error("Đăng nhập thất bại:", error.message);
+    console.error("Đăng nhập thất bại:", error);
     setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
   } finally {
     setLoading(false);

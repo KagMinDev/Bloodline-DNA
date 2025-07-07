@@ -74,7 +74,7 @@ const TestList: React.FC<TestListProps> = ({ tests, onEditTest, onShowDetail, on
                       >
                         <TableCell className="text-center">{test.name}</TableCell>
                         <TableCell className="text-center font-semibold text-green-700">
-                          {price.price.toLocaleString()} {price.currency ?? 'VND'}
+                          {price.price.toLocaleString()} {price.currency}
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200">
