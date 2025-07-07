@@ -296,6 +296,7 @@ namespace ADNTester.API.Controllers
                     // Tạo LogisticsInfo giao kit
                     var logisticsInfo = new LogisticsInfo
                     {
+                        Name = booking.ClientName,
                         Address = booking.Address,
                         Phone = booking.Phone,
                         Type = LogisticsType.Delivery,

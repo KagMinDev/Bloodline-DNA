@@ -1,4 +1,5 @@
 ﻿using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.Logistic;
 using ADNTester.BO.DTOs.User;
 using ADNTester.BO.Entities;
 using ADNTester.BO.Enums;
@@ -75,7 +76,7 @@ namespace ADNTester.Api.Controllers
         /// Tạo nhiệm vụ logistics mới (giao hoặc nhận)
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] LogisticsInfo dto)
+        public async Task<IActionResult> Create([FromBody] CreateLogisticsInfoDto dto)
         {
             var entity = _mapper.Map<LogisticsInfo>(dto);
             var created = await _logisticService.CreateAsync(entity);
