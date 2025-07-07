@@ -21,7 +21,7 @@ export const styles = StyleSheet.create({
   },
   chatContainer: {
     width: "100%",
-    height: "90%",
+    height: "95%",
     backgroundColor: "#fff",
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
