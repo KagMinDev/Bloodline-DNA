@@ -1,7 +1,10 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { NotFound } from "../components";
-import { ForgotPasswordForm, Login, Register } from "../features";
+import { Blogs, ForgotPasswordForm, Login, Register } from "../features";
+import { AboutPage } from "../features/about";
+import { Contacts, DetailServices, Doctors, Services } from "../features/customer";
+import BlogDetail from "../features/customer/pages/BlogDetails";
 import HomePage from "../features/home/pages/HomePage";
 import AdminRouter from "./AdminRouter";
 import CustomerRouter from "./CustomerRouter";
@@ -18,6 +21,13 @@ const App: React.FC = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+      <Route path="/about" element={<AboutPage />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/:id" element={<DetailServices />} />
+        <Route path="/doctors" element={<Doctors />} />
+        <Route path="/contacts" element={<Contacts />} />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
       
       {/* Homepage route */}
       <Route path="/" element={<HomePage />} />

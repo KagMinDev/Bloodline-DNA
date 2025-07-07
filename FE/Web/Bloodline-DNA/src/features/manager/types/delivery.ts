@@ -30,3 +30,15 @@ export interface DeliveryOrder {
   note: string;
   status: DeliveryStatus;
 }
+export interface RawStaffResponse {
+  id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  address: string;
+}
+export interface ActiveStaff {
+  id: string;
+  fullName: string;
+  email: string;
+}

@@ -28,7 +28,7 @@ const DeliveriesStaff = () => {
   const handleRowClick = (id: string) => {
     setSelectedId(id);
     console.log("Click đơn:", id);
-    setTimeout(() => setSelectedId(null), 500); // giả lập
+    setTimeout(() => setSelectedId(null), 500);
   };
 
   return (
@@ -46,6 +46,9 @@ const DeliveriesStaff = () => {
           data={deliveries}
           onRowClick={handleRowClick}
           loadingId={selectedId}
+          onComplete={(id) => {
+            console.log("Hoàn thành đơn:", id);
+          }}
         />
       )}
     </div>
