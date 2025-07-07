@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { FeedbackResponse } from '../types/feedback';
+import { useCallback, useEffect, useState } from 'react';
 import { Loading } from '../../../components';
-import FeedbackCard from '../components/feedback/FeedbackCard';
 import { getFeedbacksApi } from '../api/feedbackApi'; // Thêm dòng này
+import FeedbackCard from '../components/feedback/FeedbackCard';
+import type { FeedbackResponse } from '../types/feedback';
 
 function Feedbacks() {
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
