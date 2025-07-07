@@ -323,6 +323,35 @@ namespace ADNTester.Service.Implementations
             return true;
         }
 
+        public async Task<bool> ConfirmKitReceivedAsync(string bookingId)
+        {
+            // Step 1: Get the booking
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(bookingId);
+            if (booking == null)
+                throw new Exception("Không tìm thấy đặt lịch.");
+
+            // Step 2: Get the TestKit with DeliveryInfo
+            var testKit = await _unitOfWork.TestKitRepository.GetWithDeliveryInfoByBookingIdAsync(bookingId);
+
+            if (testKit == null)
+                throw new Exception("Không tìm thấy bộ kit xét nghiệm cho đặt lịch này.");
+
+            if (testKit.CollectionMethod != SampleCollectionMethod.SelfSample)
+                throw new InvalidOperationException("Phương thức lấy mẫu không phải là lấy mẫu tại nhà.");
+
+            if (testKit.DeliveryInfo == null)
+                throw new InvalidOperationException("Không có thông tin giao hàng.");
+
+            if (testKit.DeliveryInfo.Status != LogisticStatus.KitDelivered)
+                throw new InvalidOperationException("Nhân viên chưa xác nhận đã giao kit.");
+
+            // Step 3: Allow client to confirm → update only the booking status
+            booking.Status = BookingStatus.KitDelivered;
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #region Helper methods
         private string GetStatusText(BookingStatus status)
         {

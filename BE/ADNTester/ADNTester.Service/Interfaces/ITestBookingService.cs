@@ -19,5 +19,6 @@ namespace ADNTester.Service.Interfaces
         Task<IEnumerable<TestBookingDetailDto>> GetBookingByUserId(string userId);
         Task<IEnumerable<TestBookingDto>> GetFilteredBookingsAsync(SampleCollectionMethod? method, DateTime? appointDate);
         Task<bool> CheckInAsync(string bookingId);
+        Task<bool> ConfirmKitReceivedAsync(string bookingId);
     }
 } 

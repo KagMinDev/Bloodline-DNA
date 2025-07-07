@@ -65,7 +65,7 @@ namespace ADNTester.Api.Controllers
         /// <param name="method">Phương thức lấy mẫu: SelfSample hoặc AtFacility</param>
         /// <param name="appointDate">Ngày hẹn (yyyy-MM-dd)</param>
         /// <returns>Danh sách đặt lịch phù hợp</returns>
-        [HttpGet("bookings/filter")]
+        [HttpGet("/bookings/filter")]
         public async Task<IActionResult> GetFilteredBookings(
             [FromQuery] SampleCollectionMethod? method,
             [FromQuery] DateTime? appointDate)
@@ -78,7 +78,7 @@ namespace ADNTester.Api.Controllers
         /// </summary>
         /// <param name="bookingId">ID của lượt đặt lịch</param>
         /// <returns>Kết quả check-in</returns>
-        [HttpPut("bookings/{bookingId}/check-in")]
+        [HttpPut("/bookings/{bookingId}/check-in")]
         public async Task<IActionResult> CheckIn(string bookingId)
         {
             var success = await _testBookingService.CheckInAsync(bookingId);
