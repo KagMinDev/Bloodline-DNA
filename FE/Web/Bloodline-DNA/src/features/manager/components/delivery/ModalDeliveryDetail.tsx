@@ -108,13 +108,6 @@ const DeliveryDetailModal = ({
     onClose();
   };
 
-  // Tìm tên staff để hiển thị
-  const getStaffDisplayName = () => {
-    if (!selectedStaff) return "Chưa phân công";
-    const staff = staffList.find((s) => s.id === selectedStaff);
-    return staff ? `${staff.fullName} (${staff.email})` : "Chưa phân công";
-  };
-
   if (!delivery) return null;
 
   return (
@@ -150,11 +143,6 @@ const DeliveryDetailModal = ({
                 </Select.Option>
               ))}
             </Select>
-            {selectedStaff && (
-              <div style={{ marginTop: 4, fontSize: 12, color: "#666" }}>
-                Hiện tại: {getStaffDisplayName()}
-              </div>
-            )}
           </Descriptions.Item>
           <Descriptions.Item label="Địa chỉ">
             {delivery.address}

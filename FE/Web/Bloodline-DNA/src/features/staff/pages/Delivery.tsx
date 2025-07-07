@@ -46,9 +46,7 @@ const DeliveriesStaff = () => {
           data={deliveries}
           onRowClick={handleRowClick}
           loadingId={selectedId}
-          onComplete={(id) => {
-            console.log("Hoàn thành đơn:", id);
-          }}
+          onComplete={fetchDeliveries}
         />
       )}
     </div>
