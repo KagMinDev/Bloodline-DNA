@@ -12,15 +12,17 @@ export const statusToNumber = (status: string | number | null | undefined): numb
 
   const statusMap: Record<string, number> = {
     Pending: 0,
-    Preparingkit: 1,
-    Deliveringkit: 2,
-    Kitdelivered: 3,
-    Waitingforsample: 4,
-    Returningsample: 5,
-    Samplereceived: 6,
+    PreparingKit: 1,
+    DeliveringKit: 2,
+    KitDelivered: 3,
+    WaitingForSample: 4,
+    ReturningSample: 5,
+    SampleReceived: 6,
     Testing: 7,
     Completed: 8,
     Cancelled: 9,
+    StaffGettingSample: 10,
+    CheckIn: 11,
   };
 
   const normalizedStatus = status.trim();

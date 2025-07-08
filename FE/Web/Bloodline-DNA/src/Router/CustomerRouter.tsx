@@ -4,7 +4,6 @@ import { NotFound } from "../components";
 import AboutPage from "../features/about/pages/AboutPage";
 import {
     Blogs,
-    BookingDetail,
     BookingList,
     Contacts,
     DetailServices,
@@ -12,17 +11,18 @@ import {
     EditBooking,
     EditProfile,
     Services,
-    TestProgress,
 } from "../features/customer";
 import BlogDetail from "../features/customer/pages/BlogDetails";
-import HomePage from "../features/home/pages/HomePage";
+import { BookingStatusPage } from "../features/customer/pages/BookingStatusPage";
+import CheckoutSuccess from "../features/customer/pages/CheckoutSuccess";
+import CheckoutError from "../features/customer/pages/CheckoutError";
+import CheckoutRemainSuccess from "../features/customer/pages/CheckoutRemainSuccess";
 
 export default function CustomerRouter() {
   return (
     <div className="flex-1">
       <Routes>
-        <Route path="/" element={<HomePage />} />{" "}
-        {/* 👈 route homepage trong customer */}
+        <Route path="/" element={<BookingList />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<DetailServices />} />
@@ -30,11 +30,13 @@ export default function CustomerRouter() {
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
-        <Route path="/booking-detail/:id" element={<BookingDetail />} />
-        <Route path="/test-progress" element={<TestProgress />} />
+        <Route path="/booking-status/:id" element={<BookingStatusPage />} />
         <Route path="/edit-booking/:id" element={<EditBooking />} />
         <Route path="/booking-list" element={<BookingList />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/checkout-success" element={<CheckoutSuccess />} />
+        <Route path="/checkout-remainsuccess" element={<CheckoutRemainSuccess />} />
+        <Route path="/checkout-error" element={<CheckoutError />} />
         {/* Not found */}
         <Route path="*" element={<NotFound />} />
       </Routes>

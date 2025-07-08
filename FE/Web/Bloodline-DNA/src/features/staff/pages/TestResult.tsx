@@ -1,160 +1,251 @@
-import { useState } from 'react';
-import type { TestResult as TestResultType } from '../types/testResult';
-import ModalTestResult from '../components/common/ModalTestResult';
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/sample/ui/table";
+import ModalTestResult from "../components/testResult/ModalTestResult";
+import { createTestResultApi, deleteTestResultApi, getAllTestResultApi } from "../api/testResultApi";
+import { getTestBookingApi } from "../api/testBookingApi";
+import type { TestResultRequest, TestResultResponse } from "../types/testResult";
+import type { TestBookingResponse } from "../types/testBooking";
+import { Button } from "../components/sample/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../components/sample/ui/dropdown-menu";
+import { MoreVertical, Trash2 } from "lucide-react";
 
-const initialResults: TestResultType[] = [
-	{
-		id: 'RES001',
-		testBookingId: 'BOOK001',
-		resultSummary: 'Âm tính với các chỉ số bất thường.',
-		resultDate: new Date('2024-06-01'),
-		resultFileUrl: 'https://example.com/result1.pdf',
-	},
-	{
-		id: 'RES002',
-		testBookingId: 'BOOK002',
-		resultSummary: 'Phát hiện chỉ số cao, cần theo dõi thêm.',
-		resultDate: new Date('2024-06-02'),
-		resultFileUrl: 'https://example.com/result2.pdf',
-	},
-];
-
-function TestResult() {
-	const [results, setResults] = useState<TestResultType[]>(initialResults);
-	const [showModal, setShowModal] = useState(false);
-	const [editIndex, setEditIndex] = useState<number | null>(null);
-	const [form, setForm] = useState<Omit<TestResultType, 'resultDate'> & { resultDate: string }>({
-		id: '',
-		testBookingId: '',
-		resultSummary: '',
-		resultDate: '',
-		resultFileUrl: '',
-	});
-
-	const openCreateModal = () => {
-		setEditIndex(null);
-		setForm({
-			id: '',
-			testBookingId: '',
-			resultSummary: '',
-			resultDate: '',
-			resultFileUrl: '',
-		});
-		setShowModal(true);
-	};
-
-	const openEditModal = (idx: number) => {
-		const r = results[idx];
-		setEditIndex(idx);
-		setForm({
-			...r,
-			resultDate: r.resultDate ? new Date(r.resultDate).toISOString().slice(0, 10) : '',
-		});
-		setShowModal(true);
-	};
-
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-		setForm({ ...form, [e.target.name]: e.target.value });
-	};
-
-	const handleSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		const newResult: TestResultType = {
-			...form,
-			resultDate: new Date(form.resultDate),
-		};
-		if (editIndex === null) {
-			setResults([...results, newResult]);
-		} else {
-			setResults(results.map((r, idx) => (idx === editIndex ? newResult : r)));
-		}
-		setShowModal(false);
-	};
-
-	return (
-		<div className="min-h-screen bg-blue-50 p-8">
-			<div className="max-w-7xl mx-auto">
-				<h1 className="text-3xl font-bold text-blue-600 mb-8">Kết quả xét nghiệm</h1>
-				<div className="flex justify-end mb-4">
-					<button
-						className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
-						onClick={openCreateModal}
-					>
-						+ Tạo kết quả mới
-					</button>
-				</div>
-				<div className="bg-white rounded-xl shadow-lg p-6 border border-blue-200">
-					<div className="overflow-x-auto">
-						<table className="min-w-full table-fixed border border-blue-200 text-sm">
-							<thead>
-								<tr className="bg-blue-100 text-blue-700">
-									<th className="py-3 px-4 border-b font-bold w-1/6">Mã kết quả</th>
-									<th className="py-3 px-4 border-b font-bold w-1/6">Mã đặt xét nghiệm</th>
-									<th className="py-3 px-4 border-b font-bold w-2/6">Tóm tắt kết quả</th>
-									<th className="py-3 px-4 border-b font-bold w-1/6">Ngày trả kết quả</th>
-									<th className="py-3 px-4 border-b font-bold w-1/6">File kết quả</th>
-									<th className="py-3 px-4 border-b font-bold w-1/6">Hành động</th>
-								</tr>
-							</thead>
-							<tbody>
-								{results.length === 0 ? (
-									<tr>
-										<td colSpan={6} className="text-center text-gray-400 py-6">
-											Chưa có kết quả xét nghiệm nào.
-										</td>
-									</tr>
-								) : (
-									results.map((result, idx) => (
-										<tr key={result.id} className="hover:bg-blue-50 transition">
-											<td className="py-3 px-4 border-b text-blue-700 font-medium break-words text-center">
-												{result.id}
-											</td>
-											<td className="py-3 px-4 border-b break-words text-center">
-												{result.testBookingId}
-											</td>
-											<td className="py-3 px-4 border-b break-words text-center">
-												{result.resultSummary}
-											</td>
-											<td className="py-3 px-4 border-b break-words text-center">
-												{new Date(result.resultDate).toLocaleDateString('vi-VN')}
-											</td>
-											<td className="py-3 px-4 border-b break-words text-center">
-												<a
-													href={result.resultFileUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													className="text-blue-600 hover:underline"
-												>
-													Xem file
-												</a>
-											</td>
-											<td className="py-3 px-4 border-b text-center">
-												<button
-													className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 transition mr-2"
-													onClick={() => openEditModal(idx)}
-												>
-													Sửa
-												</button>
-											</td>
-										</tr>
-									))
-								)}
-							</tbody>
-						</table>
-					</div>
-				</div>
-
-				<ModalTestResult
-					show={showModal}
-					onClose={() => setShowModal(false)}
-					onSubmit={handleSubmit}
-					form={form}
-					onChange={handleChange}
-					editIndex={editIndex}
-				/>
-			</div>
-		</div>
-	);
+interface BookingOption {
+  id: string;
+  clientName: string;
+  email: string;
+  appointmentDate: string;
+  status: string;
 }
 
-export default TestResult;
+function TestResultPage() {
+  const [results, setResults] = useState<TestResultResponse[]>([]);
+  const [bookings, setBookings] = useState<BookingOption[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState<Omit<TestResultRequest, "resultDate"> & { resultDate: string }>({
+    id: "",
+    testBookingId: "",
+    resultSummary: "",
+    resultDate: "",
+    resultFileUrl: "",
+  });
+
+  const token = localStorage.getItem("token") || "";
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!token) return;
+      setIsLoadingResults(true);
+      try {
+        const data = await getAllTestResultApi(token);
+        setResults(data);
+      } catch {
+        setResults([]);
+      } finally {
+        setIsLoadingResults(false);
+      }
+    };
+    fetchResults();
+  }, [token]);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!token) return;
+      setIsLoadingBookings(true);
+      try {
+        const bookingData = await getTestBookingApi(token);
+        const bookingOptions: BookingOption[] = bookingData.map((booking: TestBookingResponse) => ({
+          id: booking.id,
+          clientName: booking.clientName,
+          email: booking.email,
+          appointmentDate: booking.appointmentDate,
+          status: booking.status,
+        }));
+        setBookings(bookingOptions);
+      } catch {
+        setBookings([]);
+      } finally {
+        setIsLoadingBookings(false);
+      }
+    };
+    fetchBookings();
+  }, [token]);
+
+  const openCreateModal = () => {
+    setForm({ id: "", testBookingId: "", resultSummary: "", resultDate: "", resultFileUrl: "" });
+    setShowModal(true);
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) {
+      alert("Không tìm thấy token xác thực!");
+      return;
+    }
+
+    const req: TestResultRequest = {
+      ...form,
+      resultDate: new Date(form.resultDate),
+    };
+
+    try {
+      await createTestResultApi(req, token);
+      const updatedResults = await getAllTestResultApi(token);
+      setResults(updatedResults);
+      setShowModal(false);
+      setForm({
+        id: "",
+        testBookingId: "",
+        resultSummary: "",
+        resultDate: "",
+        resultFileUrl: "",
+      });
+    } catch (error) {
+      console.error("Lỗi tạo kết quả:", error);
+      alert("Có lỗi xảy ra khi tạo kết quả!");
+    }
+  };
+
+  const handleDelete = async (idx: number) => {
+    if (!token) return;
+    const id = results[idx].id;
+    if (!id) return;
+    if (!window.confirm("Bạn chắc chắn muốn xóa kết quả này?")) return;
+    try {
+      await deleteTestResultApi(id, token);
+      setResults((prev) => prev.filter((_, i) => i !== idx));
+    } catch {
+      alert("Xóa thất bại!");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-[#1F2B6C]">Quản lý kết quả xét nghiệm</h1>
+        <Button
+          className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 text-white"
+          onClick={openCreateModal}
+        >
+          <span className="text-white">+ Thêm kết quả</span>
+        </Button>
+      </div>
+
+      <div className="max-w-7xl mx-auto">
+        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-[#1F2B6C]">Danh sách kết quả xét nghiệm</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Mã đặt xét nghiệm</TableHead>
+                  <TableHead className="text-center">Tóm tắt kết quả</TableHead>
+                  <TableHead className="text-center">Ngày trả</TableHead>
+                  <TableHead className="text-center">File kết quả</TableHead>
+                  <TableHead className="text-center">Khách hàng</TableHead>
+                  <TableHead className="text-center">Hành động</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoadingResults ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <p className="text-gray-500">Đang tải dữ liệu...</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : results.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <div className="text-gray-500">Chưa có kết quả nào</div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  results.map((result, idx) => (
+                    <TableRow key={result.id || idx}>
+                      <TableCell className="text-center text-xs font-mono">
+                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded">
+                          {result.testBookingId}
+                        </span>
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate text-left">
+                        {result.resultSummary}
+                      </TableCell>
+                      <TableCell className="text-center text-sm">
+                        {result.resultDate
+                          ? new Date(result.resultDate).toLocaleDateString("vi-VN")
+                          : "-"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {result.resultFileUrl ? (
+                          <a
+                            href={result.resultFileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 text-xs underline hover:text-blue-800"
+                          >
+                            Xem file
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 text-xs">Chưa có file</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center text-sm">
+                        {result.client?.fullName || "-"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              className="p-2 rounded-full hover:bg-gray-200 transition"
+                              title="Tùy chọn"
+                            >
+                              <MoreVertical className="h-5 w-5 text-gray-600" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(idx)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      <ModalTestResult
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleSubmit}
+        form={form}
+        onChange={handleChange}
+        bookingOptions={bookings}
+        isLoadingBookings={isLoadingBookings}
+      />
+    </div>
+  );
+}
+
+export default TestResultPage;

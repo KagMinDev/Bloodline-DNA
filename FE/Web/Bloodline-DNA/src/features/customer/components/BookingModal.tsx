@@ -5,14 +5,13 @@ import {
   CheckCircleIcon,
   ClockIcon,
   HomeIcon,
-  MailIcon,
   MapPinIcon,
   PhoneIcon,
   UserIcon,
   X,
 } from "lucide-react";
 import React, { useState } from "react";
-import { createBookingApi, mapFormDataToBookingRequest, getAvailableTestServicesApi, testBookingApiRequirements } from "../api/bookingCreateApi";
+import { createBookingApi, mapFormDataToBookingRequest, getAvailableTestServicesApi } from "../api/bookingCreateApi";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader } from "./ui/Card";
 import { Input } from "./ui/Input";
@@ -30,9 +29,10 @@ interface BookingModalProps {
   onSubmit?: (bookingData: BookingData) => void;
   selectedService?: {
     id: string;
-    title: string;
+    name: string;
     category: string; // 'civil' or 'legal'
-    price: string;
+    price: number;
+    collectionMethod: number; // 0 = home/self, 1 = clinic
     testServiceInfo?: {
       id: string;
       [key: string]: any;
@@ -44,7 +44,6 @@ interface BookingModalProps {
 interface BookingData {
   serviceType: "home" | "clinic";
   name: string;
-  email: string;
   phone: string;
   address: string;
   preferredDate: string;
@@ -62,7 +61,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [formData, setFormData] = useState<BookingData>({
     serviceType: "home",
     name: "",
-    email: "",
     phone: "",
     address: "",
     preferredDate: "",
@@ -90,13 +88,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // Validate testServiceId
   const validateTestServiceId = (): boolean => {
     const serviceToUse = enhancedSelectedService || selectedService;
-    const testServiceId = serviceToUse?.testServiceInfo?.id || serviceToUse?.id || formData.testType;
-    
-    console.log('Validating testServiceId:', {
-      serviceToUse,
-      testServiceId,
-      hasTestServiceInfo: !!serviceToUse?.testServiceInfo
-    });
+    const testServiceId = serviceToUse?.testServiceInfor?.id || serviceToUse?.testServiceInfo?.id || serviceToUse?.id || formData.testType;
     
     // Check if testServiceId exists and is not an internal code
     if (!testServiceId || 
@@ -112,23 +104,46 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // Update formData when selectedService changes
   React.useEffect(() => {
     if (selectedService) {
-      const serviceCategory = selectedService.category;
-      
-      // Determine default service type based on category
+      // Determine default service type based on collectionMethod
       let defaultServiceType: 'home' | 'clinic';
-      if (serviceCategory === 'civil') {
-        defaultServiceType = 'home'; // Civil has both options, default to home
+      let defaultAddress = '';
+      
+      if (selectedService.collectionMethod === 0) {
+        defaultServiceType = 'home'; // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
+        defaultAddress = ''; // User needs to input address
+      } else if (selectedService.collectionMethod === 1) {
+        defaultServiceType = 'clinic'; // collectionMethod 1 = Thu mẫu tại trung tâm
+        defaultAddress = 'TẠI CƠ SỞ'; // Default address for clinic
       } else {
-        defaultServiceType = 'clinic'; // Legal only has clinic option
+        // Fallback to home if collectionMethod is unexpected or undefined
+        console.warn('Unexpected collectionMethod value:', selectedService.collectionMethod);
+        defaultServiceType = 'home';
+        defaultAddress = '';
       }
       
       // Set testType to the selected service id
       const defaultTestType = selectedService.id;
       
+      console.log('🔧 Setting form data based on collectionMethod:', {
+        collectionMethod: selectedService.collectionMethod,
+        defaultServiceType,
+        defaultTestType,
+        defaultAddress
+      });
+      
       setFormData(prev => ({
         ...prev,
         serviceType: defaultServiceType,
-        testType: defaultTestType
+        testType: defaultTestType,
+        address: defaultAddress
+      }));
+    } else {
+      // Reset to default if no selectedService
+      setFormData(prev => ({
+        ...prev,
+        serviceType: 'home',
+        testType: 'civil-self',
+        address: ''
       }));
     }
   }, [selectedService]);
@@ -136,12 +151,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   // Debug: Fetch available TestServices when modal opens
   React.useEffect(() => {
     if (isOpen) {
-      console.log('=== BOOKING MODAL DEBUG ===');
-      console.log('selectedService object structure:', selectedService);
-      console.log('selectedService.testServiceInfo:', selectedService?.testServiceInfo);
-      console.log('Does selectedService have testServiceInfo?', !!selectedService?.testServiceInfo);
-      console.log('selectedService keys:', selectedService ? Object.keys(selectedService) : 'no selectedService');
-      
+      // Debug disabled for production
       console.log('Modal opened, fetching available TestServices for debugging...');
       getAvailableTestServicesApi().then(testServices => {
         console.log('Available TestServices in database:', testServices);
@@ -155,10 +165,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           
           // Try to find matching TestService
           const matchingTestService = testServices.find((ts: any) => 
-            ts.serviceId === selectedService.id ||
-            ts.relatedServiceId === selectedService.id ||
-            ts.id === selectedService.id ||
-            (ts.name || ts.title || '').toLowerCase().includes((selectedService.title || '').toLowerCase().substring(0, 5))
+            ts.id === selectedService?.id ||               // priceServiceId matches
+            ts.serviceId === selectedService?.testServiceInfor?.id
+            
           );
           
           if (matchingTestService) {
@@ -168,7 +177,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               testServiceInfo: {
                 id: matchingTestService.id,
                 ...matchingTestService
-              }
+              },
+              // Ensure collectionMethod is preserved
+              collectionMethod: selectedService.collectionMethod
             };
             setEnhancedSelectedService(enhancedService);
             console.log('🚀 Enhanced selectedService with testServiceInfo:', enhancedService);
@@ -218,13 +229,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         console.error('Failed to fetch TestServices for debugging:', err);
       });
       
-      // Test API requirements
-      console.log('Testing API requirements...');
-      testBookingApiRequirements().then(result => {
-        console.log('API requirements test result:', result);
-      }).catch(err => {
-        console.error('API requirements test failed:', err);
-      });
+      // Removed testBookingApiRequirements call to avoid sending sample request
     }
   }, [isOpen, selectedService]);
 
@@ -261,9 +266,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     
     // Tạo TestType object từ selectedService
     return {
-      id: selectedService.id,
-      name: selectedService.title,
-      price: selectedService.price,
+      id: selectedService.testServiceInfor?.id || selectedService.id,
+      name: selectedService.name,
+      price: `${selectedService.price.toLocaleString('vi-VN')}đ`,
       time: "3-7 ngày", // Default time, có thể customize
       category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
     };
@@ -275,45 +280,65 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return selectedTest ? [selectedTest] : [];
   };
 
-  // Lấy tất cả service types khả dụng cho category đã chọn (để validate)
+  // Lấy tất cả service types khả dụng cho collectionMethod đã chọn (để validate)
   const getAvailableServiceTypes = (): string[] => {
-    const serviceCategory = selectedService?.category || 'civil';
-    const categoryData = testTypesByCategory[serviceCategory];
+    if (!selectedService) {
+      // Nếu không có selectedService, trả về cả hai option
+      return ['home', 'clinic'];
+    }
     
-    if (!categoryData) return ['home']; // Default to home for civil
+    const { collectionMethod } = selectedService;
     
-    return Object.keys(categoryData).filter(serviceType => {
-      const types = categoryData[serviceType];
-      return types && types.length > 0;
-    });
+    // Dựa vào collectionMethod để trả về service types khả dụng
+    if (collectionMethod === 0) {
+      return ['home']; // collectionMethod 0 = chỉ home
+    } else if (collectionMethod === 1) {
+      return ['clinic']; // collectionMethod 1 = chỉ clinic
+    }
+    
+    // Fallback: nếu collectionMethod không rõ, trả về cả hai
+    return ['home', 'clinic'];
   };
 
   // Đếm số lượng service types có sẵn
   const getAvailableServiceTypesCount = (): number => {
-    const serviceCategory = selectedService?.category || 'civil';
-    let count = 0;
+    if (!selectedService) {
+      // Nếu không có selectedService, hiển thị cả hai option
+      return 2;
+    }
     
-    if (shouldShowServiceType('home')) count++;
-    if (shouldShowServiceType('clinic')) count++;
+    const { collectionMethod } = selectedService;
     
-    return count;
+    // Với logic mới dựa vào collectionMethod, luôn chỉ có 1 option
+    // vì mỗi service chỉ có 1 collectionMethod cố định
+    if (collectionMethod === 0 || collectionMethod === 1) {
+      return 1;
+    }
+    
+    // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
+    return 2;
   };
 
-  // Kiểm tra xem có nên hiển thị service type không dựa vào category
+  // Kiểm tra xem có nên hiển thị service type không dựa vào collectionMethod
   const shouldShowServiceType = (serviceType: string): boolean => {
-    const serviceCategory = selectedService?.category || 'civil';
-    
-    // Nếu là civil, hiển thị cả home và clinic
-    if (serviceCategory === 'civil') {
+    if (!selectedService) {
+      // Nếu không có selectedService, hiển thị cả hai option (fallback cho compatibility)
       return ['home', 'clinic'].includes(serviceType);
     }
     
-    // Nếu là legal, chỉ hiển thị clinic
-    if (serviceCategory === 'legal') {
+    const { collectionMethod } = selectedService;
+    
+    // Dựa vào collectionMethod để quyết định hiển thị
+    if (collectionMethod === 0) {
+      // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
+      return serviceType === 'home';
+    } else if (collectionMethod === 1) {
+      // collectionMethod 1 = Thu mẫu tại trung tâm  
       return serviceType === 'clinic';
     }
     
-    return false;
+    // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
+    return ['home', 'clinic'].includes(serviceType);
   };
 
   const timeSlots = [
@@ -392,8 +417,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         
         if (errorMessage.includes('Missing required')) {
           setApiError("Vui lòng điền đầy đủ thông tin bắt buộc.");
-        } else if (errorMessage.includes('Invalid email format')) {
-          setApiError("Định dạng email không hợp lệ. Vui lòng nhập email đúng định dạng.");
+        } else if (errorMessage.includes('Invalid priceServiceId')) {
+          setApiError("ID dịch vụ không hợp lệ. Vui lòng thử chọn lại dịch vụ.");
         } else if (errorMessage.includes('Invalid phone')) {
           setApiError("Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại từ 10-15 chữ số.");
         } else if (errorMessage.includes('Name must be at least')) {
@@ -449,10 +474,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return (
       formData.name &&
       formData.phone &&
-      formData.email &&
       formData.preferredDate &&
       formData.preferredTime &&
-      (formData.serviceType === "clinic" || formData.address)
+      formData.address // Address is always required now (will be "TẠI CƠ SỞ" for clinic)
     );
   };
 
@@ -460,7 +484,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     setFormData({
       serviceType: "home",
       name: "",
-      email: "",
       phone: "",
       address: "",
       preferredDate: "",
@@ -742,39 +765,34 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     />
                   </div>
 
+
+
                   <div className="space-y-2 md:col-span-2">
                     <label className="flex items-center text-sm font-semibold text-blue-900">
-                      <MailIcon className="w-4 h-4 mr-2" />
-                      Email *
+                      <MapPinIcon className="w-4 h-4 mr-2" />
+                      {formData.serviceType === "home" ? "Địa chỉ nhận kit / Thu mẫu *" : "Địa chỉ thực hiện"}
                     </label>
                     <Input
-                      type="email"
-                      value={formData.email}
+                      type="text"
+                      value={formData.address}
                       onChange={(e) =>
-                        handleInputChange("email", e.target.value)
+                        handleInputChange("address", e.target.value)
                       }
-                      placeholder="Nhập địa chỉ email"
+                      placeholder={
+                        formData.serviceType === "home" 
+                          ? "Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
+                          : "Xét nghiệm tại cơ sở"
+                      }
                       className="w-full"
+                      disabled={formData.serviceType === "clinic"}
+                      readOnly={formData.serviceType === "clinic"}
                     />
+                    {formData.serviceType === "clinic" && (
+                      <p className="text-xs text-blue-600">
+                        <strong>Lưu ý:</strong> Bạn sẽ đến trung tâm để thực hiện xét nghiệm
+                      </p>
+                    )}
                   </div>
-
-                  {formData.serviceType === "home" && (
-                    <div className="space-y-2 md:col-span-2">
-                      <label className="flex items-center text-sm font-semibold text-blue-900">
-                        <MapPinIcon className="w-4 h-4 mr-2" />
-                        Địa chỉ nhận kit / Thu mẫu *
-                      </label>
-                      <Input
-                        type="text"
-                        value={formData.address}
-                        onChange={(e) =>
-                          handleInputChange("address", e.target.value)
-                        }
-                        placeholder="Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
-                        className="w-full"
-                      />
-                    </div>
-                  )}
 
                   <div className="space-y-2">
                     <label className="flex items-center text-sm font-semibold text-blue-900">

@@ -1,116 +1,80 @@
-import React, { useState } from 'react';
-import { FaPlus, FaEllipsisV } from 'react-icons/fa';
-import { Button } from '../components/sample/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../components/sample/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../components/sample/ui/dropdown-menu';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../components/sample/ui/table';
-import type { SampleTestRequest } from '../types/sampleTest';
-import ModalSample from '../components/testSample/ModalSample';
+import { useEffect, useState, useCallback } from "react";
+import { format } from "date-fns";
+import { getRelationshipLabelViByKey, getSampleTypeLabelViByKey, type SampleTestResponse} from "../types/sampleTest";
+import { getAllTestSampleApi } from "../api/testSampleApi";
+import { Button } from "antd";
+import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/sample/ui/table";
+import TestSampleModal from "../components/testSample/TestSampleModal";
 
-const TestSample: React.FC = () => {
-  const [samples, setSamples] = useState<any[]>([/* Sample dữ liệu đã có */]);
-  const [openModal, setOpenModal] = useState(false);
+export default function TestSamplePage() {
+  const [data, setData] = useState<SampleTestResponse[]>([]);
+  const [open, setOpen] = useState(false);
+  const token = localStorage.getItem("token") || "";
 
-  const [form, setForm] = useState<SampleTestRequest>({
-    sampleType: 0,
-    instructionText: '',
-    mediaUrl: '',
-  });
+  const fetchData = useCallback(async () => {
+    if (!token) {
+      alert("Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn!");
+      return;
+    }
+    try {
+      const res = await getAllTestSampleApi(token);
+      setData(res);
+    } catch {
+      alert("Không thể tải dữ liệu mẫu");
+    }
+  }, [token]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: name === 'sampleType' ? Number(value) : value }));
-  };
-
-  const handleSubmit = () => {
-    console.log('Dữ liệu mẫu mới:', form);
-    setSamples(prev => [...prev, { ...form, id: `ORD${prev.length + 1}` }]);
-    setOpenModal(false);
-    setForm({ sampleType: 0, instructionText: '', mediaUrl: '' });
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <div className="min-h-screen bg-blue-50 p-8">
+      <TestSampleModal open={open} onClose={() => { setOpen(false); fetchData(); }} />
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-blue-600">Quản lý mẫu xét nghiệm</h1>
-        <Button
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-          onClick={() => setOpenModal(true)}
+        <h1 className="text-3xl font-bold text-[#1F2B6C]">Quản lý mẫu xét nghiệm</h1>
+        <Button 
+          className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 text-white"
+          onClick={() => setOpen(true)}
         >
-          <FaPlus className="text-white" />
-          Thêm mẫu
+          + Thêm mẫu
         </Button>
       </div>
 
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-blue-600">Danh sách mẫu xét nghiệm</CardTitle>
+          <CardTitle className="text-[#1F2B6C]">Danh sách mẫu xét nghiệm</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Mã đơn</TableHead>
-                <TableHead>Loại mẫu</TableHead>
-                <TableHead>Hướng dẫn</TableHead>
-                <TableHead>Media URL</TableHead>
-                <TableHead>Hành động</TableHead>
+                <TableHead>Mã Mẫu</TableHead>
+                <TableHead>Người Cho</TableHead>
+                <TableHead>Quan Hệ</TableHead>
+                <TableHead>Loại Mẫu</TableHead>
+                <TableHead>Ngày Thu</TableHead>
+                <TableHead>Ngày Nhận Lab</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {samples.length === 0 ? (
+              {data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-gray-400 py-6">
-                    Chưa có mẫu xét nghiệm nào.
+                  <TableCell colSpan={6} className="text-center text-gray-400 py-6">
+                    Không có mẫu nào.
                   </TableCell>
                 </TableRow>
               ) : (
-                samples.map((sample, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{sample.id}</TableCell>
-                    <TableCell>{sample.sampleType}</TableCell>
-                    <TableCell>{sample.instructionText}</TableCell>
+                data.map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium text-blue-700">{item.sampleCode}</TableCell>
+                    <TableCell>{item.donorName}</TableCell>
+                    <TableCell>{getRelationshipLabelViByKey(item.relationshipToSubject)}</TableCell>
+                    <TableCell>{getSampleTypeLabelViByKey(item.sampleType)}</TableCell>
+                    <TableCell>{format(new Date(item.collectedAt), "dd/MM/yyyy")}</TableCell>
                     <TableCell>
-                      <a href={sample.mediaUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        Xem media
-                      </a>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <FaEllipsisV className="text-blue-600" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => alert('Chức năng sửa sẽ bổ sung sau')}>
-                            Sửa
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => alert('Chức năng xóa sẽ bổ sung sau')}
-                            className="text-red-600 focus:bg-red-50 focus:text-red-800"
-                          >
-                            Xóa
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      {item.labReceivedAt ? format(new Date(item.labReceivedAt), "dd/MM/yyyy") : "—"}
                     </TableCell>
                   </TableRow>
                 ))
@@ -119,17 +83,6 @@ const TestSample: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Modal Thêm Mẫu */}
-      <ModalSample
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        form={form}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-      />
     </div>
   );
-};
-
-export default TestSample;
+}

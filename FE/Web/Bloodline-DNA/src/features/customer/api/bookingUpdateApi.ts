@@ -130,6 +130,82 @@ export const updateBookingApi = async (bookingData: UpdateBookingRequest): Promi
   }
 };
 
+// Function để confirm delivery của booking
+export const confirmDeliveryApi = async (bookingId: string): Promise<UpdateBookingResponse> => {
+  try {
+    const token = getAuthToken();
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    
+    // Add authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      console.warn('⚠️ No authentication token found');
+      throw new Error('Authentication required. Please login to confirm delivery.');
+    }
+    
+    console.log('🔄 Confirming delivery for booking ID:', bookingId);
+    
+    const response = await fetch(`${API_BASE_URL}/TestBooking/${bookingId}/confirm-delivery`, {
+      method: 'PUT',
+      headers,
+    });
+
+    if (!response.ok) {
+      let errorData;
+      let detailedMessage = '';
+      
+      try {
+        const responseText = await response.text();
+        console.log('Raw error response:', responseText);
+        
+        // Try to parse as JSON
+        errorData = JSON.parse(responseText);
+        
+        // Extract detailed error info
+        if (errorData.message) {
+          detailedMessage = errorData.message;
+        }
+        
+        console.log('Parsed error data:', errorData);
+      } catch (parseError) {
+        // If not JSON, use raw text
+        detailedMessage = errorData || 'Unknown error';
+        console.log('Error parsing response as JSON:', parseError);
+      }
+      
+      // Specific error handling
+      if (response.status === 401) {
+        throw new Error('Unauthorized: Please login to continue.');
+      } else if (response.status === 403) {
+        throw new Error('Access denied: You do not have permission to confirm delivery.');
+      } else if (response.status === 404) {
+        throw new Error('Booking not found: The booking does not exist.');
+      } else if (response.status === 400) {
+        throw new Error(`Invalid request: ${detailedMessage || 'Cannot confirm delivery at this time.'}`);
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status}, message: ${detailedMessage}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ Delivery confirmed successfully:', result);
+    
+    return {
+      success: true,
+      data: result.data || result,
+      message: result.message || 'Delivery confirmed successfully',
+      statusCode: result.statusCode || 200
+    };
+  } catch (error) {
+    console.error('❌ Error confirming delivery:', error);
+    throw error;
+  }
+};
+
 // Helper function để validate update request data
 export const validateUpdateBookingRequest = (data: Partial<UpdateBookingRequest>): string[] => {
   const errors: string[] = [];

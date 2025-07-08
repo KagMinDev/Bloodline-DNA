@@ -57,8 +57,9 @@ export const createBlogApi = async (data: BlogCreateRequest): Promise<BlogRespon
     formData.append("ThumbnailURL", data.thumbnailURL);
     formData.append("Status", data.status.toString());
     formData.append("AuthorId", accountId);
+    formData.append("TagIds", data.tagIds);
 
-    const response = await rootApi.post("/Blog", formData, {
+    const response = await rootApi.post("/Blog/with-tags", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

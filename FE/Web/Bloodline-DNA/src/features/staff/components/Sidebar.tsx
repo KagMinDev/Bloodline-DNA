@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import {FaAngleDown,FaAngleRight,} from 'react-icons/fa';
-import { TbTestPipe } from "react-icons/tb";
-import { SiTestcafe } from "react-icons/si";
 import { Dna } from 'lucide-react';
+import React, { useState } from 'react';
+import { FaAngleDown, FaAngleRight, FaShippingFast, } from 'react-icons/fa';
 import { GrTestDesktop } from "react-icons/gr";
+import { SiTestcafe } from "react-icons/si";
+import { TbTestPipe } from "react-icons/tb";
+import { Link, useLocation } from 'react-router-dom';
 
 
 interface SidebarDataType {
@@ -30,7 +30,11 @@ const SidebarData: SidebarDataType[] = [
     heading: 'Quản lí kết quả xét nghiệm',
     href: '/staff/test-result',
   },
-
+    {
+    icon: FaShippingFast,
+    heading: 'Quản lí giao - nhận TestKit',
+    href: '/staff/delivery',
+  },
 ];
 
 const Sidebar = () => {
@@ -55,9 +59,9 @@ const Sidebar = () => {
         <div className="w-14 h-14 rounded-full bg-[#1F2B6C] flex items-center justify-center mb-2">
           <Dna size={32} className="text-white" />
         </div>
-        <span className="text-2xl font-bold text-white text-center">ADN Huyết Thống</span>
+        <span className="text-2xl font-bold text-center text-white">ADN Huyết Thống</span>
       </div>
-      <nav className='scrollbar-hide flex-1 overflow-y-auto px-6 py-6'>
+      <nav className='flex-1 px-6 py-6 overflow-y-auto scrollbar-hide'>
         <ul className='space-y-2'>
           {SidebarData.map(item => (
             <li key={item.heading}>
@@ -83,7 +87,7 @@ const Sidebar = () => {
                     )}
                   </div>
                   {openDropdown[item.heading] && (
-                    <ul className='ml-2 mt-1 space-y-1'>
+                    <ul className='mt-1 ml-2 space-y-1'>
                       {item.children.map(child => (
                         <li key={child.heading}>
                           <Link to={child.href}>

@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import {
-  FaChartBar,
-  FaAngleDown,
-  FaAngleRight,
-  FaUsers,
-} from 'react-icons/fa';
+import {  FaChartBar,  FaAngleDown,  FaAngleRight,  FaUsers,} from 'react-icons/fa';
 import { Dna } from 'lucide-react';
+import { MdDomainAdd } from 'react-icons/md';
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -25,6 +21,11 @@ const SidebarData: SidebarDataType[] = [
     icon: FaUsers,
     heading: 'Quản lí người dùng',
     href: '/admin/users',
+  },
+  {
+    icon: MdDomainAdd,
+    heading: 'Hướng dẫn lấy mẫu',
+    href: '/admin/sample-ins',
   },
   
 ];
