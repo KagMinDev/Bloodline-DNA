@@ -1,7 +1,10 @@
 ﻿using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.Logistic;
+using ADNTester.BO.DTOs.User;
 using ADNTester.BO.Entities;
 using ADNTester.BO.Enums;
 using ADNTester.Service.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +17,16 @@ namespace ADNTester.Api.Controllers
     public class LogisticController : ControllerBase
     {
         private readonly ILogisticService _logisticService;
+        private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public LogisticController(ILogisticService logisticService)
+        public LogisticController(ILogisticService logisticService,
+            IUserService userService,
+            IMapper mapper)
         {
             _logisticService = logisticService;
+            _userService = userService;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -67,11 +76,24 @@ namespace ADNTester.Api.Controllers
         /// Tạo nhiệm vụ logistics mới (giao hoặc nhận)
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] LogisticsInfo dto)
+        public async Task<IActionResult> Create([FromBody] CreateLogisticsInfoDto dto)
         {
-            var created = await _logisticService.CreateAsync(dto);
+            var entity = _mapper.Map<LogisticsInfo>(dto);
+            var created = await _logisticService.CreateAsync(entity);
+
             return CreatedAtAction(nameof(GetById), new { id = created.Id },
                 new ApiResponse<LogisticsInfo>(created, "Tạo nhiệm vụ logistics thành công", HttpCodes.Created));
+        }
+        /// <summary>
+        /// Lấy danh sách nhân viên đang hoạt động (chỉ dành cho Admin và Manager)
+        /// </summary>
+        /// <returns>Danh sách nhân viên đang hoạt động</returns>
+        [Authorize(Roles = $"{nameof(UserRole.Admin)},{nameof(UserRole.Manager)}")]
+        [HttpGet("active-staff")]
+        public async Task<IActionResult> GetActiveStaff()
+        {
+            var staffList = await _userService.GetActiveStaffAsync();
+            return Ok(new ApiResponse<IEnumerable<UserDto>>(staffList, "Lấy danh sách nhân viên đang hoạt động thành công"));
         }
     }
 }

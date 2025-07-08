@@ -9,5 +9,6 @@ namespace ADNTester.Repository.Interfaces
 {
     public interface ITestKitRepository : IGenericRepository<TestKit>
     {
+        Task<TestKit?> GetWithDeliveryInfoByBookingIdAsync(string bookingId);
     }
 }
