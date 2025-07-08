@@ -366,3 +366,98 @@ export const formatPaymentAmount = (amount: number): string => {
 export const calculateDeposit = (totalAmount: number): number => {
   return Math.round(totalAmount * 0.2);
 }; 
+
+// API for remaining payment callback
+export const callRemainingPaymentCallbackApi = async (payload: {
+  orderCode: string;
+  status: string;
+  bookingId: string;
+}): Promise<{
+  orderCode: string;
+  bookingId: string;
+  status: 'PAID' | 'CANCELLED';
+  success: boolean;
+  error?: string;
+}> => {
+  try {
+    // Get token from multiple sources
+    const token = localStorage.getItem('token') || 
+                  localStorage.getItem('authToken') || 
+                  sessionStorage.getItem('token') ||
+                  sessionStorage.getItem('authToken');
+
+    // Normalize status: chỉ PAID hoặc CANCELLED
+    const normalizedStatus = payload.status === 'PAID' ? 'PAID' : 'CANCELLED';
+
+    console.log('🔄 Calling remaining payment callback:', {
+      orderCode: payload.orderCode,
+      status: normalizedStatus,
+      bookingId: payload.bookingId,
+      timestamp: new Date().toISOString()
+    });
+
+    const response = await fetch(`${BASE_URL}/api/Payment/remaining-callback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token || ''}`,
+      },
+      body: JSON.stringify({
+        orderCode: payload.orderCode,
+        status: normalizedStatus,
+        bookingId: payload.bookingId,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Remaining payment callback error:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+        orderCode: payload.orderCode,
+        bookingId: payload.bookingId,
+        timestamp: new Date().toISOString()
+      });
+
+      return {
+        orderCode: payload.orderCode,
+        bookingId: payload.bookingId,
+        status: normalizedStatus,
+        success: false,
+        error: errorData?.error || errorData?.message || 'Unknown server error',
+      };
+    }
+
+    const responseData = await response.json();
+    console.log('✅ Remaining payment callback success:', {
+      orderCode: payload.orderCode,
+      bookingId: payload.bookingId,
+      status: normalizedStatus,
+      responseData,
+      timestamp: new Date().toISOString()
+    });
+
+    return {
+      orderCode: payload.orderCode,
+      bookingId: payload.bookingId,
+      status: normalizedStatus,
+      success: true,
+    };
+  } catch (err) {
+    console.error('❌ Remaining payment callback exception:', {
+      error: err,
+      orderCode: payload.orderCode,
+      bookingId: payload.bookingId,
+      timestamp: new Date().toISOString()
+    });
+
+    return {
+      orderCode: payload.orderCode,
+      bookingId: payload.bookingId,
+      status: payload.status === 'PAID' ? 'PAID' : 'CANCELLED',
+      success: false,
+      error: err instanceof Error ? err.message : 'Unexpected error',
+    };
+  }
+}; 

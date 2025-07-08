@@ -1,6 +1,6 @@
 import type { ProgressStep } from '../../types/bookingTypes';
 import { Button } from '../ui/Button';
-import { FilePenIcon, CreditCardIcon, AlertCircleIcon } from 'lucide-react';
+import { FilePenIcon, CreditCardIcon, AlertCircleIcon, CheckCircleIcon } from 'lucide-react';
 
 interface ProgressStepProps {
   step: ProgressStep;
@@ -11,9 +11,23 @@ interface ProgressStepProps {
   handleStepAction: (payload: any) => void;
   bookingStatus: string;
   setIsSampleModalOpen: (open: boolean) => void;
+  handleConfirmDelivery?: (bookingId: string) => void;
+  confirmDeliveryLoading?: boolean;
+  bookingId?: string;
 }
 
-export const ProgressStepProps = ({ step, isLast, paymentLoading, paymentError, handleStepAction, bookingStatus, setIsSampleModalOpen }: ProgressStepProps) => {
+export const ProgressStepProps = ({ 
+  step, 
+  isLast, 
+  paymentLoading, 
+  paymentError, 
+  handleStepAction, 
+  bookingStatus, 
+  setIsSampleModalOpen,
+  handleConfirmDelivery,
+  confirmDeliveryLoading = false,
+  bookingId = ''
+}: ProgressStepProps) => {
   const Icon = step.icon;
 
   return (
@@ -94,14 +108,38 @@ export const ProgressStepProps = ({ step, isLast, paymentLoading, paymentError, 
             )}
           </div>
         )}
-        {step.id === 3 && step.status === 'completed' && ['kitdelivered', 'waitingforsample'].includes(bookingStatus) && (
+        {step.id === 3 && step.status === 'current' && bookingStatus.toLowerCase() === 'deliveringkit' && handleConfirmDelivery && (
+          <div className="mt-4">
+            <Button
+              onClick={() => handleConfirmDelivery(bookingId)}
+              disabled={confirmDeliveryLoading}
+              className="bg-green-600 hover:bg-green-700 !text-white font-semibold"
+            >
+              {confirmDeliveryLoading ? (
+                <div className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  Đang xử lý...
+                </div>
+              ) : (
+                <>
+                  <CheckCircleIcon className="w-4 h-4 mr-2 text-white" />
+                  Đã Nhận Kit
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-slate-500 mt-2">
+              Xác nhận bạn đã nhận được kit xét nghiệm.
+            </p>
+          </div>
+        )}
+        {step.id === 4 && step.status === 'current' && ['waitingforsample', 'returningsample'].includes(bookingStatus.toLowerCase()) && (
           <div className="mt-4">
             <Button
               onClick={() => setIsSampleModalOpen(true)}
               className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
             >
               <FilePenIcon className="w-4 h-4 mr-2 text-white" />
-              {bookingStatus === 'kitdelivered' ? 'Điền thông tin mẫu' : 'Điền thông tin mẫu'}
+              Điền thông tin mẫu
             </Button>
             <p className="text-xs text-slate-500 mt-2">
               Sau khi điền thông tin, bạn có thể gửi mẫu cho chúng tôi.

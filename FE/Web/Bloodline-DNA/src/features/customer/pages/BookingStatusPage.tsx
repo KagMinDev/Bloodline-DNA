@@ -3,13 +3,14 @@ import { useBookingData } from '../hooks/useBookingData';
 import { Footer, Header } from '../../../components';
 import { ArrowLeftIcon, EditIcon, XCircleIcon } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { statusConfig } from '../components/bookingStatus/StatusConfig';
+import { getStatusConfigByDetailedStatus } from '../components/bookingStatus/StatusConfig';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '../components/ui/Breadcrumb';
 import { BookingDetailTab } from '../components/bookingStatus/BookingDetailTab';
 import { BookingProgressTab } from '../components/bookingStatus/BookingProgressTab';
 import ChatbotAI from '../../chatbotAI/components/ChatbotAI';
 import { SampleInfoModal } from '../components/SampleInfoModal';
 import { PaymentDebugger } from '../components/PaymentDebugger';
+import type { DetailedBookingStatus } from '../types/bookingTypes';
 
 export const BookingStatusPage = (): React.JSX.Element => {
   const {
@@ -28,11 +29,13 @@ export const BookingStatusPage = (): React.JSX.Element => {
     feedbackError,
     isSampleModalOpen,
     setIsSampleModalOpen,
+    confirmDeliveryLoading,
     navigate,
     handlePayment,
     handleFeedbackSubmit,
     handleSampleSubmitSuccess,
     handleStepAction,
+    handleConfirmDelivery,
   } = useBookingData();
 
   const [activeTab, setActiveTab] = useState<'detail' | 'progress'>('detail');
@@ -71,7 +74,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
     );
   }
 
-  const StatusIcon = statusConfig[booking.status].icon;
+  // Use the new helper function to get status info
+  const statusInfo = getStatusConfigByDetailedStatus(booking.status);
+  const StatusIcon = statusInfo.icon;
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
@@ -119,9 +124,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
                   Theo dõi chi tiết tiến trình xét nghiệm ADN của bạn từ khi đăng ký đến lúc nhận kết quả.
                 </p>
                 <div className="flex items-center gap-4">
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${statusConfig[booking.status].color}`}>
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${statusInfo.color}`}>
                     <StatusIcon className="w-5 h-5" />
-                    {statusConfig[booking.status].label}
+                    {statusInfo.label}
                   </div>
                   <div className="text-sm text-blue-700">
                     <span className="font-medium">Mã đơn:</span> #{booking.id.slice(-8)}
@@ -180,6 +185,8 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 handleStepAction={handleStepAction}
                 isSampleModalOpen={isSampleModalOpen}
                 setIsSampleModalOpen={setIsSampleModalOpen}
+                handleConfirmDelivery={handleConfirmDelivery}
+                confirmDeliveryLoading={confirmDeliveryLoading}
               />
             )}
           </div>

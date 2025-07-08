@@ -21,6 +21,8 @@ interface BookingProgressTabProps {
   handleStepAction: (payload: any) => void;
   isSampleModalOpen: boolean;
   setIsSampleModalOpen: (open: boolean) => void;
+  handleConfirmDelivery?: (bookingId: string) => void;
+  confirmDeliveryLoading?: boolean;
 }
 
 export const BookingProgressTab = ({
@@ -37,7 +39,9 @@ export const BookingProgressTab = ({
   feedbackError,
   handleFeedbackSubmit,
   handleStepAction,
-  setIsSampleModalOpen
+  setIsSampleModalOpen,
+  handleConfirmDelivery,
+  confirmDeliveryLoading = false
 }: BookingProgressTabProps) => {
   if (!progressData) return <p>Không có dữ liệu tiến trình.</p>;
 
@@ -58,6 +62,9 @@ export const BookingProgressTab = ({
             handleStepAction={handleStepAction}
             bookingStatus={booking.status}
             setIsSampleModalOpen={setIsSampleModalOpen}
+            handleConfirmDelivery={handleConfirmDelivery}
+            confirmDeliveryLoading={confirmDeliveryLoading}
+            bookingId={booking.id}
           />
         ))}
       </div>
@@ -108,7 +115,7 @@ export const BookingProgressTab = ({
                 </div>
               )}
             </div>
-            {booking.status === 'completed' && (
+            {booking.status === 'Completed' && (
               <div className="pt-4 mt-4 border-t">
                 {feedbackSuccess ? (
                   <div className="p-3 bg-green-100 border border-green-200 rounded-lg text-center">
@@ -154,7 +161,7 @@ export const BookingProgressTab = ({
                 )}
               </div>
             )}
-            {booking.status === 'kitdelivered' && (
+            {booking.status === 'ReturningSample' && (
               <div className="pt-4 mt-4 border-t">
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center space-y-3">
                   <p className="font-semibold text-blue-800">Cập nhật thông tin mẫu</p>
