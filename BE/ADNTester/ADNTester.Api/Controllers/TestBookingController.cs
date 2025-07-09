@@ -112,5 +112,28 @@ namespace ADNTester.Api.Controllers
             }
             return Ok(bookings);
         }
+        /// <summary>
+        /// [VI] Xác nhận rằng client đã nhận được kit xét nghiệm.
+        /// </summary>
+        /// <param name="bookingId">ID của đặt lịch</param>
+        /// <returns>Thông báo kết quả xác nhận</returns>
+        [HttpPut("{bookingId}/confirm-delivery")]
+        public async Task<IActionResult> ConfirmKitReceived(string bookingId)
+        {
+            try
+            {
+                var result = await _testBookingService.ConfirmKitReceivedAsync(bookingId);
+
+                if (!result)
+                    return BadRequest(new ApiResponse<string>("Không thể xác nhận. Vui lòng thử lại hoặc kiểm tra trạng thái giao hàng."));
+
+                return Ok(new ApiResponse<string>(bookingId, "Xác nhận nhận kit thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse<string>(ex.Message));
+            }
+        }
+
     }
 } 

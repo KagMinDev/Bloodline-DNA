@@ -28,10 +28,10 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-4">
-              {booking.serviceType === 'home' ? <HomeIcon className="w-8 h-8 text-blue-600" /> : <BuildingIcon className="w-8 h-8 text-blue-600" />}
+              {booking.collectionMethod === 'SelfSample' ? <HomeIcon className="w-8 h-8 text-blue-600" /> : <BuildingIcon className="w-8 h-8 text-blue-600" />}
               <div>
                 <p className="font-semibold text-slate-800">{booking.testType}</p>
-                <p className="text-sm text-slate-500">{booking.serviceType === 'home' ? 'Thu mẫu tại nhà' : 'Thu mẫu tại trung tâm'}</p>
+                <p className="text-sm text-slate-500">{booking.collectionMethod === 'SelfSample' ? 'Khách Hàng Tự Thu Mẫu' : 'Thu mẫu tại cơ sở'}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 pt-4 border-t">

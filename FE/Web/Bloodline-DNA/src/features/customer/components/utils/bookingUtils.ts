@@ -17,20 +17,20 @@ export const transformApiDataToBookingDetail = (item: BookingItem, setTestServic
 
   const normalizeStatus = (status: string): DetailedBookingStatus => {
     const statusLower = (status || '').toLowerCase().replace(/[^a-z0-9]/gi, '');
-    if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'cancelled';
-    if (statusLower.includes('completed') || statusLower.includes('hoànthành')) return 'completed';
-    if (statusLower.includes('finalpayment')) return 'finalpayment';
-    if (statusLower.includes('testing')) return 'testing';
-    if (statusLower.includes('samplereceived')) return 'samplereceived';
-    if (statusLower.includes('returningsample')) return 'returningsample';
-    if (statusLower.includes('waitingforsample')) return 'waitingforsample';
-    if (statusLower.includes('kitdelivered') || statusLower.includes('đãnhậnkit')) return 'kitdelivered';
-    if (statusLower.includes('deliveringkit')) return 'deliveringkit';
-    if (statusLower.includes('preparingkit')) return 'preparingkit';
-    if (statusLower.includes('confirmed') || statusLower.includes('xácnhận')) return 'confirmed';
-    if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'pending';
-    console.warn(`Unknown booking status from API: "${status}". Defaulting to 'pending'.`);
-    return 'pending';
+    if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'Cancelled';
+    if (statusLower.includes('completed') || statusLower.includes('hoànthành')) return 'Completed';
+    if (statusLower.includes('finalpayment')) return 'Completed'; // Map finalpayment to Completed
+    if (statusLower.includes('testing')) return 'Testing';
+    if (statusLower.includes('samplereceived')) return 'SampleReceived';
+    if (statusLower.includes('returningsample')) return 'ReturningSample';
+    if (statusLower.includes('waitingforsample')) return 'WaitingForSample';
+    if (statusLower.includes('kitdelivered') || statusLower.includes('đãnhậnkit')) return 'KitDelivered';
+    if (statusLower.includes('deliveringkit')) return 'DeliveringKit';
+    if (statusLower.includes('preparingkit')) return 'PreparingKit';
+    if (statusLower.includes('confirmed') || statusLower.includes('xácnhận')) return 'PreparingKit'; // Map confirmed to PreparingKit
+    if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'Pending';
+    console.warn(`Unknown booking status from API: "${status}". Defaulting to 'Pending'.`);
+    return 'Pending';
   };
 
   setTestServiceId(item.testServiceId || null);
@@ -51,7 +51,8 @@ export const transformApiDataToBookingDetail = (item: BookingItem, setTestServic
     price: formatPrice(item.price),
     totalPrice: formatPrice(item.price),
     appointmentCode: `APT-${item.id.slice(-6)}`,
-    priceNumeric: item.price
+    priceNumeric: item.price,
+    collectionMethod: item.collectionMethod || ''
   };
 };
 
@@ -70,7 +71,7 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     completedDate: booking.bookingDate,
   });
 
-  if (bookingStatus === 'cancelled') {
+  if (bookingStatus === 'Cancelled') {
     steps.push({
       id: 2,
       title: 'Lịch hẹn đã bị hủy',
@@ -90,7 +91,10 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     };
   }
 
-  const isDepositPaid = bookingStatus !== 'pending';
+  // FIX: Logic thanh toán đặt cọc chính xác - chỉ khi đã qua bước pending
+  const depositPaidStatuses: DetailedBookingStatus[] = ['PreparingKit', 'DeliveringKit', 'KitDelivered', 'WaitingForSample', 'ReturningSample', 'SampleReceived', 'Testing', 'Completed'];
+  const isDepositPaid = depositPaidStatuses.includes(bookingStatus);
+  
   steps.push({
     id: 2,
     title: 'Thanh Toán Đặt Cọc 20%',
@@ -102,8 +106,9 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     actionPayload: { type: 'deposit' },
   });
 
-  const kitCompletedStatuses: DetailedBookingStatus[] = ['kitdelivered', 'waitingforsample', 'returningsample', 'samplereceived', 'testing', 'completed', 'finalpayment'];
-  const kitCurrentStatuses: DetailedBookingStatus[] = ['confirmed', 'preparingkit', 'deliveringkit'];
+  // FIX: Sử dụng PascalCase để khớp với DetailedBookingStatus
+  const kitCompletedStatuses: DetailedBookingStatus[] = ['KitDelivered', 'WaitingForSample', 'ReturningSample', 'SampleReceived', 'Testing', 'Completed'];
+  const kitCurrentStatuses: DetailedBookingStatus[] = ['PreparingKit', 'DeliveringKit'];
 
   let kitStatus: ProgressStep['status'] = 'pending';
   let kitDetails: string[] = [];
@@ -112,33 +117,33 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     kitStatus = 'completed';
   } else if (kitCurrentStatuses.includes(bookingStatus)) {
     kitStatus = 'current';
-    if (bookingStatus === 'confirmed') kitDetails.push('Đơn hàng đã được xác nhận, chờ chuẩn bị kit.');
-    if (bookingStatus === 'preparingkit') kitDetails.push('Đang chuẩn bị bộ kit.');
-    if (bookingStatus === 'deliveringkit') kitDetails.push('Bộ kit đang trên đường giao đến bạn.');
+    if (bookingStatus === 'PreparingKit') kitDetails.push('Đang chuẩn bị bộ kit.');
+    if (bookingStatus === 'DeliveringKit') kitDetails.push('Bộ kit đang trên đường giao đến bạn.');
   }
 
   steps.push({
     id: 3,
     title: 'Nhận TestKit',
-    description: booking.serviceType === 'home' ? 'Nhận bộ kit xét nghiệm tại nhà' : 'Nhận kit tại trung tâm',
+    description: booking.serviceType === 'home' ? 'Nhận bộ kit xét nghiệm tại nhà' : 'Đã nhận được Kit',
     icon: PackageIcon,
     status: kitStatus,
     details: kitDetails,
     estimatedDate: new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
 
-  const sampleStatuses: DetailedBookingStatus[] = ['samplereceived', 'testing', 'completed', 'finalpayment'];
-  const sampleCurrentStatuses: DetailedBookingStatus[] = ['waitingforsample', 'returningsample'];
+  // FIX: Sử dụng PascalCase
+  const sampleCompletedStatuses: DetailedBookingStatus[] = ['SampleReceived', 'Testing', 'Completed'];
+  const sampleCurrentStatuses: DetailedBookingStatus[] = ['WaitingForSample', 'ReturningSample'];
 
   let sampleStatus: ProgressStep['status'] = 'pending';
   let sampleDetails: string[] = [];
 
-  if (sampleStatuses.includes(bookingStatus)) {
+  if (sampleCompletedStatuses.includes(bookingStatus)) {
     sampleStatus = 'completed';
   } else if (sampleCurrentStatuses.includes(bookingStatus)) {
     sampleStatus = 'current';
-    if (bookingStatus === 'waitingforsample') sampleDetails.push('Vui lòng gửi mẫu của bạn đến trung tâm theo hướng dẫn.');
-    if (bookingStatus === 'returningsample') sampleDetails.push('Mẫu của bạn đang được chuyển đến phòng lab.');
+    if (bookingStatus === 'WaitingForSample') sampleDetails.push('Vui lòng gửi mẫu của bạn đến trung tâm theo hướng dẫn.');
+    if (bookingStatus === 'ReturningSample') sampleDetails.push('Mẫu của bạn đang được chuyển đến phòng lab.');
   }
 
   steps.push({
@@ -151,11 +156,14 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     estimatedDate: new Date(baseDate.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
 
-  const isRemainingPaid = ['testing', 'completed'].includes(bookingStatus);
+  // FIX: Logic thanh toán phần còn lại chính xác
+  const finalPaymentCompletedStatuses: DetailedBookingStatus[] = ['Testing', 'Completed'];
+  const finalPaymentCurrentStatuses: DetailedBookingStatus[] = ['SampleReceived'];
+  
   let remainingPaymentStatus: ProgressStep['status'] = 'pending';
-  if (isRemainingPaid) {
+  if (finalPaymentCompletedStatuses.includes(bookingStatus)) {
     remainingPaymentStatus = 'completed';
-  } else if (bookingStatus === 'samplereceived') {
+  } else if (finalPaymentCurrentStatuses.includes(bookingStatus)) {
     remainingPaymentStatus = 'current';
   }
 
@@ -172,9 +180,9 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
 
   let analysisStatus: ProgressStep['status'] = 'pending';
   let analysisDetails: string[] = [];
-  if (bookingStatus === 'completed') {
+  if (bookingStatus === 'Completed') {
     analysisStatus = 'completed';
-  } else if (bookingStatus === 'testing') {
+  } else if (bookingStatus === 'Testing') {
     analysisStatus = 'current';
     analysisDetails.push('Mẫu đang được phân tích bởi các chuyên gia.');
   }
@@ -194,7 +202,7 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     title: 'Trả Kết Quả',
     description: 'Kết quả xét nghiệm được gửi đến bạn qua email và SMS',
     icon: FileTextIcon,
-    status: bookingStatus === 'completed' ? 'completed' : 'pending',
+    status: bookingStatus === 'Completed' ? 'completed' : 'pending',
     estimatedDate: new Date(baseDate.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
 

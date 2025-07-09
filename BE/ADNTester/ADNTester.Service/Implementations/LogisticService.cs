@@ -83,7 +83,7 @@ namespace ADNTester.Service.Implementations
             {
                 LogisticsType.Delivery => LogisticStatus.PreparingKit,
                 LogisticsType.Pickup => LogisticStatus.WaitingForPickup,
-                _ => LogisticStatus.Pending
+                _ => throw new ArgumentOutOfRangeException(nameof(type), $"Unsupported logistics type: {type}")
             };
         }
 
@@ -93,7 +93,7 @@ namespace ADNTester.Service.Implementations
             {
                 LogisticsType.Delivery => LogisticStatus.DeliveringKit,
                 LogisticsType.Pickup => LogisticStatus.PickingUpSample,
-                _ => LogisticStatus.Pending
+                _ => throw new ArgumentOutOfRangeException(nameof(type), $"Unsupported logistics type: {type}")
             };
         }
 

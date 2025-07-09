@@ -216,7 +216,7 @@ namespace ADNTester.API.Controllers
      amount: (int)Math.Round(currentPayment.RemainingAmount ?? 0), // Handle null case
      description: description,
      items: [new("Thanh toán số tiền còn lại", 1, (int)Math.Round(currentPayment.RemainingAmount ?? 0))], // Handle null case
-     returnUrl: $"{domain}/customer/checkout-success?bookingId={bookingId}",
+     returnUrl: $"{domain}/customer/Checkout-remainsucess?bookingId={bookingId}",
                     cancelUrl: $"{domain}/customer/checkout-error?bookingId={bookingId}"
  );
 
@@ -296,6 +296,7 @@ namespace ADNTester.API.Controllers
                     // Tạo LogisticsInfo giao kit
                     var logisticsInfo = new LogisticsInfo
                     {
+                        Name = booking.ClientName,
                         Address = booking.Address,
                         Phone = booking.Phone,
                         Type = LogisticsType.Delivery,

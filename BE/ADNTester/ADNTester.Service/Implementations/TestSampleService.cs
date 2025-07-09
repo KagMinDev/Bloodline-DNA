@@ -49,9 +49,16 @@ namespace ADNTester.Service.Implementations
                 throw new Exception("Không tìm thấy thông tin đặt lịch");
 
             // Kiểm tra trạng thái booking
+            // Nếu đang ở trạng thái CheckIn thì tự động chuyển sang StaffGettingSample
+            if (booking.Status == BookingStatus.CheckIn)
+            {
+                booking.Status = BookingStatus.StaffGettingSample;
+                booking.UpdatedAt = DateTime.UtcNow;
+                _unitOfWork.TestBookingRepository.Update(booking);
+            }
             if (booking.Status != BookingStatus.StaffGettingSample)
             {
-                throw new Exception($"Không thể tạo sample. Trạng thái đặt lịch hiện tại là {booking.Status}, cần phải ở trạng thái SampleReceived.");
+                throw new Exception($"Không thể tạo sample. Trạng thái đặt lịch hiện tại là {booking.Status}, yêu cầu phải ở trạng thái CheckIn hoặc StaffGettingSample.");
             }
 
             // Lấy toàn bộ sample của kit này
@@ -224,10 +231,19 @@ namespace ADNTester.Service.Implementations
                 if (distinctDonors.Count < 2)
                     throw new Exception("Cần ít nhất 2 người cung cấp mẫu để thực hiện xét nghiệm.");
             }
+            //Gen Sample code không duplicate
+            string generatedCode;
+            var existingCodes = allSamples.Select(s => s.SampleCode).ToHashSet();
+
+            do
+            {
+                generatedCode = SampleCodeHelper.Generate();
+            }
+            while (existingCodes.Contains(generatedCode));
 
             // Map và tạo sample
             var sample = _mapper.Map<TestSample>(dto);
-            sample.SampleCode = SampleCodeHelper.Generate(); // helper tạo mã
+            sample.SampleCode = generatedCode; // helper tạo mã
             sample.CollectedAt = DateTime.UtcNow;
 
             await _unitOfWork.TestSampleRepository.AddAsync(sample);
