@@ -35,7 +35,7 @@ export default function CustomerRouter() {
         <Route path="/booking-list" element={<BookingList />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
-        <Route path="/checkout-remainsuccess" element={<CheckoutRemainSuccess />} />
+        <Route path="/checkout-remainsucess" element={<CheckoutRemainSuccess />} />
         <Route path="/checkout-error" element={<CheckoutError />} />
         {/* Not found */}
         <Route path="*" element={<NotFound />} />

@@ -6,21 +6,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { submitSampleInfoApi, getTestKitByBookingIdApi, type SampleInfoPayload } from "../api/sampleApi";
 import { AlertCircleIcon, CheckCircle, Loader2 } from "lucide-react";
 
-// Enums for dropdowns, mirroring staff implementation
+// Enums for dropdowns, matching backend enums exactly
 const RelationshipToSubjectLabelVi: Record<number, string> = {
-  0: "Cha",
-  1: "Mẹ",
-  2: "Con",
-  3: "Anh/Chị/Em",
-  4: "Khác",
+  0: "Không xác định",
+  1: "Cha",
+  2: "Mẹ", 
+  3: "Con",
+  4: "Ông nội",
+  5: "Bà nội",
+  6: "Cháu",
+  7: "Anh trai",
+  8: "Chị/Em gái",
+  9: "Chú/Bác trai",
+  10: "Cô/Dì",
+  11: "Cháu trai",
+  12: "Cháu gái",
+  99: "Khác",
 };
 
 const SampleTypeLabelVi: Record<number, string> = {
-  0: "Máu",
-  1: "Tóc",
-  2: "Móng",
-  3: "Nước bọt",
-  4: "Khác",
+  0: "Không xác định",
+  1: "Tăm bông miệng",
+  2: "Máu",
+  3: "Tóc có chân tóc",
+  4: "Móng tay",
+  5: "Nước bọt",
+  99: "Khác",
 };
 
 interface SampleInfoModalProps {
@@ -173,9 +184,11 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
             <Select onValueChange={(value: string) => setFormData({ ...formData, relationshipToSubject: value })}>
               <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn mối quan hệ" /></SelectTrigger>
               <SelectContent>
-                {Object.entries(RelationshipToSubjectLabelVi).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
-                ))}
+                {Object.entries(RelationshipToSubjectLabelVi)
+                  .filter(([key]) => key !== "0") // Exclude "Unknown" option
+                  .map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             {errors.relationshipToSubject && <p className="text-sm text-red-600 mt-1">{errors.relationshipToSubject}</p>}
@@ -185,9 +198,11 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
             <Select onValueChange={(value: string) => setFormData({ ...formData, sampleType: value })}>
               <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn loại mẫu" /></SelectTrigger>
               <SelectContent>
-                {Object.entries(SampleTypeLabelVi).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
-                ))}
+                {Object.entries(SampleTypeLabelVi)
+                  .filter(([key]) => key !== "0") // Exclude "Unknown" option
+                  .map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             {errors.sampleType && <p className="text-sm text-red-600 mt-1">{errors.sampleType}</p>}

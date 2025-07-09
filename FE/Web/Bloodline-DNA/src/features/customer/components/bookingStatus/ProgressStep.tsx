@@ -108,7 +108,7 @@ export const ProgressStepProps = ({
             )}
           </div>
         )}
-        {step.id === 3 && step.status === 'current' && bookingStatus.toLowerCase() === 'deliveringkit' && handleConfirmDelivery && (
+        {step.id === 3 && bookingStatus.toLowerCase() === 'kitdelivered' && handleConfirmDelivery && (
           <div className="mt-4">
             <Button
               onClick={() => handleConfirmDelivery(bookingId)}
