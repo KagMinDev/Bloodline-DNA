@@ -396,54 +396,111 @@ export const callRemainingPaymentCallbackApi = async (payload: {
       timestamp: new Date().toISOString()
     });
 
-    const response = await fetch(`${BASE_URL}/api/Payment/remaining-callback`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token || ''}`,
-      },
-      body: JSON.stringify({
-        orderCode: payload.orderCode,
-        status: normalizedStatus,
-        bookingId: payload.bookingId,
-      }),
-    });
+    // 🔄 Thử nhiều endpoint có thể có
+    const possibleEndpoints = [
+      
+      `${BASE_URL}/Payment/remaining-callback`,
+      `${BASE_URL}/api/Payment/callback`,
+      `${BASE_URL}/Payment/callback`,
+      `${BASE_URL}/api/Payment/${payload.bookingId}/remaining-callback`,
+      `${BASE_URL}/Payment/${payload.bookingId}/remaining-callback`
+    ];
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('❌ Remaining payment callback error:', {
-        status: response.status,
-        statusText: response.statusText,
-        errorData,
-        orderCode: payload.orderCode,
-        bookingId: payload.bookingId,
-        timestamp: new Date().toISOString()
-      });
+    let lastError: any = null;
 
-      return {
-        orderCode: payload.orderCode,
-        bookingId: payload.bookingId,
-        status: normalizedStatus,
-        success: false,
-        error: errorData?.error || errorData?.message || 'Unknown server error',
-      };
+    for (const endpoint of possibleEndpoints) {
+      try {
+        console.log(`🔄 Trying endpoint: ${endpoint}`);
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token || ''}`,
+          },
+          body: JSON.stringify({
+            orderCode: payload.orderCode,
+            status: normalizedStatus,
+            bookingId: payload.bookingId,
+          }),
+        });
+
+        console.log(`📡 Response from ${endpoint}:`, {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get('content-type'),
+          timestamp: new Date().toISOString()
+        });
+
+        // 🔍 Handle different response scenarios
+        if (response.ok) {
+          // Try to parse JSON, but handle empty responses
+          let responseData = null;
+          const contentType = response.headers.get('content-type');
+          
+          if (contentType && contentType.includes('application/json')) {
+            const text = await response.text();
+            if (text.trim()) {
+              responseData = JSON.parse(text);
+            }
+          }
+
+          console.log('✅ Remaining payment callback success:', {
+            endpoint,
+            orderCode: payload.orderCode,
+            bookingId: payload.bookingId,
+            status: normalizedStatus,
+            responseData,
+            timestamp: new Date().toISOString()
+          });
+
+          return {
+            orderCode: payload.orderCode,
+            bookingId: payload.bookingId,
+            status: normalizedStatus,
+            success: true,
+          };
+        } else if (response.status === 404) {
+          console.log(`❌ 404 Not Found at ${endpoint}, trying next endpoint...`);
+          lastError = new Error(`404 Not Found: ${endpoint}`);
+          continue; // Try next endpoint
+        } else {
+          // Handle other HTTP errors
+          let errorData = null;
+          try {
+            const text = await response.text();
+            if (text.trim()) {
+              errorData = JSON.parse(text);
+            }
+          } catch (parseError) {
+            console.log('Cannot parse error response as JSON');
+          }
+
+          console.error(`❌ HTTP Error ${response.status} at ${endpoint}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            errorData,
+            timestamp: new Date().toISOString()
+          });
+
+          return {
+            orderCode: payload.orderCode,
+            bookingId: payload.bookingId,
+            status: normalizedStatus,
+            success: false,
+            error: errorData?.error || errorData?.message || `HTTP ${response.status}: ${response.statusText}`,
+          };
+        }
+      } catch (endpointError) {
+        console.log(`❌ Endpoint ${endpoint} failed:`, endpointError);
+        lastError = endpointError;
+        continue; // Try next endpoint
+      }
     }
 
-    const responseData = await response.json();
-    console.log('✅ Remaining payment callback success:', {
-      orderCode: payload.orderCode,
-      bookingId: payload.bookingId,
-      status: normalizedStatus,
-      responseData,
-      timestamp: new Date().toISOString()
-    });
+    // 🚫 All endpoints failed
+    throw lastError || new Error('All callback endpoints failed');
 
-    return {
-      orderCode: payload.orderCode,
-      bookingId: payload.bookingId,
-      status: normalizedStatus,
-      success: true,
-    };
   } catch (err) {
     console.error('❌ Remaining payment callback exception:', {
       error: err,
