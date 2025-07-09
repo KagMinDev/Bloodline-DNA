@@ -7,7 +7,7 @@ export interface CreateBookingRequest {
   clientName: string;
   address: string;
   phone: string;
-  email?: string; // Add email as optional field in case API needs it
+  priceServiceId: string; // Service ID for pricing
 }
 
 // Interface cho response (có thể customize dựa trên actual response)
@@ -219,16 +219,25 @@ export const formatDateForApi = (date: Date): string => {
 };
 
 // Mapping từ UI service selection sang actual TestService IDs trong database
-const getTestServiceIdMapping = (selectedService: any, serviceType: string): string | null => {
-  // Prioritize testServiceInfo.id if available
-  if (selectedService?.testServiceInfo?.id) {
-    console.log('Using testServiceInfo.id as testServiceId:', selectedService.testServiceInfo.id);
-    return selectedService.testServiceInfo.id;
+const getTestServiceIdMapping = async (selectedService: any, serviceType: string): Promise<string | null> => {
+  // Prioritize testServiceInfor.id or testServiceInfo.id (support both spellings)
+  const rawCandidateId = selectedService?.testServiceInfor?.id || selectedService?.testServiceInfo?.id;
+  if (rawCandidateId) {
+    const candidateId = rawCandidateId;
+    const knownServiceId = selectedService?.serviceId;
+
+    if (!knownServiceId || candidateId === knownServiceId) {
+      console.log('Using consistent testServiceInfo.id as testServiceId:', candidateId);
+      return candidateId;
+    }
+
+    // If inconsistent, log and skip this early return
+    console.warn('⚠️ Inconsistent testServiceInfo.id detected. candidateId:', candidateId, 'knownServiceId:', knownServiceId);
   }
   
   // Nếu selectedService đã có testServiceId thực, return luôn
-  if (selectedService?.testServiceId) {
-    return selectedService.testServiceId;
+  if (selectedService?.serviceId) {
+    return selectedService.serviceId;
   }
   
   // Check for other possible testServiceInfo structures
@@ -243,8 +252,51 @@ const getTestServiceIdMapping = (selectedService: any, serviceType: string): str
     }
   }
   
+  // NEW: Try to find testServiceId from API based on priceServiceId
+  try {
+    console.log('🔍 Attempting to find testServiceId from API based on priceServiceId...');
+    const availableTestServices = await getAvailableTestServicesApi();
+    const priceServiceId = selectedService?.id || selectedService?.serviceId;
+    
+    if (priceServiceId && availableTestServices.length > 0) {
+      console.log('Searching for testService with priceServiceId:', priceServiceId);
+      console.log('Available TestServices:', availableTestServices);
+      
+      // Based on the actual data structure:
+      // - ts.id is the priceServiceId
+      // - ts.serviceId is the testServiceId we want
+      // - ts.testServiceInfor.id is also the testServiceId
+      const matchingTestService = availableTestServices.find((ts: any) => {
+        const isMatch = ts.id === priceServiceId;
+        
+        console.log('Checking TestService:', {
+          priceServiceRecord_id: ts.id,
+          testServiceId: ts.serviceId,
+          testServiceInfor_id: ts.testServiceInfor?.id,
+          searchingForPriceServiceId: priceServiceId,
+          isMatch
+        });
+        
+        return isMatch;
+      });
+      
+      if (matchingTestService) {
+        console.log('✅ Found matching TestService from API:', matchingTestService);
+        
+        // Return the actual testServiceId (either serviceId or testServiceInfor.id)
+        const testServiceId = matchingTestService.serviceId || matchingTestService.testServiceInfor?.id;
+        
+        console.log('🎯 Extracted testServiceId:', testServiceId);
+        return testServiceId;
+      } else {
+        console.warn('❌ No matching TestService found in API for priceServiceId:', priceServiceId);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error fetching TestServices from API:', error);
+  }
+  
   // Temporary solution: Use selectedService.id directly (as fallback)
-  // TODO: Implement proper mapping when you have the actual TestService IDs
   if (selectedService?.id && selectedService.id !== 'temp-id') {
     console.log('Fallback: Using selectedService.id as testServiceId:', selectedService.id);
     return selectedService.id;
@@ -256,7 +308,6 @@ const getTestServiceIdMapping = (selectedService: any, serviceType: string): str
   if (category === 'civil') {
     if (serviceType === 'home') {
       // Map to actual TestService IDs for civil home services
-      // TODO: Replace with actual TestService IDs from your database
       return selectedService?.testServiceInfo?.id || selectedService?.id || 'civil-home-test-service-id'; // Replace with real ID
     } else if (serviceType === 'clinic') {
       // Map to actual TestService IDs for civil clinic services
@@ -271,7 +322,7 @@ const getTestServiceIdMapping = (selectedService: any, serviceType: string): str
   }
   
   // Fallback: return the original selectedService.id
-  return selectedService?.testServiceInfo?.id || selectedService?.id || null;
+  return selectedService?.testServiceInfor?.id || selectedService?.testServiceInfo?.id || selectedService?.id || null;
 };
 
 // Helper function để tạo booking data từ form data
@@ -296,17 +347,7 @@ export const mapFormDataToBookingRequest = async (
     throw new Error('Missing required contact information');
   }
   
-  if (!formData.email) {
-    console.error('❌ Missing email:', formData.email);
-    throw new Error('Missing required email information');
-  }
-  
-  // Basic email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(formData.email)) {
-    console.error('❌ Invalid email format:', formData.email);
-    throw new Error('Invalid email format');
-  }
+  // No longer need email validation since it's removed
   
   // Validate phone format (basic)
   const phoneRegex = /^[0-9+\-\s()]{10,15}$/;
@@ -357,12 +398,13 @@ export const mapFormDataToBookingRequest = async (
   
   console.log('✅ Date validation passed');
   
-  // Get the actual TestService ID using mapping
-  let testServiceId = getTestServiceIdMapping(selectedService, formData.serviceType);
+  // Get the actual TestService ID using mapping (now async)
+  let testServiceId = await getTestServiceIdMapping(selectedService, formData.serviceType);
   
   // If mapping failed, try fallback methods
   if (!testServiceId) {
-    testServiceId = selectedService?.testServiceId || 
+    testServiceId = selectedService?.testServiceInfor?.id || 
+                   selectedService?.testServiceInfo?.id || 
                    selectedService?.serviceId || 
                    selectedService?.id ||
                    formData.testType;
@@ -378,14 +420,17 @@ export const mapFormDataToBookingRequest = async (
     throw new Error('Unable to determine TestService ID. Please select a valid service.');
   }
   
+  // Type assertion: At this point, testServiceId is guaranteed to be string
+  const finalTestServiceId: string = testServiceId;
+  
   // Validate testServiceId format (should be GUID-like)
   const guidRegex = /^[0-9A-F]{16}$/i;
-  if (!guidRegex.test(testServiceId)) {
-    console.error('❌ Invalid testServiceId format:', testServiceId);
+  if (!guidRegex.test(finalTestServiceId)) {
+    console.error('❌ Invalid testServiceId format:', finalTestServiceId);
     throw new Error('Invalid service ID format. Please try selecting the service again.');
   }
   
-  console.log('✅ TestServiceId validation passed:', testServiceId);
+  console.log('✅ TestServiceId validation passed:', finalTestServiceId);
   
   // Get real clientId from API instead of localStorage
   let realClientId = clientId || getUserClientId(); // Try provided or localStorage first
@@ -404,15 +449,18 @@ export const mapFormDataToBookingRequest = async (
     willIncludeClientId: !!realClientId
   });
   
+  // Get priceServiceId (same as selected service ID)
+  const priceServiceId = selectedService?.id || selectedService?.serviceId || finalTestServiceId;
+  
   // Build request object conditionally
   const bookingRequest: CreateBookingRequest = {
-    testServiceId: testServiceId, // Now guaranteed to be string
+    testServiceId: finalTestServiceId, // Now guaranteed to be string
     appointmentDate: formatDateForApi(appointmentDateTime),
     note: (formData.notes || "").trim(),
     clientName: formData.name.trim(),
     address: (formData.address || "").trim(),
     phone: formData.phone.replace(/\s/g, ''), // Remove spaces from phone
-    email: formData.email.trim().toLowerCase(),
+    priceServiceId: priceServiceId,
   };
   
   // Include clientId if we have one (API requires it)
@@ -444,9 +492,9 @@ export const mapFormDataToBookingRequest = async (
     throw new Error('Invalid phone number in request');
   }
   
-  if (!bookingRequest.email || !bookingRequest.email.includes('@')) {
-    console.error('❌ Invalid email in final request:', bookingRequest.email);
-    throw new Error('Invalid email in request');
+  if (!bookingRequest.priceServiceId || bookingRequest.priceServiceId.length < 10) {
+    console.error('❌ Invalid priceServiceId in final request:', bookingRequest.priceServiceId);
+    throw new Error('Invalid price service ID in request');
   }
   
   if (!bookingRequest.appointmentDate || !bookingRequest.appointmentDate.includes('T')) {

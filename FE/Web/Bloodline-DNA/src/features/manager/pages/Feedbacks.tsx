@@ -1,51 +1,29 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { FeedbackResponse } from '../types/feedback';
+import { useCallback, useEffect, useState } from 'react';
 import { Loading } from '../../../components';
+import { getFeedbacksApi } from '../api/feedbackApi'; // Thêm dòng này
 import FeedbackCard from '../components/feedback/FeedbackCard';
+import type { FeedbackResponse } from '../types/feedback';
 
 function Feedbacks() {
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const token = localStorage.getItem("token") || "";
 
-  const fetchFakeFeedbacks = useCallback(async () => {
+  // Đổi sang gọi API thật
+  const fetchFeedbacks = useCallback(async () => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Giả delay
-    const fakeData: FeedbackResponse[] = [
-      {
-        id: 'fb001',
-        userId: 'user001',
-        testServiceId: 'test001',
-        rating: 5,
-        comment: 'Dịch vụ rất tốt!',
-        createdAt: '2025-06-17T10:00:00Z',
-        updatedAt: '2025-06-17T10:00:00Z',
-      },
-      {
-        id: 'fb002',
-        userId: 'user002',
-        testServiceId: 'test002',
-        rating: 3,
-        comment: 'Khá ổn nhưng cần cải thiện thời gian chờ.',
-        createdAt: '2025-06-16T14:20:00Z',
-        updatedAt: '2025-06-16T14:20:00Z',
-      },
-      {
-        id: 'fb003',
-        userId: 'user003',
-        testServiceId: 'test003',
-        rating: 1,
-        comment: 'Tôi không hài lòng với thái độ phục vụ.',
-        createdAt: '2025-06-15T09:30:00Z',
-        updatedAt: '2025-06-15T09:30:00Z',
-      },
-    ];
-    setFeedbacks(fakeData);
+    try {
+      const data = await getFeedbacksApi(token);
+      setFeedbacks(data);
+    } catch {
+      setFeedbacks([]);
+    }
     setIsLoading(false);
-  }, []);
+  }, [token]);
 
   useEffect(() => {
-    fetchFakeFeedbacks();
-  }, [fetchFakeFeedbacks]);
+    fetchFeedbacks();
+  }, [fetchFeedbacks]);
 
   return (
     <>

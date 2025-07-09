@@ -1,20 +1,20 @@
 export interface PriceServiceRequest {
-  id?: string;
+  id?: string; 
   price: number;
   collectionMethod: number;
   effectiveFrom: string;
   effectiveTo: string;
-  isActive: boolean;
   currency?: string;
+  isActive: boolean;
 }
 
 // Dùng cho tạo mới (POST)
 export interface TestRequest {
   name: string;
   description: string;
-  type: number; // BẮT BUỘC là number khi tạo mới
   isActive: boolean;
   priceServices: PriceServiceRequest[];
+  sampleCount: number; // Số lượng mẫu mặc định
 }
 
 // Dùng cho cập nhật (PUT)
@@ -22,7 +22,7 @@ export interface TestUpdateRequest {
   id: string;
   name: string;
   description: string;
-  category: string; // BẮT BUỘC là string khi cập nhật
+  category: string; 
   isActive: boolean;
   priceServices: PriceServiceRequest[];
 }
@@ -32,13 +32,26 @@ export interface PriceServiceResponse {
   serviceId: string;
   price: number;
   collectionMethod: number;
+  collectionMethodLabel?: string; // thêm nếu bạn muốn lưu label tiếng Việt tại đây
   currency: string;
   effectiveFrom: string;
   effectiveTo: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-  testServiceInfor: string;
+  testServiceInfor: TestServiceInfor;
+}
+
+export interface TestServiceInfor {
+  id: string;
+  name: string;
+  description: string;  
+  category: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  priceServices: PriceServiceResponse[];
+  sampleCount: number;
 }
 
 export interface TestResponse {
@@ -50,6 +63,7 @@ export interface TestResponse {
   createdAt: string;
   updatedAt: string;
   priceServices: PriceServiceResponse[];
+  sampleCount: number;
 }
 
 export function getCategoryLabel(category: string): string {
@@ -60,5 +74,16 @@ export function getCategoryLabel(category: string): string {
       return "Pháp lý";
     default:
       return category;
+  }
+}
+
+export function getCollectionMethodLabel(method: number): string {
+  switch (method) {
+    case 0:
+      return "Tự lấy mẫu";
+    case 1:
+      return "Lấy mẫu tại cơ sở";
+    default:
+      return "Không xác định";
   }
 }

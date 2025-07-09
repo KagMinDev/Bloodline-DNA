@@ -4,14 +4,17 @@ import BlogCard from '../components/blogs/BlogCard';
 import BlogDialog from '../components/blogs/BlogDialog';
 import { FaPlus } from 'react-icons/fa';
 import { getBlogsApi, createBlogApi, getBlogByIdApi, updateBlogApi, deleteBlogApi } from '../api/blogsApi';
+import { getTagsApi } from '../api/tagApi'; // import hàm getTagsApi
 import type { BlogResponse, BlogCreateRequest, BlogUpdateRequest } from '../types/blogs';
 import { Loading } from '../../../components';
+import type { TagResponse } from '../types/tags';
 
 function Blogs() {
   const [blogs, setBlogs] = useState<BlogResponse[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [editingBlog, setEditingBlog] = useState<BlogResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [tags, setTags] = useState<TagResponse[]>([]);
   const accountId = localStorage.getItem('accountId') || '';
   const accountName = localStorage.getItem('accountName') || '';
   const authorId = accountId;
@@ -24,6 +27,7 @@ function Blogs() {
     status: string;
     authorId: string;
     authorName: string;
+    tagIds: string;
   }>({
     title: '',
     content: '',
@@ -32,6 +36,7 @@ function Blogs() {
     status: '',
     authorId: authorId,
     authorName: accountName,
+    tagIds: '',
   });
 
   const fetchBlogs = useCallback(async () => {
@@ -78,6 +83,7 @@ function Blogs() {
           status: statusNumber,
           authorId: form.authorId,
           thumbnailURL: typeof form.thumbnailURL === 'string' ? form.thumbnailURL : undefined,
+          tagIds: form.tagIds || '',
         };
 
         const updatedBlog = await updateBlogApi(editingBlog.id, blogRequest);
@@ -96,6 +102,7 @@ function Blogs() {
           status: statusNumber,
           authorId: form.authorId,
           thumbnailURL: form.thumbnailURL,
+          tagIds: form.tagIds || '',
         };
         await createBlogApi(blogRequest);
         await fetchBlogs();
@@ -112,6 +119,7 @@ function Blogs() {
         status: '',
         authorId: authorId,
         authorName: accountName,
+        tagIds: '',
       });
     } catch (error: any) {
       console.error('handleSave error:', error);
@@ -134,6 +142,7 @@ function Blogs() {
         status: (typeof blogData.status === 'string' ? Number(blogData.status) : blogData.status) === 1 ? 'Hiển thị' : 'Ẩn',
         authorId: blogData.authorId,
         authorName: blogData.authorName,
+        tagIds: blogData.tagIds || '',
       });
       setShowDialog(true);
     } catch (error: any) {
@@ -169,10 +178,15 @@ function Blogs() {
       status: '',
       authorId: authorId,
       authorName: accountName,
+      tagIds: '',
     });
     setEditingBlog(null);
     setShowDialog(true);
   }, [authorId, accountName]);
+
+  useEffect(() => {
+    getTagsApi().then(setTags).catch(() => setTags([]));
+  }, []);
 
   return (
     <>
@@ -214,6 +228,7 @@ function Blogs() {
           onSave={handleSave}
           editingBlog={editingBlog}
           isLoading={isLoading}
+          tags={tags} // truyền thêm prop này
         />
       </div>
       {isLoading && <Loading message="Đang tải..." fullScreen={true} />}

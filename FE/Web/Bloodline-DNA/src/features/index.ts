@@ -5,5 +5,4 @@ export { default as Login } from "./auth/pages/Login";
 export { default as Register } from "./auth/pages/Register";
 export { default as TestManagement } from "./manager/pages/TestManagement";
 export { default as Blogs } from "./manager/pages/Blogs";
-export { default as Report } from "./manager/pages/Report";
-export { default as Result } from "./manager/pages/Result";
+export { default as Tags } from "./manager/pages/Tags";

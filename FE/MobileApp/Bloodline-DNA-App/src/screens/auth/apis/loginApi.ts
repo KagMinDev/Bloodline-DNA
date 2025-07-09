@@ -1,30 +1,30 @@
 import axios from "axios";
 import { BASE_URL } from "./rootApi";
 
-export const loginApi = async (email: string, password: string) => {
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/auth/login`,
-      {
-        email,
-        password,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+export interface LoginResponse {
+  token: string;
+  userName: string;
+  role: "Staff" | "Client";
+}
 
-    return response.data;
-  } catch (error) {
-    // Nếu là lỗi từ axios
-    if (axios.isAxiosError(error)) {
-      const serverMessage =
-        error.response?.data?.message || "Lỗi không xác định từ server";
-      throw new Error(serverMessage);
+export const loginApi = async (
+  email: string,
+  password: string
+): Promise<LoginResponse> => {
+  try {
+    const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
+
+    if (response.data.success) {
+      const { token, userName, role } = response.data.data;
+      return { token, userName, role };
+    } else {
+      throw new Error(response.data.message || "Đăng nhập thất bại");
     }
-    // Nếu là lỗi khác (không phải axios)
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const message = error.response?.data?.message || "Lỗi không xác định từ server";
+      throw new Error(message);
+    }
     throw new Error("Đã xảy ra lỗi không mong muốn");
   }
 };

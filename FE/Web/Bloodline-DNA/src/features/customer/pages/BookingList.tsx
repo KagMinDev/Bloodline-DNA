@@ -11,9 +11,7 @@ import {
   PhoneIcon,
   HomeIcon,
   BuildingIcon,
-  CheckCircleIcon,
-  AlertCircleIcon,
-  XCircleIcon
+  AlertCircleIcon
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
@@ -36,6 +34,9 @@ import {
   getStatusDisplay,
   type BookingItem 
 } from "../api/bookingListApi";
+// Import statusConfig từ BookingStatusPage để đồng bộ
+import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
+import type { DetailedBookingStatus } from "../types/bookingTypes";
 
 interface Booking {
   id: string;
@@ -47,34 +48,12 @@ interface Booking {
   address?: string;
   preferredDate: string;
   preferredTime: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: DetailedBookingStatus;
   notes?: string;
   bookingDate: string;
   price: string;
+  collectionMethod: string;
 }
-
-const statusConfig = {
-  pending: {
-    label: 'Chờ xác nhận',
-    color: 'bg-yellow-100 text-yellow-800',
-    icon: AlertCircleIcon
-  },
-  confirmed: {
-    label: 'Đã xác nhận',
-    color: 'bg-blue-100 text-blue-800', 
-    icon: CheckCircleIcon
-  },
-  completed: {
-    label: 'Hoàn thành',
-    color: 'bg-green-100 text-green-800',
-    icon: CheckCircleIcon
-  },
-  cancelled: {
-    label: 'Đã hủy',
-    color: 'bg-red-100 text-red-800',
-    icon: XCircleIcon
-  }
-};
 
 export const BookingList = (): React.JSX.Element => {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -98,19 +77,43 @@ export const BookingList = (): React.JSX.Element => {
     const createdAt = new Date(item.createdAt);
     const bookingDate = createdAt.toISOString().split('T')[0];
     
-    // Map collectionMethod to serviceType
-    const serviceType: 'home' | 'clinic' = 
-      item.collectionMethod?.toLowerCase().includes('home') || 
-      item.collectionMethod?.toLowerCase().includes('nhà') ? 'home' : 'clinic';
+    // Map collectionMethod to serviceType - FIX: sử dụng logic đúng 0/1
+    const serviceType: 'home' | 'clinic' = (() => {
+      // Kiểm tra nếu collectionMethod là number
+      if (typeof item.collectionMethod === 'number') {
+        return item.collectionMethod === 0 ? 'home' : 'clinic';
+      }
+      
+      // Kiểm tra nếu collectionMethod là string number
+      const methodNum = parseInt(item.collectionMethod);
+      if (!isNaN(methodNum)) {
+        return methodNum === 0 ? 'home' : 'clinic';
+      }
+      
+      // Fallback: nếu là string, kiểm tra nội dung
+      const methodStr = item.collectionMethod?.toLowerCase() || '';
+      return methodStr.includes('home') || methodStr.includes('nhà') || methodStr.includes('0') ? 'home' : 'clinic';
+    })();
     
-    // Normalize status to match expected values
-    const normalizeStatus = (status: string): 'pending' | 'confirmed' | 'completed' | 'cancelled' => {
+    // Normalize status to match DetailedBookingStatus - FIX: sử dụng PascalCase  
+    const normalizeStatus = (status: string): DetailedBookingStatus => {
       const statusLower = status.toLowerCase();
-      if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'pending';
-      if (statusLower.includes('confirmed') || statusLower.includes('xác nhận')) return 'confirmed';
-      if (statusLower.includes('completed') || statusLower.includes('hoàn thành')) return 'completed';
-      if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'cancelled';
-      return 'pending'; // Default fallback
+      
+      // Map theo DetailedBookingStatus (PascalCase)
+      if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'Pending';
+      if (statusLower.includes('confirmed') || statusLower.includes('xác nhận')) return 'PreparingKit'; // Assume confirmed moves to preparing
+      if (statusLower.includes('preparing') || statusLower.includes('chuẩn bị')) return 'PreparingKit';
+      if (statusLower.includes('delivering') || statusLower.includes('giao')) return 'DeliveringKit';
+      if (statusLower.includes('delivered') || statusLower.includes('nhận kit')) return 'KitDelivered';
+      if (statusLower.includes('waiting') || statusLower.includes('chờ mẫu')) return 'WaitingForSample';
+      if (statusLower.includes('returning') || statusLower.includes('vận chuyển')) return 'ReturningSample';
+      if (statusLower.includes('received') || statusLower.includes('nhận mẫu')) return 'SampleReceived';
+      if (statusLower.includes('testing') || statusLower.includes('phân tích')) return 'Testing';
+      if (statusLower.includes('payment') || statusLower.includes('thanh toán')) return 'Completed'; // Map payment to completed for now
+      if (statusLower.includes('completed') || statusLower.includes('hoàn thành')) return 'Completed';
+      if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'Cancelled';
+      
+      return 'Pending'; // Default fallback
     };
     
     return {
@@ -126,7 +129,8 @@ export const BookingList = (): React.JSX.Element => {
       status: normalizeStatus(item.status),
       notes: item.note || '',
       bookingDate,
-      price: formatPrice(item.price)
+      price: formatPrice(item.price),
+      collectionMethod: item.collectionMethod
     };
   };
 
@@ -248,10 +252,16 @@ export const BookingList = (): React.JSX.Element => {
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
                 >
                   <option value="all">Tất cả</option>
-                  <option value="pending">Chờ xác nhận</option>
-                  <option value="confirmed">Đã xác nhận</option>
-                  <option value="completed">Hoàn thành</option>
-                  <option value="cancelled">Đã hủy</option>
+                  <option value="Pending">Chờ xác nhận</option>
+                  <option value="PreparingKit">Đang chuẩn bị Kit</option>
+                  <option value="DeliveringKit">Đang giao Kit</option>
+                  <option value="KitDelivered">Đã nhận Kit</option>
+                  <option value="WaitingForSample">Chờ nhận mẫu</option>
+                  <option value="ReturningSample">Đang vận chuyển mẫu</option>
+                  <option value="SampleReceived">Đã nhận mẫu</option>
+                  <option value="Testing">Đang phân tích</option>
+                  <option value="Completed">Hoàn thành</option>
+                  <option value="Cancelled">Đã hủy</option>
                 </select>
               </div>
             </div>
@@ -295,7 +305,8 @@ export const BookingList = (): React.JSX.Element => {
             ) : (
               <div className="grid grid-cols-1 gap-6">
                 {filteredBookings.map((booking) => {
-                  const StatusIcon = statusConfig[booking.status].icon;
+                  const statusInfo = getStatusConfigByDetailedStatus(booking.status);
+                  const StatusIcon = statusInfo?.icon || AlertCircleIcon;
                   const ServiceIcon = booking.serviceType === 'home' ? HomeIcon : BuildingIcon;
                   
                   return (
@@ -307,9 +318,9 @@ export const BookingList = (): React.JSX.Element => {
                               <div>
                                 <div className="flex items-center gap-3 mb-2">
                                   <h3 className="text-xl font-bold text-blue-900">#{booking.id}</h3>
-                                  <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${statusConfig[booking.status].color}`}>
+                                  <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${statusInfo?.color || 'bg-gray-100 text-gray-800'}`}>
                                     <StatusIcon className="w-4 h-4" />
-                                    {statusConfig[booking.status].label}
+                                    {statusInfo?.label || booking.status}
                                   </span>
                                 </div>
                                 <p className="text-lg font-semibold text-slate-700 mb-1">{booking.testType}</p>
@@ -325,7 +336,7 @@ export const BookingList = (): React.JSX.Element => {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                               <div className="flex items-center text-slate-600">
                                 <ServiceIcon className="w-4 h-4 mr-2 text-blue-500" />
-                                {booking.serviceType === 'home' ? 'Tự thu mẫu tại nhà' : 'Thu mẫu tại cơ sở'}
+                                {booking.collectionMethod === 'SelfSample' ? 'Khách Hàng Tự Thu Mẫu' : 'Thu mẫu tại cơ sở'}
                               </div>
                               <div className="flex items-center text-slate-600">
                                 <CalendarIcon className="w-4 h-4 mr-2 text-blue-500" />
@@ -356,25 +367,22 @@ export const BookingList = (): React.JSX.Element => {
                             )}
                           </div>
 
-                          <div className="flex flex-col gap-2 lg:min-w-[200px]">
-                            <Button
-                              variant="outline"
-                              className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white w-full transition-colors duration-200"
-                              onClick={() => navigate(`/customer/booking-detail/${booking.id}`)}
+                          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                            <Button 
+                              variant="outline" 
+                              className="w-full sm:w-auto"
+                              onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
                             >
                               <EyeIcon className="w-4 h-4 mr-2" />
-                              Xem Chi Tiết
+                              Xem chi tiết
                             </Button>
-                            {(booking.status === 'pending' || booking.status === 'confirmed') && (
-                              <Button
-                                variant="outline"
-                                className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white w-full transition-colors duration-200"
-                                onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
-                              >
-                                <EditIcon className="w-4 h-4 mr-2" />
-                                Cập Nhật
-                              </Button>
-                            )}
+                            <Button 
+                              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+                              onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
+                            >
+                              <EditIcon className="w-4 h-4 mr-2" />
+                              Sửa
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
