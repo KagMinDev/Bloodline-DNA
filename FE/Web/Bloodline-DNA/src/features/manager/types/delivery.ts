@@ -5,7 +5,7 @@ export type DeliveryStatus =
   | "WaitingForPickup"
   | "PickingUpSample"
   | "SampleReceived"
-  | "cancelled";
+  | "Cancelled";
 
 export interface DeliveryLogistic {
   id: string;

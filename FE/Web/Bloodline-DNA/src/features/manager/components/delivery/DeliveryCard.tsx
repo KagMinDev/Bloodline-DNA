@@ -26,7 +26,7 @@ const DeliveryCard = ({ delivery, onClick, loadingId }: Props) => {
       WaitingForPickup: "bg-yellow-100 text-yellow-800",
       PickingUpSample: "bg-purple-100 text-purple-800",
       SampleReceived: "bg-emerald-100 text-emerald-800",
-      cancelled: "bg-red-100 text-red-800",
+      Cancelled: "bg-red-100 text-red-800",
     };
     return map[status] || "bg-gray-100 text-gray-800";
   };
@@ -39,7 +39,7 @@ const DeliveryCard = ({ delivery, onClick, loadingId }: Props) => {
       WaitingForPickup: "Đợi đến lấy mẫu",
       PickingUpSample: "Đang lấy mẫu",
       SampleReceived: "Đã nhận mẫu",
-      cancelled: "Huỷ giao hoặc lấy mẫu",
+      Cancelled: "Huỷ giao hoặc lấy mẫu",
     };
     return map[status] || "Không xác định";
   };
