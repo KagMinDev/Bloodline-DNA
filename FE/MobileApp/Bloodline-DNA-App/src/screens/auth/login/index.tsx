@@ -75,7 +75,7 @@ const handleLogin = async (data: Login) => {
   setLoading(true);
   try {
     const response = await loginApi(data.email, data.password); 
-    const token = response.data.token;
+    const token = response.token;
 
     await login(token); 
 

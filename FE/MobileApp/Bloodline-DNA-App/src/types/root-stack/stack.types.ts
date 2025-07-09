@@ -13,6 +13,22 @@ export type RootStackParamList = {
   AllService: undefined;
   DetailsService: { id: string };
   AppointmentScreen: { testServiceId: string; priceServiceId: string; };
+
+  CheckoutScreen: { bookingId: string };
+  PaymentSuccess: {
+    bookingId: string;
+    orderCode?: string;
+    amount?: number;
+    paymentType?: "deposit" | "remaining";
+  };
+  PaymentError: {
+    bookingId?: string;
+    orderCode?: string;
+    paymentType?: "deposit" | "remaining";
+    message?: string;
+  };
+  TestPayment: undefined;
+  BookingHistory: undefined;
 };
 
 

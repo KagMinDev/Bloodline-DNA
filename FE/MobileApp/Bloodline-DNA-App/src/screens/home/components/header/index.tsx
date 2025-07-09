@@ -4,26 +4,17 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useRef, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Easing,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Animated, Dimensions, Easing, Pressable, Text, TouchableOpacity, View,} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./styles";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MENU_WIDTH = SCREEN_WIDTH * 0.8;
 
 const navItems = [
   { label: "Trang chủ", screen: "Home" },
+  { label: "Lịch sử đặt lịch", screen: "BookingHistory" },
   { label: "Về chúng tôi", screen: "About" },
-  { label: "Dịch vụ", screen: "Services" },
   { label: "Các Bác Sĩ", screen: "Doctors" },
   { label: "Tin tức", screen: "News" },
   { label: "Liên hệ", screen: "Contact" },
@@ -74,7 +65,7 @@ const Header: React.FC = () => {
         return "home-outline";
       case "About":
         return "information-outline";
-      case "Services":
+      case "BookingHistory":
         return "briefcase-outline";
       case "Doctors":
         return "stethoscope";

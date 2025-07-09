@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Alert, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, TouchableOpacity,} from "react-native";
+import { View, Text, TextInput, Alert, ScrollView, StyleSheet, Platform, KeyboardAvoidingView, TouchableOpacity, } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { TestBookingRequest } from "../types/testBooking";
 import { createTestBookingApi } from "../api/testbookingApi";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
 import Icon from "react-native-vector-icons/Feather";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 const AppointmentScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, "AppointmentScreen">>();
-  const { testServiceId, priceServiceId } = route.params;
-  const [form, setForm] = useState<
-    Omit<TestBookingRequest, "appointmentDate"> & { appointmentDate: Date }
-  >({
+  const { testServiceId, priceServiceId } = route.params || {};
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  console.log("Route params:", route.params);
+  console.log("testServiceId:", testServiceId);
+  console.log("priceServiceId:", priceServiceId);
+  const [form, setForm] = useState<Omit<TestBookingRequest, "appointmentDate"> & { appointmentDate: Date }>({
     clientName: "",
     address: "",
     phone: "",
     note: "",
-    testServiceId,
+    testServiceId: testServiceId || "",
     clientId: "",
-    priceServiceId,
+    priceServiceId: priceServiceId || "",
     appointmentDate: new Date(),
   });
 
-
-
-  // Load clientId from AsyncStorage when component mounts
   useEffect(() => {
     const loadClientId = async () => {
       try {
@@ -40,7 +40,6 @@ const AppointmentScreen: React.FC = () => {
         console.error("Error loading clientId:", error);
       }
     };
-
     loadClientId();
   }, []);
 
@@ -52,28 +51,59 @@ const AppointmentScreen: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!testServiceId || !priceServiceId) {
+      Alert.alert("Lỗi", "Thiếu thông tin dịch vụ. Vui lòng quay lại và chọn lại dịch vụ.");
+      return;
+    }
+    if (!form.clientName.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập tên khách hàng.");
+      return;
+    }
+    if (!form.address.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập địa chỉ.");
+      return;
+    }
+    if (!form.phone.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập số điện thoại.");
+      return;
+    }
     setLoading(true);
     try {
       const payload: TestBookingRequest = {
         ...form,
+        testServiceId: testServiceId!,
+        priceServiceId: priceServiceId!,
         appointmentDate: form.appointmentDate.toISOString(),
       };
-
-      await createTestBookingApi(payload);
+      const result = await createTestBookingApi(payload);
+      let bookingId = "";
+      if (typeof result === 'string') {
+        bookingId = result;
+      } else if (result && typeof result === 'object' && result.id) {
+        bookingId = result.id;
+      } else {
+        throw new Error("Invalid response format from create booking API");
+      }
+      if (!bookingId) {
+        Alert.alert("Cảnh báo", "Đặt lịch thành công nhưng không nhận được ID. Vui lòng kiểm tra lại trong danh sách đặt lịch.");
+        return;
+      }
       Alert.alert("Thành công", "Bạn đã đặt lịch thành công.");
+      navigation.navigate("CheckoutScreen", { bookingId });
+
       setForm({
         clientName: "",
         address: "",
         phone: "",
         note: "",
-        testServiceId,
+        testServiceId: testServiceId || "",
         clientId: "",
-        priceServiceId,
+        priceServiceId: priceServiceId || "",
         appointmentDate: new Date(),
       });
+      console.log("handleSubmit success");
     } catch (error: any) {
       console.log("handleSubmit error:", error.message);
-      
       Alert.alert("Lỗi", "Không thể đặt lịch. Vui lòng thử lại.");
     } finally {
       setLoading(false);
@@ -87,6 +117,31 @@ const AppointmentScreen: React.FC = () => {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Đặt lịch xét nghiệm</Text>
+
+        {/* Service Info Display */}
+        {(testServiceId || priceServiceId) && (
+          <View style={styles.serviceInfoCard}>
+            <Text style={styles.serviceInfoTitle}>📋 Thông tin dịch vụ</Text>
+            <View style={styles.serviceInfoRow}>
+              <Text style={styles.serviceInfoLabel}>Mã dịch vụ:</Text>
+              <Text style={styles.serviceInfoValue}>{testServiceId || "Chưa chọn"}</Text>
+            </View>
+            <View style={styles.serviceInfoRow}>
+              <Text style={styles.serviceInfoLabel}>Mã giá:</Text>
+              <Text style={styles.serviceInfoValue}>{priceServiceId || "Chưa chọn"}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Warning if missing service info */}
+        {(!testServiceId || !priceServiceId) && (
+          <View style={styles.warningCard}>
+            <Icon name="alert-triangle" size={16} color="#f59e0b" />
+            <Text style={styles.warningText}>
+              Thiếu thông tin dịch vụ. Vui lòng quay lại và chọn dịch vụ trước khi đặt lịch.
+            </Text>
+          </View>
+        )}
 
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Tên khách hàng</Text>
@@ -150,7 +205,7 @@ const AppointmentScreen: React.FC = () => {
             mode="datetime"
             is24Hour
             display="default"
-            onChange={(event, selectedDate) => {
+            onChange={(_, selectedDate) => {
               setShowDatePicker(false);
               if (selectedDate) {
                 handleChange("appointmentDate", selectedDate);
@@ -161,11 +216,16 @@ const AppointmentScreen: React.FC = () => {
 
         <TouchableOpacity
           onPress={handleSubmit}
-          disabled={loading}
-          style={[styles.customButton, loading && { opacity: 0.6 }]}
+          disabled={loading || !testServiceId || !priceServiceId}
+          style={[
+            styles.customButton,
+            (loading || !testServiceId || !priceServiceId) && { opacity: 0.6 }
+          ]}
         >
           <Text style={styles.customButtonText}>
-            {loading ? "Đang xử lý..." : "Xác nhận đặt lịch"}
+            {loading ? "Đang xử lý..." :
+              (!testServiceId || !priceServiceId) ? "Thiếu thông tin dịch vụ" :
+                "Xác nhận đặt lịch"}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -230,5 +290,73 @@ const styles = StyleSheet.create({
     color: "#1565C0", // xanh đậm hơn
     fontSize: 16,
     fontWeight: "500",
+  },
+  serviceInfoCard: {
+    backgroundColor: "#f0f9ff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+  },
+  serviceInfoTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1e40af",
+    marginBottom: 12,
+  },
+  serviceInfoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  serviceInfoLabel: {
+    fontSize: 14,
+    color: "#64748b",
+    flex: 1,
+  },
+  serviceInfoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1e293b",
+    flex: 1,
+    textAlign: "right",
+  },
+  warningCard: {
+    backgroundColor: "#fef3c7",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#fbbf24",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  warningText: {
+    fontSize: 14,
+    color: "#92400e",
+    marginLeft: 8,
+    flex: 1,
+    lineHeight: 20,
+  },
+  debugCard: {
+    backgroundColor: "#f3f4f6",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+  },
+  debugTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: 8,
+  },
+  debugText: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginBottom: 4,
+    fontFamily: "monospace",
   },
 });

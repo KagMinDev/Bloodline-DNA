@@ -6,6 +6,8 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "bloodline",
+    "deepLinking": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",

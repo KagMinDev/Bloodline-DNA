@@ -82,7 +82,13 @@ const DetailService: React.FC = () => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("AppointmentScreen", { serviceId: service.id })}
+        onPress={() => {
+          const priceServiceId = service.priceServices?.[0]?.id || "";
+          navigation.navigate("AppointmentScreen", {
+            testServiceId: service.id,
+            priceServiceId,
+          });
+        }}
       >
         <Text style={styles.buttonText}>Đặt lịch ngay</Text>
       </TouchableOpacity>
