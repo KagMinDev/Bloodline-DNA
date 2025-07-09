@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { callPaymentCallbackApi } from '../api/checkoutApi';
+import { callRemainingPaymentCallbackApi } from '../api/paymentApi';
+import { confirmDeliveryApi } from '../api/bookingUpdateApi';
 import type {
   BookingDetail,
   DetailedBookingStatus,
@@ -50,6 +52,7 @@ export const useBookingData = () => {
   const [feedbackSuccess, setFeedbackSuccess] = useState<string | null>(null);
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
+  const [confirmDeliveryLoading, setConfirmDeliveryLoading] = useState(false);
 
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -150,18 +153,49 @@ export const useBookingData = () => {
     if (!effectiveBookingId) throw new Error('Không tìm thấy bookingId');
 
     const normalizedStatus = status.toUpperCase() === 'PAID' ? 'PAID' : 'CANCELLED';
-
-    const response = await callPaymentCallbackApi({
+    
+    // Check if this is a remaining payment
+    const isRemainingPayment = paymentData?.isRemainingPayment || false;
+    
+    console.log('🔄 Processing payment callback:', {
       orderCode,
       status: normalizedStatus,
       bookingId: effectiveBookingId,
+      isRemainingPayment,
+      timestamp: new Date().toISOString()
     });
+
+    // Use the appropriate callback API based on payment type
+    const response = isRemainingPayment 
+      ? await callRemainingPaymentCallbackApi({
+          orderCode,
+          status: normalizedStatus,
+          bookingId: effectiveBookingId,
+        })
+      : await callPaymentCallbackApi({
+          orderCode,
+          status: normalizedStatus,
+          bookingId: effectiveBookingId,
+        });
 
     if (response.success && response.status === 'PAID') {
       setPaymentStatus('PAID');
+      console.log('✅ Payment callback successful:', {
+        paymentType: isRemainingPayment ? 'remaining' : 'deposit',
+        orderCode,
+        bookingId: effectiveBookingId,
+        timestamp: new Date().toISOString()
+      });
     } else {
       setPaymentStatus('CANCELLED');
       setPaymentError('Thanh toán thất bại hoặc bị hủy');
+      console.log('❌ Payment callback failed:', {
+        paymentType: isRemainingPayment ? 'remaining' : 'deposit',
+        orderCode,
+        bookingId: effectiveBookingId,
+        response,
+        timestamp: new Date().toISOString()
+      });
     }
 
     await fetchBookingData();
@@ -228,6 +262,34 @@ export const useBookingData = () => {
     await fetchBookingData();
   };
 
+  const handleConfirmDelivery = async (bookingId: string) => {
+    if (!bookingId) {
+      console.error('Booking ID is required for confirm delivery');
+      return;
+    }
+
+    setConfirmDeliveryLoading(true);
+    try {
+      console.log('🔄 Confirming delivery for booking:', bookingId);
+      const result = await confirmDeliveryApi(bookingId);
+      
+      if (result.success) {
+        console.log('✅ Delivery confirmed successfully');
+        // Refresh booking data to get updated status
+        await fetchBookingData();
+      } else {
+        throw new Error(result.message || 'Failed to confirm delivery');
+      }
+    } catch (err) {
+      console.error('❌ Error confirming delivery:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Lỗi xác nhận nhận kit';
+      setError(errorMessage);
+      // Could also set a specific error state if needed
+    } finally {
+      setConfirmDeliveryLoading(false);
+    }
+  };
+
   const handleStepAction = (payload: any) => {
     switch (payload?.type) {
       case 'deposit':
@@ -261,11 +323,13 @@ export const useBookingData = () => {
     feedbackError,
     isSampleModalOpen,
     setIsSampleModalOpen,
+    confirmDeliveryLoading,
     handlePayment,
     handleFeedbackSubmit,
     handleSampleSubmitSuccess,
     handlePaymentCallback,
     handleStepAction,
+    handleConfirmDelivery,
     navigate,
     refetchBookingData: fetchBookingData,
   };

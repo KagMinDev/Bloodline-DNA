@@ -14,5 +14,11 @@ namespace ADNTester.Repository.Implementations
         public TestKitRepository(ApplicationDbContext context) : base(context)
         {
         }
+        public async Task<TestKit?> GetWithDeliveryInfoByBookingIdAsync(string bookingId)
+        {
+            return await _dbSet
+                .Include(k => k.DeliveryInfo)
+                .FirstOrDefaultAsync(k => k.BookingId == bookingId);
+        }
     }
 }

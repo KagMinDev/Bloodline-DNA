@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { CheckCircle, Home } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Header, Footer } from "../../../components";
-import { callPaymentCallbackApi } from "../api/checkoutApi";
+import { callRemainingPaymentCallbackApi } from "../api/paymentApi";
 import { getBookingByIdApi } from "../api/bookingListApi";
 
-const CheckoutSuccess = () => {
+const CheckoutRemainSuccess = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,7 +23,7 @@ const CheckoutSuccess = () => {
     isLoading: true,
   });
 
-  // ✅ Hàm lấy bookingId từ localStorage (giống trang CheckoutError)
+  // ✅ Hàm lấy bookingId từ localStorage
   const getBookingIdFromStorage = (): string | null => {
     const paymentDataStr = localStorage.getItem("paymentData");
     if (!paymentDataStr) return null;
@@ -37,84 +37,81 @@ const CheckoutSuccess = () => {
   };
 
   useEffect(() => {
-  const query = new URLSearchParams(location.search);
-  const queryOrderCode = query.get("orderCode");
-  const queryAmount = query.get("amount");
-  const queryStatus = query.get("status")?.toUpperCase();
+    const query = new URLSearchParams(location.search);
+    const queryOrderCode = query.get("orderCode");
+    const queryAmount = query.get("amount");
+    const queryStatus = query.get("status")?.toUpperCase();
 
-  setOrderCode(queryOrderCode);
-  setAmount(queryAmount);
+    setOrderCode(queryOrderCode);
+    setAmount(queryAmount);
 
-  const storedBookingId = getBookingIdFromStorage();
-  if (storedBookingId) {
-    setBookingId(storedBookingId);
-  }
+    const storedBookingId = getBookingIdFromStorage();
+    if (storedBookingId) {
+      setBookingId(storedBookingId);
+    }
 
-  const normalizedStatus = queryStatus === "PAID" ? "PAID" : "CANCELLED";
+    const normalizedStatus = queryStatus === "PAID" ? "PAID" : "CANCELLED";
 
-  console.log("CheckoutSuccess mounted with:", {
-    orderCode: queryOrderCode,
-    amount: queryAmount,
-    bookingId: storedBookingId,
-    status: normalizedStatus,
-    timestamp: new Date().toISOString(),
-  });
-
-  if (queryOrderCode && storedBookingId) {
-    handlePaymentCallback(queryOrderCode, normalizedStatus, storedBookingId);
-  } else {
-    setUpdateStatus({
-      isLoading: false,
-      isSuccess: false,
-      message: "Thiếu thông tin thanh toán để xác nhận.",
-    });
-  }
-}, [location.search]);
-
-
-  const handlePaymentCallback = async (
-  orderCode: string,
-  status: string,
-  bookingId: string
-) => {
-  try {
-    await callPaymentCallbackApi({
-      orderCode,
-      status,
-      bookingId,
+    console.log("CheckoutRemainSuccess mounted with:", {
+      orderCode: queryOrderCode,
+      amount: queryAmount,
+      bookingId: storedBookingId,
+      status: normalizedStatus,
+      timestamp: new Date().toISOString(),
     });
 
-    // 👉 Dù callback trả về lỗi, vẫn kiểm tra lại trạng thái thật từ backend
-    const bookingData = await getBookingByIdApi(bookingId);
-    const normalizedStatus = (bookingData?.status || "").toUpperCase();
-    const isPaid = normalizedStatus === "PAID" || normalizedStatus === "SUCCESS" || normalizedStatus === "PREPARINGKIT" || normalizedStatus === "CANCELLED";
-
-    if (isPaid) {
-      setUpdateStatus({
-        isLoading: false,
-        isSuccess: true,
-        message: "Đã xác nhận thanh toán thành công.",
-      });
+    if (queryOrderCode && storedBookingId) {
+      handleRemainingPaymentCallback(queryOrderCode, normalizedStatus, storedBookingId);
     } else {
       setUpdateStatus({
         isLoading: false,
         isSuccess: false,
-        message: "Thanh toán chưa được ghi nhận thành công.",
+        message: "Thiếu thông tin thanh toán để xác nhận.",
       });
     }
+  }, [location.search]);
 
-    localStorage.removeItem("paymentData");
-  } catch (err) {
-    console.error("❌ Callback exception:", err);
-    setUpdateStatus({
-      isLoading: false,
-      isSuccess: false,
-      message: "Lỗi khi xác nhận thanh toán.",
-    });
-  }
-};
+  const handleRemainingPaymentCallback = async (
+    orderCode: string,
+    status: string,
+    bookingId: string
+  ) => {
+    try {
+      await callRemainingPaymentCallbackApi({
+        orderCode,
+        status,
+        bookingId,
+      });
 
+      // 👉 Dù callback trả về lỗi, vẫn kiểm tra lại trạng thái thật từ backend
+      const bookingData = await getBookingByIdApi(bookingId);
+      const normalizedStatus = (bookingData?.status || "").toUpperCase();
+      const isPaid = normalizedStatus === "PAID" || normalizedStatus === "SUCCESS" || normalizedStatus === "COMPLETED" || normalizedStatus === "TESTING";
 
+      if (isPaid) {
+        setUpdateStatus({
+          isLoading: false,
+          isSuccess: true,
+          message: "Đã xác nhận thanh toán số tiền còn lại thành công.",
+        });
+      } else {
+        setUpdateStatus({
+          isLoading: false,
+          isSuccess: false,
+          message: "Thanh toán còn lại chưa được ghi nhận thành công.",
+        });
+      }
+
+      localStorage.removeItem("paymentData");
+    } catch (err) {
+      console.error("❌ Remaining payment callback exception:", err);
+      setUpdateStatus({
+        isLoading: false,
+        isSuccess: false,
+        message: "Lỗi khi xác nhận thanh toán còn lại.",
+      });
+    }
+  };
 
   const formatCurrency = (value: string | null) => {
     if (!value) return "N/A";
@@ -132,7 +129,7 @@ const CheckoutSuccess = () => {
         <main className="flex-grow flex items-center justify-center">
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600 mx-auto mb-4"></div>
-            <p className="text-lg text-gray-700">Đang xác nhận thanh toán...</p>
+            <p className="text-lg text-gray-700">Đang xác nhận thanh toán còn lại...</p>
           </div>
         </main>
         <Footer />
@@ -154,7 +151,7 @@ const CheckoutSuccess = () => {
                       <CheckCircle className="w-10 h-10 text-green-500" />
                     </div>
                     <h2 className="text-3xl font-bold text-teal-800 m-0">
-                      Thanh toán thành công!
+                      Thanh toán còn lại thành công!
                     </h2>
                   </>
                 ) : (
@@ -163,7 +160,7 @@ const CheckoutSuccess = () => {
                       <CheckCircle className="w-10 h-10 text-red-500" />
                     </div>
                     <h2 className="text-3xl font-bold text-red-800 m-0">
-                      Xác nhận thanh toán thất bại
+                      Xác nhận thanh toán còn lại thất bại
                     </h2>
                   </>
                 )}
@@ -193,7 +190,7 @@ const CheckoutSuccess = () => {
                   </div>
                   {amount && (
                     <div className="flex justify-between items-center">
-                      <p className="text-slate-600">Số tiền:</p>
+                      <p className="text-slate-600">Số tiền còn lại:</p>
                       <p
                         className={`font-bold text-lg ${
                           updateStatus.isSuccess ? "text-green-600" : "text-red-600"
@@ -244,4 +241,4 @@ const CheckoutSuccess = () => {
   );
 };
 
-export default CheckoutSuccess;
+export default CheckoutRemainSuccess; 

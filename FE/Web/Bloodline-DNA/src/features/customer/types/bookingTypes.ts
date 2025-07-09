@@ -30,6 +30,7 @@ export interface BookingDetail {
   totalPrice: string;
   appointmentCode: string;
   priceNumeric?: number;
+  collectionMethod?: string;
 }
 
 export interface ProgressStep {
@@ -61,7 +62,7 @@ export interface BookingItem {
   id: string;
   testServiceId?: string;
   appointmentDate: string;
-  collectionMethod: string;
+  collectionMethod?: string;
   clientName: string;
   phone: string;
   email: string;

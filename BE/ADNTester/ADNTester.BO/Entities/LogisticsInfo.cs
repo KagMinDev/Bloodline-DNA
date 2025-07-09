@@ -17,6 +17,7 @@ namespace ADNTester.BO.Entities
         public string? StaffId { get; set; }
         public User? Staff { get; set; }
 
+        public string Name { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }
 
@@ -27,7 +28,7 @@ namespace ADNTester.BO.Entities
 
         // Optional: add a discriminator if needed
         public LogisticsType Type { get; set; } // Enum: Delivery or Pickup
-        public LogisticStatus Status { get; set; } = LogisticStatus.Pending;
+        public LogisticStatus Status { get; set; }
 
         private static string GenerateUniqueId()
         {

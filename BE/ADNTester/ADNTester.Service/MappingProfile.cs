@@ -13,6 +13,7 @@ using ADNTester.BO.DTOs.SampleInstruction;
 using ADNTester.BO.DTOs.Payment;
 using ADNTester.BO.DTOs.Tag;
 using ADNTester.BO.DTOs.BlogTag;
+using ADNTester.BO.DTOs.Logistic;
 
 namespace ADNTester.Service
 {
@@ -144,6 +145,14 @@ namespace ADNTester.Service
             CreateMap<CreateBlogTagDto, BlogTag>();
             #endregion
 
+            #region Logistic
+            CreateMap<CreateLogisticsInfoDto, LogisticsInfo>()
+            .ForMember(dest => dest.Status, opt => opt.Ignore()) // default status
+            .ForMember(dest => dest.CompletedAt, opt => opt.Ignore()) // not set at creation
+            .ForMember(dest => dest.Staff, opt => opt.Ignore()) // navigation prop
+            .ForMember(dest => dest.Id, opt => opt.Ignore());   // auto-generated
+            #endregion
         }
     }
 }
+

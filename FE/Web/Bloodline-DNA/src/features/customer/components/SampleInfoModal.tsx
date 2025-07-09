@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../staff/components/booking/ui/select";
-import { submitSampleInfoApi, type SampleInfoPayload } from "../api/sampleApi";
+import { submitSampleInfoApi, getTestKitByBookingIdApi, type SampleInfoPayload } from "../api/sampleApi";
 import { AlertCircleIcon, CheckCircle, Loader2 } from "lucide-react";
 
 // Enums for dropdowns, mirroring staff implementation
@@ -37,26 +37,54 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
   onSubmitSuccess,
 }) => {
   const [formData, setFormData] = useState({
-    sampleCode: "",
     donorName: "",
     relationshipToSubject: "",
     sampleType: "",
-    collectedAt: new Date().toISOString().split("T")[0], // Default to today
   });
+  const [kitId, setKitId] = useState<string>("");
+  const [isLoadingKit, setIsLoadingKit] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  // Fetch TestKit information when modal opens
+  useEffect(() => {
+    const fetchTestKit = async () => {
+      if (isOpen && bookingId) {
+        setIsLoadingKit(true);
+        setApiError(null);
+        
+        try {
+          console.log('🔄 Fetching TestKit for booking:', bookingId);
+          const response = await getTestKitByBookingIdApi(bookingId);
+          
+          if (response.success && response.data?.id) {
+            setKitId(response.data.id);
+            console.log('✅ TestKit ID found:', response.data.id);
+          } else {
+            setApiError(response.message || "Không tìm thấy TestKit cho booking này.");
+          }
+        } catch (error) {
+          console.error('❌ Error fetching TestKit:', error);
+          setApiError("Lỗi khi lấy thông tin TestKit.");
+        } finally {
+          setIsLoadingKit(false);
+        }
+      }
+    };
+
+    fetchTestKit();
+  }, [isOpen, bookingId]);
 
   useEffect(() => {
     // Reset form when modal opens
     if (isOpen) {
       setFormData({
-        sampleCode: "",
         donorName: "",
         relationshipToSubject: "",
         sampleType: "",
-        collectedAt: new Date().toISOString().split("T")[0],
       });
+      setKitId("");
       setErrors({});
       setApiError(null);
     }
@@ -64,11 +92,10 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!formData.sampleCode.trim()) newErrors.sampleCode = "Vui lòng nhập mã mẫu.";
+    if (!kitId.trim()) newErrors.kitId = "Không tìm thấy mã Kit. Vui lòng thử lại.";
     if (!formData.donorName.trim()) newErrors.donorName = "Vui lòng nhập tên người cho mẫu.";
     if (!formData.relationshipToSubject) newErrors.relationshipToSubject = "Vui lòng chọn mối quan hệ.";
     if (!formData.sampleType) newErrors.sampleType = "Vui lòng chọn loại mẫu.";
-    if (!formData.collectedAt) newErrors.collectedAt = "Vui lòng chọn ngày thu mẫu.";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -81,14 +108,13 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
     setApiError(null);
 
     const payload: SampleInfoPayload = {
-      sampleCode: formData.sampleCode,
+      kitId: kitId,
       donorName: formData.donorName,
       relationshipToSubject: Number(formData.relationshipToSubject),
       sampleType: Number(formData.sampleType),
-      collectedAt: new Date(formData.collectedAt).toISOString(),
     };
 
-    const response = await submitSampleInfoApi(bookingId, payload);
+    const response = await submitSampleInfoApi(payload);
 
     setIsSubmitting(false);
 
@@ -106,23 +132,31 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-blue-900">Điền thông tin mẫu xét nghiệm</DialogTitle>
         </DialogHeader>
-        <div className="py-4 space-y-4">
-            {apiError && (
-                <div className="bg-red-50 text-red-700 p-3 rounded-md flex items-center gap-2">
-                    <AlertCircleIcon className="w-4 h-4" />
-                    <span>{apiError}</span>
-                </div>
-            )}
-          <div>
-            <label className="text-sm font-medium">Mã mẫu *</label>
-            <Input
-              value={formData.sampleCode}
-              onChange={(e) => setFormData({ ...formData, sampleCode: e.target.value })}
-              placeholder="Nhập mã dán trên ống nghiệm"
-              className="mt-1"
-            />
-            {errors.sampleCode && <p className="text-sm text-red-600 mt-1">{errors.sampleCode}</p>}
-          </div>
+        
+        <div className="space-y-4">
+          {apiError && (
+            <div className="bg-red-50 text-red-700 p-3 rounded-md flex items-center gap-2">
+              <AlertCircleIcon className="w-4 h-4" />
+              <span>{apiError}</span>
+            </div>
+          )}
+
+          {isLoadingKit && (
+            <div className="bg-blue-50 text-blue-700 p-3 rounded-md flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>Đang tải thông tin TestKit...</span>
+            </div>
+          )}
+
+          {kitId && (
+            <div className="bg-green-50 text-green-700 p-3 rounded-md flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" />
+              <span>TestKit đã được tìm thấy: <strong>{kitId}</strong></span>
+            </div>
+          )}
+
+          {errors.kitId && <p className="text-sm text-red-600">{errors.kitId}</p>}
+
           <div>
             <label className="text-sm font-medium">Tên người cho mẫu *</label>
             <Input
@@ -133,46 +167,41 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
             />
             {errors.donorName && <p className="text-sm text-red-600 mt-1">{errors.donorName}</p>}
           </div>
+          
           <div>
             <label className="text-sm font-medium">Mối quan hệ với người đăng ký *</label>
             <Select onValueChange={(value: string) => setFormData({ ...formData, relationshipToSubject: value })}>
-                <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn mối quan hệ" /></SelectTrigger>
-                <SelectContent>
-                    {Object.entries(RelationshipToSubjectLabelVi).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))}
-                </SelectContent>
+              <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn mối quan hệ" /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(RelationshipToSubjectLabelVi).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
             {errors.relationshipToSubject && <p className="text-sm text-red-600 mt-1">{errors.relationshipToSubject}</p>}
           </div>
           <div>
             <label className="text-sm font-medium">Loại mẫu *</label>
             <Select onValueChange={(value: string) => setFormData({ ...formData, sampleType: value })}>
-                <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn loại mẫu" /></SelectTrigger>
-                <SelectContent>
-                    {Object.entries(SampleTypeLabelVi).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))}
-                </SelectContent>
+              <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn loại mẫu" /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(SampleTypeLabelVi).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
             {errors.sampleType && <p className="text-sm text-red-600 mt-1">{errors.sampleType}</p>}
           </div>
-          <div>
-            <label className="text-sm font-medium">Ngày thu mẫu *</label>
-            <Input
-              type="date"
-              value={formData.collectedAt}
-              onChange={(e) => setFormData({ ...formData, collectedAt: e.target.value })}
-              className="mt-1"
-            />
-             {errors.collectedAt && <p className="text-sm text-red-600 mt-1">{errors.collectedAt}</p>}
-          </div>
         </div>
-        <DialogFooter>
+        
+        <DialogFooter className="gap-2">
           <DialogClose asChild>
             <Button variant="outline" onClick={onClose}>Hủy</Button>
           </DialogClose>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={isSubmitting || isLoadingKit || !kitId}
+          >
             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
             Lưu thông tin
           </Button>
