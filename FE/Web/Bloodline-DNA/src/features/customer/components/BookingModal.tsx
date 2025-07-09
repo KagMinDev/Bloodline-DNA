@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createBookingApi, mapFormDataToBookingRequest, getAvailableTestServicesApi } from "../api/bookingCreateApi";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader } from "./ui/Card";
@@ -18,9 +19,11 @@ import { Input } from "./ui/Input";
 
 // Define interface locally to avoid import issues
 interface CreateBookingResponse {
-  id: string;
+  data?: string; // Booking ID comes in 'data' field
+  id?: string; // Fallback for 'id' field
   message: string;
   success: boolean;
+  statusCode?: number;
 }
 
 interface BookingModalProps {
@@ -58,6 +61,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   onSubmit,
   selectedService,
 }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<BookingData>({
     serviceType: "home",
     name: "",
@@ -497,8 +501,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const handleClose = () => {
-    resetForm();
-    onClose();
+    // If we're on step 3 (success step) and have booking response, navigate to booking status
+    const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
+    if (step === 3 && bookingId) {
+      console.log('🔄 Closing success modal, navigating to booking status:', bookingId);
+      // Navigate first, then close modal to avoid any interference
+      navigate(`/customer/booking-status/${bookingId}`);
+      // Close modal after a brief delay to ensure navigation completes
+      setTimeout(() => {
+        resetForm();
+        onClose();
+      }, 100);
+    } else {
+      resetForm();
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -896,7 +913,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </p>
                 <div className="p-4 mb-6 rounded-lg bg-blue-50">
                   <p className="text-sm text-blue-800">
-                    <strong>Mã đăng ký:</strong> {bookingResponse?.id || `ADN${Date.now().toString().slice(-6)}`}
+                    <strong>Mã đăng ký:</strong> {(bookingResponse as any)?.data || bookingResponse?.id || `ADN${Date.now().toString().slice(-6)}`}
                   </p>
                   <p className="mt-1 text-sm text-blue-800">
                     <strong>Thời gian:</strong> {formData.preferredDate} lúc{" "}
@@ -910,7 +927,29 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </p>
                 </div>
                 <Button
-                  onClick={handleClose}
+                  onClick={() => {
+                    console.log('🔄 Success close button clicked');
+                    console.log('Current step:', step);
+                    console.log('Booking response:', bookingResponse);
+                    // Check both possible locations for booking ID
+                    const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
+                    if (bookingId) {
+                      console.log('🚀 Navigating to booking status:', bookingId);
+                      console.log('Current location:', window.location.href);
+                      navigate(`/customer/booking-status/${bookingId}`);
+                      console.log('✅ Navigation command sent');
+                      // Close modal after navigation
+                      setTimeout(() => {
+                        console.log('🔄 Closing modal and resetting form');
+                        resetForm();
+                        onClose();
+                      }, 150);
+                    } else {
+                      console.warn('⚠️ No booking ID found, just closing modal');
+                      resetForm();
+                      onClose();
+                    }
+                  }}
                   className="px-8 py-3 !text-white bg-blue-900 hover:bg-blue-800"
                 >
                   Đóng

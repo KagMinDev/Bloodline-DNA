@@ -23,6 +23,7 @@ interface BookingProgressTabProps {
   setIsSampleModalOpen: (open: boolean) => void;
   handleConfirmDelivery?: (bookingId: string) => void;
   confirmDeliveryLoading?: boolean;
+  shouldShowSampleButton: boolean;
 }
 
 export const BookingProgressTab = ({
@@ -41,7 +42,8 @@ export const BookingProgressTab = ({
   handleStepAction,
   setIsSampleModalOpen,
   handleConfirmDelivery,
-  confirmDeliveryLoading = false
+  confirmDeliveryLoading = false,
+  shouldShowSampleButton
 }: BookingProgressTabProps) => {
   if (!progressData) return <p>Không có dữ liệu tiến trình.</p>;
 
@@ -65,6 +67,7 @@ export const BookingProgressTab = ({
             handleConfirmDelivery={handleConfirmDelivery}
             confirmDeliveryLoading={confirmDeliveryLoading}
             bookingId={booking.id}
+            shouldShowSampleButton={shouldShowSampleButton}
           />
         ))}
       </div>
