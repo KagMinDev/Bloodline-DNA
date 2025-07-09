@@ -1,7 +1,16 @@
+import { useAuth } from "@/context/auth/AuthContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
 import React, { useRef, useState } from "react";
-import { Animated, Dimensions, Easing, Pressable, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  Dimensions,
+  Easing,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./styles";
 
@@ -22,7 +31,8 @@ const Header: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
   const navigation = useNavigation();
-
+  const { logout } = useAuth();
+  
   const openMenu = () => {
     setMenuVisible(true);
     Animated.timing(slideAnim, {
@@ -53,6 +63,15 @@ const Header: React.FC = () => {
   const onSelectMenu = (screen: string) => {
     navigation.navigate(screen as never); // Chuyển trang
     closeMenu();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout(); // Gọi logout từ context
+      // Không cần reset navigation
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
 
   const getIconName = (screen: string) => {
@@ -128,10 +147,7 @@ const Header: React.FC = () => {
               <Text style={styles.menuItemText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
-          <TouchableOpacity
-            onPress={() => console.log("Đăng xuất")}
-            style={styles.logoutButton}
-          >
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
             <Text style={styles.logoutButtonText}>Đăng xuất</Text>
             <AntDesign name="logout" size={12} color="#ff4d4d" />
           </TouchableOpacity>

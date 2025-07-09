@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
@@ -17,7 +18,6 @@ import { Login } from "../../../types/auth/auth.types";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
 import { getUserInfoApi, loginApi } from "../apis/loginApi";
 import styles from "./styles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginScreen: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -67,32 +67,28 @@ const LoginScreen: React.FC = () => {
     return isValid;
   };
 
-const handleLogin = async (data: Login) => {
-  if (!validateInputs()) {
-    return;
-  }
+  const handleLogin = async (data: Login) => {
+    if (!validateInputs()) {
+      return;
+    }
 
-  setLoading(true);
-  try {
-    const response = await loginApi(data.email, data.password); 
-    const token = response.data.token;
-
-    await login(token); 
-
-    const userInfo = await getUserInfoApi(token);
-    
-    const clientId = userInfo.id;
-    
-    await AsyncStorage.setItem("clientId", clientId);
-
-    
-  } catch (error: any) {
-    console.error("Đăng nhập thất bại:", error);
-    setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const response = await loginApi(data.email, data.password);
+      const token = response.token;
+      
+      await login(token);
+      const userInfo = await getUserInfoApi(token);
+      const clientId = userInfo.id;
+      
+      await AsyncStorage.setItem("clientId", clientId);
+    } catch (error: any) {
+      console.error("Đăng nhập thất bại:", error);
+      setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -144,12 +140,16 @@ const handleLogin = async (data: Login) => {
           </View>
 
           <Text style={styles.title}>Hệ Thống Y Tế Thông Minh</Text>
-          <Text style={styles.subtitle}>Dịch vụ xét nghiệm ADN huyết thống</Text>
+          <Text style={styles.subtitle}>
+            Dịch vụ xét nghiệm ADN huyết thống
+          </Text>
 
           <View style={styles.featuresContainer}>
             <View style={styles.featureItem}>
               <Icon name="shield" size={18} color="#BFDBFE" />
-              <Text style={styles.featureText}>Bảo mật thông tin tuyệt đối</Text>
+              <Text style={styles.featureText}>
+                Bảo mật thông tin tuyệt đối
+              </Text>
             </View>
             <View style={styles.featureItem}>
               <Icon name="heart" size={18} color="#BFDBFE" />
@@ -157,7 +157,9 @@ const handleLogin = async (data: Login) => {
             </View>
             <View style={styles.featureItem}>
               <Icon name="account-group" size={18} color="#BFDBFE" />
-              <Text style={styles.featureText}>Đội ngũ bác sĩ chuyên nghiệp</Text>
+              <Text style={styles.featureText}>
+                Đội ngũ bác sĩ chuyên nghiệp
+              </Text>
             </View>
             <View style={styles.featureItem}>
               <Icon name="chat" size={18} color="#BFDBFE" />
@@ -278,13 +280,14 @@ const handleLogin = async (data: Login) => {
 
             <View style={styles.formOptions}>
               <View style={styles.checkboxContainer}>
-                <TouchableOpacity
-                  onPress={() => setRememberMe(!rememberMe)}
-                >
-                  <View style={[styles.checkbox, rememberMe && styles.checkboxChecked]}>
-                    {rememberMe && (
-                      <Icon name="check" size={14} color="#fff" />
-                    )}
+                <TouchableOpacity onPress={() => setRememberMe(!rememberMe)}>
+                  <View
+                    style={[
+                      styles.checkbox,
+                      rememberMe && styles.checkboxChecked,
+                    ]}
+                  >
+                    {rememberMe && <Icon name="check" size={14} color="#fff" />}
                   </View>
                 </TouchableOpacity>
                 <Text style={styles.checkboxLabel}>Ghi nhớ đăng nhập</Text>
@@ -298,9 +301,7 @@ const handleLogin = async (data: Login) => {
 
             <TouchableOpacity
               style={[styles.loginButton, loading && styles.disabledButton]}
-              onPress={() =>
-                handleLogin({ email: email, password: password })
-              }
+              onPress={() => handleLogin({ email: email, password: password })}
               disabled={loading}
             >
               <Text style={styles.loginButtonText}>Đăng Nhập Hệ Thống</Text>
