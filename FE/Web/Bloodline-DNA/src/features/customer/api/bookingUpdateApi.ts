@@ -32,20 +32,34 @@ const getAuthToken = (): string | null => {
 
 // Status mapping - convert UI status to API status number
 export const statusToNumber: Record<string, number> = {
-  'pending': 0,
-  'confirmed': 1,
-  'in_progress': 2,
-  'completed': 3,
-  'cancelled': 4,
+  'Pending': 0,
+  'PreparingKit': 1,
+  'DeliveringKit': 2,
+  'KitDelivered': 3,
+  'WaitingForSample': 4,
+  'ReturningSample': 5,
+  'SampleReceived': 6,
+  'Testing': 7,
+  'Completed': 8,
+  'Cancelled': 9,
+  'StaffGettingSample': 10,
+  'CheckIn': 11,
 };
 
 // Status mapping - convert API status number to UI status
 export const numberToStatus: Record<number, string> = {
-  0: 'pending',
-  1: 'confirmed',
-  2: 'in_progress',
-  3: 'completed',
-  4: 'cancelled',
+  0: 'Pending',
+  1: 'PreparingKit',
+  2: 'DeliveringKit',
+  3: 'KitDelivered',
+  4: 'WaitingForSample',
+  5: 'ReturningSample',
+  6: 'SampleReceived',
+  7: 'Testing',
+  8: 'Completed',
+  9: 'Cancelled',
+  10: 'StaffGettingSample',
+  11: 'CheckIn',
 };
 
 // Function để update booking
