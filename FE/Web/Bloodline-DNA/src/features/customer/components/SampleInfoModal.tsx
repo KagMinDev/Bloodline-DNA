@@ -118,18 +118,39 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
     setIsSubmitting(true);
     setApiError(null);
 
+    // Convert string values to numbers with validation
+    const relationshipNumber = Number(formData.relationshipToSubject);
+    const sampleTypeNumber = Number(formData.sampleType);
+
+    // Validate converted numbers
+    if (isNaN(relationshipNumber) || isNaN(sampleTypeNumber)) {
+      setApiError("Lỗi chuyển đổi dữ liệu. Vui lòng thử lại.");
+      setIsSubmitting(false);
+      return;
+    }
+
     const payload: SampleInfoPayload = {
       kitId: kitId,
       donorName: formData.donorName,
-      relationshipToSubject: Number(formData.relationshipToSubject),
-      sampleType: Number(formData.sampleType),
+      relationshipToSubject: relationshipNumber,
+      sampleType: sampleTypeNumber,
     };
+
+    console.log('🔄 Submitting sample info with payload:', {
+      kitId: payload.kitId,
+      donorName: payload.donorName,
+      relationshipToSubject: payload.relationshipToSubject,
+      sampleType: payload.sampleType,
+      relationshipLabel: RelationshipToSubjectLabelVi[relationshipNumber],
+      sampleTypeLabel: SampleTypeLabelVi[sampleTypeNumber]
+    });
 
     const response = await submitSampleInfoApi(payload);
 
     setIsSubmitting(false);
 
     if (response.success) {
+      console.log('✅ Sample info submitted successfully');
       onSubmitSuccess();
       onClose();
     } else {
@@ -213,11 +234,11 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
           <DialogClose asChild>
             <Button variant="outline" onClick={onClose}>Hủy</Button>
           </DialogClose>
-          <Button 
+          <Button className="!text-white !bg-blue-900"
             onClick={handleSubmit} 
             disabled={isSubmitting || isLoadingKit || !kitId}
           >
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" /> : <CheckCircle className="mr-2 h-4 w-4 text-white" />}
             Lưu thông tin
           </Button>
         </DialogFooter>

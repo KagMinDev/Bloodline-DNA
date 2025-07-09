@@ -11,7 +11,8 @@ import {
   PhoneIcon,
   HomeIcon,
   BuildingIcon,
-  AlertCircleIcon
+  AlertCircleIcon,
+  StarIcon
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
@@ -37,9 +38,11 @@ import {
 // Import statusConfig từ BookingStatusPage để đồng bộ
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import type { DetailedBookingStatus } from "../types/bookingTypes";
+import { FeedbackModal } from "../components/FeedbackModal";
 
 interface Booking {
   id: string;
+  testServiceId: string; // Add testServiceId field
   testType: string;
   serviceType: 'home' | 'clinic';
   name: string;
@@ -62,6 +65,8 @@ export const BookingList = (): React.JSX.Element => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [selectedBookingForFeedback, setSelectedBookingForFeedback] = useState<Booking | null>(null);
 
   const { openBookingModal } = useBookingModal();
   const navigate = useNavigate();
@@ -118,6 +123,7 @@ export const BookingList = (): React.JSX.Element => {
     
     return {
       id: item.id,
+      testServiceId: item.testServiceId, // Add testServiceId from API
       testType: `Xét nghiệm ADN`, // Default since API doesn't have testType
       serviceType,
       name: item.clientName,
@@ -148,8 +154,15 @@ export const BookingList = (): React.JSX.Element => {
         const formattedBookings = apiData.map(transformApiDataToBooking);
         console.log('✅ Formatted bookings:', formattedBookings);
         
-        setBookings(formattedBookings);
-        setFilteredBookings(formattedBookings);
+        // Sort bookings by createdAt descending (newest first)
+        const sortedBookings = formattedBookings.sort((a, b) => {
+          const dateA = new Date(a.bookingDate);
+          const dateB = new Date(b.bookingDate);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        setBookings(sortedBookings);
+        setFilteredBookings(sortedBookings);
       } catch (err) {
         console.error('❌ Error fetching bookings:', err);
         setError(err instanceof Error ? err.message : 'Failed to load bookings');
@@ -192,6 +205,17 @@ export const BookingList = (): React.JSX.Element => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleFeedbackClick = (booking: Booking) => {
+    console.log('🔄 Opening feedback modal for booking:', booking.id);
+    setSelectedBookingForFeedback(booking);
+    setFeedbackModalOpen(true);
+  };
+
+  const handleFeedbackModalClose = () => {
+    setFeedbackModalOpen(false);
+    setSelectedBookingForFeedback(null);
   };
 
   return (
@@ -367,22 +391,33 @@ export const BookingList = (): React.JSX.Element => {
                             )}
                           </div>
 
-                          <div className="flex flex-col sm:flex-row gap-3 mt-4">
-                            <Button 
-                              variant="outline" 
-                              className="w-full sm:w-auto"
-                              onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
-                            >
-                              <EyeIcon className="w-4 h-4 mr-2" />
-                              Xem chi tiết
-                            </Button>
-                            <Button 
-                              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
-                              onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
-                            >
-                              <EditIcon className="w-4 h-4 mr-2" />
-                              Sửa
-                            </Button>
+                          <div className="flex flex-col gap-3 mt-4">
+                            <div className="flex flex-col sm:flex-row gap-3">
+                              <Button 
+                                variant="outline" 
+                                className="w-full sm:w-auto"
+                                onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
+                              >
+                                <EyeIcon className="w-4 h-4 mr-2" />
+                                Xem chi tiết
+                              </Button>
+                              <Button 
+                                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+                                onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
+                              >
+                                <EditIcon className="w-4 h-4 mr-2" />
+                                Sửa
+                              </Button>
+                            </div>
+                            {booking.status === 'Completed' && (
+                              <Button 
+                                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                                onClick={() => handleFeedbackClick(booking)}
+                              >
+                                <StarIcon className="w-4 h-4 mr-2" />
+                                Đánh giá
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -398,6 +433,16 @@ export const BookingList = (): React.JSX.Element => {
           <Footer />
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      {selectedBookingForFeedback && (
+        <FeedbackModal
+          isOpen={feedbackModalOpen}
+          onClose={handleFeedbackModalClose}
+          bookingId={selectedBookingForFeedback.id}
+          testServiceId={selectedBookingForFeedback.testServiceId} // Use correct testServiceId
+        />
+      )}
     </div>
   );
 }; 
