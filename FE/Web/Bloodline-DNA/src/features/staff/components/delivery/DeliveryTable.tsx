@@ -144,7 +144,11 @@ const DeliveryTable = ({ data, onRowClick, onComplete }: Props) => {
     <>
       <Table
         rowKey="id"
-        dataSource={data}
+        dataSource={[...data].sort(
+          (a, b) =>
+            new Date(b.scheduledAt).getTime() -
+            new Date(a.scheduledAt).getTime()
+        )}
         columns={columns}
         pagination={{ pageSize: 6 }}
         onRow={(record) => ({

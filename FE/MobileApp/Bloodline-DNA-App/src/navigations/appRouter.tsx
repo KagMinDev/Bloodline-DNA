@@ -1,25 +1,25 @@
 // AppRouter.tsx
 import { useAuth } from "@/context/auth/AuthContext";
 import AboutScreen from "@/screens/about";
+import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
+import BookingHistory from "@/screens/booking-history/screen/BookingHistory";
+import CheckoutScreen from "@/screens/checkout/screen/Checkout";
 import ContactScreen from "@/screens/contact";
 import DoctorsScreen from "@/screens/doctors";
 import NewsScreen from "@/screens/news";
+import PaymentError from "@/screens/payment/screen/PaymentError";
+import PaymentSuccess from "@/screens/payment/screen/PaymentSuccess";
 import Services from "@/screens/services";
+import DetailService from "@/screens/services/components/AllServices/DetailService";
+import AllServiceScreen from "@/screens/services/screen/AllServiceScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen } from "../screens";
-import { MainTabParamList, RootStackParamList,} from "../types/root-stack/stack.types";
-import DetailService from "@/screens/services/components/AllServices/DetailService";
-import AllServiceScreen from "@/screens/services/screen/AllServiceScreen";
-import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
-import CheckoutScreen from "@/screens/checkout/screen/Checkout";
-import PaymentSuccess from "@/screens/payment/screen/PaymentSuccess";
-import PaymentError from "@/screens/payment/screen/PaymentError";
-import BookingHistory from "@/screens/booking-history/screen/BookingHistory";
+import { DeliveriesStaffScreen, ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen } from "../screens";
+import { MainTabParamList, RootStackParamList, } from "../types/root-stack/stack.types";
 
 // ... (giữ nguyên các component Placeholder screens)
 const ProfileScreen: React.FC = () => (
@@ -105,6 +105,7 @@ const AppRouter: React.FC = () => {
           <Stack.Screen name="Doctors" component={DoctorsScreen} />
           <Stack.Screen name="News" component={NewsScreen} />
           <Stack.Screen name="Contact" component={ContactScreen} />
+          <Stack.Screen name="DeliveriesStaff" component={DeliveriesStaffScreen} />
 
           <Stack.Screen name="AllService" component={AllServiceScreen} />
           <Stack.Screen name="DetailsService" component={DetailService} />

@@ -5,3 +5,5 @@ const rootApi = axios.create({
 });
 
 export default rootApi;
+
+export const STAFF_BASE_URL = "https://api.adntester.duckdns.org";

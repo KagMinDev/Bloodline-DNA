@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { updateTestBookingStatusApi } from "../../../api/testBookingApi";
 import type { TestBookingResponse } from "../../../types/testBooking";
 import { type StatusOption } from "../constants/statusMapping";
 import { getStatusLabel, renderCollectionMethod } from "../utils/statusUtils";
 import StatusSelect from "./StatusSelect";
-import { updateTestBookingStatusApi } from "../../../api/testBookingApi";
 
 interface BookingTableProps {
   selectedDay: string;
@@ -50,7 +50,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
       });
 
       toast.success(`Đã cập nhật trạng thái thành: ${newStatusLabel}`);
-    } catch (err) {
+    } catch {
       toast.error("Cập nhật trạng thái thất bại");
     } finally {
       setLoadingBookings((prev) => {

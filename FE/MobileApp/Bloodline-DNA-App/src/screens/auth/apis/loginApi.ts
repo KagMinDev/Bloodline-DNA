@@ -13,7 +13,6 @@ export const loginApi = async (
 ): Promise<LoginResponse> => {
   try {
     const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
-
     if (response.data.success) {
       const { token, userName, role } = response.data.data;
       return { token, userName, role };

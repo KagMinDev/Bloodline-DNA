@@ -6,8 +6,9 @@ type AuthContextType = {
   token: string | null;
   isLoggedIn: boolean;
   loading: boolean;
-  login: (token: string) => Promise<void>;
+  login: (token: string, userName: string) => Promise<void>;
   logout: () => Promise<void>;
+  userName?: string;
 };
 
 // Tạo context mặc định
@@ -19,51 +20,49 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [token, setToken] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userName, setFullName] = useState<string | undefined>();
 
   useEffect(() => {
     const checkToken = async () => {
-      try {
-        const storedToken = await AsyncStorage.getItem("token");
-        setToken(storedToken);
-        setIsLoggedIn(!!storedToken);
-      } catch (error) {
-        console.error("Error checking token:", error);
-      } finally {
-        setLoading(false);
-      }
+      const token = await AsyncStorage.getItem("token");
+      const storedUserName = await AsyncStorage.getItem("userName");
+      setFullName(storedUserName || undefined);
+      setIsLoggedIn(!!token);
+      setLoading(false);
     };
-
     checkToken();
   }, []);
 
-  const login = async (newToken: string) => {
+  const login = async (newToken: string, newFullName: string) => {
     try {
       await AsyncStorage.setItem("token", newToken);
+      await AsyncStorage.setItem("fullName", newFullName);
+
       setToken(newToken);
       setIsLoggedIn(true);
-      console.log("✅ Token saved and login successful:", newToken);
+      setFullName(newFullName);
     } catch (error) {
-      console.error("❌ Error saving token:", error);
+      console.error("❌ Error saving token or fullName:", error);
     }
   };
 
   const logout = async () => {
-    try {
-      await AsyncStorage.removeItem("token");
-      setToken(null);
-      setIsLoggedIn(false);
-      console.log("🚪 Logged out and token removed");
-    } catch (error) {
-      console.error("❌ Error removing token:", error);
-    }
+    await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("userName");
+    setIsLoggedIn(false);
+    setFullName(undefined);
   };
 
   return (
-    <AuthContext.Provider value={{ token, isLoggedIn, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ token, isLoggedIn, loading, login, logout, userName }}
+    >
       {children}
     </AuthContext.Provider>
   );

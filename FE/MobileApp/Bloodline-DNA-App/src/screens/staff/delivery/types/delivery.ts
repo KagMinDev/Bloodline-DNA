@@ -18,7 +18,6 @@ export const statusTextMap: Record<string, string> = {
   Cancelled: "Đã hủy",
 };
 
-
 export type DeliveryStatus =
   | "PreparingKit"
   | "DeliveringKit"
@@ -28,7 +27,7 @@ export type DeliveryStatus =
   | "SampleReceived"
   | "Cancelled";
 
-  export const statusMapNumberToKey: Record<number, DeliveryStatus> = {
+export const statusMapNumberToKey: Record<number, DeliveryStatus> = {
   0: "PreparingKit",
   1: "DeliveringKit",
   2: "KitDelivered",

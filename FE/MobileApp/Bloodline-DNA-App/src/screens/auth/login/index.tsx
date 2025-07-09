@@ -68,27 +68,38 @@ const LoginScreen: React.FC = () => {
   };
 
   const handleLogin = async (data: Login) => {
-    if (!validateInputs()) {
-      return;
-    }
+  if (!validateInputs()) return;
 
-    setLoading(true);
-    try {
-      const response = await loginApi(data.email, data.password);
-      const token = response.token;
-      
-      await login(token);
-      const userInfo = await getUserInfoApi(token);
-      const clientId = userInfo.id;
-      
-      await AsyncStorage.setItem("clientId", clientId);
-    } catch (error: any) {
-      console.error("Đăng nhập thất bại:", error);
-      setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  try {
+    const response = await loginApi(data.email, data.password);
+    const { token, role, userName } = response;
+    // console.log(response)
+
+    await login(token, userName);
+
+    const userInfo = await getUserInfoApi(token);
+
+    if (role === "Client") {
+      await AsyncStorage.setItem("clientId", userInfo.id);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      });
+    } else if (role === "Staff") {
+      await AsyncStorage.setItem("staffId", userInfo.id);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "DeliveriesStaff" }],
+      });
     }
-  };
+  } catch (error: any) {
+    console.error("Đăng nhập thất bại:", error);
+    setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>

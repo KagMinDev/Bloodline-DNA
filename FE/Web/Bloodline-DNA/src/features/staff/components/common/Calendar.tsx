@@ -149,7 +149,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
           setSelectedStatuses={setSelectedStatuses}
           setFilteredBookings={setLocalEvents}
           token={token}
-          refetchBookings={refetchBookings} // ✅ THÊM
+          refetchBookings={refetchBookings}
         />
 
       </div>
