@@ -16,6 +16,10 @@ import { MainTabParamList, RootStackParamList,} from "../types/root-stack/stack.
 import DetailService from "@/screens/services/components/AllServices/DetailService";
 import AllServiceScreen from "@/screens/services/screen/AllServiceScreen";
 import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
+import CheckoutScreen from "@/screens/checkout/screen/Checkout";
+import PaymentSuccess from "@/screens/payment/screen/PaymentSuccess";
+import PaymentError from "@/screens/payment/screen/PaymentError";
+import BookingHistory from "@/screens/booking-history/screen/BookingHistory";
 
 // ... (giữ nguyên các component Placeholder screens)
 const ProfileScreen: React.FC = () => (
@@ -105,6 +109,11 @@ const AppRouter: React.FC = () => {
           <Stack.Screen name="AllService" component={AllServiceScreen} />
           <Stack.Screen name="DetailsService" component={DetailService} />
           <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
+
+          <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
+          <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
+          <Stack.Screen name="PaymentError" component={PaymentError} />
+          <Stack.Screen name="BookingHistory" component={BookingHistory} />
         </>
       ) : (
         <>

@@ -65,8 +65,7 @@ export const updateTestBookingStatusApi = async (request: TestBookingStatusReque
   
   try {
     const response = await rootApi.put<{ data: TestBookingResponse }>(
-      `/TestBooking/${request.bookingId}/status?newStatus=${request.status}`,
-      {}, // No body needed for this request
+      `/TestBooking/${request.bookingId}/status?newStatus=${request.status}`,{},
       {
         headers: {
           Authorization: `Bearer ${token}`,
