@@ -56,6 +56,26 @@ namespace ADNTester.Service.Implementations
             logistics.ScheduledAt ??= DateTime.UtcNow;
             logistics.Status = GetAssignedStatus(logistics.Type);
 
+            // Update related booking status if applicable
+            var testKit = await _unitOfWork.TestKitRepository
+                .FindOneAsync(x =>
+                    x.DeliveryInfoId == logisticsInfoId || x.PickupInfoId == logisticsInfoId);
+
+            if (testKit != null)
+            {
+                var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(testKit.BookingId);
+                if (booking != null)
+                {
+                    booking.Status = logistics.Type switch
+                    {
+                        LogisticsType.Delivery => BookingStatus.DeliveringKit,
+                        LogisticsType.Pickup => BookingStatus.ReturningSample,
+                        _ => booking.Status
+                    };
+                }
+            }
+
+
             await _unitOfWork.SaveChangesAsync();
         }
 

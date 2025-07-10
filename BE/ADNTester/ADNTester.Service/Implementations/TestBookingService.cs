@@ -310,17 +310,11 @@ namespace ADNTester.Service.Implementations
             if (booking == null || booking.CollectionMethod != SampleCollectionMethod.AtFacility)
                 return false;
 
-            // Optional: validate current status
             if (booking.Status != BookingStatus.Pending)
                 return false;
 
-            booking.Status = BookingStatus.CheckIn;
-            booking.UpdatedAt = DateTime.UtcNow;
-
-            _unitOfWork.TestBookingRepository.Update(booking);
-            await _unitOfWork.CommitAsync();
-
-            return true;
+            // Delegate to shared status update logic
+            return await UpdateBookingStatusAsync(bookingId, BookingStatus.CheckIn);
         }
 
         public async Task<bool> ConfirmKitReceivedAsync(string bookingId)
