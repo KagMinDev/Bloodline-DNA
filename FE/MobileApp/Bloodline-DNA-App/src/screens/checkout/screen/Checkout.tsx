@@ -10,12 +10,12 @@ import ProgressStepsContainer from "../components/ProgressStepsContainer";
 import SampleInfoModal from "../components/SampleInfoModal";
 import DepositButton from "../components/DepositButton";
 import RemainingPaymentButton from "../components/RemainingPaymentButton";
-import { CheckoutApi, RemainingPaymentApi } from "../api/paymentApi";
 import type { ProgressStep, TestProgressData } from "../types/checkout";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
+import { checkoutApi, remainingPaymentApi } from "../api/paymentApi";
 
 
 const CheckoutScreen: React.FC = () => {
@@ -125,35 +125,35 @@ const CheckoutScreen: React.FC = () => {
   };
 
   const handleStepAction = async (payload: any) => {
-    if (!payload || !booking) return;
-    setPaymentLoading(true);
-    setPaymentError(null);
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) throw new Error("Token không tồn tại");
+  if (!payload || !booking) return;
+  setPaymentLoading(true);
+  setPaymentError(null);
+  try {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) throw new Error("Token không tồn tại");
 
-      if (payload.type === "deposit") {
-        const result = await CheckoutApi(payload.bookingId, token);
-              console.log("CheckoutApi result:", result);
+    if (payload.type === "deposit") {
+      const result = await checkoutApi(payload.bookingId, token);
+      console.log("📦 Response from checkoutApi:", payload);
 
-        if (result.data.checkoutUrl) {
-          Linking.openURL(result.data.checkoutUrl);
-        }
-      } else if (payload.type === "remaining") {
-        const result = await RemainingPaymentApi(payload.bookingId, token);
-        if (result.data.checkoutUrl) {
-          Linking.openURL(result.data.checkoutUrl);
-        }
-      } else if (payload.type === "fill_sample_info") {
-        setIsSampleModalOpen(true);
+      if (result.checkoutUrl) {
+        navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
       }
-    } catch (error) {
-      console.error("Lỗi khi xử lý action:", error);
-      setPaymentError("Có lỗi xảy ra. Vui lòng thử lại.");
-    } finally {
-      setPaymentLoading(false);
+    } else if (payload.type === "remaining") {
+      const result = await remainingPaymentApi(payload.bookingId, token);
+      if (result.checkoutUrl) {
+        navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
+      }
+    } else if (payload.type === "fill_sample_info") {
+      setIsSampleModalOpen(true);
     }
-  };
+  } catch (error) {
+    console.error("Lỗi khi xử lý action:", error);
+    setPaymentError("Có lỗi xảy ra. Vui lòng thử lại.");
+  } finally {
+    setPaymentLoading(false);
+  }
+};
 
   const onFillSampleInfo = () => {
     setIsSampleModalOpen(true);

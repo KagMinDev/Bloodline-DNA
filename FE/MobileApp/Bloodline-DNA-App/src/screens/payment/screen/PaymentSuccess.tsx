@@ -1,77 +1,94 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Animated,} from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import {View, Text, StyleSheet, TouchableOpacity, Animated, ActivityIndicator,} from "react-native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { useAuth } from "@/context/auth/AuthContext";
-import { CallbackApi, RemainingCallbackApi } from "@/screens/checkout/api/paymentApi";
+import { callbackApi, remainingCallbackApi,} from "@/screens/checkout/api/paymentApi";
 
 type PaymentSuccessRouteProp = RouteProp<RootStackParamList, "PaymentSuccess">;
-type PaymentSuccessNavigationProp = NativeStackNavigationProp<RootStackParamList, "PaymentSuccess">;
+type PaymentSuccessNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "PaymentSuccess"
+>;
 
 const PaymentSuccess: React.FC = () => {
   const navigation = useNavigation<PaymentSuccessNavigationProp>();
   const route = useRoute<PaymentSuccessRouteProp>();
-  const { token } = useAuth(); // Token lấy từ context hoặc hook
+  const { token } = useAuth();
 
-  const {
-    bookingId,
-    orderCode,
-    amount,
-    paymentType = "deposit",
-  } = route.params || {};
+  const { bookingId, orderCode, amount, paymentType = "deposit" } =
+    route.params || {};
 
-  const scaleAnim = new Animated.Value(0);
-  const fadeAnim = new Animated.Value(0);
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const [callbackSuccess, setCallbackSuccess] = useState<boolean>(false);
+  const [callbackSuccess, setCallbackSuccess] = useState(false);
+  const [callbackError, setCallbackError] = useState<string | null>(null);
 
+  // Hiệu ứng khi mở trang
   useEffect(() => {
-    // Hiệu ứng animate
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
+    Animated.parallel([
+      Animated.spring(scaleAnim, {
         toValue: 1,
-        duration: 500,
         useNativeDriver: true,
       }),
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 300,
+        duration: 600,
         useNativeDriver: true,
       }),
     ]).start();
-
-    // Gọi callback API khi thành công
-    if (bookingId && orderCode && token) {
-      const payload = {
-        bookingId,
-        orderCode,
-        status: "PAID", // có thể lấy từ route.params.status nếu cần chính xác
-      };
-
-      const callCallback = async () => {
-        try {
-          if (paymentType === "remaining") {
-            await RemainingCallbackApi(payload, token);
-            console.log("✅ RemainingCallbackApi success");
-          } else {
-            await CallbackApi(payload, token);
-            console.log("✅ CallbackApi success");
-          }
-          setCallbackSuccess(true);
-        } catch (err) {
-          console.error("❌ Callback API error:", err);
-        }
-      };
-
-      callCallback();
-    }
   }, []);
 
+  const callCallback = useCallback(async () => {
+    if (!bookingId || !orderCode || !token) {
+      console.warn("❌ Thiếu dữ liệu callback:", { bookingId, orderCode, token });
+      return;
+    }
+
+    const payload = {
+      bookingId,
+      orderCode,
+      status: "PAID",
+    };
+
+    console.log("📦 Gửi callback với payload:", payload);
+    console.log("🔐 Token:", token);
+
+    try {
+      if (paymentType === "remaining") {
+        await remainingCallbackApi(bookingId, payload, token);
+      } else {
+        await callbackApi(payload, token);
+      }
+      console.log("✅ Callback thành công");
+      setCallbackSuccess(true);
+    } catch (err: any) {
+      const errorData = err?.response?.data || err.message || "Lỗi không xác định";
+      console.error("❌ Callback thất bại:", errorData);
+      setCallbackError("Đã xảy ra lỗi khi cập nhật trạng thái thanh toán.");
+    }
+  }, [bookingId, orderCode, token, paymentType]);
+
+  // Gọi API sau 500ms nếu đủ điều kiện
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    if (bookingId && orderCode && token && !callbackSuccess && !callbackError) {
+      timeout = setTimeout(() => {
+        callCallback();
+      }, 500);
+    }
+
+    return () => clearTimeout(timeout);
+  }, [bookingId, orderCode, token, callCallback, callbackSuccess, callbackError]);
+
   const handleBackToCheckout = () => {
-    navigation.navigate("CheckoutScreen", { bookingId: bookingId || "" });
+    if (bookingId) {
+      navigation.navigate("CheckoutScreen", { bookingId });
+    }
   };
 
   const handleBackToHome = () => {
@@ -100,21 +117,37 @@ const PaymentSuccess: React.FC = () => {
     }
   };
 
+  if (!bookingId || !orderCode) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "red", textAlign: "center" }}>
+          ❌ Không thể hiển thị thông tin thanh toán. Thiếu dữ liệu bookingId hoặc orderCode.
+        </Text>
+      </View>
+    );
+  }
+
+  if (!token) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#2563eb" />
+        <Text style={{ textAlign: "center", marginTop: 12 }}>
+          Đang xác thực người dùng...
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* Success Icon */}
       <Animated.View
-        style={[
-          styles.iconContainer,
-          { transform: [{ scale: scaleAnim }] },
-        ]}
+        style={[styles.iconContainer, { transform: [{ scale: scaleAnim }] }]}
       >
         <View style={styles.successIcon}>
           <Feather name="check" size={60} color="#ffffff" />
         </View>
       </Animated.View>
 
-      {/* Content */}
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         <Text style={styles.title}>Thanh toán thành công!</Text>
         <Text style={styles.subtitle}>{getSuccessMessage()}</Text>
@@ -128,21 +161,17 @@ const PaymentSuccess: React.FC = () => {
             <Text style={styles.detailValue}>{getPaymentTypeText()}</Text>
           </View>
 
-          {orderCode && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Mã giao dịch:</Text>
-              <Text style={styles.detailValue}>{orderCode}</Text>
-            </View>
-          )}
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Mã giao dịch:</Text>
+            <Text style={styles.detailValue}>{orderCode}</Text>
+          </View>
 
-          {bookingId && (
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Mã đặt lịch:</Text>
-              <Text style={styles.detailValue}>{bookingId}</Text>
-            </View>
-          )}
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Mã đặt lịch:</Text>
+            <Text style={styles.detailValue}>{bookingId}</Text>
+          </View>
 
-          {amount && (
+          {amount !== undefined && (
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Số tiền:</Text>
               <Text style={styles.detailValueAmount}>
@@ -201,7 +230,6 @@ const PaymentSuccess: React.FC = () => {
 };
 
 export default PaymentSuccess;
-
 
 const styles = StyleSheet.create({
   container: {
