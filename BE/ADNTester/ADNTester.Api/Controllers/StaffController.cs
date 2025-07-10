@@ -25,6 +25,7 @@ namespace ADNTester.Api.Controllers
         {
             _logisticsService = logisticsService;
             _testBookingService = testBookingService;
+            _mapper = mapper;
 
         }
         #region Logistic
