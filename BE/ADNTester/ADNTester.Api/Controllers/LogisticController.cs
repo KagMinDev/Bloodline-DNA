@@ -5,8 +5,10 @@ using ADNTester.BO.Entities;
 using ADNTester.BO.Enums;
 using ADNTester.Service.Interfaces;
 using AutoMapper;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ADNTester.Api.Controllers
@@ -36,7 +38,8 @@ namespace ADNTester.Api.Controllers
         public async Task<IActionResult> GetAll([FromQuery] LogisticsType? type = null, [FromQuery] LogisticStatus? status = null)
         {
             var result = await _logisticService.GetAllAsync(type, status);
-            return Ok(new ApiResponse<List<LogisticsInfo>>(result, "Lấy danh sách logistics thành công", HttpCodes.Ok));
+            var mapped = _mapper.Map<List<LogisticsInfoDto>>(result);
+            return Ok(new ApiResponse<List<LogisticsInfoDto>>(mapped, "Lấy danh sách logistics thành công", HttpCodes.Ok));
         }
 
         /// <summary>
@@ -46,10 +49,11 @@ namespace ADNTester.Api.Controllers
         public async Task<IActionResult> GetById(string id)
         {
             var info = await _logisticService.GetByIdAsync(id);
+            var mapped = _mapper.Map<LogisticsInfoDto>(info);
             if (info == null)
                 return NotFound(new ApiResponse<object>(null, "Không tìm thấy thông tin logistics", HttpCodes.NotFound));
 
-            return Ok(new ApiResponse<LogisticsInfo>(info, "Lấy thông tin logistics thành công", HttpCodes.Ok));
+            return Ok(new ApiResponse<LogisticsInfoDto>(mapped, "Lấy thông tin logistics thành công", HttpCodes.Ok));
         }
 
         /// <summary>

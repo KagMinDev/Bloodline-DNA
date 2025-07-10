@@ -242,6 +242,127 @@ namespace ADNTester.API.Controllers
                 return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình xử lý thanh toán." });
             }
         }
+        /// <summary>
+        /// Thanh Toán Cho Mobile phần cọc tiền
+        /// </summary>
+        [HttpPost("mobile/{bookingId}/checkout")]
+        public async Task<IActionResult> CreateMobilePayment(string bookingId)
+        {
+            try
+            {
+                var booking = await _bookingService.GetByIdAsync(bookingId);
+                if (booking == null)
+                    return NotFound(new { error = "Không tìm thấy đơn đặt lịch." });
+                if (booking.CollectionMethod != SampleCollectionMethod.SelfSample.ToString())
+                    return BadRequest(new { error = "Chỉ hỗ trợ thanh toán cho đơn lấy mẫu tại nhà (SelfSample)." });
+                if (booking.Status != "Pending")
+                    return BadRequest(new { error = "Chỉ có thể thanh toán cho đơn đặt lịch ở trạng thái Pending." });
+                if (booking.Price <= 0 || booking.Price > int.MaxValue)
+                    return BadRequest(new { error = "Số tiền thanh toán không hợp lệ." });
+                int amountToPay = (int)Math.Round(booking.Price);
+                decimal depositAmount = amountToPay * 0.2m;
+                var clientId = _configuration["PayOS:ClientId"];
+                var apiKey = _configuration["PayOS:ApiKey"];
+                var checksumKey = _configuration["PayOS:ChecksumKey"];
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(checksumKey))
+                    return BadRequest(new { error = "Thông tin cấu hình PayOS bị thiếu hoặc không hợp lệ." });
+                var payOS = new PayOS(clientId, apiKey, checksumKey);
+                var domain = _configuration["AppSettings:MobileBaseUrl"];
+                if (string.IsNullOrWhiteSpace(domain))
+                    domain = "http://localhost:5173";
+                var orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                var description = $"Đặt cọc dịch vụ xét nghiệm {bookingId}";
+                if (description.Length > 25) description = description.Substring(0, 25);
+                var paymentLinkRequest = new PaymentData(
+                    orderCode: orderCode,
+                    amount: (int)Math.Round(depositAmount),
+                    description: description,
+                    items: [new("Đặt cọc dịch vụ xét nghiệm", 1, (int)Math.Round(depositAmount))],
+                    returnUrl: $"{domain}?bookingId={bookingId}",
+                    cancelUrl: $"{domain}?bookingId={bookingId}"
+                );
+                var response = await payOS.createPaymentLink(paymentLinkRequest);
+                if (!string.IsNullOrEmpty(response.checkoutUrl))
+                {
+                    return Ok(new
+                    {
+                        checkoutUrl = response.checkoutUrl,
+                        qrCode = response.qrCode,
+                        orderCode = orderCode,
+                        amount = depositAmount,
+                        bookingId = bookingId
+                    });
+                }
+                return StatusCode(500, new { error = "Không thể tạo liên kết thanh toán. Vui lòng thử lại." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình xử lý thanh toán.", detail = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Thanh Toán Cho Mobile phần số tiền còn lại.
+        /// </summary>
+        [HttpPost("mobile/{bookingId}/remaining-payment")]
+        public async Task<IActionResult> CreateMobileRemainingPayment(string bookingId)
+        {
+            try
+            {
+                var booking = await _bookingService.GetByIdAsync(bookingId);
+                if (booking == null)
+                    return NotFound(new { error = "Không tìm thấy đơn đặt lịch." });
+                if (booking.CollectionMethod != SampleCollectionMethod.SelfSample.ToString())
+                    return BadRequest(new { error = "Chỉ hỗ trợ thanh toán cho đơn lấy mẫu tại nhà (SelfSample)." });
+                if (booking.Status == "Confirmed")
+                    return BadRequest(new { error = "Đơn đặt lịch đã được xác nhận, không thể thanh toán thêm." });
+                if (booking.Status != "SampleReceived")
+                    return BadRequest(new { error = "Chỉ có thể thanh toán số tiền còn lại khi đã nhận mẫu xét nghiệm." });
+                var currentPayment = await _paymentService.GetByBookingIdAsync(bookingId);
+                if (currentPayment == null || currentPayment.Status != PaymentStatus.Deposited)
+                    return BadRequest(new { error = "Chưa tìm thấy thông tin đặt cọc hoặc trạng thái không hợp lệ." });
+                if (currentPayment.Status == PaymentStatus.Paid)
+                    return BadRequest(new { error = "Đơn đặt lịch đã được thanh toán đầy đủ, không thể thanh toán thêm." });
+                if (currentPayment.RemainingAmount <= 0)
+                    return BadRequest(new { error = "Không có số tiền còn lại cần thanh toán." });
+                var clientId = _configuration["PayOS:ClientId"];
+                var apiKey = _configuration["PayOS:ApiKey"];
+                var checksumKey = _configuration["PayOS:ChecksumKey"];
+                if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(checksumKey))
+                    return BadRequest(new { error = "Thông tin cấu hình PayOS bị thiếu hoặc không hợp lệ." });
+                var payOS = new PayOS(clientId, apiKey, checksumKey);
+                var domain = _configuration["AppSettings:MobileBaseUrl"];
+                if (string.IsNullOrWhiteSpace(domain))
+                    domain = "http://localhost:5173";
+                var orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                var description = $"Thanh toán số tiền còn lại - Đơn xét nghiệm {bookingId}";
+                if (description.Length > 25) description = description.Substring(0, 25);
+                var paymentLinkRequest = new PaymentData(
+                    orderCode: orderCode,
+                    amount: (int)Math.Round(currentPayment.RemainingAmount ?? 0),
+                    description: description,
+                    items: [new("Thanh toán số tiền còn lại", 1, (int)Math.Round(currentPayment.RemainingAmount ?? 0))],
+                    returnUrl: $"{domain}?bookingId={bookingId}",
+                    cancelUrl: $"{domain}?bookingId={bookingId}"
+                );
+                var response = await payOS.createPaymentLink(paymentLinkRequest);
+                if (!string.IsNullOrEmpty(response.checkoutUrl))
+                {
+                    return Ok(new
+                    {
+                        checkoutUrl = response.checkoutUrl,
+                        qrCode = response.qrCode,
+                        orderCode = orderCode,
+                        amount = currentPayment.RemainingAmount,
+                        bookingId = bookingId
+                    });
+                }
+                return StatusCode(500, new { error = "Không thể tạo liên kết thanh toán. Vui lòng thử lại." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình xử lý thanh toán.", detail = ex.Message });
+            }
+        }
 
         [HttpPost("callback")]
         public async Task<IActionResult> PaymentCallback([FromBody] PaymentCallbackDto callback)

@@ -56,7 +56,7 @@ export const transformApiDataToBookingDetail = (item: BookingItem, setTestServic
   };
 };
 
-export const generateProgressData = (booking: BookingDetail): TestProgressData => {
+export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boolean): TestProgressData => {
   const baseDate = new Date(booking.bookingDate);
   const bookingStatus = booking.status;
 
@@ -142,7 +142,15 @@ export const generateProgressData = (booking: BookingDetail): TestProgressData =
     sampleStatus = 'completed';
   } else if (sampleCurrentStatuses.includes(bookingStatus)) {
     sampleStatus = 'current';
-    if (bookingStatus === 'WaitingForSample') sampleDetails.push('Vui lòng gửi mẫu của bạn đến trung tâm theo hướng dẫn.');
+    if (bookingStatus === 'WaitingForSample') {
+      // Show different text based on whether sample info has been submitted
+      if (hasSampleInfo === false) {
+        sampleDetails.push('Vui lòng gửi mẫu của bạn đến trung tâm theo hướng dẫn.');
+      } else if (hasSampleInfo === true) {
+        sampleDetails.push('Thông tin mẫu đã được ghi nhận.');
+      }
+      // If hasSampleInfo is undefined, don't add details (still loading)
+    }
     if (bookingStatus === 'ReturningSample') sampleDetails.push('Mẫu của bạn đang được chuyển đến phòng lab.');
   }
 

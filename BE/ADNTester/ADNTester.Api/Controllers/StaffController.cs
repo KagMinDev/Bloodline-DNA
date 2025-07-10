@@ -1,6 +1,8 @@
 ﻿using ADNTester.BO.DTOs.Common;
+using ADNTester.BO.DTOs.Logistic;
 using ADNTester.BO.Enums;
 using ADNTester.Service.Interfaces;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +17,15 @@ namespace ADNTester.Api.Controllers
     {
         private readonly ILogisticService _logisticsService;
         private readonly ITestBookingService _testBookingService;
+        private readonly IMapper _mapper;
 
         public StaffController(ILogisticService logisticsService, 
-            ITestBookingService testBookingService)
+            ITestBookingService testBookingService,
+            IMapper mapper)
         {
             _logisticsService = logisticsService;
             _testBookingService = testBookingService;
+
         }
         #region Logistic
         /// <summary>
@@ -38,7 +43,8 @@ namespace ADNTester.Api.Controllers
                 return Unauthorized("Staff ID not found");
 
             var tasks = await _logisticsService.GetAssignedLogisticsAsync(staffId, type);
-            return Ok(tasks);
+            var mapped = _mapper.Map<List<LogisticsInfoDto>>(tasks);
+            return Ok(new ApiResponse<List<LogisticsInfoDto>>(mapped, "Lấy danh sách nhiệm vụ thành công"));
         }
 
         /// <summary>

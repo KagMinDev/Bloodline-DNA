@@ -151,6 +151,12 @@ namespace ADNTester.Service
             .ForMember(dest => dest.CompletedAt, opt => opt.Ignore()) // not set at creation
             .ForMember(dest => dest.Staff, opt => opt.Ignore()) // navigation prop
             .ForMember(dest => dest.Id, opt => opt.Ignore());   // auto-generated
+
+            CreateMap<LogisticsInfo, LogisticsInfoDto>()
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type.ToString()))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()));
+            
+
             #endregion
         }
     }

@@ -17,6 +17,7 @@ import { getBookingByIdApi } from '../api/bookingListApi';
 import { getUserInfoApi } from '../api/userApi';
 import { checkoutPaymentApi, checkoutRemainingPaymentApi } from '../api/paymentApi';
 import { submitFeedbackApi } from '../api/feedbackApi';
+import { getTestKitByBookingIdApi, getTestSampleByKitIdApi } from '../api/sampleApi';
 
 const statusNumberMapping: Record<number, DetailedBookingStatus> = {
   0: 'Pending',
@@ -53,9 +54,45 @@ export const useBookingData = () => {
   const [feedbackError, setFeedbackError] = useState<string | null>(null);
   const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
   const [confirmDeliveryLoading, setConfirmDeliveryLoading] = useState(false);
+  const [shouldShowSampleButton, setShouldShowSampleButton] = useState(true);
+  const [hasSampleInfo, setHasSampleInfo] = useState<boolean | undefined>(undefined);
 
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const checkSampleInfoStatus = useCallback(async (bookingId: string) => {
+    try {
+      console.log('🔄 Checking sample info status for booking:', bookingId);
+      
+      // First get the TestKit ID
+      const testKitResponse = await getTestKitByBookingIdApi(bookingId);
+      if (!testKitResponse.success || !testKitResponse.data?.id) {
+        console.log('📝 No TestKit found, showing sample button');
+        setShouldShowSampleButton(true);
+        return;
+      }
+
+      const kitId = testKitResponse.data.id;
+      console.log('✅ TestKit found:', kitId);
+
+      // Check if TestSample exists for this kit
+      const testSampleResponse = await getTestSampleByKitIdApi(kitId);
+      if (testSampleResponse.success && testSampleResponse.data) {
+        console.log('✅ TestSample found - hiding sample button');
+        setShouldShowSampleButton(false);
+        setHasSampleInfo(true);
+      } else {
+        console.log('📝 No TestSample found - showing sample button');
+        setShouldShowSampleButton(true);
+        setHasSampleInfo(false);
+      }
+    } catch (error) {
+      console.error('❌ Error checking sample info status:', error);
+      // On error, show the button to be safe
+      setShouldShowSampleButton(true);
+      setHasSampleInfo(false);
+    }
+  }, []);
 
   const fetchBookingData = useCallback(async () => {
     if (!bookingId) {
@@ -76,7 +113,8 @@ export const useBookingData = () => {
 
       const formatted = transformApiDataToBookingDetail(apiData, setTestServiceId);
       setBooking(formatted);
-      setProgressData(generateProgressData(formatted));
+      // Generate progress data with sample info status
+      setProgressData(generateProgressData(formatted, hasSampleInfo));
 
       const rawStatus = formatted.status;
       let normalizedStatus: DetailedBookingStatus | null = null;
@@ -91,6 +129,14 @@ export const useBookingData = () => {
         setPaymentStatus('PAID');
       } else if (normalizedStatus === 'Cancelled') {
         setPaymentError('Thanh toán thất bại');
+      }
+
+      // Check if sample info has been submitted for WaitingForSample status
+      if (normalizedStatus === 'WaitingForSample') {
+        await checkSampleInfoStatus(bookingId);
+      } else {
+        setShouldShowSampleButton(true); // Show button for other statuses
+        setHasSampleInfo(undefined); // Reset for other statuses
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Lỗi khi tải thông tin đặt lịch';
@@ -107,6 +153,13 @@ export const useBookingData = () => {
   useEffect(() => {
     fetchBookingData();
   }, [fetchBookingData]);
+
+  // Regenerate progress data when sample info status changes
+  useEffect(() => {
+    if (booking) {
+      setProgressData(generateProgressData(booking, hasSampleInfo));
+    }
+  }, [booking, hasSampleInfo]);
 
   const handlePayment = async (payload?: any) => {
     if (!booking?.id) {
@@ -258,7 +311,12 @@ export const useBookingData = () => {
   };
 
   const handleSampleSubmitSuccess = async () => {
+    console.log('✅ Sample info submitted successfully, updating sample status');
     setIsSampleModalOpen(false);
+    // Update sample info status immediately
+    setShouldShowSampleButton(false);
+    setHasSampleInfo(true);
+    // Also refresh booking data for any other changes
     await fetchBookingData();
   };
 
@@ -324,6 +382,7 @@ export const useBookingData = () => {
     isSampleModalOpen,
     setIsSampleModalOpen,
     confirmDeliveryLoading,
+    shouldShowSampleButton,
     handlePayment,
     handleFeedbackSubmit,
     handleSampleSubmitSuccess,

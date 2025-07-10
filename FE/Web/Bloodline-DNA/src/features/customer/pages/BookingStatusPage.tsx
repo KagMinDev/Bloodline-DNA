@@ -30,6 +30,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
     isSampleModalOpen,
     setIsSampleModalOpen,
     confirmDeliveryLoading,
+    shouldShowSampleButton,
     navigate,
     handlePayment,
     handleFeedbackSubmit,
@@ -187,6 +188,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 setIsSampleModalOpen={setIsSampleModalOpen}
                 handleConfirmDelivery={handleConfirmDelivery}
                 confirmDeliveryLoading={confirmDeliveryLoading}
+                shouldShowSampleButton={shouldShowSampleButton}
               />
             )}
           </div>

@@ -14,6 +14,7 @@ interface ProgressStepProps {
   handleConfirmDelivery?: (bookingId: string) => void;
   confirmDeliveryLoading?: boolean;
   bookingId?: string;
+  shouldShowSampleButton: boolean;
 }
 
 export const ProgressStepProps = ({ 
@@ -26,7 +27,8 @@ export const ProgressStepProps = ({
   setIsSampleModalOpen,
   handleConfirmDelivery,
   confirmDeliveryLoading = false,
-  bookingId = ''
+  bookingId = '',
+  shouldShowSampleButton
 }: ProgressStepProps) => {
   const Icon = step.icon;
 
@@ -132,7 +134,7 @@ export const ProgressStepProps = ({
             </p>
           </div>
         )}
-        {step.id === 4 && step.status === 'current' && ['waitingforsample', 'returningsample'].includes(bookingStatus.toLowerCase()) && (
+        {step.id === 4 && bookingStatus.toLowerCase() === 'waitingforsample' && shouldShowSampleButton && (
           <div className="mt-4">
             <Button
               onClick={() => setIsSampleModalOpen(true)}
