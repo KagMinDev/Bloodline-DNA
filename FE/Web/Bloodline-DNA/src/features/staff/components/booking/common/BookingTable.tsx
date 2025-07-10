@@ -1,10 +1,11 @@
+// components/BookingTable.tsx
 import React, { useState } from "react";
 import { BsCalendarXFill } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { updateTestBookingStatusApi } from "../../../api/testBookingApi";
 import type { TestBookingResponse } from "../../../types/testBooking";
-import { type StatusOption } from "../constants/statusMapping";
+import { STATUS_MAPPING, type StatusOption } from "../constants/statusMapping";
 import { getStatusLabel, renderCollectionMethod } from "../utils/statusUtils";
 import StatusSelect from "./StatusSelect";
 
@@ -62,23 +63,20 @@ const BookingTable: React.FC<BookingTableProps> = ({
   };
 
   const getAvailableStatusOptions = (
-    collectionMethod: string,
-    currentStatus: string
-  ): string[] => {
-    const facilityStatusLabels = [
-      "Chờ xử lý",
-      "Đã nhận mẫu",
-      "Nhân viên đang lấy mẫu",
-      "Đang xét nghiệm",
-      "Hoàn tất",
-      "Đã huỷ",
-    ];
+    collectionMethod: string
+  ): (StatusOption & { disabled?: boolean })[] => {
+    if (collectionMethod === "SelfSample") {
+      return STATUS_MAPPING.map((option) => ({
+        ...option,
+        disabled: option.value !== 2 && option.value !== 3,
+      }));
+    }
 
-    const fullLabels = statusOptions.map((s) => s.label);
-    const statusList = collectionMethod === "AtFacility" ? facilityStatusLabels : fullLabels;
-
-    const currentIndex = statusList.indexOf(currentStatus);
-    return currentIndex >= 0 ? statusList.slice(currentIndex) : statusList;
+    // default: không disable gì cả
+    return STATUS_MAPPING.map((option) => ({
+      ...option,
+      disabled: false,
+    }));
   };
 
   const sortedBookings = [...filteredBookings].sort(
@@ -110,9 +108,8 @@ const BookingTable: React.FC<BookingTableProps> = ({
               const currentStatusLabel = getStatusLabel(booking.status);
               const isLoading = loadingBookings.has(booking.id);
               const collectionMethod = booking.collectionMethod;
-              const options = getAvailableStatusOptions(collectionMethod, currentStatusLabel);
+              const options = getAvailableStatusOptions(collectionMethod);
 
-              // ✅ Nếu selectedStatuses chưa có booking.id, thì set giá trị mặc định từ API
               if (!selectedStatuses[booking.id]) {
                 setSelectedStatuses((prev) => ({
                   ...prev,

@@ -61,7 +61,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
     return localEvents.map((booking) => ({
       id: booking.id,
       start: new Date(formatToYYYYMMDD(new Date(booking.appointmentDate)) + 'T00:00:00'),
-      title: booking.email || 'Không có email',
+      title: booking.clientName || 'Không có',
       extendedProps: {
         status: booking.status,
         collectionMethod: booking.collectionMethod,

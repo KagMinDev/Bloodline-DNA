@@ -1,26 +1,37 @@
-import React from 'react';
+// components/StatusSelect.tsx
+import { Select } from "antd";
+import type { StatusOption } from "../constants/statusMapping";
 
-interface Props {
+interface StatusSelectProps {
   value: string;
-  options: string[];
+  options: (StatusOption & { disabled?: boolean })[];
   onChange: (value: string) => void;
   disabled?: boolean;
 }
 
-const StatusSelect: React.FC<Props> = ({ value, options, onChange, disabled = false }) => {
+const StatusSelect: React.FC<StatusSelectProps> = ({
+  value,
+  options,
+  onChange,
+  disabled,
+}) => {
   return (
-    <select
+    <Select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={onChange}
       disabled={disabled}
-      className="rounded-md border border-gray-300 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      style={{ minWidth: 160 }}
     >
       {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
+        <Select.Option
+          key={option.value}
+          value={option.label}
+          disabled={option.disabled}
+        >
+          {option.label}
+        </Select.Option>
       ))}
-    </select>
+    </Select>
   );
 };
 
