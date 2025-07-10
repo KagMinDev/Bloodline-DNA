@@ -3,6 +3,7 @@ using ADNTester.BO.DTOs.Common;
 using ADNTester.BO.DTOs.TestBooking;
 using ADNTester.BO.DTOs.TestKit;
 using ADNTester.BO.Enums;
+using ADNTester.Service.Implementations;
 using ADNTester.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -128,6 +129,30 @@ namespace ADNTester.Api.Controllers
                     return BadRequest(new ApiResponse<string>("Không thể xác nhận. Vui lòng thử lại hoặc kiểm tra trạng thái giao hàng."));
 
                 return Ok(new ApiResponse<string>(bookingId, "Xác nhận nhận kit thành công"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse<string>(ex.Message));
+            }
+        }
+        /// <summary>
+        /// Xác nhận đã thu mẫu và yêu cầu nhân viên đến lấy mẫu.
+        /// </summary>
+        /// <param name="bookingId">ID của lịch đặt test</param>
+        /// <param name="note">Ghi chú tùy chọn từ client</param>
+        /// <returns>Kết quả tạo nhiệm vụ lấy mẫu</returns>
+        [HttpPost("{bookingId}/confirm-collection")]
+        public async Task<IActionResult> ConfirmSampleCollected(string bookingId, [FromBody] string? note = null)
+        {
+            try
+            {
+                var result = await _testBookingService.CreatePickupAfterSampleCollectedAsync(bookingId, note);
+                if (!result)
+                {
+                    return BadRequest(new ApiResponse<string>("Không thể xác nhận thu mẫu hoặc tạo nhiệm vụ lấy mẫu"));
+                }
+
+                return Ok(new ApiResponse<string>(bookingId, "Đã xác nhận thu mẫu và tạo nhiệm vụ lấy mẫu"));
             }
             catch (Exception ex)
             {

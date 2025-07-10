@@ -20,5 +20,12 @@ namespace ADNTester.Repository.Implementations
                 .Include(k => k.DeliveryInfo)
                 .FirstOrDefaultAsync(k => k.BookingId == bookingId);
         }
+        public async Task<TestKit?> GetWithPickupInfoByBookingIdAsync(string bookingId)
+        {
+            return await _dbSet
+                .Include(k => k.PickupInfo)
+                .FirstOrDefaultAsync(k => k.BookingId == bookingId);
+        }
+
     }
 }
