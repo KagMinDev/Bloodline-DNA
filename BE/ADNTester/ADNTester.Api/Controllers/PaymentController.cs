@@ -414,6 +414,12 @@ namespace ADNTester.API.Controllers
                 // Nếu là lấy mẫu tại nhà, tạo LogisticsInfo và TestKit sau khi thanh toán cọc
                 if (booking.CollectionMethod == SampleCollectionMethod.SelfSample.ToString())
                 {
+                    // Check if TestKit already exists for this booking
+                    var existingKit = await _testKitService.GetByBookingIdAsync(booking.Id);
+                    if (existingKit != null)
+                    {
+                        return Ok(new { message = "Đã xử lý test kit và giao hàng cho booking này." });
+                    }
                     // Tạo LogisticsInfo giao kit
                     var logisticsInfo = new LogisticsInfo
                     {
