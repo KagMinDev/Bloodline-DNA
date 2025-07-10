@@ -91,6 +91,24 @@ namespace ADNTester.Service.Implementations
 
             logistics.CompletedAt = DateTime.UtcNow;
             logistics.Status = GetCompletionStatus(logistics.Type);
+            //update related booking when staff complete pick up task
+            if (logistics.Type == LogisticsType.Pickup)
+            {
+                var testKit = await _unitOfWork.TestKitRepository
+                    .FindOneAsync(k => k.PickupInfoId == logistics.Id);
+
+                if (testKit != null)
+                {
+                    var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(testKit.BookingId);
+                    if (booking != null)
+                    {
+                        booking.Status = BookingStatus.SampleReceived;
+                        booking.UpdatedAt = DateTime.UtcNow;
+                        
+                        _unitOfWork.TestBookingRepository.Update(booking);
+                    }
+                }
+            }
 
             await _unitOfWork.SaveChangesAsync();
         }
