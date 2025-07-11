@@ -175,6 +175,8 @@ export const confirmDeliveryApi = async (
   }
 
   try {
+    console.log("📤 Sending confirm delivery request for booking:", bookingId);
+    
     const res = await axios.put(
       `${API_BASE_URL}/TestBooking/${bookingId}/confirm-delivery`,
       {},
@@ -185,6 +187,14 @@ export const confirmDeliveryApi = async (
         },
       }
     );
+
+    // Log raw response từ server
+    console.log("📥 Raw server response:", {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+      data: res.data
+    });
 
     // Giả sử BE trả { success, data, message, statusCode }
     return res.data as UpdateBookingResponse;
@@ -213,6 +223,133 @@ export const confirmDeliveryApi = async (
     }
 
     // Lỗi mạng / timeout
+    throw new Error(error.message || "Network error");
+  }
+};
+
+// Function để update booking status
+export const updateBookingStatusApi = async (
+  bookingId: string,
+  newStatus: number
+): Promise<UpdateBookingResponse> => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error(
+      "Authentication required. Please login to update booking status."
+    );
+  }
+
+  try {
+    console.log(`🔄 Updating booking ${bookingId} status to ${newStatus}`);
+    
+    const res = await axios.put(
+      `${API_BASE_URL}/TestBooking/${bookingId}/status?newStatus=${newStatus}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log(`✅ Status updated successfully for booking ${bookingId}`);
+    return res.data as UpdateBookingResponse;
+  } catch (err) {
+    const error = err as AxiosError<{ message: string }>;
+
+    // Handle 4xx/5xx errors
+    if (error.response) {
+      const { status, data } = error.response;
+      const msg = data?.message || "Unknown error";
+
+      switch (status) {
+        case 401:
+          throw new Error("Unauthorized: Please login to continue.");
+        case 403:
+          throw new Error(
+            "Access denied: You do not have permission to update booking status."
+          );
+        case 404:
+          throw new Error("Booking not found: The booking does not exist.");
+        case 400:
+          throw new Error(`Invalid request: ${msg}`);
+        default:
+          throw new Error(`HTTP ${status}: ${msg}`);
+      }
+    }
+
+    // Network/timeout errors
+    console.error(`❌ Error updating booking ${bookingId} status:`, error);
+    throw new Error(error.message || "Network error");
+  }
+};
+
+// Function để confirm collection với ngày giờ
+export const confirmCollectionApi = async (
+  bookingId: string,
+  collectionDateTime: string
+): Promise<UpdateBookingResponse> => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error(
+      "Authentication required. Please login to confirm collection."
+    );
+  }
+
+  try {
+    console.log(`🔄 Confirming collection for booking ${bookingId} at ${collectionDateTime}`);
+    
+    // Bọc collectionDateTime trong dấu ngoặc kép
+    const quotedDateTime = `"${collectionDateTime}"`;
+    
+    const res = await axios.post(
+      `${API_BASE_URL}/TestBooking/${bookingId}/confirm-collection`,
+      quotedDateTime,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log(`✅ Collection confirmed successfully for booking ${bookingId}`);
+    
+    // Log raw response từ server
+    console.log("📥 Raw server response:", {
+      status: res.status,
+      statusText: res.statusText,
+      data: res.data
+    });
+
+    return res.data as UpdateBookingResponse;
+  } catch (err) {
+    const error = err as AxiosError<{ message: string }>;
+
+    // Handle 4xx/5xx errors
+    if (error.response) {
+      const { status, data } = error.response;
+      const msg = data?.message || "Unknown error";
+
+      switch (status) {
+        case 401:
+          throw new Error("Unauthorized: Please login to continue.");
+        case 403:
+          throw new Error(
+            "Access denied: You do not have permission to confirm collection."
+          );
+        case 404:
+          throw new Error("Booking not found: The booking does not exist.");
+        case 400:
+          throw new Error(`Invalid request: ${msg}`);
+        default:
+          throw new Error(`HTTP ${status}: ${msg}`);
+      }
+    }
+
+    // Network/timeout errors
+    console.error(`❌ Error confirming collection for booking ${bookingId}:`, error);
     throw new Error(error.message || "Network error");
   }
 };
