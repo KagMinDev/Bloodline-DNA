@@ -1,14 +1,17 @@
 import axios from "axios";
 // src/apis/chatbotApi.ts
-const CHATBOT_BASE_URL = "http://localhost:3000/api";
-
+export const CHATBOTAI_URL = "https://bloodlinedna-chatbotai.onrender.com/api";
 /**
  * Gửi tin nhắn đến Gemini và lấy phản hồi
  */
+interface GeminiErrorResponse {
+  error?: string;
+}
+
 export const sendMessage = async (message: string, userId?: string) => {
   try {
     const response = await axios.post(
-      `${CHATBOT_BASE_URL}/chatbotAI/chat`,
+      `${CHATBOTAI_URL}/chatbotAI/chat`,
       { message, userId },
       {
         headers: { "Content-Type": "application/json" },
@@ -16,10 +19,11 @@ export const sendMessage = async (message: string, userId?: string) => {
       }
     );
     return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
       const serverMessage =
-        error.response?.data?.error || "Lỗi không xác định từ server";
+        (err.response?.data as GeminiErrorResponse)?.error ||
+        "Lỗi không xác định từ server";
       throw new Error(serverMessage);
     }
     throw new Error("Đã xảy ra lỗi không mong muốn");
@@ -31,7 +35,7 @@ export const sendMessage = async (message: string, userId?: string) => {
  */
 export const getChatHistory = async (userId?: string) => {
   try {
-    const response = await axios.get(`${CHATBOT_BASE_URL}/chatbotAI/history`, {
+    const response = await axios.get(`${CHATBOTAI_URL}/chatbotAI/history`, {
       params: userId ? { userId } : {},
       timeout: 10000,
     });
