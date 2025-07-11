@@ -364,7 +364,8 @@ namespace ADNTester.Service.Implementations
 
             if (testKit.PickupInfoId != null)
                 throw new Exception("Đã có nhiệm vụ lấy mẫu được tạo cho booking này");
-
+            var deliveryLogistics = await _unitOfWork.LogisticInfoRepository
+                .GetByIdAsync(testKit.DeliveryInfoId ?? string.Empty);
             // Create LogisticsInfo for Pickup
             var pickupLogistics = new LogisticsInfo
             {
@@ -374,7 +375,8 @@ namespace ADNTester.Service.Implementations
                 Note = string.IsNullOrWhiteSpace(note)? $"Lấy mẫu từ client cho booking {booking.Id}" : note.Trim(),
                 Type = LogisticsType.Pickup,
                 Status = LogisticStatus.WaitingForPickup,
-                ScheduledAt = DateTime.UtcNow
+                ScheduledAt = DateTime.UtcNow,
+                StaffId = deliveryLogistics?.StaffId
             };
 
 
