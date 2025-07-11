@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#F9FAFB",
-    paddingTop: 25,
+    paddingTop: 50,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
@@ -52,18 +52,18 @@ const styles = StyleSheet.create({
     padding: 4,
   },
 
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.3)",
-  },
+  // modalOverlay: {
+  //   flex: 1,
+  //   justifyContent: "flex-end",
+  //   backgroundColor: "rgba(0,0,0,0.3)",
+  // },
 
-  modalMenu: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
+  // modalMenu: {
+  //   backgroundColor: "#fff",
+  //   padding: 20,
+  //   borderTopLeftRadius: 16,
+  //   borderTopRightRadius: 16,
+  // },
 
   modalTitle: {
     fontSize: 16,
@@ -83,6 +83,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#2563EB",
   },
+  modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
+  justifyContent: "center",
+  alignItems: "center",
+},
+modalMenu: {
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  padding: 20,
+  width: "80%",
+},
+
 });
 
 export default styles;

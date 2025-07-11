@@ -90,7 +90,7 @@ const LoginScreen: React.FC = () => {
       await AsyncStorage.setItem("staffId", userInfo.id);
       navigation.reset({
         index: 0,
-        routes: [{ name: "DeliveriesStaff" }],
+        routes: [{ name: "DeliveriesStaffTabs" }],
       });
     }
   } catch (error: any) {

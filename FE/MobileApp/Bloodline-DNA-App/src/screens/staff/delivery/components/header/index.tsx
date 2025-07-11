@@ -1,7 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
+import {
+  Keyboard,
+  Modal,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 import { useAuth } from "@/context/auth/AuthContext";
@@ -12,19 +19,11 @@ const HeaderStaff: React.FC = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { logout, userName } = useAuth();
   const [menuVisible, setMenuVisible] = useState(false);
-
-  const handleNavigate = <T extends keyof RootStackParamList>(screen: T) => {
-    setMenuVisible(false);
-    navigation.navigate(screen);
-  };
+  const [showDeliverySubmenu, setShowDeliverySubmenu] = useState(false);
 
   const handleLogout = async () => {
-    await logout();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
-    });
-  };
+  await logout();
+};
 
   return (
     <View style={styles.header}>
@@ -60,31 +59,84 @@ const HeaderStaff: React.FC = () => {
         animationType="slide"
         onRequestClose={() => setMenuVisible(false)}
       >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={() => setMenuVisible(false)}
-        >
-          <View style={styles.modalMenu}>
-            <Text style={styles.modalTitle}>Chọn chức năng</Text>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.modalMenu}>
+              <Text style={styles.modalTitle}>Chọn chức năng</Text>
 
-            <TouchableOpacity
-              style={styles.modalMenuItem}
-              onPress={() => handleNavigate("Calendar")}
-            >
-              <Icon name="calendar-check" size={20} color="#2563EB" />
-              <Text style={styles.modalMenuText}>Quản lý đơn xét nghiệm</Text>
-            </TouchableOpacity>
+              {/* Quản lý đơn xét nghiệm */}
+              <TouchableOpacity
+                style={styles.modalMenuItem}
+                onPress={() => {
+                  setMenuVisible(false);
+                  navigation.navigate("Calendar");
+                }}
+              >
+                <Icon name="calendar-check" size={20} color="#2563EB" />
+                <Text style={styles.modalMenuText}>
+                  Quản lý đơn xét nghiệm
+                </Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.modalMenuItem}
-              onPress={() => handleNavigate("DeliveriesStaff")}
-            >
-              <Icon name="truck-delivery" size={20} color="#2563EB" />
-              <Text style={styles.modalMenuText}>Quản lý giao nhận Kit</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
+              {/* Quản lý giao nhận Kit */}
+              <TouchableOpacity
+                style={styles.modalMenuItem}
+                onPress={() =>
+                  setShowDeliverySubmenu((prev) => !prev)
+                }
+              >
+                <Icon name="truck-delivery" size={20} color="#2563EB" />
+                <Text style={styles.modalMenuText}>Quản lý giao nhận Kit</Text>
+                <Icon
+                  name={showDeliverySubmenu ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#2563EB"
+                  style={{ marginLeft: "auto" }}
+                />
+              </TouchableOpacity>
+
+              {/* Submenu */}
+              {showDeliverySubmenu && (
+                <View style={{ paddingLeft: 32 }}>
+                  <TouchableOpacity
+                    style={styles.modalMenuItem}
+                    onPress={() => {
+                      setMenuVisible(false);
+                      setShowDeliverySubmenu(false);
+                      navigation.navigate("DeliveriesStaff", {
+                        tab: "Giao Kit",
+                      });
+                    }}
+                  >
+                    <Text style={styles.modalMenuText}>• Giao Kit</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.modalMenuItem}
+                    onPress={() => {
+                      setMenuVisible(false);
+                      setShowDeliverySubmenu(false);
+                      navigation.navigate("SampleReceived");
+                    }}
+                  >
+                    <Text style={styles.modalMenuText}>• Nhận mẫu Kit</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.modalMenuItem}
+                    onPress={() => {
+                      setMenuVisible(false);
+                      setShowDeliverySubmenu(false);
+                      navigation.navigate("ResultSent");
+                    }}
+                  >
+                    <Text style={styles.modalMenuText}>• Gửi kết quả</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </View>
   );

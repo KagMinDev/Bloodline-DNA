@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { completeDelivery, getAssignedDeliveries } from "../../api/delivery";
 import HeaderStaff from "../../components/header";
 import {
-    DeliveryOrder,
-    statusColorMap,
-    statusTextMap,
+  DeliveryOrder,
+  statusColorMap,
+  statusTextMap,
 } from "../../types/delivery";
 import styles from "./styles";
 

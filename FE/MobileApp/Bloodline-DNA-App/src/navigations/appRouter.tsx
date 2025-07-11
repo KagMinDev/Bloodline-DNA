@@ -3,6 +3,7 @@ import { useAuth } from "@/context/auth/AuthContext";
 import AboutScreen from "@/screens/about";
 import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
 import BookingHistory from "@/screens/booking-history/screen/BookingHistory";
+import WebViewScreen from "@/screens/checkout/components/WebViewScreen";
 import CheckoutScreen from "@/screens/checkout/screen/Checkout";
 import ContactScreen from "@/screens/contact";
 import DoctorsScreen from "@/screens/doctors";
@@ -12,15 +13,23 @@ import PaymentSuccess from "@/screens/payment/screen/PaymentSuccess";
 import Services from "@/screens/services";
 import DetailService from "@/screens/services/components/AllServices/DetailService";
 import AllServiceScreen from "@/screens/services/screen/AllServiceScreen";
+import DeliveriesStaffTabs from "@/screens/staff/delivery/types/bottomTab.types";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { RouteProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { DeliveriesStaffScreen, ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen } from "../screens";
-import { MainTabParamList, RootStackParamList, } from "../types/root-stack/stack.types";
-import WebViewScreen from "@/screens/checkout/components/WebViewScreen";
+import {
+  ForgotPasswordScreen,
+  HomePageScreen,
+  LoginScreen,
+  RegisterScreen
+} from "../screens";
+import {
+  MainTabParamList,
+  RootStackParamList,
+} from "../types/root-stack/stack.types";
 
 // ... (giữ nguyên các component Placeholder screens)
 const ProfileScreen: React.FC = () => (
@@ -106,18 +115,27 @@ const AppRouter: React.FC = () => {
           <Stack.Screen name="Doctors" component={DoctorsScreen} />
           <Stack.Screen name="News" component={NewsScreen} />
           <Stack.Screen name="Contact" component={ContactScreen} />
-          <Stack.Screen name="DeliveriesStaff" component={DeliveriesStaffScreen} />
+          <Stack.Screen
+            name="DeliveriesStaffTabs"
+            component={DeliveriesStaffTabs}
+          />
 
           <Stack.Screen name="AllService" component={AllServiceScreen} />
           <Stack.Screen name="DetailsService" component={DetailService} />
-          <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
+          <Stack.Screen
+            name="AppointmentScreen"
+            component={AppointmentScreen}
+          />
 
           <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
           <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
           <Stack.Screen name="PaymentError" component={PaymentError} />
           <Stack.Screen name="BookingHistory" component={BookingHistory} />
-          <Stack.Screen name="WebViewScreen" component={WebViewScreen} options={{ title: "Thanh toán" }} />
-
+          <Stack.Screen
+            name="WebViewScreen"
+            component={WebViewScreen}
+            options={{ title: "Thanh toán" }}
+          />
         </>
       ) : (
         <>

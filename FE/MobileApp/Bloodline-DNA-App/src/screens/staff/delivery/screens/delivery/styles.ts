@@ -62,6 +62,67 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "bold",
   },
+
+  // Thêm các styles này vào file styles.ts
+
+tabContainer: {
+  backgroundColor: '#FFFFFF',
+  borderBottomWidth: 1,
+  borderBottomColor: '#E5E7EB',
+  paddingVertical: 8,
+  elevation: 2,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+},
+
+tabScrollContent: {
+  paddingHorizontal: 16,
+  alignItems: 'center',
+},
+
+tabButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  marginHorizontal: 4,
+  borderRadius: 20,
+  backgroundColor: '#F3F4F6',
+  borderWidth: 1,
+  borderColor: '#E5E7EB',
+},
+
+activeTabButton: {
+  backgroundColor: '#3B82F6',
+  borderColor: '#3B82F6',
+},
+
+tabButtonText: {
+  marginLeft: 8,
+  fontSize: 14,
+  fontWeight: '600',
+  color: '#6B7280',
+},
+
+activeTabButtonText: {
+  color: '#FFFFFF',
+},
+
+emptyContainer: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingVertical: 64,
+},
+
+emptyText: {
+  marginTop: 16,
+  fontSize: 16,
+  color: '#6B7280',
+  textAlign: 'center',
+},
 });
 
 export default styles;
