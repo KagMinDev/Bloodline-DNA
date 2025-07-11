@@ -1,25 +1,58 @@
-import { CalendarIcon, CreditCardIcon, PackageIcon, TruckIcon, FlaskConicalIcon, FileTextIcon, XCircleIcon } from 'lucide-react';
-import type { BookingDetail, BookingItem, DetailedBookingStatus, ProgressStep, TestProgressData } from '../../types/bookingTypes';
+import {
+  CalendarIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  FlaskConicalIcon,
+  PackageIcon,
+  TruckIcon,
+  XCircleIcon,
+} from 'lucide-react';
 import { formatPrice } from '../../api/bookingListApi';
 import { calculateDeposit, formatPaymentAmount } from '../../api/paymentApi';
+import type {
+  BookingDetail,
+  BookingItem,
+  DetailedBookingStatus,
+  ProgressStep,
+  TestProgressData,
+} from '../../types/bookingTypes';
 
-export const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-export const formatDateTime = (dateString: string) => new Date(dateString).toLocaleString('vi-VN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+export const formatDate = (dateString: string) =>
+  new Date(dateString).toLocaleDateString('vi-VN', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
-export const transformApiDataToBookingDetail = (item: BookingItem, setTestServiceId: (id: string | null) => void): BookingDetail => {
+export const formatDateTime = (dateString: string) =>
+  new Date(dateString).toLocaleString('vi-VN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+export const transformApiDataToBookingDetail = (
+  item: BookingItem,
+  setTestServiceId: (id: string | null) => void
+): BookingDetail => {
   const appointmentDate = new Date(item.appointmentDate);
   const preferredDate = appointmentDate.toISOString().split('T')[0];
   const preferredTime = appointmentDate.toTimeString().substring(0, 5);
 
   const serviceType: 'home' | 'clinic' =
     item.collectionMethod?.toLowerCase().includes('home') ||
-    item.collectionMethod?.toLowerCase().includes('nhà') ? 'home' : 'clinic';
+    item.collectionMethod?.toLowerCase().includes('nhà')
+      ? 'home'
+      : 'clinic';
 
   const normalizeStatus = (status: string): DetailedBookingStatus => {
     const statusLower = (status || '').toLowerCase().replace(/[^a-z0-9]/gi, '');
     if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'Cancelled';
     if (statusLower.includes('completed') || statusLower.includes('hoànthành')) return 'Completed';
-    if (statusLower.includes('finalpayment')) return 'Completed'; // Map finalpayment to Completed
+    if (statusLower.includes('finalpayment')) return 'Completed';
     if (statusLower.includes('testing')) return 'Testing';
     if (statusLower.includes('samplereceived')) return 'SampleReceived';
     if (statusLower.includes('returningsample')) return 'ReturningSample';
@@ -27,7 +60,7 @@ export const transformApiDataToBookingDetail = (item: BookingItem, setTestServic
     if (statusLower.includes('kitdelivered') || statusLower.includes('đãnhậnkit')) return 'KitDelivered';
     if (statusLower.includes('deliveringkit')) return 'DeliveringKit';
     if (statusLower.includes('preparingkit')) return 'PreparingKit';
-    if (statusLower.includes('confirmed') || statusLower.includes('xácnhận')) return 'PreparingKit'; // Map confirmed to PreparingKit
+    if (statusLower.includes('confirmed') || statusLower.includes('xácnhận')) return 'PreparingKit';
     if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'Pending';
     console.warn(`Unknown booking status from API: "${status}". Defaulting to 'Pending'.`);
     return 'Pending';
@@ -52,11 +85,14 @@ export const transformApiDataToBookingDetail = (item: BookingItem, setTestServic
     totalPrice: formatPrice(item.price),
     appointmentCode: `APT-${item.id.slice(-6)}`,
     priceNumeric: item.price,
-    collectionMethod: item.collectionMethod || ''
+    collectionMethod: item.collectionMethod || '',
   };
 };
 
-export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boolean): TestProgressData => {
+export const generateProgressData = (
+  booking: BookingDetail,
+  hasSampleInfo?: boolean
+): TestProgressData => {
   const baseDate = new Date(booking.bookingDate);
   const bookingStatus = booking.status;
 
@@ -91,14 +127,26 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     };
   }
 
-  // FIX: Logic thanh toán đặt cọc chính xác - chỉ khi đã qua bước pending
-  const depositPaidStatuses: DetailedBookingStatus[] = ['PreparingKit', 'DeliveringKit', 'KitDelivered', 'WaitingForSample', 'ReturningSample', 'SampleReceived', 'Testing', 'Completed'];
+  const depositPaidStatuses: DetailedBookingStatus[] = [
+    'PreparingKit',
+    'DeliveringKit',
+    'KitDelivered',
+    'WaitingForSample',
+    'ReturningSample',
+    'SampleReceived',
+    'Testing',
+    'Completed',
+  ];
   const isDepositPaid = depositPaidStatuses.includes(bookingStatus);
-  
+
   steps.push({
     id: 2,
     title: 'Thanh Toán Đặt Cọc 20%',
-    description: booking.priceNumeric ? `Thanh toán đặt cọc ${formatPaymentAmount(calculateDeposit(booking.priceNumeric))}` : 'Thanh toán đặt cọc 20% của tổng chi phí',
+    description: booking.priceNumeric
+      ? `Thanh toán đặt cọc ${formatPaymentAmount(
+          calculateDeposit(booking.priceNumeric)
+        )}`
+      : 'Thanh toán đặt cọc 20% của tổng chi phí',
     icon: CreditCardIcon,
     status: isDepositPaid ? 'completed' : 'current',
     actionRequired: !isDepositPaid,
@@ -106,8 +154,14 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     actionPayload: { type: 'deposit' },
   });
 
-  // FIX: Sử dụng PascalCase để khớp với DetailedBookingStatus
-  const kitCompletedStatuses: DetailedBookingStatus[] = ['KitDelivered', 'WaitingForSample', 'ReturningSample', 'SampleReceived', 'Testing', 'Completed'];
+  const kitCompletedStatuses: DetailedBookingStatus[] = [
+    'KitDelivered',
+    'WaitingForSample',
+    'ReturningSample',
+    'SampleReceived',
+    'Testing',
+    'Completed',
+  ];
   const kitCurrentStatuses: DetailedBookingStatus[] = ['PreparingKit', 'DeliveringKit'];
 
   let kitStatus: ProgressStep['status'] = 'pending';
@@ -121,17 +175,26 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     if (bookingStatus === 'DeliveringKit') kitDetails.push('Bộ kit đang trên đường giao đến bạn.');
   }
 
+  const showKitConfirmBtn = bookingStatus === 'DeliveringKit';
+
   steps.push({
     id: 3,
     title: 'Nhận TestKit',
-    description: booking.serviceType === 'home' ? 'Nhận bộ kit xét nghiệm tại nhà' : 'Đã nhận được Kit',
+    description:
+      booking.serviceType === 'home'
+        ? 'Nhận bộ kit xét nghiệm tại nhà'
+        : 'Vui lòng xác nhận nếu đã nhận Kit',
     icon: PackageIcon,
     status: kitStatus,
     details: kitDetails,
-    estimatedDate: new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    estimatedDate: new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
+    actionRequired: showKitConfirmBtn,
+    actionText: 'Xác nhận đã nhận Kit',
+    actionPayload: { type: 'confirmKitReceived' },
   });
 
-  // FIX: Sử dụng PascalCase
   const sampleCompletedStatuses: DetailedBookingStatus[] = ['SampleReceived', 'Testing', 'Completed'];
   const sampleCurrentStatuses: DetailedBookingStatus[] = ['WaitingForSample', 'ReturningSample'];
 
@@ -143,13 +206,11 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
   } else if (sampleCurrentStatuses.includes(bookingStatus)) {
     sampleStatus = 'current';
     if (bookingStatus === 'WaitingForSample') {
-      // Show different text based on whether sample info has been submitted
       if (hasSampleInfo === false) {
         sampleDetails.push('Vui lòng gửi mẫu của bạn đến trung tâm theo hướng dẫn.');
       } else if (hasSampleInfo === true) {
         sampleDetails.push('Thông tin mẫu đã được ghi nhận.');
       }
-      // If hasSampleInfo is undefined, don't add details (still loading)
     }
     if (bookingStatus === 'ReturningSample') sampleDetails.push('Mẫu của bạn đang được chuyển đến phòng lab.');
   }
@@ -161,13 +222,14 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     icon: TruckIcon,
     status: sampleStatus,
     details: sampleDetails,
-    estimatedDate: new Date(baseDate.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    estimatedDate: new Date(baseDate.getTime() + 5 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
   });
 
-  // FIX: Logic thanh toán phần còn lại chính xác
   const finalPaymentCompletedStatuses: DetailedBookingStatus[] = ['Testing', 'Completed'];
   const finalPaymentCurrentStatuses: DetailedBookingStatus[] = ['SampleReceived'];
-  
+
   let remainingPaymentStatus: ProgressStep['status'] = 'pending';
   if (finalPaymentCompletedStatuses.includes(bookingStatus)) {
     remainingPaymentStatus = 'completed';
@@ -178,7 +240,11 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
   steps.push({
     id: 5,
     title: 'Thanh Toán Phần Còn Lại',
-    description: booking.priceNumeric ? `Thanh toán ${formatPaymentAmount(booking.priceNumeric - calculateDeposit(booking.priceNumeric))}` : 'Thanh toán phần còn lại của chi phí',
+    description: booking.priceNumeric
+      ? `Thanh toán ${formatPaymentAmount(
+          booking.priceNumeric - calculateDeposit(booking.priceNumeric)
+        )}`
+      : 'Thanh toán phần còn lại của chi phí',
     icon: CreditCardIcon,
     status: remainingPaymentStatus,
     actionRequired: remainingPaymentStatus === 'current',
@@ -188,6 +254,7 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
 
   let analysisStatus: ProgressStep['status'] = 'pending';
   let analysisDetails: string[] = [];
+
   if (bookingStatus === 'Completed') {
     analysisStatus = 'completed';
   } else if (bookingStatus === 'Testing') {
@@ -202,7 +269,9 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     icon: FlaskConicalIcon,
     status: analysisStatus,
     details: analysisDetails,
-    estimatedDate: new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    estimatedDate: new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
   });
 
   steps.push({
@@ -211,10 +280,12 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     description: 'Kết quả xét nghiệm được gửi đến bạn qua email và SMS',
     icon: FileTextIcon,
     status: bookingStatus === 'Completed' ? 'completed' : 'pending',
-    estimatedDate: new Date(baseDate.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    estimatedDate: new Date(baseDate.getTime() + 10 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
   });
 
-  const currentStepIndex = steps.findIndex(step => step.status === 'current');
+  const currentStepIndex = steps.findIndex((step) => step.status === 'current');
 
   return {
     bookingId: booking.id,
@@ -224,6 +295,8 @@ export const generateProgressData = (booking: BookingDetail, hasSampleInfo?: boo
     currentStep: currentStepIndex !== -1 ? steps[currentStepIndex].id : steps.length,
     steps,
     trackingNumber: `TRK-${booking.id.slice(-8)}`,
-    expectedResultDate: new Date(baseDate.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    expectedResultDate: new Date(baseDate.getTime() + 10 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0],
   };
 };

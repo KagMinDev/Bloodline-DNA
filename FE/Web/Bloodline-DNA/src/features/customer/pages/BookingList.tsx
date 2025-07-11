@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  CalendarIcon, 
-  ClockIcon, 
-  MapPinIcon,
-  SearchIcon,
-  FilterIcon,
-  EyeIcon,
-  EditIcon,
-  PhoneIcon,
-  HomeIcon,
-  BuildingIcon,
+import {
   AlertCircleIcon,
+  BuildingIcon,
+  CalendarIcon,
+  CircleSlash2,
+  ClockIcon,
+  EditIcon,
+  EyeIcon,
+  FilterIcon,
+  HomeIcon,
+  MapPinIcon,
+  PhoneIcon,
+  SearchIcon,
   StarIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent } from "../components/ui/Card";
-import { Input } from "../components/ui/Input";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Footer, Header } from "../../../components";
+import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,21 +24,19 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
-import { useBookingModal } from "../components/BookingModalContext";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
 // Import booking list API
-import { 
-  getBookingListApi, 
-  formatBookingDate, 
-  formatPrice, 
-  getStatusDisplay,
-  type BookingItem 
+import {
+  formatPrice,
+  getBookingListApi,
+  type BookingItem
 } from "../api/bookingListApi";
 // Import statusConfig từ BookingStatusPage để đồng bộ
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
-import type { DetailedBookingStatus } from "../types/bookingTypes";
 import { FeedbackModal } from "../components/FeedbackModal";
+import type { DetailedBookingStatus } from "../types/bookingTypes";
 
 interface Booking {
   id: string;
@@ -220,18 +218,18 @@ export const BookingList = (): React.JSX.Element => {
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-      <div className="w-full max-w-none relative">
+      <div className="relative w-full max-w-none">
         {/* Header */}
         <div className="relative z-50">
           <Header />
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -246,20 +244,20 @@ export const BookingList = (): React.JSX.Element => {
                 Quản lý lịch hẹn xét nghiệm
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Theo dõi và quản lý tất cả các lịch hẹn xét nghiệm của bạn một cách dễ dàng và tiện lợi.</p>
+            <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">Theo dõi và quản lý tất cả các lịch hẹn xét nghiệm của bạn một cách dễ dàng và tiện lợi.</p>
           </div>
         </section>
 
         {/* Search and Filter Section */}
         <section className="py-8 bg-white border-b border-gray-200">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
-            <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+            <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
               <div className="relative flex-1 max-w-md">
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <SearchIcon className="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 left-3 top-1/2" />
                 <Input
                   type="text"
                   placeholder="Tìm kiếm theo mã, loại xét nghiệm, tên..."
-                  className="pl-10 pr-4 py-3"
+                  className="py-3 pl-10 pr-4"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -267,7 +265,7 @@ export const BookingList = (): React.JSX.Element => {
 
               <div className="flex items-center gap-4">
                 <div className="flex items-center">
-                  <FilterIcon className="w-5 h-5 text-gray-600 mr-2" />
+                  <FilterIcon className="w-5 h-5 mr-2 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">Trạng thái:</span>
                 </div>
                 <select
@@ -293,8 +291,8 @@ export const BookingList = (): React.JSX.Element => {
         </section>
 
         {/* Bookings List */}
-        <section className="py-16 md:py-20 bg-white">
-          <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl">
+        <section className="py-16 bg-white md:py-20">
+          <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-8">
               <p className="text-lg text-slate-600">
                 Tìm thấy <span className="font-semibold text-blue-900">{filteredBookings.length}</span> lịch hẹn
@@ -302,27 +300,27 @@ export const BookingList = (): React.JSX.Element => {
             </div>
 
             {isLoading ? (
-              <div className="text-center py-16">
-                <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <div className="py-16 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
                 <p className="text-slate-600">Đang tải danh sách...</p>
               </div>
             ) : error ? (
-              <div className="text-center py-16">
-                <AlertCircleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-600 mb-2">Có lỗi xảy ra</h3>
-                <p className="text-slate-500 mb-4">{error}</p>
+              <div className="py-16 text-center">
+                <CircleSlash2 className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <p className="mb-4 text-slate-500">{error}</p>
                 <Button 
                   onClick={() => window.location.reload()} 
-                  className="bg-blue-900 hover:bg-blue-800 text-white"
+                  className="text-white bg-blue-900 hover:bg-blue-800"
+                  style={{color: "white"}}
                 >
                   Thử Lại
                 </Button>
               </div>
             ) : filteredBookings.length === 0 ? (
-              <div className="text-center py-16">
-                <CalendarIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-600 mb-2">Không có lịch hẹn nào</h3>
-                <Button onClick={() => openBookingModal()} className="bg-blue-900 hover:bg-blue-800 text-white">
+              <div className="py-16 text-center">
+                <CalendarIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="mb-2 text-xl font-semibold text-slate-600">Không có lịch hẹn nào</h3>
+                <Button onClick={() => openBookingModal()} className="text-white bg-blue-900 hover:bg-blue-800">
                   Đặt Lịch Mới
                 </Button>
               </div>
@@ -334,9 +332,9 @@ export const BookingList = (): React.JSX.Element => {
                   const ServiceIcon = booking.serviceType === 'home' ? HomeIcon : BuildingIcon;
                   
                   return (
-                    <Card key={booking.id} className="bg-white shadow-lg border-0 hover:shadow-xl transition-shadow duration-300">
+                    <Card key={booking.id} className="transition-shadow duration-300 bg-white border-0 shadow-lg hover:shadow-xl">
                       <CardContent className="p-6">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-4">
                               <div>
@@ -347,8 +345,8 @@ export const BookingList = (): React.JSX.Element => {
                                     {statusInfo?.label || booking.status}
                                   </span>
                                 </div>
-                                <p className="text-lg font-semibold text-slate-700 mb-1">{booking.testType}</p>
-                                <p className="text-blue-600 font-medium">{booking.name}</p>
+                                <p className="mb-1 text-lg font-semibold text-slate-700">{booking.testType}</p>
+                                <p className="font-medium text-blue-600">{booking.name}</p>
                               </div>
                               <div className="text-right">
                               <p className="text-sm text-slate-500">Tổng chi phí</p>
@@ -357,7 +355,7 @@ export const BookingList = (): React.JSX.Element => {
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                            <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2 lg:grid-cols-3">
                               <div className="flex items-center text-slate-600">
                                 <ServiceIcon className="w-4 h-4 mr-2 text-blue-500" />
                                 {booking.collectionMethod === 'SelfSample' ? 'Khách Hàng Tự Thu Mẫu' : 'Thu mẫu tại cơ sở'}
@@ -383,7 +381,7 @@ export const BookingList = (): React.JSX.Element => {
                             </div>
 
                             {booking.notes && (
-                              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                              <div className="p-3 mt-4 rounded-lg bg-blue-50">
                                 <p className="text-sm text-blue-800">
                                   <strong>Lưu ý:</strong> {booking.notes}
                                 </p>
@@ -392,7 +390,7 @@ export const BookingList = (): React.JSX.Element => {
                           </div>
 
                           <div className="flex flex-col gap-3 mt-4">
-                            <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row">
                               <Button 
                                 variant="outline" 
                                 className="w-full sm:w-auto"
@@ -402,7 +400,7 @@ export const BookingList = (): React.JSX.Element => {
                                 Xem chi tiết
                               </Button>
                               <Button 
-                                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+                                className="w-full text-white bg-blue-600 sm:w-auto hover:bg-blue-700"
                                 onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
                               >
                                 <EditIcon className="w-4 h-4 mr-2" />
@@ -411,7 +409,7 @@ export const BookingList = (): React.JSX.Element => {
                             </div>
                             {booking.status === 'Completed' && (
                               <Button 
-                                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+                                className="w-full text-white bg-yellow-500 hover:bg-yellow-600"
                                 onClick={() => handleFeedbackClick(booking)}
                               >
                                 <StarIcon className="w-4 h-4 mr-2" />

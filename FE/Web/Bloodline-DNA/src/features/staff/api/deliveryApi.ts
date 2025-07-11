@@ -12,13 +12,22 @@ const getAuthHeaders = () => {
 };
 
 export const getAssignedDeliveries = async (): Promise<DeliveryOrder[]> => {
-  const res = await axios.get(
-    `${STAFF_BASE_URL}/logistics/assigned`,
-    getAuthHeaders()
-  );
-  return res.data;
+  const res = await axios.get(`${STAFF_BASE_URL}/logistics/assigned`, getAuthHeaders());
+
+  console.log("getAssignedDeliveries", res)
+  if (res.data && Array.isArray(res.data)) {
+    return res.data;
+  }
+
+  if (res.data?.data && Array.isArray(res.data.data)) {
+    return res.data.data;
+  }
+
+  console.error("❌ Invalid data format from API:", res.data);
+  return []; // fallback tránh crash
 };
 
+// ✅ Hoàn tất đơn
 export const completeDelivery = async (id: string): Promise<void> => {
   await axios.put(
     `${STAFF_BASE_URL}/logistics/${id}/complete`,
@@ -26,8 +35,3 @@ export const completeDelivery = async (id: string): Promise<void> => {
     getAuthHeaders()
   );
 };
-
-// export const getDeliveryLogisticById = async (id: string): Promise<DeliveryOrder> => {
-//   const res = await axios.get(`${BASE_URL}/api/logistics/${id}`, getAuthHeaders());
-//   return res.data.data;
-// };

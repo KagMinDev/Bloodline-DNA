@@ -7,26 +7,18 @@ import type {
   DeliveryStatus
 } from "../types/delivery";
 
-const mapStatus = (status: number): DeliveryStatus => {
-  switch (status) {
-    case 0:
-      return "PreparingKit";
-    case 1:
-      return "DeliveringKit";
-    case 2:
-      return "KitDelivered";
-    case 3:
-      return "WaitingForPickup";
-    case 4:
-      return "PickingUpSample";
-    case 5:
-      return "SampleReceived";
-    case 6:
-      return "cancelled";
-    default:
-      return "cancelled";
-  }
-};
+const validStatuses: DeliveryStatus[] = [
+  "PreparingKit",
+  "DeliveringKit",
+  "KitDelivered",
+  "WaitingForPickup",
+  "PickingUpSample",
+  "SampleReceived",
+  "Cancelled",
+];
+
+const isValidStatus = (status: string): status is DeliveryStatus =>
+  validStatuses.includes(status as DeliveryStatus);
 
 export const getDeliveryLogistics = async (): Promise<DeliveryOrder[]> => {
   const token = localStorage.getItem("token");
@@ -37,18 +29,23 @@ export const getDeliveryLogistics = async (): Promise<DeliveryOrder[]> => {
       "Content-Type": "application/json",
     },
   });
+  console.log("getDeliveryLogistics", response)
 
   if (response.data.success && Array.isArray(response.data.data)) {
-    return response.data.data.map((item: DeliveryLogistic) => ({
-      id: item.id,
-      staff: item.staff?.fullName || "Chưa phân công",
-      address: item.address,
-      phone: item.phone,
-      scheduleAt: item.scheduledAt,
-      completeAt: item.completedAt,
-      note: item.note,
-      status: mapStatus(item.status),
-    }));
+    return response.data.data.map((item: DeliveryLogistic) => {
+      const status = isValidStatus(item.status) ? item.status : "Cancelled";
+
+      return {
+        id: item.id,
+        staff: item.staff?.fullName || "Chưa phân công",
+        address: item.address,
+        phone: item.phone,
+        scheduleAt: item.scheduledAt,
+        completeAt: item.completedAt,
+        note: item.note,
+        status,
+      };
+    });
   } else {
     throw new Error("Dữ liệu không hợp lệ từ server.");
   }
@@ -58,12 +55,15 @@ export const getDeliveryLogisticById = async (
   id: string
 ): Promise<DeliveryOrder> => {
   const token = localStorage.getItem("token");
+
   const response = await axios.get(`${BASE_URL}/Logistic/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
   if (response.data.success && response.data.data) {
     const item: DeliveryLogistic = response.data.data;
+    const status = isValidStatus(item.status) ? item.status : "Cancelled";
+
     return {
       id: item.id,
       staff: item.staff?.fullName || "Chưa phân công",
@@ -72,7 +72,7 @@ export const getDeliveryLogisticById = async (
       scheduleAt: item.scheduledAt,
       completeAt: item.completedAt,
       note: item.note,
-      status: mapStatus(item.status),
+      status,
     };
   } else {
     throw new Error("Không tìm thấy đơn logistic với ID này.");

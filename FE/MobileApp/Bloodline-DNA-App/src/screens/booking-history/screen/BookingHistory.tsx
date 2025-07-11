@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, RefreshControl, TouchableOpacity, Alert, } from "react-native";
+import { getBookingsByUserIdApi } from "@/screens/appoiment/api/testbookingApi";
+import type { TestBookingResponse } from "@/screens/appoiment/types/testBooking";
+import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
+import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/types/root-stack/stack.types";
-import { getBookingsByUserIdApi } from "@/screens/appoiment/api/testbookingApi";
-import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
-import type { TestBookingResponse } from "@/screens/appoiment/types/testBooking";
+import React, { useState } from "react";
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
 import BookingHistoryCard from "../components/BookingHistoryCard";
 
 const BookingHistory: React.FC = () => {

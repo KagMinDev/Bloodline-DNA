@@ -47,7 +47,7 @@ export interface DeliveryLogistic {
   completedAt: string | null;
   note: string;
   type: number;
-  status: number;
+  status: string;
 }
 
 export interface DeliveryOrder {

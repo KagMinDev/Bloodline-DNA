@@ -5,9 +5,8 @@ import { useState } from "react";
 import { completeDelivery } from "../../api/deliveryApi";
 import {
   statusColorMap,
-  statusMapNumberToKey,
   statusTextMap,
-  type DeliveryOrder,
+  type DeliveryOrder
 } from "../../types/delivery";
 
 interface Props {
@@ -35,7 +34,7 @@ const DeliveryTable = ({ data, onRowClick, onComplete }: Props) => {
       message.success("Đã hoàn thành đơn hàng.");
       setOpenModal(false);
       setSelectedId(null);
-      onComplete(); // refetch danh sách
+      onComplete();
     } catch (error) {
       console.error("Lỗi hoàn thành:", error);
       message.error("Không thể hoàn thành đơn.");
@@ -97,14 +96,16 @@ const DeliveryTable = ({ data, onRowClick, onComplete }: Props) => {
       dataIndex: "status",
       key: "status",
       align: "center",
-      render: (statusNumber: number) => {
-        const statusKey = statusMapNumberToKey[statusNumber];
+      render: (status: string) => {
+        const color = statusColorMap[status as keyof typeof statusColorMap];
+        const text = statusTextMap[status as keyof typeof statusTextMap];
+
         return (
           <Tag
-            color={statusColorMap[statusKey]}
+            color={color || "default"}
             style={{ fontSize: "12px", padding: "2px 6px" }}
           >
-            {statusTextMap[statusKey]}
+            {text || status}
           </Tag>
         );
       },
@@ -114,9 +115,7 @@ const DeliveryTable = ({ data, onRowClick, onComplete }: Props) => {
       key: "actions",
       align: "center",
       render: (_, record) => {
-        const statusKey = statusMapNumberToKey[Number(record.status)];
-
-        // Chỉ cho phép hoàn thành nếu đang ở trạng thái "DeliveringKit"
+        const statusKey = record.status;
         const isCompleted = statusKey !== "DeliveringKit";
 
         return (
@@ -144,7 +143,7 @@ const DeliveryTable = ({ data, onRowClick, onComplete }: Props) => {
     <>
       <Table
         rowKey="id"
-        dataSource={[...data].sort(
+        dataSource={(data ?? []).sort(
           (a, b) =>
             new Date(b.scheduledAt).getTime() -
             new Date(a.scheduledAt).getTime()

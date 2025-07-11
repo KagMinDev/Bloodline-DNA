@@ -1,23 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import { callPaymentCallbackApi } from '../api/checkoutApi';
-import { callRemainingPaymentCallbackApi } from '../api/paymentApi';
+import { getBookingByIdApi } from '../api/bookingListApi';
 import { confirmDeliveryApi } from '../api/bookingUpdateApi';
+import { callPaymentCallbackApi } from '../api/checkoutApi';
+import { submitFeedbackApi } from '../api/feedbackApi';
+import { callRemainingPaymentCallbackApi, checkoutPaymentApi, checkoutRemainingPaymentApi } from '../api/paymentApi';
+import { getTestKitByBookingIdApi, getTestSampleByKitIdApi } from '../api/sampleApi';
+import { getUserInfoApi } from '../api/userApi';
+import {
+  generateProgressData,
+  transformApiDataToBookingDetail,
+} from '../components/utils/bookingUtils';
 import type {
   BookingDetail,
   DetailedBookingStatus,
   TestProgressData,
 } from '../types/bookingTypes';
-import {
-  generateProgressData,
-  transformApiDataToBookingDetail,
-} from '../components/utils/bookingUtils';
-import { getBookingByIdApi } from '../api/bookingListApi';
-import { getUserInfoApi } from '../api/userApi';
-import { checkoutPaymentApi, checkoutRemainingPaymentApi } from '../api/paymentApi';
-import { submitFeedbackApi } from '../api/feedbackApi';
-import { getTestKitByBookingIdApi, getTestSampleByKitIdApi } from '../api/sampleApi';
 
 const statusNumberMapping: Record<number, DetailedBookingStatus> = {
   0: 'Pending',
@@ -349,18 +348,25 @@ export const useBookingData = () => {
   };
 
   const handleStepAction = (payload: any) => {
-    switch (payload?.type) {
-      case 'deposit':
-      case 'remaining':
-        handlePayment(payload);
-        break;
-      case 'fill_sample_info':
-        setIsSampleModalOpen(true);
-        break;
-      default:
-        console.warn('Hành động không được hỗ trợ:', payload?.type);
-    }
-  };
+  switch (payload?.type) {
+    case 'deposit':
+    case 'remaining':
+      handlePayment(payload);
+      break;
+    case 'fill_sample_info':
+      setIsSampleModalOpen(true);
+      break;
+    case 'confirmKitReceived':
+      if (booking?.id) {
+        handleConfirmDelivery(booking.id);
+      } else {
+        console.error('Không tìm thấy booking ID để xác nhận nhận Kit');
+      }
+      break;
+    default:
+      console.warn('Hành động không được hỗ trợ:', payload?.type);
+  }
+};
 
   return {
     booking,

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { formatDate } from '@fullcalendar/core';
+import { useEffect, useState } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { getTestBookingApi } from '../api/testBookingApi';
 import Calendar from '../components/common/Calendar';
 import type { TestBookingResponse } from '../types/testBooking';
-import { getTestBookingApi } from '../api/testBookingApi';
-import { formatDate } from '@fullcalendar/core';
 
 function TestBooking() {
   const [bookings, setBookings] = useState<TestBookingResponse[]>([]);
@@ -61,7 +61,7 @@ function TestBooking() {
           });
           counts[dateStr] = (counts[dateStr] || 0) + 1;
         }
-      } catch (e) {
+      } catch {
         console.warn('Invalid booking date:', booking.appointmentDate);
       }
     });
@@ -92,11 +92,11 @@ function TestBooking() {
       </div>
       <div className="h-[92%]">
         {error ? (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex items-center justify-center h-full">
             <p className="text-red-500">{error}</p>
           </div>
         ) : isLoading ? (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">Đang tải dữ liệu...</p>
           </div>
         ) : (
