@@ -1,4 +1,3 @@
-import axios, { AxiosError } from 'axios';
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -9,14 +8,17 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
+import { sendMessage } from "./api/chatbotAI.api";
 import { styles } from "./styles";
+
+type ChatMsg = { sender: "user" | "bot"; text: string };
 
 const ChatbotAI: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
+  const [messages, setMessages] = useState<ChatMsg[]>([
     {
       sender: "bot",
       text: "👋 Chào bạn! Tôi là trợ lý hỗ trợ tư vấn về dịch vụ xét nghiệm ADN huyết thống. Bạn cần tìm hiểu gì?",
@@ -27,28 +29,30 @@ const ChatbotAI: React.FC = () => {
 
   const toggleChat = () => setIsChatOpen(!isChatOpen);
 
+  /* ------------------ SEND ------------------ */
   const handleSendMessage = async () => {
     if (!inputText.trim()) return;
 
+    // push tin nhắn của user
     setMessages((prev) => [...prev, { sender: "user", text: inputText }]);
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/openai", {
-        message: inputText,
-        history: messages,
-      });
+      /* gọi helper đã xử lý lỗi, time‑out, network */
+      const { reply } = await sendMessage(inputText);
 
-      const botReply = response.data.reply;
-      setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
-    } catch (err) {
-      const error = err as AxiosError<{ error?: string; details?: string }>;
-      console.error("Lỗi gọi backend:", error.response?.data || error.message);
+      setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
+    } catch (error: unknown) {
+      let errMsg = "❗Đã xảy ra lỗi, vui lòng thử lại.";
 
-      const errorMessage = error.response?.data?.details
-        ? `Lỗi: ${error.response.data.details}`
-        : "❗Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.";
-      setMessages((prev) => [...prev, { sender: "bot", text: errorMessage }]);
+      if (error instanceof Error) {
+        // chuyển sang tiếng Việt nếu là lỗi quá tải
+        errMsg = error.message.includes("overloaded")
+          ? "⚠️ Gemini đang quá tải, thử lại sau ít phút."
+          : `❗${error.message}`;
+      }
+
+      setMessages((prev) => [...prev, { sender: "bot", text: errMsg }]);
     } finally {
       setIsLoading(false);
       setInputText("");
@@ -57,33 +61,37 @@ const ChatbotAI: React.FC = () => {
 
   return (
     <>
+      {/* FAB */}
       <TouchableOpacity style={styles.chatButton} onPress={toggleChat}>
         <Icon name="wechat" size={20} color="white" />
       </TouchableOpacity>
 
+      {/* Modal chat */}
       <Modal
         visible={isChatOpen}
         animationType="slide"
-        transparent={true}
+        transparent
         onRequestClose={toggleChat}
       >
         <View style={styles.modalBackdrop}>
           <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
             style={styles.chatContainer}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerTitle}>
                 <Icon name="wechat" size={18} color="white" />
-                <Text style={styles.headerText}>Chat tư vấn ADN huyết thống</Text>
+                <Text style={styles.headerText}>
+                  Chat tư vấn ADN huyết thống
+                </Text>
               </View>
               <TouchableOpacity onPress={toggleChat}>
                 <Icon name="close" size={20} color="white" />
               </TouchableOpacity>
             </View>
 
-            {/* Message Area */}
+            {/* Messages */}
             <ScrollView style={styles.messages}>
               {messages.map((msg, i) => (
                 <View
@@ -95,6 +103,14 @@ const ChatbotAI: React.FC = () => {
                       : styles.messageLeft,
                   ]}
                 >
+                  {msg.sender === "bot" && (
+                    <Icon
+                      name="android"
+                      size={18}
+                      color="#007bff"
+                      style={styles.avatarBot}
+                    />
+                  )}
                   <View
                     style={[
                       styles.messageBubble,
@@ -114,6 +130,14 @@ const ChatbotAI: React.FC = () => {
                       {msg.text}
                     </Text>
                   </View>
+                  {msg.sender === "user" && (
+                    <Icon
+                      name="user"
+                      size={15}
+                      color="white"
+                      style={styles.avatarUser}
+                    />
+                  )}
                 </View>
               ))}
 
@@ -121,7 +145,7 @@ const ChatbotAI: React.FC = () => {
                 <View style={styles.messageLeft}>
                   <View style={styles.botBubble}>
                     <ActivityIndicator size="small" color="#000" />
-                    <Text style={styles.botText}> Đang xử lý...</Text>
+                    <Text style={styles.botText}> Đang trả lời...</Text>
                   </View>
                 </View>
               )}
