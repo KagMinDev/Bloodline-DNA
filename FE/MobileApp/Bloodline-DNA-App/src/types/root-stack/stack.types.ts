@@ -8,14 +8,16 @@ export type RootStackParamList = {
   About: undefined;
   Doctors: undefined;
   News: undefined;
-  DeliveriesStaff: undefined;
+  DeliveriesStaff: { tab: string };
+  SampleReceived: undefined;
+  ResultSent: undefined;
   StaffMenu: undefined;
   Calendar: undefined;
   BlogDetail: { id: string };
   Main: undefined;
   AllService: undefined;
   DetailsService: { id: string };
-  AppointmentScreen: { testServiceId: string; priceServiceId: string; };
+  AppointmentScreen: { testServiceId: string; priceServiceId: string };
 
   CheckoutScreen: { bookingId: string };
   WebViewScreen: { url: string };
@@ -34,7 +36,6 @@ export type RootStackParamList = {
   TestPayment: undefined;
   BookingHistory: undefined;
 };
-
 
 export type MainTabParamList = {
   Home: undefined;

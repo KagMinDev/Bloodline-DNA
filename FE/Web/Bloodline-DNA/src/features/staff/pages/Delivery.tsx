@@ -1,8 +1,12 @@
-import { Select, Spin } from "antd";
+import { Select, Spin, Tabs } from "antd";
 import { useCallback, useEffect, useState } from "react";
 import { getAssignedDeliveries } from "../api/deliveryApi";
 import DeliveryTable from "../components/delivery/DeliveryTable";
+import ResultSentTable from "../components/delivery/ResultSentTable";
+import SampleReceivedTable from "../components/delivery/SampleReceivedTable";
 import type { DeliveryOrder } from "../types/delivery";
+
+const { TabPane } = Tabs;
 
 const DeliveriesStaff = () => {
   const [deliveries, setDeliveries] = useState<DeliveryOrder[]>([]);
@@ -28,7 +32,6 @@ const DeliveriesStaff = () => {
 
   const handleRowClick = (id: string) => {
     setSelectedId(id);
-    console.log("Click đơn:", id);
     setTimeout(() => setSelectedId(null), 500);
   };
 
@@ -39,37 +42,69 @@ const DeliveriesStaff = () => {
 
   return (
     <div className="min-h-screen p-6 bg-blue-50">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-blue-800">
-          Danh sách đơn được phân công
-        </h2>
-        <div className="flex flex-row items-center self-center justify-center gap-3">
-          <div className="text-sm">Tìm kiếm:</div>
-          <Select
-            value={filterStatus}
-            onChange={setFilterStatus}
-            style={{ width: 200 }}
-            options={[
-              { label: "Tất cả trạng thái", value: "All" },
-              { label: "Đang giao bộ Kit", value: "DeliveringKit" },
-              { label: "Đã nhận Kit", value: "KitDelivered" },
-            ]}
-          />
-        </div>
-      </div>
+      <h2 className="mb-6 text-2xl font-bold text-blue-800">
+        Danh sách đơn được phân công
+      </h2>
 
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Spin size="large" />
-        </div>
-      ) : (
-        <DeliveryTable
-          data={filteredDeliveries}
-          onRowClick={handleRowClick}
-          loadingId={selectedId}
-          onComplete={fetchDeliveries}
-        />
-      )}
+      <Tabs defaultActiveKey="1">
+        {/* Tab 1: Giao Kit */}
+        <TabPane tab="Giao Kit" key="1">
+          <div className="flex flex-row items-center gap-3 mb-4">
+            <div className="text-sm">Tìm kiếm:</div>
+            <Select
+              value={filterStatus}
+              onChange={setFilterStatus}
+              style={{ width: 200 }}
+              options={[
+                { label: "Tất cả trạng thái", value: "All" },
+                { label: "Đang giao bộ Kit", value: "DeliveringKit" },
+                { label: "Đã nhận Kit", value: "KitDelivered" },
+              ]}
+            />
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <DeliveryTable
+              data={filteredDeliveries}
+              onRowClick={handleRowClick}
+              loadingId={selectedId}
+              onComplete={fetchDeliveries}
+            />
+          )}
+        </TabPane>
+
+        <TabPane tab="Nhận mẫu Kit" key="2">
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <SampleReceivedTable
+              data={deliveries.filter((d) => d.status === "KitDelivered")}
+              onRowClick={handleRowClick}
+              onComplete={fetchDeliveries}
+            />
+          )}
+        </TabPane>
+
+        <TabPane tab="Gửi kết quả" key="3">
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[200px]">
+              <Spin size="large" />
+            </div>
+          ) : (
+            <ResultSentTable
+              data={deliveries.filter((d) => d.status === "KitReceived")}
+              onRowClick={handleRowClick}
+              onComplete={fetchDeliveries}
+            />
+          )}
+        </TabPane>
+      </Tabs>
     </div>
   );
 };

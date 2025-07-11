@@ -62,3 +62,8 @@ export interface DeliveryOrder {
   type: number;
   status: DeliveryStatus;
 }
+
+export interface TestBookingStatusRequest {
+  bookingId: string;
+  status: string;
+}

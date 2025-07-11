@@ -1,6 +1,7 @@
 import axios from "axios";
-import { STAFF_BASE_URL } from "../../../apis/rootApi";
-import type { DeliveryOrder } from "../types/delivery";
+import rootApi, { STAFF_BASE_URL } from "../../../apis/rootApi";
+import type { DeliveryOrder, TestBookingStatusRequest } from "../types/delivery";
+import type { TestBookingResponse } from "../types/testBooking";
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
@@ -34,4 +35,20 @@ export const completeDelivery = async (id: string): Promise<void> => {
     {},
     getAuthHeaders()
   );
+};
+
+// Hàm PUT: Cập nhật trạng thái đặt lịch xét nghiệm
+// https://api.adntester.duckdns.org/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
+export const updateTestBookingStatusStaff = async (request: TestBookingStatusRequest, token: string): Promise<TestBookingResponse> => {
+  console.log("Updating booking status:", request.bookingId, "to status:", request.status);
+  
+  const response = await rootApi.put<{ data: TestBookingResponse }>(
+    `/TestBooking/${request.bookingId}/status?newStatus=${request.status}`,{},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data.data;
 };

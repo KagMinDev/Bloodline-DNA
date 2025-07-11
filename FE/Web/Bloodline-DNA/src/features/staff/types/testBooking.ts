@@ -15,7 +15,7 @@ export interface TestBookingResponse {
 
 export interface TestBookingStatusRequest {
   bookingId: string;
-  status: number; 
+  status: number;
 }
 
 export interface CalendarProps {
