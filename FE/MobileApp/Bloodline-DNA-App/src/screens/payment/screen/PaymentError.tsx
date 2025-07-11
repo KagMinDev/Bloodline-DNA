@@ -5,6 +5,8 @@ import { Feather } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
+import { callbackApi } from "@/screens/checkout/api/paymentApi";
+import { useAuth } from "@/context/auth/AuthContext";
 
 type PaymentErrorRouteProp = RouteProp<RootStackParamList, "PaymentError">;
 type PaymentErrorNavigationProp = NativeStackNavigationProp<RootStackParamList, "PaymentError">;
@@ -12,6 +14,7 @@ type PaymentErrorNavigationProp = NativeStackNavigationProp<RootStackParamList, 
 const PaymentError: React.FC = () => {
   const navigation = useNavigation<PaymentErrorNavigationProp>();
   const route = useRoute<PaymentErrorRouteProp>();
+  const { token } = useAuth();
 
   const {
     bookingId,
@@ -36,7 +39,27 @@ const PaymentError: React.FC = () => {
         useNativeDriver: true,
       }),
     ]).start();
-  }, []);
+
+    // Gửi callback thất bại nếu có đủ thông tin
+    if (bookingId && orderCode && token) {
+      const payload = {
+        bookingId,
+        orderCode,
+        status: "UNPAID",
+      };
+
+      const callFailedCallback = async () => {
+        try {
+          await callbackApi(payload, token);
+          console.log("❌ Đã gửi callback thất bại");
+        } catch (error) {
+          console.error("🔴 Gửi callback thất bại bị lỗi:", error);
+        }
+      };
+
+      callFailedCallback();
+    }
+  }, [bookingId, orderCode, token]);
 
   const handleBackToCheckout = () => {
     navigation.navigate("CheckoutScreen", { bookingId: bookingId || "" });
@@ -133,10 +156,10 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: "#22c55e",
+    backgroundColor: "#ef4444",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#22c55e",
+    shadowColor: "#ef4444",
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 8 },
     shadowRadius: 16,
@@ -194,13 +217,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#1e293b",
-    flex: 1,
-    textAlign: "right",
-  },
-  detailValueAmount: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#22c55e",
     flex: 1,
     textAlign: "right",
   },

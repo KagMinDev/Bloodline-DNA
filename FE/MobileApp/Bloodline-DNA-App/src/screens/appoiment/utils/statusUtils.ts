@@ -1,4 +1,4 @@
-import { STATUS_MAPPING } from "../constants/statusMapping";
+import { STATUS_MAPPING } from "./statusmapping";
 
 export const statusToNumber = (status: string | number | null | undefined): number => {
   if (typeof status === 'number') {

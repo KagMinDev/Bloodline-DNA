@@ -18,6 +18,7 @@ export type RootStackParamList = {
   AppointmentScreen: { testServiceId: string; priceServiceId: string; };
 
   CheckoutScreen: { bookingId: string };
+  WebViewScreen: { url: string };
   PaymentSuccess: {
     bookingId: string;
     orderCode?: string;

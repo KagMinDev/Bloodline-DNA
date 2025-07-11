@@ -20,6 +20,7 @@ import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { DeliveriesStaffScreen, ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen } from "../screens";
 import { MainTabParamList, RootStackParamList, } from "../types/root-stack/stack.types";
+import WebViewScreen from "@/screens/checkout/components/WebViewScreen";
 
 // ... (giữ nguyên các component Placeholder screens)
 const ProfileScreen: React.FC = () => (
@@ -115,6 +116,8 @@ const AppRouter: React.FC = () => {
           <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
           <Stack.Screen name="PaymentError" component={PaymentError} />
           <Stack.Screen name="BookingHistory" component={BookingHistory} />
+          <Stack.Screen name="WebViewScreen" component={WebViewScreen} options={{ title: "Thanh toán" }} />
+
         </>
       ) : (
         <>
