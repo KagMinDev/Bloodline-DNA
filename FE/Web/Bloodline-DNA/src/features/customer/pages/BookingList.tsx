@@ -13,7 +13,7 @@ import {
   SearchIcon,
   StarIcon
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "../../../components";
 import { useBookingModal } from "../components/BookingModalContext";
@@ -37,6 +37,8 @@ import {
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import { FeedbackModal } from "../components/FeedbackModal";
 import type { DetailedBookingStatus } from "../types/bookingTypes";
+import { useExistingFeedback } from "../hooks/useExistingFeedback";
+import { getUserInfoApi } from "../api/userApi";
 
 interface Booking {
   id: string;
@@ -65,9 +67,46 @@ export const BookingList = (): React.JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [selectedBookingForFeedback, setSelectedBookingForFeedback] = useState<Booking | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [preloadedFeedbacks, setPreloadedFeedbacks] = useState<Set<string>>(new Set());
+
+  // Use existing feedback hook
+  const {
+    checkExistingFeedback,
+    getExistingFeedback,
+    isCheckingFeedbackFor,
+  } = useExistingFeedback();
 
   const { openBookingModal } = useBookingModal();
   const navigate = useNavigate();
+  
+  // Debouncing refs
+  const hoverTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
+  
+  // Debounced feedback check function
+  const debouncedCheckFeedback = useCallback((bookingId: string, userId: string, testServiceId: string, delay = 300) => {
+    // Clear existing timeout for this booking
+    if (hoverTimeoutRef.current[bookingId]) {
+      clearTimeout(hoverTimeoutRef.current[bookingId]);
+    }
+    
+    // Set new timeout
+    hoverTimeoutRef.current[bookingId] = setTimeout(() => {
+      const feedbackKey = `${userId}_${testServiceId}`;
+      const existingFeedback = getExistingFeedback(userId, testServiceId);
+      const isAlreadyChecking = isCheckingFeedbackFor(userId, testServiceId);
+      
+      // Only check if we haven't checked yet and not currently checking
+      if (!existingFeedback && !isAlreadyChecking && !preloadedFeedbacks.has(feedbackKey)) {
+        console.log(`🔄 Debounced feedback check for booking: ${bookingId}`);
+        checkExistingFeedback(userId, testServiceId);
+        setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
+      }
+      
+      // Clean up timeout reference
+      delete hoverTimeoutRef.current[bookingId];
+    }, delay);
+  }, [checkExistingFeedback, getExistingFeedback, isCheckingFeedbackFor, preloadedFeedbacks]);
 
   // Helper function to transform API data to Booking interface
   const transformApiDataToBooking = (item: BookingItem): Booking => {
@@ -139,11 +178,19 @@ export const BookingList = (): React.JSX.Element => {
   };
 
   useEffect(() => {
-    // Fetch bookings from API
-    const fetchBookings = async () => {
+    // Fetch user info and bookings
+    const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        
+        // Get user info first
+        console.log('🔄 Fetching user info...');
+        const userData = await getUserInfoApi().catch(() => null);
+        if (userData?.id) {
+          setUserId(userData.id);
+          console.log('✅ User ID:', userData.id);
+        }
         
         console.log('🔄 Fetching bookings from API...');
         const apiData = await getBookingListApi();
@@ -161,9 +208,31 @@ export const BookingList = (): React.JSX.Element => {
         
         setBookings(sortedBookings);
         setFilteredBookings(sortedBookings);
+
+        // Preload feedback for first 3 completed bookings to improve UX
+        if (userData?.id) {
+          const completedBookings = sortedBookings
+            .filter(booking => booking.status === 'Completed')
+            .slice(0, 3); // Only first 3 to avoid performance issues
+          
+          if (completedBookings.length > 0) {
+            console.log(`🔄 Preloading feedback for top ${completedBookings.length} completed bookings`);
+            
+            // Add small delays to avoid hitting API too hard
+            completedBookings.forEach((booking, index) => {
+              if (booking.testServiceId) {
+                setTimeout(() => {
+                  const feedbackKey = `${userData.id}_${booking.testServiceId}`;
+                  checkExistingFeedback(userData.id, booking.testServiceId);
+                  setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
+                }, index * 100); // 100ms delay between each call
+              }
+            });
+          }
+        }
       } catch (err) {
-        console.error('❌ Error fetching bookings:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load bookings');
+        console.error('❌ Error fetching data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
         // Use empty array as fallback
         setBookings([]);
         setFilteredBookings([]);
@@ -172,8 +241,8 @@ export const BookingList = (): React.JSX.Element => {
       }
     };
 
-    fetchBookings();
-  }, []);
+    fetchData();
+  }, [checkExistingFeedback]);
 
   useEffect(() => {
     let filtered = bookings;
@@ -195,6 +264,15 @@ export const BookingList = (): React.JSX.Element => {
     setFilteredBookings(filtered);
   }, [bookings, searchTerm, statusFilter]);
 
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(hoverTimeoutRef.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', {
@@ -207,6 +285,19 @@ export const BookingList = (): React.JSX.Element => {
 
   const handleFeedbackClick = (booking: Booking) => {
     console.log('🔄 Opening feedback modal for booking:', booking.id);
+    
+    // Check for existing feedback before opening modal to ensure latest data
+    if (userId && booking.testServiceId) {
+      const existingFeedback = getExistingFeedback(userId, booking.testServiceId);
+      const isAlreadyChecking = isCheckingFeedbackFor(userId, booking.testServiceId);
+      
+      // Refresh feedback check to ensure we have the latest data
+      if (!isAlreadyChecking) {
+        console.log(`🔄 Refreshing feedback check for booking: ${booking.id}`);
+        checkExistingFeedback(userId, booking.testServiceId);
+      }
+    }
+    
     setSelectedBookingForFeedback(booking);
     setFeedbackModalOpen(true);
   };
@@ -331,8 +422,28 @@ export const BookingList = (): React.JSX.Element => {
                   const StatusIcon = statusInfo?.icon || AlertCircleIcon;
                   const ServiceIcon = booking.serviceType === 'home' ? HomeIcon : BuildingIcon;
                   
+                  // Handler to check feedback on hover (lazy loading with debouncing)
+                  const handleCardHover = () => {
+                    if (booking.status === 'Completed' && userId && booking.testServiceId) {
+                      debouncedCheckFeedback(booking.id, userId, booking.testServiceId);
+                    }
+                  };
+                  
+                  // Handler to cancel hover timeout when mouse leaves
+                  const handleCardLeave = () => {
+                    if (hoverTimeoutRef.current[booking.id]) {
+                      clearTimeout(hoverTimeoutRef.current[booking.id]);
+                      delete hoverTimeoutRef.current[booking.id];
+                    }
+                  };
+                  
                   return (
-                    <Card key={booking.id} className="transition-shadow duration-300 bg-white border-0 shadow-lg hover:shadow-xl">
+                    <Card 
+                      key={booking.id} 
+                      className="transition-shadow duration-300 bg-white border-0 shadow-lg hover:shadow-xl"
+                      onMouseEnter={handleCardHover}
+                      onMouseLeave={handleCardLeave}
+                    >
                       <CardContent className="p-6">
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                           <div className="flex-1">
@@ -407,15 +518,79 @@ export const BookingList = (): React.JSX.Element => {
                                 Sửa
                               </Button>
                             </div>
-                            {booking.status === 'Completed' && (
-                              <Button 
-                                className="w-full text-white bg-yellow-500 hover:bg-yellow-600"
-                                onClick={() => handleFeedbackClick(booking)}
-                              >
-                                <StarIcon className="w-4 h-4 mr-2" />
-                                Đánh giá
-                              </Button>
-                            )}
+                            {booking.status === 'Completed' && (() => {
+                              const existingFeedback = userId && booking.testServiceId ? getExistingFeedback(userId, booking.testServiceId) : null;
+                              const isCheckingFeedback = userId && booking.testServiceId ? isCheckingFeedbackFor(userId, booking.testServiceId) : false;
+                              const feedbackKey = userId && booking.testServiceId ? `${userId}_${booking.testServiceId}` : '';
+                              const hasPreloaded = preloadedFeedbacks.has(feedbackKey);
+
+                              // Show loading if checking feedback or if we're in the preloading phase
+                              if (isCheckingFeedback) {
+                                return (
+                                  <div className="w-full p-3 text-center bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="flex items-center justify-center space-x-2">
+                                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                      <span className="text-sm text-blue-700">Đang kiểm tra đánh giá...</span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              // Show existing feedback if found
+                              if (existingFeedback) {
+                                return (
+                                  <div className="w-full p-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <div className="text-center">
+                                      <div className="flex items-center justify-center space-x-1 mb-2">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                          <StarIcon
+                                            key={star}
+                                            className={`w-4 h-4 ${
+                                              existingFeedback.rating >= star
+                                                ? "text-yellow-400 fill-yellow-400"
+                                                : "text-gray-300"
+                                            }`}
+                                          />
+                                        ))}
+                                        <span className="text-sm text-gray-600 ml-2">
+                                          ({existingFeedback.rating}/5)
+                                        </span>
+                                      </div>
+                                      <p className="text-sm text-green-700 font-medium">
+                                        ✓ Đã đánh giá
+                                      </p>
+                                      {existingFeedback.comment && (
+                                        <p className="text-xs text-gray-600 mt-1 italic">
+                                          "{existingFeedback.comment.length > 50 
+                                            ? `${existingFeedback.comment.substring(0, 50)}...` 
+                                            : existingFeedback.comment}"
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              }
+
+                              // Show evaluate button if checked but no feedback found
+                              if (hasPreloaded || userId && booking.testServiceId) {
+                                return (
+                                  <Button 
+                                    className="w-full text-white bg-yellow-500 hover:bg-yellow-600"
+                                    onClick={() => handleFeedbackClick(booking)}
+                                  >
+                                    <StarIcon className="w-4 h-4 mr-2" />
+                                    Đánh giá
+                                  </Button>
+                                );
+                              }
+
+                              // Default state - show placeholder that will trigger check on hover
+                              return (
+                                <div className="w-full p-3 text-center bg-gray-50 border border-gray-200 rounded-lg">
+                                  <span className="text-sm text-gray-500">Hover để kiểm tra đánh giá</span>
+                                </div>
+                              );
+                            })()}
                           </div>
                         </div>
                       </CardContent>

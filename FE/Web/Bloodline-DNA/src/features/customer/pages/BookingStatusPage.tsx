@@ -5,6 +5,7 @@ import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import { BookingDetailTab } from "../components/bookingStatus/BookingDetailTab";
 import { BookingProgressTab } from "../components/bookingStatus/BookingProgressTab";
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
+import { CollectionTimeModal } from "../components/CollectionTimeModal";
 import { PaymentDebugger } from "../components/PaymentDebugger";
 import { SampleInfoModal } from "../components/SampleInfoModal";
 import {
@@ -36,12 +37,22 @@ export const BookingStatusPage = (): React.JSX.Element => {
     setIsSampleModalOpen,
     confirmDeliveryLoading,
     shouldShowSampleButton,
+    isDeliveryConfirmed,
+    isCollectionConfirmed,
+    isCollectionModalOpen,
+    setIsCollectionModalOpen,
+    collectionLoading,
+    getExistingFeedback,
+    isCheckingFeedbackFor,
+    userId,
+    testServiceId,
     navigate,
     handlePayment,
     handleFeedbackSubmit,
     handleSampleSubmitSuccess,
     handleStepAction,
     handleConfirmDelivery,
+    handleConfirmCollection,
   } = useBookingData();
 
   const [activeTab, setActiveTab] = useState<"detail" | "progress">("detail");
@@ -226,6 +237,12 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 handleConfirmDelivery={handleConfirmDelivery}
                 confirmDeliveryLoading={confirmDeliveryLoading}
                 shouldShowSampleButton={shouldShowSampleButton}
+                isDeliveryConfirmed={isDeliveryConfirmed}
+                isCollectionConfirmed={isCollectionConfirmed}
+                getExistingFeedback={getExistingFeedback}
+                isCheckingFeedbackFor={isCheckingFeedbackFor}
+                userId={userId}
+                testServiceId={testServiceId}
               />
             )}
           </div>
@@ -254,6 +271,13 @@ export const BookingStatusPage = (): React.JSX.Element => {
         onClose={() => setIsSampleModalOpen(false)}
         bookingId={booking.id}
         onSubmitSuccess={handleSampleSubmitSuccess}
+      />
+
+      <CollectionTimeModal
+        isOpen={isCollectionModalOpen}
+        onClose={() => setIsCollectionModalOpen(false)}
+        onConfirm={handleConfirmCollection}
+        isLoading={collectionLoading}
       />
 
       {/* Payment Debugger - chỉ hiển thị trong development */}
