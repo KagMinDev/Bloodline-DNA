@@ -15,7 +15,7 @@ const getAuthHeaders = async () => {
 export const getAssignedDeliveries = async (): Promise<DeliveryOrder[]> => {
   const headers = await getAuthHeaders();
   const res = await axios.get(`${STAFF_BASE_URL}/logistics/assigned`, headers);
-  return res.data;
+  return res.data.data;
 };
 
 export const completeDelivery = async (id: string): Promise<void> => {

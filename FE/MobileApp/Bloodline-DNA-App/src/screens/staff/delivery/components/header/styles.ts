@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   menuButton: {
     position: "absolute",
     bottom: 4,
-    left: 16,
+    left: 45,
   },
 
   menuLabel: {
