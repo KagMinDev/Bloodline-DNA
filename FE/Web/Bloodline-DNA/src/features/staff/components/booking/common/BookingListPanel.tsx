@@ -21,7 +21,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
 
   return (
     <div className="flex flex-col w-full h-full bg-white shadow-lg rounded-xl">
-      <div className="pt-6 pb-3 text-lg font-semibold text-center text-blue-600 border-b-2 border-blue-600">
+      <div className="py-3 text-sm font-semibold text-center text-blue-600 border-b-2 border-blue-600 ">
         Danh sách đặt lịch ngày {selectedDay}
       </div>
       <div className="flex-1 h-full px-5 py-4 space-y-4 overflow-y-auto">
@@ -42,7 +42,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
                 <div className="mb-3 text-xs text-gray-400">
                   Đặt lúc: {new Date(booking.createdAt).toLocaleString("vi-VN")}
                 </div>
-                <div className="grid grid-cols-1 text-sm text-gray-600 gap-y-1">
+                <div className="grid grid-cols-1 text-xs text-gray-600 gap-y-1">
                   <div>
                     Phương thức:{" "}
                     <span className="font-medium">

@@ -14,8 +14,12 @@ interface BookingTableProps {
   filteredBookings: TestBookingResponse[];
   selectedStatuses: Record<string, string>;
   statusOptions: StatusOption[];
-  setSelectedStatuses: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  setFilteredBookings: React.Dispatch<React.SetStateAction<TestBookingResponse[]>>;
+  setSelectedStatuses: React.Dispatch<
+    React.SetStateAction<Record<string, string>>
+  >;
+  setFilteredBookings: React.Dispatch<
+    React.SetStateAction<TestBookingResponse[]>
+  >;
   token: string;
   refetchBookings: () => Promise<void>;
 }
@@ -29,7 +33,9 @@ const BookingTable: React.FC<BookingTableProps> = ({
   token,
   refetchBookings,
 }) => {
-  const [loadingBookings, setLoadingBookings] = useState<Set<string>>(new Set());
+  const [loadingBookings, setLoadingBookings] = useState<Set<string>>(
+    new Set()
+  );
 
   const handleClickUpdate = async (bookingId: string) => {
     const newStatusLabel = selectedStatuses[bookingId];
@@ -41,7 +47,10 @@ const BookingTable: React.FC<BookingTableProps> = ({
 
     setLoadingBookings((prev) => new Set(prev).add(bookingId));
     try {
-      await updateTestBookingStatusApi({ bookingId, status: statusOption.value }, token);
+      await updateTestBookingStatusApi(
+        { bookingId, status: statusOption.value },
+        token
+      );
       await refetchBookings();
 
       setSelectedStatuses((prev) => {
@@ -85,7 +94,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
 
   return (
     <div className="flex-1 overflow-auto">
-      <div className="pb-1 mb-2 text-base font-semibold text-blue-600 border-b-2 border-blue-600">
+      <div className="pb-1 mb-2 text-sm font-semibold text-blue-600 border-b-2 border-blue-600">
         Lịch hẹn trong ngày {selectedDay}
       </div>
       {sortedBookings.length === 0 ? (
@@ -94,7 +103,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
           <div className="mt-2 text-gray-400">Không có lịch hẹn</div>
         </div>
       ) : (
-        <table className="w-full text-sm">
+        <table className="w-full text-xs">
           <thead>
             <tr className="text-blue-700 bg-blue-50">
               <th className="px-2 py-2 text-left">Khách hàng</th>
@@ -119,13 +128,18 @@ const BookingTable: React.FC<BookingTableProps> = ({
 
               return (
                 <tr key={booking.id} className="border-b">
-                  <td className="px-2 py-1">{booking.clientName || "Không có tên"}</td>
+                  <td className="px-2 py-1">
+                    {booking.clientName || "Không có tên"}
+                  </td>
                   <td className="px-2 py-1">
                     {new Date(booking.appointmentDate).toLocaleString("vi-VN")}
                   </td>
-                  <td className="px-2 py-1">{renderCollectionMethod(collectionMethod)}</td>
+                  <td className="px-2 py-1">
+                    {renderCollectionMethod(collectionMethod)}
+                  </td>
                   <td className="flex items-center gap-2 px-2 py-1">
                     <StatusSelect
+                      style={{ minWidth: 100, fontSize: 12 }}
                       value={selectedStatuses[booking.id] || currentStatusLabel}
                       options={options}
                       onChange={(value) =>
@@ -175,7 +189,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
                           ></path>
                         </svg>
                       ) : (
-                        <FaCheck className="w-4 h-4 text-white" />
+                        <FaCheck className="w-3 h-3 text-white" />
                       )}
                     </button>
                   </td>

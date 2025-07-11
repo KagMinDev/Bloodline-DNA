@@ -13,7 +13,7 @@ import {
   SearchIcon,
   StarIcon
 } from "lucide-react";
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "../../../components";
 import { useBookingModal } from "../components/BookingModalContext";
@@ -34,11 +34,11 @@ import {
   type BookingItem
 } from "../api/bookingListApi";
 // Import statusConfig từ BookingStatusPage để đồng bộ
+import { getUserInfoApi } from "../api/userApi";
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import { FeedbackModal } from "../components/FeedbackModal";
-import type { DetailedBookingStatus } from "../types/bookingTypes";
 import { useExistingFeedback } from "../hooks/useExistingFeedback";
-import { getUserInfoApi } from "../api/userApi";
+import type { DetailedBookingStatus } from "../types/bookingTypes";
 
 interface Booking {
   id: string;
@@ -185,19 +185,13 @@ export const BookingList = (): React.JSX.Element => {
         setError(null);
         
         // Get user info first
-        console.log('🔄 Fetching user info...');
         const userData = await getUserInfoApi().catch(() => null);
         if (userData?.id) {
           setUserId(userData.id);
-          console.log('✅ User ID:', userData.id);
         }
         
-        console.log('🔄 Fetching bookings from API...');
         const apiData = await getBookingListApi();
-        console.log('✅ API data received:', apiData);
-        
         const formattedBookings = apiData.map(transformApiDataToBooking);
-        console.log('✅ Formatted bookings:', formattedBookings);
         
         // Sort bookings by createdAt descending (newest first)
         const sortedBookings = formattedBookings.sort((a, b) => {
@@ -527,9 +521,9 @@ export const BookingList = (): React.JSX.Element => {
                               // Show loading if checking feedback or if we're in the preloading phase
                               if (isCheckingFeedback) {
                                 return (
-                                  <div className="w-full p-3 text-center bg-blue-50 border border-blue-200 rounded-lg">
+                                  <div className="w-full p-3 text-center border border-blue-200 rounded-lg bg-blue-50">
                                     <div className="flex items-center justify-center space-x-2">
-                                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                      <div className="w-4 h-4 border-2 border-blue-500 rounded-full border-t-transparent animate-spin"></div>
                                       <span className="text-sm text-blue-700">Đang kiểm tra đánh giá...</span>
                                     </div>
                                   </div>
@@ -539,9 +533,9 @@ export const BookingList = (): React.JSX.Element => {
                               // Show existing feedback if found
                               if (existingFeedback) {
                                 return (
-                                  <div className="w-full p-3 bg-green-50 border border-green-200 rounded-lg">
+                                  <div className="w-full p-3 border border-green-200 rounded-lg bg-green-50">
                                     <div className="text-center">
-                                      <div className="flex items-center justify-center space-x-1 mb-2">
+                                      <div className="flex items-center justify-center mb-2 space-x-1">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                           <StarIcon
                                             key={star}
@@ -552,15 +546,15 @@ export const BookingList = (): React.JSX.Element => {
                                             }`}
                                           />
                                         ))}
-                                        <span className="text-sm text-gray-600 ml-2">
+                                        <span className="ml-2 text-sm text-gray-600">
                                           ({existingFeedback.rating}/5)
                                         </span>
                                       </div>
-                                      <p className="text-sm text-green-700 font-medium">
+                                      <p className="text-sm font-medium text-green-700">
                                         ✓ Đã đánh giá
                                       </p>
                                       {existingFeedback.comment && (
-                                        <p className="text-xs text-gray-600 mt-1 italic">
+                                        <p className="mt-1 text-xs italic text-gray-600">
                                           "{existingFeedback.comment.length > 50 
                                             ? `${existingFeedback.comment.substring(0, 50)}...` 
                                             : existingFeedback.comment}"
@@ -586,7 +580,7 @@ export const BookingList = (): React.JSX.Element => {
 
                               // Default state - show placeholder that will trigger check on hover
                               return (
-                                <div className="w-full p-3 text-center bg-gray-50 border border-gray-200 rounded-lg">
+                                <div className="w-full p-3 text-center border border-gray-200 rounded-lg bg-gray-50">
                                   <span className="text-sm text-gray-500">Hover để kiểm tra đánh giá</span>
                                 </div>
                               );

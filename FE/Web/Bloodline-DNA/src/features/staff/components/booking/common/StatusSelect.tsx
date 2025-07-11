@@ -1,5 +1,6 @@
 // components/StatusSelect.tsx
 import { Select } from "antd";
+import type { CSSProperties } from "react";
 import type { StatusOption } from "../constants/statusMapping";
 
 interface StatusSelectProps {
@@ -7,6 +8,8 @@ interface StatusSelectProps {
   options: (StatusOption & { disabled?: boolean })[];
   onChange: (value: string) => void;
   disabled?: boolean;
+  className?: string;
+  style?: CSSProperties;
 }
 
 const StatusSelect: React.FC<StatusSelectProps> = ({

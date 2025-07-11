@@ -15,7 +15,6 @@ const getAuthHeaders = () => {
 export const getAssignedDeliveries = async (): Promise<DeliveryOrder[]> => {
   const res = await axios.get(`${STAFF_BASE_URL}/logistics/assigned`, getAuthHeaders());
 
-  console.log("getAssignedDeliveries", res)
   if (res.data && Array.isArray(res.data)) {
     return res.data;
   }

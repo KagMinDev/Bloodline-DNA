@@ -13,6 +13,22 @@ export interface TestBookingResponse {
   updatedAt: string;
 }
 
+export interface TestBookingResponseStaff {
+  id: string;
+  testServiceId: string;
+  clientId: string;
+  clientName: string;
+  email: string;
+  address: string;
+  appointmentDate: string;
+  price: number;
+  collectionMethod: string;
+  status: string; // Sử dụng const enum
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TestBookingStatusRequest {
   bookingId: string;
   status: number;

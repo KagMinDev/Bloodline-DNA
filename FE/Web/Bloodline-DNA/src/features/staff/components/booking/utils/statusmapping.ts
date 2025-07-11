@@ -13,3 +13,26 @@ export const STATUS_MAPPING = [
   { label: 'Nhân viên đang lấy mẫu', value: 10 },    // StaffGettingSample
   { label: 'Đã check-in', value: 11 },            // CheckIn
 ];
+
+export const STATUS_COLOR_MAP: Record<number, string> = {
+  0: "default",
+  1: "processing",
+  2: "blue",
+  3: "cyan",
+  4: "orange",
+  5: "volcano",
+  6: "green",
+  7: "geekblue",
+  8: "purple",
+  9: "red",
+  10: "gold",
+  11: "lime",
+};
+
+export const STATUS_LABEL_MAP: Record<number, string> = STATUS_MAPPING.reduce(
+  (acc, curr) => {
+    acc[curr.value] = curr.label;
+    return acc;
+  },
+  {} as Record<number, string>
+);

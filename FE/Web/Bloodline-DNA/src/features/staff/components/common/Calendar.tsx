@@ -83,9 +83,9 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
   };
 
   return (
-    <div className="relative flex items-start justify-start w-full h-full px-10 py-10 bg-blue-50">
+    <div className="relative flex items-start justify-start w-full h-full py-2 bg-blue-50">
       <ToastContainer />
-      <div className="flex flex-col w-2/3 h-full p-5 mr-2 bg-white rounded-lg shadow-lg">
+      <div className="flex flex-col w-2/3 h-full p-5 mr-2 text-xs bg-white rounded-lg shadow-lg">
         <div className="mb-6">
           <FullCalendar
             ref={calendarRef}
