@@ -190,9 +190,9 @@ export const generateProgressData = (
     estimatedDate: new Date(baseDate.getTime() + 2 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split('T')[0],
-    actionRequired: showKitConfirmBtn,
-    actionText: 'Xác nhận đã nhận Kit',
-    actionPayload: { type: 'confirmKitReceived' },
+    // actionRequired: showKitConfirmBtn,
+    // actionText: 'Xác nhận đã nhận Kit',
+    // actionPayload: { type: 'confirmKitReceived' },
   });
 
   const sampleCompletedStatuses: DetailedBookingStatus[] = ['SampleReceived', 'Testing', 'Completed'];

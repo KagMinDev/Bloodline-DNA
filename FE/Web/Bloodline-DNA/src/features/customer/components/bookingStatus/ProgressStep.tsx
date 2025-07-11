@@ -1,6 +1,6 @@
 import type { ProgressStep } from '../../types/bookingTypes';
 import { Button } from '../ui/Button';
-import { FilePenIcon, CreditCardIcon, AlertCircleIcon, CheckCircleIcon } from 'lucide-react';
+import { FilePenIcon, CreditCardIcon, AlertCircleIcon, CheckCircleIcon, CalendarIcon } from 'lucide-react';
 
 interface ProgressStepProps {
   step: ProgressStep;
@@ -15,6 +15,8 @@ interface ProgressStepProps {
   confirmDeliveryLoading?: boolean;
   bookingId?: string;
   shouldShowSampleButton: boolean;
+  isDeliveryConfirmed: boolean;
+  isCollectionConfirmed: boolean;
 }
 
 export const ProgressStepProps = ({ 
@@ -28,7 +30,9 @@ export const ProgressStepProps = ({
   handleConfirmDelivery,
   confirmDeliveryLoading = false,
   bookingId = '',
-  shouldShowSampleButton
+  shouldShowSampleButton,
+  isDeliveryConfirmed,
+  isCollectionConfirmed
 }: ProgressStepProps) => {
   const Icon = step.icon;
 
@@ -110,28 +114,39 @@ export const ProgressStepProps = ({
             )}
           </div>
         )}
-        {step.id === 3 && bookingStatus.toLowerCase() === 'kitdelivered' && handleConfirmDelivery && (
+        {step.id === 3 && bookingStatus.toLowerCase() === 'deliveringkit' && handleConfirmDelivery && (
           <div className="mt-4">
-            <Button
-              onClick={() => handleConfirmDelivery(bookingId)}
-              disabled={confirmDeliveryLoading}
-              className="bg-green-600 hover:bg-green-700 !text-white font-semibold"
-            >
-              {confirmDeliveryLoading ? (
-                <div className="flex items-center">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Đang xử lý...
+            {isDeliveryConfirmed ? (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center text-green-700">
+                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Cảm ơn bạn đã xác nhận</span>
                 </div>
-              ) : (
-                <>
-                  <CheckCircleIcon className="w-4 h-4 mr-2 text-white" />
-                  Đã Nhận Kit
-                </>
-              )}
-            </Button>
-            <p className="text-xs text-slate-500 mt-2">
-              Xác nhận bạn đã nhận được kit xét nghiệm.
-            </p>
+              </div>
+            ) : (
+              <>
+                <Button
+                  onClick={() => handleConfirmDelivery(bookingId)}
+                  disabled={confirmDeliveryLoading}
+                  className="bg-green-600 hover:bg-green-700 !text-white font-semibold"
+                >
+                  {confirmDeliveryLoading ? (
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      Đang xử lý...
+                    </div>
+                  ) : (
+                    <>
+                      <CheckCircleIcon className="w-4 h-4 mr-2 text-white" />
+                      Đã Nhận Kit
+                    </>
+                  )}
+                </Button>
+                <p className="text-xs text-slate-500 mt-2">
+                  Xác nhận bạn đã nhận được kit xét nghiệm.
+                </p>
+              </>
+            )}
           </div>
         )}
         {step.id === 4 && bookingStatus.toLowerCase() === 'waitingforsample' && shouldShowSampleButton && (
@@ -146,6 +161,31 @@ export const ProgressStepProps = ({
             <p className="text-xs text-slate-500 mt-2">
               Sau khi điền thông tin, bạn có thể gửi mẫu cho chúng tôi.
             </p>
+          </div>
+        )}
+        {step.id === 4 && bookingStatus.toLowerCase() === 'waitingforsample' && !shouldShowSampleButton && (
+          <div className="mt-4">
+            {isCollectionConfirmed ? (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center text-green-700">
+                  <CheckCircleIcon className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Đã Xác Nhận Ngày Nhân Viên Đến Lấy Mẫu</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Button
+                  onClick={() => handleStepAction({ type: 'schedule_collection' })}
+                  className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
+                >
+                  <CalendarIcon className="w-4 h-4 mr-2 text-white" />
+                  Chọn Ngày Giờ Để Nhân Viên Tới Lấy Mẫu
+                </Button>
+                <p className="text-xs text-slate-500 mt-2">
+                  Đặt lịch hẹn để nhân viên đến tận nơi lấy mẫu xét nghiệm.
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>

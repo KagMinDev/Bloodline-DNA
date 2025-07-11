@@ -1,5 +1,6 @@
 import { FilePenIcon, StarIcon } from "lucide-react";
 import type { BookingDetail, TestProgressData } from "../../types/bookingTypes";
+import type { UserFeedback } from "../../api/existingFeedbackApi";
 import { Button } from "../ui/Button";
 import { Card, CardContent, CardHeader } from "../ui/Card";
 import { formatDate } from "../utils/bookingUtils";
@@ -24,6 +25,12 @@ interface BookingProgressTabProps {
   handleConfirmDelivery?: (bookingId: string) => void;
   confirmDeliveryLoading?: boolean;
   shouldShowSampleButton: boolean;
+  isDeliveryConfirmed: boolean;
+  isCollectionConfirmed: boolean;
+  getExistingFeedback: (userId: string, testServiceId: string) => UserFeedback | null;
+  isCheckingFeedbackFor: (userId: string, testServiceId: string) => boolean;
+  userId: string | null;
+  testServiceId: string | null;
 }
 
 export const BookingProgressTab = ({
@@ -44,8 +51,18 @@ export const BookingProgressTab = ({
   handleConfirmDelivery,
   confirmDeliveryLoading = false,
   shouldShowSampleButton,
+  isDeliveryConfirmed,
+  isCollectionConfirmed,
+  getExistingFeedback,
+  isCheckingFeedbackFor,
+  userId,
+  testServiceId,
 }: BookingProgressTabProps) => {
   if (!progressData) return <p>Không có dữ liệu tiến trình.</p>;
+
+  // Get existing feedback data if available
+  const existingFeedback = userId && testServiceId ? getExistingFeedback(userId, testServiceId) : null;
+  const isCheckingExistingFeedback = userId && testServiceId ? isCheckingFeedbackFor(userId, testServiceId) : false;
 
   const completedSteps = progressData.steps.filter(
     (s) => s.status === "completed"
@@ -72,6 +89,8 @@ export const BookingProgressTab = ({
             confirmDeliveryLoading={confirmDeliveryLoading}
             bookingId={booking.id}
             shouldShowSampleButton={shouldShowSampleButton}
+            isDeliveryConfirmed={isDeliveryConfirmed}
+            isCollectionConfirmed={isCollectionConfirmed}
           />
         ))}
       </div>
@@ -134,13 +153,78 @@ export const BookingProgressTab = ({
             </div>
             {booking.status === "Completed" && (
               <div className="pt-4 mt-4 border-t">
-                {feedbackSuccess ? (
+                {/* Loading state while checking existing feedback */}
+                {isCheckingExistingFeedback ? (
+                  <div className="p-4 text-center bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-blue-700 font-medium">Đang kiểm tra đánh giá...</span>
+                    </div>
+                  </div>
+                ) : existingFeedback ? (
+                  /* Display existing feedback */
+                  <div className="space-y-4">
+                    <div>
+                      <p className="font-bold text-slate-800 mb-3">
+                        Đánh giá của bạn
+                      </p>
+                      
+                      {/* Display existing rating */}
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <StarIcon
+                              key={star}
+                              className={`w-6 h-6 ${
+                                existingFeedback.rating >= star
+                                  ? "text-yellow-400 fill-yellow-400 stroke-black"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-slate-600">
+                          ({existingFeedback.rating}/5 sao)
+                        </span>
+                      </div>
+                      
+                      {/* Display existing comment */}
+                      {existingFeedback.comment && (
+                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          <p className="text-sm font-medium text-slate-600 mb-1">Bình luận:</p>
+                          <p className="text-slate-700 leading-relaxed">
+                            {existingFeedback.comment}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Display feedback date */}
+                      <div className="mt-3 text-xs text-slate-500">
+                        Đánh giá vào: {new Date(existingFeedback.createdAt).toLocaleString('vi-VN', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-700 font-medium text-center">
+                        ✓ Cảm ơn bạn đã đánh giá dịch vụ của chúng tôi!
+                      </p>
+                    </div>
+                  </div>
+                ) : feedbackSuccess ? (
+                  /* Display success message for new feedback */
                   <div className="p-3 text-center bg-green-100 border border-green-200 rounded-lg">
                     <p className="font-semibold text-green-800">
                       {feedbackSuccess}
                     </p>
                   </div>
                 ) : (
+                  /* Display feedback form for new feedback */
                   <div className="space-y-4">
                     <div>
                       <p className="font-bold text-slate-800">
@@ -187,26 +271,6 @@ export const BookingProgressTab = ({
                     </Button>
                   </div>
                 )}
-              </div>
-            )}
-            {booking.status === "ReturningSample" && (
-              <div className="pt-4 mt-4 border-t">
-                <div className="p-3 space-y-3 text-center border border-blue-200 rounded-lg bg-blue-50">
-                  <p className="font-semibold text-blue-800">
-                    Cập nhật thông tin mẫu
-                  </p>
-                  <p className="text-sm text-blue-700">
-                    Bạn đã nhận được Kit. Vui lòng điền thông tin mẫu của bạn để
-                    tiếp tục.
-                  </p>
-                  <Button
-                    onClick={() => setIsSampleModalOpen(true)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 !text-white"
-                  >
-                    <FilePenIcon className="w-4 h-4 mr-2" />
-                    Điền thông tin mẫu
-                  </Button>
-                </div>
               </div>
             )}
           </CardContent>
