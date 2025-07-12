@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Linking,} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { RemainingPaymentApi } from "../api/paymentApi";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { deepLinkService, PaymentCallbackData } from "@/services/DeepLinkService";
+import { remainingPaymentApi } from "../api/paymentApi";
 
 interface RemainingPaymentButtonProps {
   bookingId: string;
@@ -70,7 +70,7 @@ const RemainingPaymentButton: React.FC<RemainingPaymentButtonProps> = ({
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Token không tồn tại");
 
-      const result = await RemainingPaymentApi(bookingId, token);
+      const result = await remainingPaymentApi(bookingId, token);
       
       if (result.checkoutUrl) {
         // Generate payment URL with callback

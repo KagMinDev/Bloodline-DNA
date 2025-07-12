@@ -1,5 +1,5 @@
 import React from "react";
-import { View,Text, StyleSheet, TouchableOpacity, ActivityIndicator,} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator,} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { ProgressStep } from "@/screens/checkout/types/checkout";
 
@@ -12,6 +12,13 @@ interface Props {
   handleStepAction: (payload: any) => void;
   bookingStatus: string;
   setIsSampleModalOpen: (open: boolean) => void;
+  setPaymentLoading: (loading: boolean) => void;
+  updateProgressAfterDelivery: () => void;
+  shouldShowSampleButton: boolean;
+  isDeliveryConfirmed: boolean;
+  isCollectionConfirmed: boolean;
+  bookingId: string;
+  handleConfirmDelivery: (bookingId: string) => void;
 }
 
 const StepItem: React.FC<Props> = ({
@@ -21,7 +28,14 @@ const StepItem: React.FC<Props> = ({
   paymentError,
   handleStepAction,
   bookingStatus,
+  setPaymentLoading,
+  updateProgressAfterDelivery,
   setIsSampleModalOpen,
+  shouldShowSampleButton,
+  isDeliveryConfirmed,
+  isCollectionConfirmed,
+  bookingId,
+  handleConfirmDelivery,
 }) => {
   const getStatusColor = () => {
     switch (step.status) {
@@ -36,14 +50,118 @@ const StepItem: React.FC<Props> = ({
 
   const renderIcon = () => {
     const iconName =
-      step.actionPayload?.type === "fill_sample_info" ? "edit-3" : "credit-card";
-    return (
-      <Feather name={iconName as any} size={20} color="white" />
-    );
+      step.actionPayload?.type === "fill_sample_info"
+        ? "edit-3"
+        : "credit-card";
+    return <Feather name={iconName as any} size={20} color="white" />;
   };
+
+  const renderActionButton = () => {
+    if (step.actionRequired && step.status === "current") {
+      return (
+        <View style={{ marginTop: 12 }}>
+          <TouchableOpacity
+            onPress={() => handleStepAction(step.actionPayload)}
+            disabled={paymentLoading}
+            style={styles.actionButton}
+          >
+            {paymentLoading &&
+            (step.actionPayload?.type === "deposit" ||
+              step.actionPayload?.type === "remaining") ? (
+              <View style={styles.loading}>
+                <ActivityIndicator size="small" color="#fff" />
+                <Text style={styles.actionText}>Đang xử lý...</Text>
+              </View>
+            ) : (
+              <View style={styles.row}>
+                {renderIcon()}
+                <Text style={styles.actionText}>{step.actionText}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {step.actionPayload?.type !== "fill_sample_info" && (
+            <Text style={styles.note}>
+              ID: {step.actionPayload?.bookingId} | VNPay, MoMo, Banking
+            </Text>
+          )}
+          {paymentError && (
+            <View style={styles.errorBox}>
+              <Feather name="alert-circle" size={16} color="#dc2626" />
+              <Text style={styles.errorText}>{paymentError}</Text>
+            </View>
+          )}
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderConfirmDeliveryButton = () => {
+    if (step.id === 3 && bookingStatus.toLowerCase() === "deliveringkit") {
+      return isDeliveryConfirmed ? (
+        <View style={{ marginTop: 12, backgroundColor: "#dcfce7", padding: 10, borderRadius: 8 }}>
+          <View style={styles.row}>
+            <Feather name="check-circle" size={18} color="#22c55e" />
+            <Text style={{ color: "#22c55e", marginLeft: 6, fontWeight: "600" }}>
+              Cảm ơn bạn đã xác nhận
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <View style={{ marginTop: 16 }}>
+          <TouchableOpacity
+            onPress={() => handleConfirmDelivery(bookingId)}
+            style={[styles.blueButton, { backgroundColor: "#16a34a" }]}
+            disabled={paymentLoading}
+          >
+            {paymentLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <View style={styles.row}>
+                <Feather name="check" size={16} color="#fff" />
+                <Text style={styles.blueButtonText}>Xác nhận Đã Nhận Kit</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+          <Text style={styles.note}>
+            Vui lòng xác nhận khi bạn đã nhận được Kit.
+          </Text>
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const renderFillSampleButton = () => {
+  const isStep4 = step.id === 4;
+  const isDelivering = bookingStatus.toLowerCase() === "deliveringkit";
+  const isWaiting = bookingStatus.toLowerCase() === "waitingforsample";
+
+  if (isStep4 && (isDelivering || isWaiting)) {
+    return (
+      <TouchableOpacity
+        onPress={async () => {
+          if (isDelivering) {
+            await handleConfirmDelivery(bookingId);
+          }
+          setIsSampleModalOpen(true);
+        }}
+        style={[styles.blueButton, { marginTop: 12 }]}
+      >
+        <Feather name="edit-3" size={16} color="#fff" />
+        <Text style={styles.blueButtonText}>Điền thông tin mẫu</Text>
+      </TouchableOpacity>
+    );
+  }
+
+  return null;
+};
+
 
   return (
     <View style={styles.stepContainer}>
+      {/* Left timeline */}
       <View style={styles.timeline}>
         <View
           style={[
@@ -71,6 +189,7 @@ const StepItem: React.FC<Props> = ({
         )}
       </View>
 
+      {/* Right content */}
       <View style={styles.content}>
         <Text
           style={[
@@ -101,66 +220,14 @@ const StepItem: React.FC<Props> = ({
           </Text>
         )}
 
-        {step.details && step.details.length > 0 &&
-          step.details.map((d, i) => (
-            <Text key={i} style={styles.detail}>
-              {d}
-            </Text>
-          ))}
+        {step.details?.map((d, i) => (
+          <Text key={i} style={styles.detail}>
+            {d}
+          </Text>
+        ))}
 
-        {step.actionRequired && step.status === "current" && (
-          <View style={{ marginTop: 12 }}>
-            <TouchableOpacity
-              onPress={() => handleStepAction(step.actionPayload)}
-              disabled={paymentLoading}
-              style={styles.actionButton}
-            >
-              {paymentLoading &&
-              (step.actionPayload?.type === "deposit" ||
-                step.actionPayload?.type === "remaining") ? (
-                <View style={styles.loading}>
-                  <ActivityIndicator size="small" color="#fff" />
-                  <Text style={styles.actionText}>Đang xử lý...</Text>
-                </View>
-              ) : (
-                <View style={styles.row}>
-                  {renderIcon()}
-                  <Text style={styles.actionText}>{step.actionText}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-
-            {step.actionPayload?.type !== "fill_sample_info" && (
-              <Text style={styles.note}>
-                ID: {step.actionPayload?.bookingId} | VNPay, MoMo, Banking
-              </Text>
-            )}
-
-            {paymentError && (
-              <View style={styles.errorBox}>
-                <Feather name="alert-circle" size={16} color="#dc2626" />
-                <Text style={styles.errorText}>{paymentError}</Text>
-              </View>
-            )}
-          </View>
-        )}
-
-        {step.id === 3 &&
-          step.status === "completed" &&
-          ["kitdelivered", "waitingforsample"].includes(bookingStatus) && (
-            <View style={{ marginTop: 16 }}>
-              <TouchableOpacity
-                onPress={() => setIsSampleModalOpen(true)}
-                style={styles.blueButton}
-              >
-                <Feather name="edit-3" size={16} color="#fff" />
-                <Text style={styles.blueButtonText}>Điền thông tin mẫu</Text>
-              </TouchableOpacity>
-              <Text style={styles.note}>
-                Sau khi điền thông tin, bạn có thể gửi mẫu cho chúng tôi.
-              </Text>
-            </View>
-          )}
+        {renderActionButton()}
+        {renderConfirmDeliveryButton()}
       </View>
     </View>
   );

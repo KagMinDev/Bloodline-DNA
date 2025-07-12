@@ -34,7 +34,7 @@ export interface ProgressStep {
   actionRequired?: boolean;
   actionText?: string;
   actionPayload?: {
-    type: 'deposit' | 'remaining' | 'fill_sample_info';
+    type: 'deposit' | 'remaining' | 'fill_sample_info' | 'confirm_delivery';
     bookingId?: string;
     amount?: number;
   };

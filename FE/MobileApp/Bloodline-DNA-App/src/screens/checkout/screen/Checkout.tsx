@@ -1,36 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Linking, Alert, TouchableOpacity, } from "react-native";
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator,Alert, TouchableOpacity,} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getTestBookingByIdApi } from "@/screens/appoiment/api/testbookingApi";
-import type { TestBookingResponse } from "@/screens/appoiment/types/testBooking";
-import { useRoute } from "@react-navigation/native";
-import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
-import BookingStatus from "../components/BookingStatus";
-import ProgressStepsContainer from "../components/ProgressStepsContainer";
-import SampleInfoModal from "../components/SampleInfoModal";
-import DepositButton from "../components/DepositButton";
-import RemainingPaymentButton from "../components/RemainingPaymentButton";
-import type { ProgressStep, TestProgressData } from "../types/checkout";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { getTestBookingByIdApi } from "@/screens/appoiment/api/testbookingApi";
+import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
+import { checkoutApi, remainingPaymentApi } from "../api/paymentApi";
+import { confirmCollectionApi, confirmDeliveryApi, updateBookingStatusApi } from "../api/confirmDeliveryApi";
+import type { TestBookingResponse } from "@/screens/appoiment/types/testBooking";
+import type { ProgressStep, TestProgressData } from "../types/checkout";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
-import { checkoutApi, remainingPaymentApi } from "../api/paymentApi";
-
+import BookingStatus from "../components/BookingStatus";
+import ProgressStepsContainer from "../components/ProgressStepsContainer";
+import DepositButton from "../components/DepositButton";
+import RemainingPaymentButton from "../components/RemainingPaymentButton";
+import SampleInfoModalApp from "../components/SampleInfoModal";
 
 const CheckoutScreen: React.FC = () => {
   const route = useRoute<any>();
   const bookingId = route.params?.bookingId;
-  const actualBookingId = bookingId;
-
-  if (!actualBookingId) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>❌ Không có booking ID</Text>
-        <Text style={styles.errorSubtext}>Vui lòng quay lại và chọn booking</Text>
-      </View>
-    );
-  }
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [user, setUser] = useState<any>(null);
   const [booking, setBooking] = useState<TestBookingResponse | null>(null);
@@ -39,25 +30,67 @@ const CheckoutScreen: React.FC = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [isSampleModalOpen, setIsSampleModalOpen] = useState(false);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
+  const [isConfirmingCollection, setIsConfirmingCollection] = useState(false);
 
+  const canFillSample = booking?.status === "WaitingForSample";
+
+  useEffect(() => {
+    fetchData();
+  }, [bookingId]);
+
+  const fetchData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) throw new Error("Token không tồn tại");
+
+      const [userData, bookingData] = await Promise.all([
+        getUserInfoApi(token),
+        getTestBookingByIdApi(bookingId),
+      ]);
+
+      setUser(userData);
+      setBooking(bookingData);
+
+      const steps = generateProgressSteps(bookingData);
+      const expectedDate = new Date();
+      expectedDate.setDate(expectedDate.getDate() + 14);
+
+      setProgressData({
+        bookingId: bookingData.id,
+        testType: "Xét nghiệm DNA",
+        serviceType: "home",
+        customerName: userData?.fullName || "Khách hàng",
+        currentStep: 0,
+        steps,
+        expectedResultDate: expectedDate.toISOString(),
+      });
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const generateProgressSteps = (booking: TestBookingResponse): ProgressStep[] => {
     const statusMap: Record<string, number> = {
-      "Pending": 0,
-      "Deposited": 1,
-      "PreparingKit": 2,
-      "DeliveringKit": 3,
-      "KitDelivered": 4,
-      "WaitingForSample": 5,
-      "ReturningSample": 6,
-      "SampleReceived": 7,
-      "Testing": 8,
-      "Completed": 9,
+      Pending: 0,
+      PreparingKit: 1,
+      DeliveringKit: 2,
+      KitDelivered: 3,
+      WaitingForSample: 4,
+      ReturningSample: 5,
+      SampleReceived: 6,
+      Testing: 7,
+      Completed: 8,
+      Cancelled: 9,
+      StaffGettingSample: 10,
+      CheckIn: 11,
     };
 
     const currentStatus = statusMap[booking.status] ?? 0;
-    const steps: ProgressStep[] = [
+
+    return [
       {
         id: 1,
         title: "Đặt cọc",
@@ -68,7 +101,7 @@ const CheckoutScreen: React.FC = () => {
         actionPayload: {
           type: "deposit",
           bookingId: booking.id,
-          amount: booking.price ? booking.price * 0.2 : 0,
+          amount: booking.price * 0.2,
         },
       },
       {
@@ -80,15 +113,19 @@ const CheckoutScreen: React.FC = () => {
       {
         id: 3,
         title: "Giao kit",
-        description: "Kit đang được giao đến địa chỉ của bạn",
+        description: "Kit đang được giao đến bạn",
         status: currentStatus >= 3 ? "completed" : currentStatus === 2 ? "current" : "pending",
+        actionPayload: {
+          type: "confirm_delivery",
+          bookingId: booking.id,
+        },
       },
       {
         id: 4,
         title: "Lấy mẫu",
         description: "Thực hiện lấy mẫu theo hướng dẫn",
-        status: currentStatus >= 6 ? "completed" : currentStatus >= 3 ? "current" : "pending",
-        actionRequired: currentStatus === 3,
+        status: currentStatus >= 5 ? "completed" : currentStatus === 4 ? "current" : "pending",
+        actionRequired: currentStatus === 4,
         actionText: "Điền thông tin mẫu",
         actionPayload: {
           type: "fill_sample_info",
@@ -97,113 +134,87 @@ const CheckoutScreen: React.FC = () => {
       },
       {
         id: 5,
+        title: "Gửi mẫu",
+        description: "Gửi mẫu về phòng xét nghiệm",
+        status: currentStatus >= 6 ? "completed" : currentStatus === 5 ? "current" : "pending",
+      },
+      {
+        id: 6,
         title: "Thanh toán còn lại",
-        description: "Thanh toán 80% còn lại để tiến hành xét nghiệm",
+        description: "Thanh toán 80% để tiến hành xét nghiệm",
         status: currentStatus >= 7 ? "completed" : currentStatus === 6 ? "current" : "pending",
         actionRequired: currentStatus === 6,
         actionText: "Thanh toán còn lại",
         actionPayload: {
           type: "remaining",
           bookingId: booking.id,
-          amount: booking.price ? booking.price * 0.8 : 0,
+          amount: booking.price * 0.8,
         },
       },
       {
-        id: 6,
+        id: 7,
         title: "Xét nghiệm",
         description: "Mẫu đang được xét nghiệm tại phòng lab",
         status: currentStatus >= 8 ? "completed" : currentStatus === 7 ? "current" : "pending",
       },
       {
-        id: 7,
+        id: 8,
         title: "Hoàn tất",
         description: "Kết quả xét nghiệm đã sẵn sàng",
-        status: currentStatus === 8 ? "completed" : "pending",
+        status: currentStatus >= 8 ? "completed" : "pending",
       },
     ];
-    return steps;
   };
 
   const handleStepAction = async (payload: any) => {
-  if (!payload || !booking) return;
-  setPaymentLoading(true);
-  setPaymentError(null);
-  try {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) throw new Error("Token không tồn tại");
+    if (!payload || !booking) return;
+    setPaymentLoading(true);
+    setPaymentError(null);
 
-    if (payload.type === "deposit") {
-      const result = await checkoutApi(payload.bookingId, token);
-      console.log("📦 Response from checkoutApi:", payload);
-
-      if (result.checkoutUrl) {
-        navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
-      }
-    } else if (payload.type === "remaining") {
-      const result = await remainingPaymentApi(payload.bookingId, token);
-      if (result.checkoutUrl) {
-        navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
-      }
-    } else if (payload.type === "fill_sample_info") {
-      setIsSampleModalOpen(true);
-    }
-  } catch (error) {
-    console.error("Lỗi khi xử lý action:", error);
-    setPaymentError("Có lỗi xảy ra. Vui lòng thử lại.");
-  } finally {
-    setPaymentLoading(false);
-  }
-};
-
-  const onFillSampleInfo = () => {
-    setIsSampleModalOpen(true);
-  };
-
-  const handleSampleInfoSubmit = (sampleInfo: any) => {
-    console.log("Sample info submitted:", sampleInfo);
-    Alert.alert(
-      "Thành công",
-      "Thông tin mẫu đã được ghi nhận. Vui lòng gửi mẫu theo hướng dẫn trong kit.",
-      [{ text: "OK" }]
-    );
-  };
-
-  const fetchData = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Token không tồn tại");
-      const [userData, bookingData] = await Promise.all([
-        getUserInfoApi(token),
-        getTestBookingByIdApi(actualBookingId),
-      ]);
-      setUser(userData);
-      setBooking(bookingData);
-      if (bookingData) {
-        const steps = generateProgressSteps(bookingData);
-        const expectedDate = new Date();
-        expectedDate.setDate(expectedDate.getDate() + 14);
 
-        const progressData: TestProgressData = {
-          bookingId: bookingData.id,
-          testType: "Xét nghiệm DNA",
-          serviceType: "home",
-          customerName: userData?.fullName || "Khách hàng",
-          currentStep: Number(bookingData.status),
-          steps,
-          expectedResultDate: expectedDate.toISOString(),
-        };
-        setProgressData(progressData);
+      if (payload.type === "deposit") {
+        const result = await checkoutApi(payload.bookingId, token);
+        if (result.checkoutUrl) {
+          navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
+        }
+      } else if (payload.type === "remaining") {
+        const result = await remainingPaymentApi(payload.bookingId, token);
+        if (result.checkoutUrl) {
+          navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
+        }
+      } else if (payload.type === "fill_sample_info") {
+        if (booking.status === "DeliveringKit") {
+          await fetchData();
+        } else if (booking.status === "WaitingForSample") {
+          setIsSampleModalOpen(true);
+        } else {
+          Alert.alert("Không hợp lệ", "Trạng thái hiện tại không cho phép điền thông tin mẫu.");
+        }
       }
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu:", error);
+      Alert.alert("Lỗi", "Đã xảy ra lỗi, vui lòng thử lại.");
     } finally {
-      setLoading(false);
+      setPaymentLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [actualBookingId]);
+  const handleConfirmCollection = async (date: Date) => {
+    if (!bookingId) return;
+    setIsConfirmingCollection(true);
+    try {
+      const isoDate = date.toISOString();
+      await confirmCollectionApi(bookingId, isoDate);
+      Alert.alert("Thành công", "Xác nhận nhân viên lấy mẫu thành công.");
+      fetchData();
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể xác nhận thu mẫu. Vui lòng thử lại.");
+    } finally {
+      setIsConfirmingCollection(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -215,17 +226,12 @@ const CheckoutScreen: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <View style={styles.backButton}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Feather name="arrow-left" size={24} color="#1e293b" />
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <Feather name="arrow-left" size={24} color="#1e293b" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>🧬 Tiến độ xét nghiệm DNA</Text>
-        <Text style={styles.headerSubtitle}>
-          Theo dõi từng bước của quá trình xét nghiệm
-        </Text>
+        <Text style={styles.headerSubtitle}>Theo dõi từng bước của quá trình xét nghiệm</Text>
       </View>
 
       {progressData && (
@@ -234,69 +240,59 @@ const CheckoutScreen: React.FC = () => {
           paymentLoading={paymentLoading}
           paymentError={paymentError}
           handleStepAction={handleStepAction}
-          bookingStatus={booking?.status?.toString() || ""}
+          bookingStatus={booking?.status || ""}
           setIsSampleModalOpen={setIsSampleModalOpen}
-        />
-      )}
-      {booking && (booking.status === "Pending" || booking.status === "0") && (
-        <DepositButton
-          bookingId={booking.id}
-          amount={booking.price ? booking.price * 0.2 : 0}
-          onPaymentStart={() => setPaymentLoading(true)}
-          onPaymentSuccess={() => {
-            setPaymentLoading(false);
-            fetchData();
-          }}
-          onPaymentError={(error) => {
-            setPaymentLoading(false);
-            setPaymentError(error);
-          }}
-        />
-      )}
-      {booking && booking.status === "SampleReceived" && (
-        <RemainingPaymentButton
-          bookingId={booking.id}
-          amount={booking.price ? booking.price * 0.8 : 0}
-          onPaymentStart={() => setPaymentLoading(true)}
-          onPaymentSuccess={() => {
-            setPaymentLoading(false);
-            fetchData();
-          }}
-          onPaymentError={(error) => {
-            setPaymentLoading(false);
-            setPaymentError(error);
+          setPaymentLoading={setPaymentLoading}
+          updateProgressAfterDelivery={fetchData}
+          shouldShowSampleButton={canFillSample}
+          isDeliveryConfirmed={booking?.status === "KitDelivered" || booking?.status === "WaitingForSample"}
+          isCollectionConfirmed={booking?.status === "SampleReceived"}
+          bookingId={bookingId}
+          handleConfirmDelivery={async (bookingId) => {
+            try {
+              const result = await confirmDeliveryApi(bookingId);
+              if (result.success) {
+                try {
+                  await updateBookingStatusApi(bookingId, 4);
+                } catch {}
+              }
+              fetchData();
+            } catch {
+              Alert.alert("Lỗi", "Không thể xác nhận đã nhận Kit.");
+            }
           }}
         />
       )}
-      {booking && (
-        <BookingStatus booking={booking} onFillSampleInfo={onFillSampleInfo} />
+
+      {booking?.status === "Pending" && (
+        <DepositButton bookingId={booking.id} amount={booking.price * 0.2} onPaymentStart={() => setPaymentLoading(true)} onPaymentSuccess={fetchData} onPaymentError={(err) => { setPaymentLoading(false); setPaymentError(err); }} />
       )}
-      <Text style={styles.sectionTitle}>� Thông tin khách hàng</Text>
+
+      {booking?.status === "WaitingForSample" && (
+        <>
+          <RemainingPaymentButton bookingId={booking.id} amount={booking.price * 0.8} onPaymentStart={() => setPaymentLoading(true)} onPaymentSuccess={fetchData} onPaymentError={(err) => { setPaymentLoading(false); setPaymentError(err); }} />
+
+          <TouchableOpacity style={{ backgroundColor: "#1d4ed8", padding: 14, borderRadius: 12, marginHorizontal: 16, marginBottom: 20, alignItems: "center" }} onPress={() => setDateTimePickerVisible(true)} disabled={isConfirmingCollection}>
+            <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
+              {isConfirmingCollection ? "Đang xác nhận..." : "📅 Chọn ngày giờ lấy mẫu"}
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {booking && <BookingStatus booking={booking} onFillSampleInfo={() => setIsSampleModalOpen(true)} />}
+
+      <Text style={styles.sectionTitle}>📋 Thông tin khách hàng</Text>
       <View style={styles.card}>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Họ tên:</Text>
-          <Text style={styles.infoValue}>{user?.fullName || "Không rõ"}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Email:</Text>
-          <Text style={styles.infoValue}>{user?.email || "Không rõ"}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>SĐT:</Text>
-          <Text style={styles.infoValue}>{user?.phone || "Không rõ"}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Địa chỉ:</Text>
-          <Text style={styles.infoValue}>{user?.address || "Chưa cập nhật"}</Text>
-        </View>
+        <View style={styles.infoRow}><Text style={styles.infoLabel}>Họ tên:</Text><Text style={styles.infoValue}>{user?.fullName || "Không rõ"}</Text></View>
+        <View style={styles.infoRow}><Text style={styles.infoLabel}>Email:</Text><Text style={styles.infoValue}>{user?.email || "Không rõ"}</Text></View>
+        <View style={styles.infoRow}><Text style={styles.infoLabel}>SĐT:</Text><Text style={styles.infoValue}>{user?.phone || "Không rõ"}</Text></View>
+        <View style={styles.infoRow}><Text style={styles.infoLabel}>Địa chỉ:</Text><Text style={styles.infoValue}>{user?.address || "Chưa cập nhật"}</Text></View>
       </View>
 
-      <SampleInfoModal
-        visible={isSampleModalOpen}
-        onClose={() => setIsSampleModalOpen(false)}
-        bookingId={booking?.id || ""}
-        onSubmit={handleSampleInfoSubmit}
-      />
+      <SampleInfoModalApp visible={isSampleModalOpen} onClose={() => setIsSampleModalOpen(false)} bookingId={bookingId} onSuccess={() => { setIsSampleModalOpen(false); fetchData(); }} />
+
+      <DateTimePickerModal isVisible={isDateTimePickerVisible} mode="datetime" onConfirm={(date) => { setDateTimePickerVisible(false); handleConfirmCollection(date); }} onCancel={() => setDateTimePickerVisible(false)} minimumDate={new Date()} locale="vi-VN" />
     </ScrollView>
   );
 };
@@ -314,54 +310,53 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-  backgroundColor: "#ffffff",
-  padding: 20,
-  paddingTop: 80,
-  marginBottom: 24,
-  alignItems: "center",
-  justifyContent: "center",
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowOffset: { width: 0, height: 2 },
-  shadowRadius: 8,
-  elevation: 4,
-  position: "relative",
-},
-
-backButton: {
-  position: "absolute",
-  top: 50,
-  left: 16,
-  padding: 8,
-  zIndex: 10,
-},
-
-headerTitle: {
-  fontSize: 22,
-  fontWeight: "bold",
-  color: "#1e293b",
-  marginBottom: 4,
-  textAlign: "center",
-  marginTop: 8,
-},
-
-headerSubtitle: {
-  fontSize: 16,
-  color: "#64748b",
-  textAlign: "center",
-  lineHeight: 22,
-},
+    backgroundColor: "#ffffff",
+    padding: 20,
+    paddingTop: 80,
+    marginBottom: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 4,
+    position: "relative",
+  },
+  backButton: {
+    position: "absolute",
+    top: 50,
+    left: 16,
+    padding: 8,
+    zIndex: 10,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#1e293b",
+    marginBottom: 4,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: "#64748b",
+    textAlign: "center",
+    lineHeight: 22,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 16,
     color: "#1e293b",
+    paddingHorizontal: 16,
   },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 24,
+    marginHorizontal: 16,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
@@ -387,22 +382,5 @@ headerSubtitle: {
     fontWeight: "600",
     flex: 2,
     textAlign: "right",
-  },
-  item: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: "#374151",
-  },
-  errorText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#dc2626",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  errorSubtext: {
-    fontSize: 14,
-    color: "#6b7280",
-    textAlign: "center",
   },
 });

@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Linking,} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { CheckoutApi } from "../api/paymentApi";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { deepLinkService, PaymentCallbackData } from "@/services/DeepLinkService";
+import { checkoutApi } from "../api/paymentApi";
 
 interface DepositButtonProps {
   bookingId: string;
@@ -66,7 +66,7 @@ const DepositButton: React.FC<DepositButtonProps> = ({
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Token không tồn tại");
-      const result = await CheckoutApi(bookingId, token);
+      const result = await checkoutApi(bookingId, token);
       
       if (result.checkoutUrl) {
         // Mở URL thanh toán trực tiếp
