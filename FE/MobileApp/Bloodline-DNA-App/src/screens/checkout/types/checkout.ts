@@ -12,9 +12,9 @@ export interface CheckoutResponse {
 }
 
 export interface CallbackRequest {
-  orderCode: string;
-  status: string;
-  bookingId: string;
+  orderCode?: string;
+  status?: string;
+  bookingId?: string;
 }
 
 export interface CallbackResponse {

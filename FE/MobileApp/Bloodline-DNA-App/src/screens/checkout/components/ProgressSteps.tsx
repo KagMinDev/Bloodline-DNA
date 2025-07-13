@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator,} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { ProgressStep } from "@/screens/checkout/types/checkout";
 
@@ -19,6 +19,8 @@ interface Props {
   isCollectionConfirmed: boolean;
   bookingId: string;
   handleConfirmDelivery: (bookingId: string) => void;
+  setDateTimePickerVisible: (visible: boolean) => void; // Thêm prop
+  isConfirmingCollection: boolean; // Thêm prop
 }
 
 const StepItem: React.FC<Props> = ({
@@ -28,14 +30,16 @@ const StepItem: React.FC<Props> = ({
   paymentError,
   handleStepAction,
   bookingStatus,
+  setIsSampleModalOpen,
   setPaymentLoading,
   updateProgressAfterDelivery,
-  setIsSampleModalOpen,
   shouldShowSampleButton,
   isDeliveryConfirmed,
   isCollectionConfirmed,
   bookingId,
   handleConfirmDelivery,
+  setDateTimePickerVisible,
+  isConfirmingCollection,
 }) => {
   const getStatusColor = () => {
     switch (step.status) {
@@ -133,31 +137,25 @@ const StepItem: React.FC<Props> = ({
     return null;
   };
 
-  const renderFillSampleButton = () => {
-  const isStep4 = step.id === 4;
-  const isDelivering = bookingStatus.toLowerCase() === "deliveringkit";
-  const isWaiting = bookingStatus.toLowerCase() === "waitingforsample";
 
-  if (isStep4 && (isDelivering || isWaiting)) {
-    return (
-      <TouchableOpacity
-        onPress={async () => {
-          if (isDelivering) {
-            await handleConfirmDelivery(bookingId);
-          }
-          setIsSampleModalOpen(true);
-        }}
-        style={[styles.blueButton, { marginTop: 12 }]}
-      >
-        <Feather name="edit-3" size={16} color="#fff" />
-        <Text style={styles.blueButtonText}>Điền thông tin mẫu</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  return null;
-};
-
+  const renderCollectionButton = () => {
+    if (step.id === 4 && bookingStatus.toLowerCase() === "waitingforsample") {
+      return (
+        <View style={{ marginTop: 12 }}>
+          <TouchableOpacity
+            style={[styles.blueButton, { backgroundColor: "#1d4ed8" }]}
+            onPress={() => setDateTimePickerVisible(true)}
+            disabled={isConfirmingCollection}
+          >
+            <Text style={styles.blueButtonText}>
+              {isConfirmingCollection ? "Đang xác nhận..." : "📅 Chọn ngày giờ lấy mẫu"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return null;
+  };
 
   return (
     <View style={styles.stepContainer}>
@@ -228,6 +226,7 @@ const StepItem: React.FC<Props> = ({
 
         {renderActionButton()}
         {renderConfirmDeliveryButton()}
+        {renderCollectionButton()}
       </View>
     </View>
   );

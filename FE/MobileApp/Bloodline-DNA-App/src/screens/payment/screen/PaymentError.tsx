@@ -5,7 +5,7 @@ import { Feather } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
-import { callbackApi } from "@/screens/checkout/api/paymentApi";
+import { callbackApi, remainingCallbackApi } from "@/screens/checkout/api/paymentApi";
 import { useAuth } from "@/context/auth/AuthContext";
 
 type PaymentErrorRouteProp = RouteProp<RootStackParamList, "PaymentError">;
@@ -14,14 +14,16 @@ type PaymentErrorNavigationProp = NativeStackNavigationProp<RootStackParamList, 
 const PaymentError: React.FC = () => {
   const navigation = useNavigation<PaymentErrorNavigationProp>();
   const route = useRoute<PaymentErrorRouteProp>();
-  const { token } = useAuth();
+  const { token } =  useAuth();
 
   const {
     bookingId,
     orderCode,
-    paymentType = "deposit",
+    paymentType,
     message = "Thanh toán thất bại. Vui lòng thử lại sau.",
   } = route.params || {};
+
+  console.log("PaymentError params received from WebViewScreen:", { bookingId, orderCode, paymentType, message });
 
   const scaleAnim = new Animated.Value(0);
   const fadeAnim = new Animated.Value(0);
@@ -40,26 +42,30 @@ const PaymentError: React.FC = () => {
       }),
     ]).start();
 
-    // Gửi callback thất bại nếu có đủ thông tin
     if (bookingId && orderCode && token) {
-      const payload = {
-        bookingId,
-        orderCode,
-        status: "UNPAID",
-      };
-
       const callFailedCallback = async () => {
         try {
-          await callbackApi(payload, token);
-          console.log("❌ Đã gửi callback thất bại");
+          const paymentTypeSafe: "deposit" | "remaining" = paymentType === "remaining" ? "remaining" : "deposit";
+          console.log("Using paymentTypeSafe for callback:", paymentTypeSafe);
+          const api = paymentTypeSafe === "remaining" ? remainingCallbackApi : callbackApi;
+          const payload = {
+            bookingId,
+            orderCode,
+            status: "CANCELLED",
+          };
+          console.log("Sending callback with payload:", payload);
+          await api(payload, token);
+          console.log(`✅ Successfully sent callback for ${paymentTypeSafe}`);
         } catch (error) {
-          console.error("🔴 Gửi callback thất bại bị lỗi:", error);
+          console.error(`❌ Failed to send callback for ${paymentType || "unknown"}:`, error);
         }
       };
 
       callFailedCallback();
+    } else {
+      console.warn("Missing required data for callback:", { bookingId, orderCode, token });
     }
-  }, [bookingId, orderCode, token]);
+  }, [bookingId, orderCode, token, paymentType]);
 
   const handleBackToCheckout = () => {
     navigation.navigate("CheckoutScreen", { bookingId: bookingId || "" });

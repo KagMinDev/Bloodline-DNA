@@ -37,6 +37,8 @@ export const checkoutApi = async ( bookingId: string, token: string): Promise<Ch
  * Thanh toán phần còn lại.
  */
 export const remainingPaymentApi = async ( bookingId: string, token: string): Promise<CheckoutResponse> => {
+  console.log('remainingPaymentApi da duoc goi', bookingId);
+  
   try {
     const res = await rootApi.post(`/Payment/mobile/${bookingId}/remaining-payment`, {}, {
       headers: {
@@ -65,6 +67,8 @@ export const remainingPaymentApi = async ( bookingId: string, token: string): Pr
  * Gửi callback sau khi thanh toán đặt cọc.
  */
 export const callbackApi = async ( payload: CallbackRequest, token: string): Promise<CallbackResponse> => {
+  console.log("callbackApi da dc goi", payload);
+  
   try {
     const res = await rootApi.post<{ data: CallbackResponse }>("/Payment/callback", payload,
       {
@@ -92,9 +96,11 @@ export const callbackApi = async ( payload: CallbackRequest, token: string): Pro
 /**
  * Gửi callback sau khi thanh toán phần còn lại.
  */
-export const remainingCallbackApi = async (bookingId: string, payload: CallbackRequest,token: string): Promise<CallbackResponse> => {
+export const remainingCallbackApi = async (payload: CallbackRequest,token: string): Promise<CallbackResponse> => {
+  console.log("reaminingCallbackApi da dc goi", payload);
+  
   try {
-    const res = await rootApi.post<{ data: CallbackResponse }>(`/Payment/${bookingId}/remaining-callback`,payload,
+    const res = await rootApi.post<{ data: CallbackResponse }>(`/Payment/remaining-callback`,payload,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

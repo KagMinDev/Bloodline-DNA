@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator,Alert, TouchableOpacity,} from "react-native";
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
@@ -166,6 +166,11 @@ const CheckoutScreen: React.FC = () => {
     ];
   };
 
+  const appendPaymentType = (url: string, paymentType: string) => {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}paymentType=${paymentType}`;
+  };
+
   const handleStepAction = async (payload: any) => {
     if (!payload || !booking) return;
     setPaymentLoading(true);
@@ -178,12 +183,16 @@ const CheckoutScreen: React.FC = () => {
       if (payload.type === "deposit") {
         const result = await checkoutApi(payload.bookingId, token);
         if (result.checkoutUrl) {
-          navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
+          const urlWithType = appendPaymentType(result.checkoutUrl, "deposit");
+          navigation.navigate("WebViewScreen", { url: urlWithType });
         }
       } else if (payload.type === "remaining") {
+        console.log("remainingPaymentApi da dc oi tu checkout", payload.type);
+
         const result = await remainingPaymentApi(payload.bookingId, token);
         if (result.checkoutUrl) {
-          navigation.navigate("WebViewScreen", { url: result.checkoutUrl });
+          const urlWithType = appendPaymentType(result.checkoutUrl, "remaining");
+          navigation.navigate("WebViewScreen", { url: urlWithType });
         }
       } else if (payload.type === "fill_sample_info") {
         if (booking.status === "DeliveringKit") {
@@ -245,6 +254,8 @@ const CheckoutScreen: React.FC = () => {
           setPaymentLoading={setPaymentLoading}
           updateProgressAfterDelivery={fetchData}
           shouldShowSampleButton={canFillSample}
+          setDateTimePickerVisible={setDateTimePickerVisible}
+          isConfirmingCollection={isConfirmingCollection}
           isDeliveryConfirmed={booking?.status === "KitDelivered" || booking?.status === "WaitingForSample"}
           isCollectionConfirmed={booking?.status === "SampleReceived"}
           bookingId={bookingId}
@@ -254,7 +265,7 @@ const CheckoutScreen: React.FC = () => {
               if (result.success) {
                 try {
                   await updateBookingStatusApi(bookingId, 4);
-                } catch {}
+                } catch { }
               }
               fetchData();
             } catch {
@@ -266,18 +277,6 @@ const CheckoutScreen: React.FC = () => {
 
       {booking?.status === "Pending" && (
         <DepositButton bookingId={booking.id} amount={booking.price * 0.2} onPaymentStart={() => setPaymentLoading(true)} onPaymentSuccess={fetchData} onPaymentError={(err) => { setPaymentLoading(false); setPaymentError(err); }} />
-      )}
-
-      {booking?.status === "WaitingForSample" && (
-        <>
-          <RemainingPaymentButton bookingId={booking.id} amount={booking.price * 0.8} onPaymentStart={() => setPaymentLoading(true)} onPaymentSuccess={fetchData} onPaymentError={(err) => { setPaymentLoading(false); setPaymentError(err); }} />
-
-          <TouchableOpacity style={{ backgroundColor: "#1d4ed8", padding: 14, borderRadius: 12, marginHorizontal: 16, marginBottom: 20, alignItems: "center" }} onPress={() => setDateTimePickerVisible(true)} disabled={isConfirmingCollection}>
-            <Text style={{ color: "white", fontSize: 16, fontWeight: "bold" }}>
-              {isConfirmingCollection ? "Đang xác nhận..." : "📅 Chọn ngày giờ lấy mẫu"}
-            </Text>
-          </TouchableOpacity>
-        </>
       )}
 
       {booking && <BookingStatus booking={booking} onFillSampleInfo={() => setIsSampleModalOpen(true)} />}

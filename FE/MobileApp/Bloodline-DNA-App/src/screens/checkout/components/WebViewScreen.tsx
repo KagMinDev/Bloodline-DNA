@@ -13,25 +13,45 @@ const WebViewScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const { url } = route.params;
 
+  console.log("URL in WebViewScreen:", url);
+
   const extractParam = (url: string, key: string): string | null => {
     const match = url.match(new RegExp(`[?&]${key}=([^&#]*)`));
     return match ? decodeURIComponent(match[1]) : null;
   };
 
+  // Lấy paymentType từ URL ban đầu
+  const initialPaymentType = extractParam(url, "paymentType") ?? undefined;
+  console.log("Initial paymentType from URL:", initialPaymentType);
+
   const navigateToResult = (
     type: "success" | "error",
-    { bookingId, orderCode, paymentType }: { bookingId: string; orderCode?: string; paymentType?: string }
+    { bookingId, orderCode, paymentType }: { bookingId?: string; orderCode?: string; paymentType?: string }
   ) => {
-    const paymentTypeSafe = paymentType === "remaining" ? "remaining" : "deposit";
+    // Sử dụng initialPaymentType nếu paymentType từ URL trả về là undefined
+    const paymentTypeSafe: "deposit" | "remaining" =
+      paymentType === "remaining" || initialPaymentType === "remaining" ? "remaining" : "deposit";
+    console.log(
+      "Extracted paymentType:",
+      paymentType,
+      ", Initial paymentType:",
+      initialPaymentType,
+      "-> paymentTypeSafe:",
+      paymentTypeSafe
+    );
 
-    if (!bookingId) return;
+    if (!bookingId) {
+      console.log("Booking ID is missing, cannot navigate.");
+      return;
+    }
 
     if (type === "success") {
+      console.log("Navigating to PaymentSuccess with params:", { bookingId, orderCode, paymentType: paymentTypeSafe });
       navigation.reset({
         index: 0,
         routes: [
           {
-            name: "PaymentSuccess" as const,
+            name: "PaymentSuccess",
             params: {
               bookingId,
               orderCode,
@@ -41,11 +61,17 @@ const WebViewScreen = () => {
         ],
       });
     } else {
+      console.log("Navigating to PaymentError with params:", {
+        bookingId,
+        orderCode,
+        paymentType: paymentTypeSafe,
+        message: "Thanh toán đã bị hủy.",
+      });
       navigation.reset({
         index: 0,
         routes: [
           {
-            name: "PaymentError" as const,
+            name: "PaymentError",
             params: {
               bookingId,
               orderCode,
@@ -59,29 +85,36 @@ const WebViewScreen = () => {
   };
 
   const handleNavigationStateChange = (navState: any) => {
-  const currentUrl = navState.url;
+    const currentUrl = navState.url;
+    console.log("Current WebView URL:", currentUrl);
 
-  const rawBookingId = extractParam(currentUrl, "bookingId");
-  const orderCode = extractParam(currentUrl, "orderCode");
-const paymentType = extractParam(currentUrl, "paymentType") ?? undefined;
+    const rawBookingId = extractParam(currentUrl, "bookingId");
+    const orderCode = extractParam(currentUrl, "orderCode");
+    const paymentType = extractParam(currentUrl, "paymentType") ?? undefined;
 
-  if (!rawBookingId) return; // ✅ Tránh lỗi khi bookingId null
+    console.log("Extracted params:", { rawBookingId, orderCode, paymentType });
 
-  if (currentUrl.includes("status=PAID")) {
-    navigateToResult("success", {
-      bookingId: rawBookingId,
-      orderCode: orderCode ?? undefined,
-      paymentType,
-    });
-  } else if (currentUrl.includes("status=CANCELLED")) {
-    navigateToResult("error", {
-      bookingId: rawBookingId,
-      orderCode: orderCode ?? undefined,
-      paymentType,
-    });
-  }
-};
+    if (!rawBookingId) {
+      console.log("Booking ID is missing in URL:", currentUrl);
+      return;
+    }
 
+    if (currentUrl.includes("status=PAID")) {
+      console.log("Payment successful, navigating to success screen.");
+      navigateToResult("success", {
+        bookingId: rawBookingId,
+        orderCode: orderCode ?? undefined,
+        paymentType,
+      });
+    } else if (currentUrl.includes("status=CANCELLED")) {
+      console.log("Payment cancelled, navigating to error screen.");
+      navigateToResult("error", {
+        bookingId: rawBookingId,
+        orderCode: orderCode ?? undefined,
+        paymentType,
+      });
+    }
+  };
 
   return <WebView source={{ uri: url }} onNavigationStateChange={handleNavigationStateChange} />;
 };

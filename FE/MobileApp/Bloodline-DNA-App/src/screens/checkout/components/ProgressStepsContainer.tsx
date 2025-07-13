@@ -17,6 +17,8 @@ interface ProgressStepsContainerProps {
   isCollectionConfirmed: boolean;
   bookingId: string;
   handleConfirmDelivery: (bookingId: string) => void;
+  setDateTimePickerVisible: (visible: boolean) => void; // Thêm prop
+  isConfirmingCollection: boolean; // Thêm prop
 }
 
 const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
@@ -32,7 +34,9 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
   isCollectionConfirmed,
   isDeliveryConfirmed,
   bookingId,
-  handleConfirmDelivery
+  handleConfirmDelivery,
+  setDateTimePickerVisible,
+  isConfirmingCollection,
 }) => {
   const getProgressPercentage = () => {
     const completedSteps = progressData.steps.filter(step => step.status === 'completed').length;
@@ -112,8 +116,9 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
             isCollectionConfirmed={isCollectionConfirmed}
             bookingId={bookingId}
             handleConfirmDelivery={handleConfirmDelivery}
+            setDateTimePickerVisible={setDateTimePickerVisible}
+            isConfirmingCollection={isConfirmingCollection}
           />
-
         ))}
       </View>
     </View>
@@ -233,23 +238,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1e293b",
     marginBottom: 16,
-  },
-  expectedDateCard: {
-    backgroundColor: "#f0fdf4",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: "#bbf7d0",
-  },
-  expectedDateTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#15803d",
-    marginBottom: 4,
-  },
-  expectedDateText: {
-    fontSize: 14,
-    color: "#166534",
   },
 });
