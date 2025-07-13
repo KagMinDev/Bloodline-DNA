@@ -4,14 +4,9 @@ import type { CallbackRequest, CallbackResponse, CheckoutResponse,} from "../typ
 /**
  * Khởi tạo thanh toán (đặt cọc) cho Booking.
  */
-export const checkoutApi = async (
-  bookingId: string,
-  token: string
-): Promise<CheckoutResponse> => {
+export const checkoutApi = async ( bookingId: string, token: string): Promise<CheckoutResponse> => {
   try {
-    const res = await rootApi.post(
-      `/Payment/mobile/${bookingId}/checkout`,
-      {},
+    const res = await rootApi.post(`/Payment/mobile/${bookingId}/checkout`, {},
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -41,57 +36,55 @@ export const checkoutApi = async (
 /**
  * Thanh toán phần còn lại.
  */
-export const remainingPaymentApi = async (
-  bookingId: string,
-  token: string
-): Promise<CheckoutResponse> => {
+export const remainingPaymentApi = async ( bookingId: string, token: string): Promise<CheckoutResponse> => {
+  console.log('remainingPaymentApi da duoc goi', bookingId);
+  
   try {
-    const res = await rootApi.post<{ data: CheckoutResponse }>(
-      `/Payment/${bookingId}/remaining-payment`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const res = await rootApi.post(`/Payment/mobile/${bookingId}/remaining-payment`, {}, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    if (!res.data?.data) {
-      throw new Error("Invalid response from remaining-payment API");
+    console.log("📦 remainingPaymentApi response:", res.data);
+
+    if (res.data && res.data.checkoutUrl) {
+      return res.data;
     }
 
-    return res.data.data;
+    if (res.data?.data?.checkoutUrl) {
+      return res.data.data;
+    }
+
+    throw new Error("Invalid response from remaining-payment API");
   } catch (error) {
-    console.error("remainingPaymentApi error:", error);
     throw error;
   }
 };
 
+
 /**
  * Gửi callback sau khi thanh toán đặt cọc.
  */
-export const callbackApi = async (
-  payload: CallbackRequest,
-  token: string
-): Promise<CallbackResponse> => {
+export const callbackApi = async ( payload: CallbackRequest, token: string): Promise<CallbackResponse> => {
+  console.log("callbackApi da dc goi", payload);
+  
   try {
-    const res = await rootApi.post<{ data: CallbackResponse }>(
-      "/Payment/callback",
-      payload,
+    const res = await rootApi.post<{ data: CallbackResponse }>("/Payment/callback", payload,
       {
        headers: {
         Authorization: `Bearer ${token}`,
-        Accept: "application/json", // gợi ý server trả JSON
+        Accept: "application/json",
       },
-      // ⚠️ Thêm dòng này để không bị lỗi khi server trả text
       responseType: "text",
       transformResponse: [(data) => {
         try {
           return JSON.parse(data);
         } catch (e) {
-          return data; // fallback nếu không phải JSON
+          return data; 
         }
       }],
     });
-
     console.log("📥 Server response:", res.data);
     return res.data.data;
   } catch (err: any) {
@@ -103,15 +96,11 @@ export const callbackApi = async (
 /**
  * Gửi callback sau khi thanh toán phần còn lại.
  */
-export const remainingCallbackApi = async (
-  bookingId: string,
-  payload: CallbackRequest,
-  token: string
-): Promise<CallbackResponse> => {
+export const remainingCallbackApi = async (payload: CallbackRequest,token: string): Promise<CallbackResponse> => {
+  console.log("reaminingCallbackApi da dc goi", payload);
+  
   try {
-    const res = await rootApi.post<{ data: CallbackResponse }>(
-      `/Payment/${bookingId}/remaining-callback`,
-      payload,
+    const res = await rootApi.post<{ data: CallbackResponse }>(`/Payment/remaining-callback`,payload,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -120,10 +109,8 @@ export const remainingCallbackApi = async (
     if (!res.data?.data) {
       throw new Error("Invalid response from remaining-callback API");
     }
-
     return res.data.data;
   } catch (error) {
-    console.error("remainingCallbackApi error:", error);
     throw error;
   }
 };
@@ -131,12 +118,9 @@ export const remainingCallbackApi = async (
 /**
  * Lấy danh sách booking đã đặt cọc và đã nhận mẫu.
  */
-export const getDepositedWithSampleReceivedApi = async (
-  token: string
-): Promise<string[]> => {
+export const getDepositedWithSampleReceivedApi = async (token: string): Promise<string[]> => {
   try {
-    const res = await rootApi.get<{ data: string[] }>(
-      "/Payment/deposited-with-sample-received",
+    const res = await rootApi.get<{ data: string[] }>("/Payment/deposited-with-sample-received",
       {
         headers: { Authorization: `Bearer ${token}` },
       }

@@ -1,267 +1,275 @@
-import React, { useState } from "react";
-import {View,Text,Modal,StyleSheet,TouchableOpacity,TextInput,ScrollView,Alert,} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Modal, View, Text, TextInput, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView,} from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { Feather } from "@expo/vector-icons";
+import { getTestKitByBookingIdApi, submitSampleInfoApi } from "../api/sampleApi";
+import { SampleInfoPayload } from "../types/sampleInf";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-interface SampleInfoModalProps {
+const relationshipOptions = [
+  { label: "Cha", value: "1" },
+  { label: "Mẹ", value: "2" },
+  { label: "Con", value: "3" },
+  { label: "Ông nội", value: "4" },
+  { label: "Bà nội", value: "5" },
+  { label: "Anh trai", value: "7" },
+  { label: "Chị/Em gái", value: "8" },
+  { label: "Khác", value: "99" },
+];
+
+const sampleTypeOptions = [
+  { label: "Tăm bông miệng", value: "1" },
+  { label: "Máu", value: "2" },
+  { label: "Tóc có chân tóc", value: "3" },
+  { label: "Móng tay", value: "4" },
+  { label: "Nước bọt", value: "5" },
+  { label: "Khác", value: "99" },
+];
+
+interface SampleInfoModalAppProps {
   visible: boolean;
   onClose: () => void;
   bookingId: string;
-  onSubmit: (sampleInfo: SampleInfo) => void;
+  onSuccess: () => void;
 }
 
-interface SampleInfo {
-  sampleType: string;
-  collectionDate: string;
-  notes: string;
-  participantName: string;
-  participantAge: string;
-}
-
-const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
+const SampleInfoModalApp: React.FC<SampleInfoModalAppProps> = ({
   visible,
   onClose,
   bookingId,
-  onSubmit,
+  onSuccess,
 }) => {
-  const [sampleInfo, setSampleInfo] = useState<SampleInfo>({
-    sampleType: "Nước bọt",
-    collectionDate: new Date().toISOString().split('T')[0],
-    notes: "",
-    participantName: "",
-    participantAge: "",
-  });
+  const [donorName, setDonorName] = useState("");
+  const [relationshipToSubject, setRelationshipToSubject] = useState("1");
+  const [sampleType, setSampleType] = useState("1");
+  const [kitId, setKitId] = useState("");
+  const [token, setToken] = useState("");
+  const [loadingKit, setLoadingKit] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    if (!sampleInfo.participantName.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập tên người tham gia");
+  // Lấy token khi mở modal
+  useEffect(() => {
+    const fetchTokenAndKit = async () => {
+      if (!visible) return;
+
+      try {
+        const savedToken = await AsyncStorage.getItem("token");
+        if (!savedToken) {
+          setError("Không tìm thấy token.");
+          return;
+        }
+        setToken(savedToken);
+
+        setLoadingKit(true);
+        const res = await getTestKitByBookingIdApi(bookingId, savedToken);
+        if (res.success && res.data?.id) {
+          setKitId(res.data.id);
+        } else {
+          setError(res.message || "Không tìm thấy TestKit.");
+        }
+      } catch (e) {
+        setError("Lỗi khi lấy thông tin TestKit.");
+      } finally {
+        setLoadingKit(false);
+      }
+    };
+
+    fetchTokenAndKit();
+  }, [visible, bookingId]);
+
+  const handleSubmit = async () => {
+    if (!kitId) {
+      Alert.alert("Lỗi", "Không tìm thấy mã Kit.");
       return;
     }
-    if (!sampleInfo.participantAge.trim()) {
-      Alert.alert("Lỗi", "Vui lòng nhập tuổi người tham gia");
+
+    if (!donorName.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập tên người cho mẫu.");
       return;
     }
 
-    onSubmit(sampleInfo);
-    onClose();
+    const payload: SampleInfoPayload = {
+      kitId,
+      donorName: donorName.trim(),
+      relationshipToSubject: parseInt(relationshipToSubject, 10),
+      sampleType: parseInt(sampleType, 10),
+    };
+
+    try {
+      setSubmitting(true);
+      const res = await submitSampleInfoApi(payload, token);
+      if (res.success) {
+        Alert.alert("Thành công", "Gửi mẫu thành công.");
+        onSuccess();
+        onClose();
+      } else {
+        Alert.alert("Lỗi", res.message || "Không gửi được mẫu.");
+      }
+    } catch (e: any) {
+      Alert.alert("Lỗi", e.message || "Đã xảy ra lỗi.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <View style={styles.container}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>📝 Thông tin mẫu xét nghiệm</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Text style={styles.title}>🧪 Điền thông tin mẫu xét nghiệm</Text>
+          <TouchableOpacity onPress={onClose}>
             <Feather name="x" size={24} color="#64748b" />
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={styles.content}>
-          <Text style={styles.subtitle}>
-            Mã đặt lịch: <Text style={styles.bookingId}>{bookingId}</Text>
-          </Text>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Tên người tham gia *</Text>
-            <TextInput
-              style={styles.input}
-              value={sampleInfo.participantName}
-              onChangeText={(text) =>
-                setSampleInfo({ ...sampleInfo, participantName: text })
-              }
-              placeholder="Nhập tên người tham gia xét nghiệm"
-              placeholderTextColor="#94a3b8"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Tuổi *</Text>
-            <TextInput
-              style={styles.input}
-              value={sampleInfo.participantAge}
-              onChangeText={(text) =>
-                setSampleInfo({ ...sampleInfo, participantAge: text })
-              }
-              placeholder="Nhập tuổi"
-              placeholderTextColor="#94a3b8"
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Loại mẫu</Text>
-            <TextInput
-              style={styles.input}
-              value={sampleInfo.sampleType}
-              onChangeText={(text) =>
-                setSampleInfo({ ...sampleInfo, sampleType: text })
-              }
-              placeholder="Loại mẫu xét nghiệm"
-              placeholderTextColor="#94a3b8"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Ngày lấy mẫu</Text>
-            <TextInput
-              style={styles.input}
-              value={sampleInfo.collectionDate}
-              onChangeText={(text) =>
-                setSampleInfo({ ...sampleInfo, collectionDate: text })
-              }
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#94a3b8"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Ghi chú</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={sampleInfo.notes}
-              onChangeText={(text) =>
-                setSampleInfo({ ...sampleInfo, notes: text })
-              }
-              placeholder="Ghi chú thêm (tùy chọn)"
-              placeholderTextColor="#94a3b8"
-              multiline
-              numberOfLines={4}
-            />
-          </View>
-
+        {loadingKit && (
           <View style={styles.infoBox}>
-            <Feather name="info" size={16} color="#2563eb" />
-            <Text style={styles.infoText}>
-              Sau khi điền thông tin, vui lòng gửi mẫu theo địa chỉ được cung cấp trong kit.
-            </Text>
+            <ActivityIndicator size="small" />
+            <Text style={styles.infoText}>Đang tải thông tin TestKit...</Text>
           </View>
-        </ScrollView>
+        )}
 
-        <View style={styles.footer}>
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Hủy</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-            <Text style={styles.submitButtonText}>Xác nhận</Text>
-          </TouchableOpacity>
+        {kitId ? (
+          <View style={styles.successBox}>
+            <Feather name="check-circle" size={18} color="#16a34a" />
+            <Text style={styles.successText}>Mã TestKit: {kitId}</Text>
+          </View>
+        ) : null}
+
+        {error && (
+          <View style={styles.errorBox}>
+            <Feather name="alert-circle" size={18} color="#dc2626" />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
+
+        <Text style={styles.label}>Tên người cho mẫu *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Nhập họ tên"
+          value={donorName}
+          onChangeText={setDonorName}
+        />
+
+        <Text style={styles.label}>Mối quan hệ với người đăng ký *</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={relationshipToSubject}
+            onValueChange={(value) => setRelationshipToSubject(value)}
+          >
+            {relationshipOptions.map((opt) => (
+              <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+            ))}
+          </Picker>
         </View>
-      </View>
+
+        <Text style={styles.label}>Loại mẫu *</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={sampleType}
+            onValueChange={(value) => setSampleType(value)}
+          >
+            {sampleTypeOptions.map((opt) => (
+              <Picker.Item key={opt.value} label={opt.label} value={opt.value} />
+            ))}
+          </Picker>
+        </View>
+
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handleSubmit}
+          disabled={submitting || loadingKit || !kitId}
+        >
+          {submitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Lưu thông tin</Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+          <Text style={styles.cancelButtonText}>Hủy</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </Modal>
   );
 };
 
-export default SampleInfoModal;
+export default SampleInfoModalApp;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
+  container: { padding: 20, backgroundColor: "#f9fafb" },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 20,
-    backgroundColor: "#ffffff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#e2e8f0",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#1e293b",
-  },
-  closeButton: {
-    padding: 4,
-  },
-  content: {
-    flex: 1,
-    padding: 20,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#64748b",
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  bookingId: {
-    fontWeight: "bold",
-    color: "#2563eb",
-  },
-  formGroup: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#374151",
-    marginBottom: 8,
-  },
+  title: { fontSize: 20, fontWeight: "bold", color: "#1e3a8a" },
+  label: { marginTop: 12, marginBottom: 4, fontWeight: "600", color: "#1e293b" },
   input: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#d1d5db",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#1e293b",
   },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
+  pickerContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+  },
+  submitButton: {
+    backgroundColor: "#2563eb",
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 24,
+    alignItems: "center",
+  },
+  submitButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  cancelButton: {
+    marginTop: 12,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#64748b",
+    fontWeight: "600",
   },
   infoBox: {
     flexDirection: "row",
+    alignItems: "center",
     backgroundColor: "#eff6ff",
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#bfdbfe",
-    marginTop: 8,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  infoText: {
-    flex: 1,
-    fontSize: 14,
-    color: "#1e40af",
-    marginLeft: 8,
-    lineHeight: 20,
-  },
-  footer: {
+  infoText: { marginLeft: 8, color: "#1d4ed8" },
+  successBox: {
     flexDirection: "row",
-    padding: 20,
-    backgroundColor: "#ffffff",
-    borderTopWidth: 1,
-    borderTopColor: "#e2e8f0",
-    gap: 12,
+    alignItems: "center",
+    backgroundColor: "#dcfce7",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    backgroundColor: "#ffffff",
+  successText: { marginLeft: 8, color: "#15803d" },
+  errorBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fee2e2",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  cancelButtonText: {
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#64748b",
-  },
-  submitButton: {
-    flex: 1,
-    paddingVertical: 16,
-    borderRadius: 12,
-    backgroundColor: "#2563eb",
-  },
-  submitButtonText: {
-    textAlign: "center",
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#ffffff",
-  },
+  errorText: { marginLeft: 8, color: "#b91c1c" },
 });

@@ -1,25 +1,23 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import {View, Text, StyleSheet, TouchableOpacity, Animated, ActivityIndicator,} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Animated, ActivityIndicator } from "react-native";
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { useAuth } from "@/context/auth/AuthContext";
-import { callbackApi, remainingCallbackApi,} from "@/screens/checkout/api/paymentApi";
+import { callbackApi, remainingCallbackApi } from "@/screens/checkout/api/paymentApi";
 
 type PaymentSuccessRouteProp = RouteProp<RootStackParamList, "PaymentSuccess">;
-type PaymentSuccessNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "PaymentSuccess"
->;
+type PaymentSuccessNavigationProp = NativeStackNavigationProp<RootStackParamList, "PaymentSuccess">;
 
 const PaymentSuccess: React.FC = () => {
   const navigation = useNavigation<PaymentSuccessNavigationProp>();
   const route = useRoute<PaymentSuccessRouteProp>();
   const { token } = useAuth();
 
-  const { bookingId, orderCode, amount, paymentType = "deposit" } =
-    route.params || {};
+  const { bookingId, orderCode, amount, paymentType } = route.params || {};
+
+  console.log("PaymentSuccess params received from WebViewScreen:", { bookingId, orderCode, amount, paymentType });
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -27,7 +25,6 @@ const PaymentSuccess: React.FC = () => {
   const [callbackSuccess, setCallbackSuccess] = useState(false);
   const [callbackError, setCallbackError] = useState<string | null>(null);
 
-  // Hiệu ứng khi mở trang
   useEffect(() => {
     Animated.parallel([
       Animated.spring(scaleAnim, {
@@ -45,8 +42,12 @@ const PaymentSuccess: React.FC = () => {
   const callCallback = useCallback(async () => {
     if (!bookingId || !orderCode || !token) {
       console.warn("❌ Thiếu dữ liệu callback:", { bookingId, orderCode, token });
+      setCallbackError("Thiếu thông tin để cập nhật trạng thái thanh toán.");
       return;
     }
+
+    const paymentTypeSafe: "deposit" | "remaining" = paymentType === "remaining" ? "remaining" : "deposit";
+    console.log("Using paymentTypeSafe for callback:", paymentTypeSafe);
 
     const payload = {
       bookingId,
@@ -58,21 +59,17 @@ const PaymentSuccess: React.FC = () => {
     console.log("🔐 Token:", token);
 
     try {
-      if (paymentType === "remaining") {
-        await remainingCallbackApi(bookingId, payload, token);
-      } else {
-        await callbackApi(payload, token);
-      }
-      console.log("✅ Callback thành công");
+      const api = paymentTypeSafe === "remaining" ? remainingCallbackApi : callbackApi;
+      await api(payload, token);
+      console.log(`✅ Successfully sent callback for ${paymentTypeSafe}`);
       setCallbackSuccess(true);
     } catch (err: any) {
-      const errorData = err?.response?.data || err.message || "Lỗi không xác định";
-      console.error("❌ Callback thất bại:", errorData);
+      const errorData = err?.response || err.message || "Lỗi không xác định";
+      console.error(`❌ Failed to send callback for ${paymentTypeSafe}:`, errorData);
       setCallbackError("Đã xảy ra lỗi khi cập nhật trạng thái thanh toán.");
     }
   }, [bookingId, orderCode, token, paymentType]);
 
-  // Gọi API sau 500ms nếu đủ điều kiện
   useEffect(() => {
     let timeout: NodeJS.Timeout;
 
@@ -140,9 +137,7 @@ const PaymentSuccess: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[styles.iconContainer, { transform: [{ scale: scaleAnim }] }]}
-      >
+      <Animated.View style={[styles.iconContainer, { transform: [{ scale: scaleAnim }] }]}>
         <View style={styles.successIcon}>
           <Feather name="check" size={60} color="#ffffff" />
         </View>
@@ -152,7 +147,6 @@ const PaymentSuccess: React.FC = () => {
         <Text style={styles.title}>Thanh toán thành công!</Text>
         <Text style={styles.subtitle}>{getSuccessMessage()}</Text>
 
-        {/* Payment Details */}
         <View style={styles.detailsCard}>
           <Text style={styles.detailsTitle}>Chi tiết thanh toán</Text>
 
@@ -188,39 +182,37 @@ const PaymentSuccess: React.FC = () => {
           </View>
         </View>
 
-        {/* Next Steps */}
         <View style={styles.nextStepsCard}>
           <Text style={styles.nextStepsTitle}>🎯 Bước tiếp theo</Text>
-          {paymentType === "deposit" ? (
-            <Text style={styles.nextStepsText}>
-              • Chúng tôi sẽ chuẩn bị kit xét nghiệm{"\n"}
-              • Kit sẽ được giao đến địa chỉ của bạn trong 1-2 ngày{"\n"}
-              • Bạn sẽ nhận được thông báo khi kit được giao
-            </Text>
-          ) : (
+          {paymentType === "remaining" ? (
             <Text style={styles.nextStepsText}>
               • Mẫu của bạn sẽ được xét nghiệm{"\n"}
               • Kết quả sẽ có trong 7-14 ngày{"\n"}
               • Bạn sẽ nhận được thông báo khi có kết quả
             </Text>
+          ) : (
+            <Text style={styles.nextStepsText}>
+              • Chúng tôi sẽ chuẩn bị kit xét nghiệm{"\n"}
+              • Kit sẽ được giao đến địa chỉ của bạn trong 1-2 ngày{"\n"}
+              • Bạn sẽ nhận được thông báo khi kit được giao
+            </Text>
           )}
         </View>
+
+        {callbackError && (
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{callbackError}</Text>
+          </View>
+        )}
       </Animated.View>
 
-      {/* Action Buttons */}
       <Animated.View style={[styles.buttonContainer, { opacity: fadeAnim }]}>
-        <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={handleBackToCheckout}
-        >
+        <TouchableOpacity style={styles.primaryButton} onPress={handleBackToCheckout}>
           <Feather name="eye" size={20} color="#ffffff" />
           <Text style={styles.primaryButtonText}>Xem tiến độ</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.secondaryButton}
-          onPress={handleBackToHome}
-        >
+        <TouchableOpacity style={styles.secondaryButton} onPress={handleBackToHome}>
           <Feather name="home" size={20} color="#2563eb" />
           <Text style={styles.secondaryButtonText}>Về trang chủ</Text>
         </TouchableOpacity>
@@ -368,5 +360,17 @@ const styles = StyleSheet.create({
     color: "#2563eb",
     fontSize: 16,
     fontWeight: "600",
+  },
+  errorCard: {
+    backgroundColor: "#fef2f2",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 12,
+    width: "100%",
+  },
+  errorText: {
+    color: "#dc2626",
+    fontSize: 14,
+    textAlign: "center",
   },
 });

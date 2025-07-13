@@ -10,6 +10,15 @@ interface ProgressStepsContainerProps {
   handleStepAction: (payload: any) => void;
   bookingStatus: string;
   setIsSampleModalOpen: (open: boolean) => void;
+  setPaymentLoading: (loading: boolean) => void;
+  updateProgressAfterDelivery: () => void;
+  shouldShowSampleButton: boolean;
+  isDeliveryConfirmed: boolean;
+  isCollectionConfirmed: boolean;
+  bookingId: string;
+  handleConfirmDelivery: (bookingId: string) => void;
+  setDateTimePickerVisible: (visible: boolean) => void; // Thêm prop
+  isConfirmingCollection: boolean; // Thêm prop
 }
 
 const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
@@ -19,6 +28,15 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
   handleStepAction,
   bookingStatus,
   setIsSampleModalOpen,
+  setPaymentLoading,
+  updateProgressAfterDelivery,
+  shouldShowSampleButton,
+  isCollectionConfirmed,
+  isDeliveryConfirmed,
+  bookingId,
+  handleConfirmDelivery,
+  setDateTimePickerVisible,
+  isConfirmingCollection,
 }) => {
   const getProgressPercentage = () => {
     const completedSteps = progressData.steps.filter(step => step.status === 'completed').length;
@@ -51,11 +69,11 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
       {/* Progress bar */}
       <View style={styles.progressBarContainer}>
         <View style={styles.progressBarBackground}>
-          <View 
+          <View
             style={[
-              styles.progressBarFill, 
+              styles.progressBarFill,
               { width: `${progressPercentage}%` }
-            ]} 
+            ]}
           />
         </View>
         <Text style={styles.progressText}>
@@ -91,6 +109,15 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
             handleStepAction={handleStepAction}
             bookingStatus={bookingStatus}
             setIsSampleModalOpen={setIsSampleModalOpen}
+            setPaymentLoading={setPaymentLoading}
+            updateProgressAfterDelivery={updateProgressAfterDelivery}
+            shouldShowSampleButton={shouldShowSampleButton}
+            isDeliveryConfirmed={isDeliveryConfirmed}
+            isCollectionConfirmed={isCollectionConfirmed}
+            bookingId={bookingId}
+            handleConfirmDelivery={handleConfirmDelivery}
+            setDateTimePickerVisible={setDateTimePickerVisible}
+            isConfirmingCollection={isConfirmingCollection}
           />
         ))}
       </View>
@@ -211,23 +238,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1e293b",
     marginBottom: 16,
-  },
-  expectedDateCard: {
-    backgroundColor: "#f0fdf4",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: "#bbf7d0",
-  },
-  expectedDateTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#15803d",
-    marginBottom: 4,
-  },
-  expectedDateText: {
-    fontSize: 14,
-    color: "#166534",
   },
 });
