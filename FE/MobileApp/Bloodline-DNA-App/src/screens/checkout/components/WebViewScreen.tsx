@@ -29,8 +29,12 @@ const WebViewScreen = () => {
     { bookingId, orderCode, paymentType }: { bookingId?: string; orderCode?: string; paymentType?: string }
   ) => {
     // Sử dụng initialPaymentType nếu paymentType từ URL trả về là undefined
-    const paymentTypeSafe: "deposit" | "remaining" =
-      paymentType === "remaining" || initialPaymentType === "remaining" ? "remaining" : "deposit";
+    const paymentTypeSafe: "deposit" | "remaining" | "full_payment" =
+      paymentType === "remaining" || initialPaymentType === "remaining"
+        ? "remaining"
+        : paymentType === "full_payment" || initialPaymentType === "full_payment"
+          ? "full_payment"
+          : "deposit";
     console.log(
       "Extracted paymentType:",
       paymentType,

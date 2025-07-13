@@ -1,6 +1,5 @@
 // AppRouter.tsx
 import { useAuth } from "@/context/auth/AuthContext";
-import AboutScreen from "@/screens/about";
 import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
 import BookingHistory from "@/screens/booking-history/screen/BookingHistory";
 import WebViewScreen from "@/screens/checkout/components/WebViewScreen";
@@ -20,30 +19,9 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
 import { Text, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import {
-  ForgotPasswordScreen,
-  HomePageScreen,
-  LoginScreen,
-  RegisterScreen
-} from "../screens";
-import {
-  MainTabParamList,
-  RootStackParamList,
-} from "../types/root-stack/stack.types";
-
-// ... (giữ nguyên các component Placeholder screens)
-const ProfileScreen: React.FC = () => (
-  <View
-    style={{
-      flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#F0F9FF",
-    }}
-  >
-    <Text style={{ fontSize: 24, fontWeight: "bold" }}>Profile Screen</Text>
-  </View>
-);
+import { ForgotPasswordScreen, HomePageScreen, LoginScreen, RegisterScreen} from "../screens";
+import { MainTabParamList, RootStackParamList,} from "../types/root-stack/stack.types";
+import ProfileScreen from "@/screens/user/screen/Profile";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -111,40 +89,28 @@ const AppRouter: React.FC = () => {
       {isLoggedIn ? (
         <>
           <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="About" component={AboutScreen} />
           <Stack.Screen name="Doctors" component={DoctorsScreen} />
           <Stack.Screen name="News" component={NewsScreen} />
           <Stack.Screen name="Contact" component={ContactScreen} />
-          <Stack.Screen
-            name="DeliveriesStaffTabs"
-            component={DeliveriesStaffTabs}
-          />
+          <Stack.Screen name="DeliveriesStaffTabs" component={DeliveriesStaffTabs} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
+
 
           <Stack.Screen name="AllService" component={AllServiceScreen} />
           <Stack.Screen name="DetailsService" component={DetailService} />
-          <Stack.Screen
-            name="AppointmentScreen"
-            component={AppointmentScreen}
-          />
+          <Stack.Screen  name="AppointmentScreen" component={AppointmentScreen} />
 
           <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
           <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
           <Stack.Screen name="PaymentError" component={PaymentError} />
           <Stack.Screen name="BookingHistory" component={BookingHistory} />
-          <Stack.Screen
-            name="WebViewScreen"
-            component={WebViewScreen}
-            options={{ title: "Thanh toán" }}
-          />
+          <Stack.Screen name="WebViewScreen" component={WebViewScreen} options={{ title: "Thanh toán" }} />
         </>
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen
-            name="ForgotPassword"
-            component={ForgotPasswordScreen}
-          />
+          <Stack.Screen name="ForgotPassword"  component={ForgotPasswordScreen} />
         </>
       )}
     </Stack.Navigator>
