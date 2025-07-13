@@ -1,6 +1,5 @@
-// screens/AllServiceScreen.tsx
 import React, { useEffect, useState } from "react";
-import { View, ScrollView, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, FlatList,} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TestResponse } from "../types/TestService";
 import { getTestsApi } from "../api/TestServiceApi";
@@ -9,16 +8,24 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
 
+type CollectionMethod = "SelfSample" | "AtFacility";
+
+const tabLabels: Record<CollectionMethod, string> = {
+  SelfSample: "Tự lấy mẫu",
+  AtFacility: "Lấy mẫu tại cơ sở",
+};
+
 const AllServiceScreen: React.FC = () => {
   const [services, setServices] = useState<TestResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const [selectedTab, setSelectedTab] = useState<CollectionMethod>("SelfSample");
 
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const token = await AsyncStorage.getItem("token"); // Lấy token đúng cách
+        const token = await AsyncStorage.getItem("token");
         const response = await getTestsApi(token || "");
         setServices(response);
       } catch (error) {
@@ -31,6 +38,14 @@ const AllServiceScreen: React.FC = () => {
     fetchServices();
   }, []);
 
+  const filteredServices = services.filter((service) =>
+    service.priceServices.some((price) =>
+      selectedTab === "SelfSample"
+        ? price.collectionMethod === 0
+        : price.collectionMethod === 1
+    )
+  );
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -41,30 +56,84 @@ const AllServiceScreen: React.FC = () => {
   }
 
   return (
-    <ScrollView style={{ flex: 1, paddingTop: 70, }}>
+    <View style={styles.container}>
       <Text style={styles.title}>Tất Cả Dịch Vụ</Text>
-      {services.map((service) => (
-        <CardService
-          key={service.id}
-          data={service}
-          onPress={() => navigation.navigate("DetailsService", { id: service.id })}
-        />
-      ))}
-    </ScrollView>
+
+      {/* Tabs */}
+      <View style={styles.tabContainer}>
+        {(Object.keys(tabLabels) as CollectionMethod[]).map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            onPress={() => setSelectedTab(tab)}
+            style={[styles.tab, selectedTab === tab && styles.activeTab]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === tab && styles.activeTabText,
+              ]}
+            >
+              {tabLabels[tab]}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* List */}
+      <FlatList
+        data={filteredServices}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
+          <CardService
+            data={item}
+            onPress={() =>
+              navigation.navigate("DetailsService", { id: item.id })
+            }
+          />
+        )}
+      />
+    </View>
   );
 };
 
 export default AllServiceScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   title: {
     fontSize: 25,
     fontWeight: "bold",
     paddingHorizontal: 16,
-    paddingTop: 16,
     color: "#1e3a8a",
     textAlign: "center",
-    paddingBottom: 25,
+    paddingBottom: 16,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  tab: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "#e5e7eb",
+    borderRadius: 20,
+    marginHorizontal: 6,
+  },
+  activeTab: {
+    backgroundColor: "#2563eb",
+  },
+  tabText: {
+    fontSize: 14,
+    color: "#374151",
+  },
+  activeTabText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   center: {
     flex: 1,
@@ -73,6 +142,9 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    color: "#6B7280",
+    color: "#6b7280",
+  },
+  listContent: {
+    paddingHorizontal: 16,
   },
 });

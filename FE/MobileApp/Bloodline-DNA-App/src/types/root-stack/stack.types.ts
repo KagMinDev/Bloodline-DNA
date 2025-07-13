@@ -19,6 +19,7 @@ export type RootStackParamList = {
   DetailsService: { id: string };
   DeliveriesStaffTabs: undefined;
   AppointmentScreen: { testServiceId: string; priceServiceId: string };
+  Profile: undefined;
 
   CheckoutScreen: { bookingId: string };
   WebViewScreen: { url: string };
