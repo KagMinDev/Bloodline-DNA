@@ -43,7 +43,7 @@ export interface ProgressStep {
 export interface TestProgressData {
   bookingId: string;
   testType: string;
-  serviceType: 'home' | 'clinic';
+  serviceType: 'SelfSample' | 'AtFacility';
   customerName: string;
   currentStep: number;
   steps: ProgressStep[];

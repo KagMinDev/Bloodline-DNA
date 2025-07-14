@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { ProgressStep } from "@/screens/checkout/types/checkout";
 
@@ -19,8 +25,9 @@ interface Props {
   isCollectionConfirmed: boolean;
   bookingId: string;
   handleConfirmDelivery: (bookingId: string) => void;
-  setDateTimePickerVisible: (visible: boolean) => void; // Thêm prop
-  isConfirmingCollection: boolean; // Thêm prop
+  setDateTimePickerVisible: (visible: boolean) => void;
+  isConfirmingCollection: boolean;
+  collectionMethod: number; // <-- thêm prop này
 }
 
 const StepItem: React.FC<Props> = ({
@@ -30,16 +37,12 @@ const StepItem: React.FC<Props> = ({
   paymentError,
   handleStepAction,
   bookingStatus,
-  setIsSampleModalOpen,
-  setPaymentLoading,
-  updateProgressAfterDelivery,
-  shouldShowSampleButton,
   isDeliveryConfirmed,
-  isCollectionConfirmed,
   bookingId,
   handleConfirmDelivery,
   setDateTimePickerVisible,
   isConfirmingCollection,
+  collectionMethod,
 }) => {
   const getStatusColor = () => {
     switch (step.status) {
@@ -102,12 +105,27 @@ const StepItem: React.FC<Props> = ({
   };
 
   const renderConfirmDeliveryButton = () => {
+    if (collectionMethod === 1) return null;
+
     if (step.id === 3 && bookingStatus.toLowerCase() === "deliveringkit") {
       return isDeliveryConfirmed ? (
-        <View style={{ marginTop: 12, backgroundColor: "#dcfce7", padding: 10, borderRadius: 8 }}>
+        <View
+          style={{
+            marginTop: 12,
+            backgroundColor: "#dcfce7",
+            padding: 10,
+            borderRadius: 8,
+          }}
+        >
           <View style={styles.row}>
             <Feather name="check-circle" size={18} color="#22c55e" />
-            <Text style={{ color: "#22c55e", marginLeft: 6, fontWeight: "600" }}>
+            <Text
+              style={{
+                color: "#22c55e",
+                marginLeft: 6,
+                fontWeight: "600",
+              }}
+            >
               Cảm ơn bạn đã xác nhận
             </Text>
           </View>
@@ -134,11 +152,13 @@ const StepItem: React.FC<Props> = ({
         </View>
       );
     }
+
     return null;
   };
 
-
   const renderCollectionButton = () => {
+    if (collectionMethod === 1) return null;
+
     if (step.id === 4 && bookingStatus.toLowerCase() === "waitingforsample") {
       return (
         <View style={{ marginTop: 12 }}>
@@ -148,18 +168,21 @@ const StepItem: React.FC<Props> = ({
             disabled={isConfirmingCollection}
           >
             <Text style={styles.blueButtonText}>
-              {isConfirmingCollection ? "Đang xác nhận..." : "📅 Chọn ngày giờ lấy mẫu"}
+              {isConfirmingCollection
+                ? "Đang xác nhận..."
+                : "📅 Chọn ngày giờ lấy mẫu"}
             </Text>
           </TouchableOpacity>
         </View>
       );
     }
+
     return null;
   };
 
   return (
     <View style={styles.stepContainer}>
-      {/* Left timeline */}
+      {/* Timeline indicator */}
       <View style={styles.timeline}>
         <View
           style={[
@@ -167,7 +190,8 @@ const StepItem: React.FC<Props> = ({
             {
               backgroundColor: getStatusColor(),
               borderWidth: step.status === "current" ? 3 : 0,
-              borderColor: step.status === "current" ? "#bfdbfe" : "transparent",
+              borderColor:
+                step.status === "current" ? "#bfdbfe" : "transparent",
             },
           ]}
         >
@@ -187,7 +211,7 @@ const StepItem: React.FC<Props> = ({
         )}
       </View>
 
-      {/* Right content */}
+      {/* Step content */}
       <View style={styles.content}>
         <Text
           style={[
@@ -234,6 +258,7 @@ const StepItem: React.FC<Props> = ({
 
 export default StepItem;
 
+// Styles definition
 const styles = StyleSheet.create({
   stepContainer: {
     flexDirection: "row",

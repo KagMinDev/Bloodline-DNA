@@ -32,7 +32,6 @@ export const createTestBookingApi = async (data: TestBookingRequest): Promise<Te
         clientId: data.clientId || "",
         email: "",
         appointmentDate: data.appointmentDate,
-        collectionMethod: "SelfSample",
         status: "Pending",
         note: data.note,
         createdAt: new Date().toISOString(),
