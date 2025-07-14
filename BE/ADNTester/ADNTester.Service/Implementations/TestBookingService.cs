@@ -310,17 +310,11 @@ namespace ADNTester.Service.Implementations
             if (booking == null || booking.CollectionMethod != SampleCollectionMethod.AtFacility)
                 return false;
 
-            // Optional: validate current status
             if (booking.Status != BookingStatus.Pending)
                 return false;
 
-            booking.Status = BookingStatus.CheckIn;
-            booking.UpdatedAt = DateTime.UtcNow;
-
-            _unitOfWork.TestBookingRepository.Update(booking);
-            await _unitOfWork.CommitAsync();
-
-            return true;
+            // Delegate to shared status update logic
+            return await UpdateBookingStatusAsync(bookingId, BookingStatus.CheckIn);
         }
 
         public async Task<bool> ConfirmKitReceivedAsync(string bookingId)
@@ -350,6 +344,54 @@ namespace ADNTester.Service.Implementations
 
             await _unitOfWork.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> CreatePickupAfterSampleCollectedAsync(string bookingId, string? note)
+        {
+            var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(bookingId);
+            if (booking == null)
+                throw new Exception("Booking not found");
+
+            // Only allow pickup creation for HomeCollection bookings
+            if (booking.CollectionMethod != SampleCollectionMethod.SelfSample)
+                throw new Exception("Chỉ hỗ trợ tạo yêu cầu lấy mẫu tại nhà cho phương thức SelfSample");
+
+            // Check if booking already has a test kit
+            var testKit = await _unitOfWork.TestKitRepository
+                .GetWithPickupInfoByBookingIdAsync(bookingId);
+
+            if (testKit == null)
+                throw new Exception("Chưa có kit được tạo cho booking này");
+
+            if (testKit.PickupInfoId != null)
+                throw new Exception("Đã có nhiệm vụ lấy mẫu được tạo cho booking này");
+            var deliveryLogistics = await _unitOfWork.LogisticInfoRepository
+                .GetByIdAsync(testKit.DeliveryInfoId ?? string.Empty);
+            // Create LogisticsInfo for Pickup
+            var pickupLogistics = new LogisticsInfo
+            {
+                Name = string.IsNullOrWhiteSpace(booking.ClientName) ? "Chưa rõ tên" : booking.ClientName.Trim(),
+                Address = string.IsNullOrWhiteSpace(booking.Address) ? "Không rõ địa chỉ" : booking.Address.Trim(),
+                Phone = string.IsNullOrWhiteSpace(booking.Phone) ? "Không rõ số điện thoại" : booking.Phone.Trim(),
+                Note = string.IsNullOrWhiteSpace(note)? $"Lấy mẫu từ client cho booking {booking.Id}" : note.Trim(),
+                Type = LogisticsType.Pickup,
+                Status = LogisticStatus.WaitingForPickup,
+                ScheduledAt = DateTime.UtcNow,
+                StaffId = deliveryLogistics?.StaffId
+            };
+
+
+            await _unitOfWork.LogisticInfoRepository.AddAsync(pickupLogistics);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Link logistics to test kit
+            testKit.PickupInfoId = pickupLogistics.Id;
+
+            // Update booking status
+            booking.Status = BookingStatus.ReturningSample;
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            
+            return await _unitOfWork.SaveChangesAsync() > 0;
         }
 
         #region Helper methods
