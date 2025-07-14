@@ -59,7 +59,7 @@ const CheckoutScreen: React.FC = () => {
       setProgressData({
         bookingId: bookingData.id,
         testType: "Xét nghiệm DNA",
-        serviceType: "home",
+        serviceType: Number(bookingData.collectionMethod) === 1 ? "AtFacility" : "SelfSample", // ✅ sửa dòng này
         customerName: userData?.fullName || "Khách hàng",
         currentStep: 0,
         steps,
@@ -89,6 +89,31 @@ const CheckoutScreen: React.FC = () => {
     };
 
     const currentStatus = statusMap[booking.status] ?? 0;
+    const isAtFacility = Number(booking.collectionMethod) === 1;
+
+    if (isAtFacility) {
+      return [
+        {
+          id: 1,
+          title: "Thanh toán",
+          description: "Thanh toán toàn bộ để xác nhận lịch hẹn",
+          status: currentStatus >= 1 ? "completed" : "current",
+          actionRequired: currentStatus === 0,
+          actionText: "Thanh toán",
+          actionPayload: {
+            type: "full_payment", // reuse loại này hoặc đổi tên thành 'full' nếu muốn
+            bookingId: booking.id,
+            amount: booking.price,
+          },
+        },
+        {
+          id: 4,
+          title: "Hoàn tất",
+          description: "Kết quả xét nghiệm đã sẵn sàng",
+          status: currentStatus >= 8 ? "completed" : "pending",
+        },
+      ];
+    }
 
     return [
       {
@@ -275,7 +300,7 @@ const CheckoutScreen: React.FC = () => {
         />
       )}
 
-      {booking?.status === "Pending" && (
+      {booking?.status === "Pending" && booking?.collectionMethod !== "Lấy mẫu tại cơ sở" && (
         <DepositButton bookingId={booking.id} amount={booking.price * 0.2} onPaymentStart={() => setPaymentLoading(true)} onPaymentSuccess={fetchData} onPaymentError={(err) => { setPaymentLoading(false); setPaymentError(err); }} />
       )}
 

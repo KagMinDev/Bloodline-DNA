@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import ProgressSteps from "./ProgressSteps";
 import type { TestProgressData } from "../types/checkout";
+import { getCollectionMethodLabel } from "@/screens/services/types/TestService";
 
 interface ProgressStepsContainerProps {
   progressData: TestProgressData;
@@ -40,8 +41,11 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
 }) => {
   const getProgressPercentage = () => {
     const completedSteps = progressData.steps.filter(step => step.status === 'completed').length;
-    return Math.round((completedSteps / progressData.steps.length) * 100);
+    return progressData.steps.length === 0 ? 0 : Math.round((completedSteps / progressData.steps.length) * 100);
   };
+
+  const collectionMethod = progressData.serviceType === 'SelfSample' ? 0 : 1;
+  const collectionMethodLabel = getCollectionMethodLabel(collectionMethod);
 
   const getCurrentStepInfo = () => {
     const currentStep = progressData.steps.find(step => step.status === 'current');
@@ -51,6 +55,10 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
   const progressPercentage = getProgressPercentage();
   const currentStep = getCurrentStepInfo();
 
+  function getServiceTypeLabel(serviceType: 'SelfSample' | 'AtFacility'): string {
+    return serviceType === 'SelfSample' ? 'Tại nhà' : 'Tại cơ sở';
+  }
+
   return (
     <View style={styles.container}>
       {/* Header with progress overview */}
@@ -58,7 +66,7 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
         <View style={styles.progressInfo}>
           <Text style={styles.progressTitle}>Tiến độ thực hiện</Text>
           <Text style={styles.progressSubtitle}>
-            {progressData.testType} - {progressData.serviceType === 'home' ? 'Tại nhà' : 'Tại phòng khám'}
+            {progressData.testType} - {getServiceTypeLabel(progressData.serviceType)}
           </Text>
         </View>
         <View style={styles.progressBadge}>
@@ -118,6 +126,7 @@ const ProgressStepsContainer: React.FC<ProgressStepsContainerProps> = ({
             handleConfirmDelivery={handleConfirmDelivery}
             setDateTimePickerVisible={setDateTimePickerVisible}
             isConfirmingCollection={isConfirmingCollection}
+            collectionMethod={collectionMethod}
           />
         ))}
       </View>

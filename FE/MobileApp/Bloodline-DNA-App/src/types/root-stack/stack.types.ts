@@ -27,12 +27,12 @@ export type RootStackParamList = {
     bookingId: string;
     orderCode?: string;
     amount?: number;
-    paymentType?: "deposit" | "remaining";
+    paymentType?: "deposit" | "remaining" | "full_payment";
   };
   PaymentError: {
     bookingId?: string;
     orderCode?: string;
-    paymentType?: "deposit" | "remaining";
+    paymentType?: "deposit" | "remaining" | "full_payment";
     message?: string;
   };
   TestPayment: undefined;
