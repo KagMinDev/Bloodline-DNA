@@ -34,7 +34,7 @@ export interface ProgressStep {
   actionRequired?: boolean;
   actionText?: string;
   actionPayload?: {
-    type: 'deposit' | 'remaining' | 'fill_sample_info' | 'confirm_delivery' | "full_payment";
+    type: 'deposit' | 'remaining' | 'fill_sample_info' | 'confirm_delivery';
     bookingId?: string;
     amount?: number;
   };
@@ -43,7 +43,7 @@ export interface ProgressStep {
 export interface TestProgressData {
   bookingId: string;
   testType: string;
-  serviceType: 'SelfSample' | 'AtFacility';
+  serviceType: 'home' | 'clinic';
   customerName: string;
   currentStep: number;
   steps: ProgressStep[];
