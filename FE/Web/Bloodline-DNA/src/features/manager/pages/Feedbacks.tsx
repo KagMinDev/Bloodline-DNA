@@ -7,19 +7,18 @@ import type { FeedbackResponse } from '../types/feedback';
 function Feedbacks() {
   const [feedbacks, setFeedbacks] = useState<FeedbackResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const token = localStorage.getItem("token") || "";
 
   // Đổi sang gọi API thật
   const fetchFeedbacks = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await getFeedbacksApi(token);
+      const data = await getFeedbacksApi();
       setFeedbacks(data);
     } catch {
       setFeedbacks([]);
     }
     setIsLoading(false);
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchFeedbacks();

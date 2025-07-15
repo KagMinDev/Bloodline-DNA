@@ -48,8 +48,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
     setLoadingBookings((prev) => new Set(prev).add(bookingId));
     try {
       await updateTestBookingStatusApi(
-        { bookingId, status: statusOption.value },
-        token
+        { bookingId, status: statusOption.value }
       );
       await refetchBookings();
 

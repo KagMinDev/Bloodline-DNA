@@ -10,17 +10,16 @@ import { createStaffApi, getAllUserApi } from '../api/userApi';
 const UserMangement: React.FC = () => {
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const token = localStorage.getItem('token') || '';
 
   // Định nghĩa fetchUsers với useCallback
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await getAllUserApi(token);
+      const res = await getAllUserApi();
       setUsers(res);
     } catch (error) {
       alert('Không thể tải danh sách người dùng');
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -41,7 +40,7 @@ const UserMangement: React.FC = () => {
 
   const handleAddUser = async (data: any) => {
     try {
-      await createStaffApi(data, token);
+      await createStaffApi(data);
       await fetchUsers(); // Gọi lại fetchUsers để cập nhật danh sách
       setShowModal(false);
     } catch (error: any) {
