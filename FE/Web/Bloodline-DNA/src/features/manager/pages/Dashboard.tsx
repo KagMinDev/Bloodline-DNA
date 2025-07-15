@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
 import { getBlogsApi } from "../api/blogsApi";
 import { getFeedbacksApi } from "../api/feedbackApi";
 import { getTestBookingApi } from "../../staff/api/testBookingApi";

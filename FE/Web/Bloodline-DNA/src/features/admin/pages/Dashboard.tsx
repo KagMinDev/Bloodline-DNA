@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer
-} from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
 import { getBlogsApi } from "../../manager/api/blogsApi";
 import { getTestsApi } from "../../manager/api/testApi";
 import { getFeedbacksApi } from "../../manager/api/feedbackApi";
@@ -183,7 +180,7 @@ export default function Dashboard() {
               </div>
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">📈 Hoạt động theo thời gian</h2>
-            <ResponsiveContainer width="100%" height={420}>
+            <ResponsiveContainer width="100%" height={430}>
               <LineChart data={formatChartData()}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
