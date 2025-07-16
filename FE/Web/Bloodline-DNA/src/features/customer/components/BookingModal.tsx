@@ -156,6 +156,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       // Debug disabled for production
+      console.log('🔍 BookingModal opened with selectedService:', selectedService);
+      console.log('🔍 Service name:', selectedService?.name);
+      console.log('🔍 Service price:', selectedService?.price);
+      console.log('🔍 Service category:', selectedService?.category);
+      
       console.log('Modal opened, fetching available TestServices for debugging...');
       getAvailableTestServicesApi().then(testServices => {
         console.log('Available TestServices in database:', testServices);
@@ -266,16 +271,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   // Lấy gói xét nghiệm duy nhất từ selectedService thay vì tất cả gói available
   const getSelectedServiceAsTestType = (): TestType | null => {
-    if (!selectedService) return null;
+    if (!selectedService) {
+      console.log('❌ getSelectedServiceAsTestType: No selectedService');
+      return null;
+    }
     
-    // Tạo TestType object từ selectedService
-    return {
+    const testType = {
       id: selectedService.testServiceInfor?.id || selectedService.id,
-      name: selectedService.name,
-      price: `${selectedService.price.toLocaleString('vi-VN')}đ`,
+      name: selectedService.name || 'Dịch vụ xét nghiệm',
+      price: selectedService.price ? `${selectedService.price.toLocaleString('vi-VN')}đ` : 'Liên hệ',
       time: "3-7 ngày", // Default time, có thể customize
       category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
     };
+    
+    console.log('✅ getSelectedServiceAsTestType created:', testType);
+    return testType;
   };
 
   // Lấy gói xét nghiệm theo category của service và hình thức thu mẫu đã chọn (giữ để tương thích)
