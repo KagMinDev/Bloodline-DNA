@@ -297,7 +297,14 @@ export const Services = (): React.JSX.Element => {
         }
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Không thể tải chi tiết dịch vụ';
+      let errorMessage = 'Không thể tải chi tiết dịch vụ';
+      if (error instanceof Error) {
+        if (error.message.includes('yêu cầu đăng nhập')) {
+          errorMessage = 'Để xem chi tiết đầy đủ, vui lòng đăng nhập. Đang hiển thị thông tin cơ bản.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
       navigate(`/services/${id}`, {
         state: {
           error: errorMessage,
@@ -349,9 +356,11 @@ export const Services = (): React.JSX.Element => {
         let errorMessage = 'API không khả dụng, đang hiển thị dữ liệu mẫu.';
         if (err instanceof Error) {
           if (err.message.includes('401')) {
-            errorMessage = 'Phiên đăng nhập đã hết hạn. Đang hiển thị dữ liệu mẫu.';
+            errorMessage = 'Bạn có thể xem dịch vụ mà không cần đăng nhập. Đang hiển thị dữ liệu mẫu.';
           } else if (err.message.includes('timeout')) {
             errorMessage = 'Kết nối quá chậm. Đang hiển thị dữ liệu mẫu.';
+          } else if (err.message.includes('yêu cầu đăng nhập')) {
+            errorMessage = 'Bạn có thể xem dịch vụ mà không cần đăng nhập. Đang hiển thị dữ liệu mẫu.';
           }
         }
         setError(errorMessage);
@@ -551,7 +560,12 @@ export const Services = (): React.JSX.Element => {
                 Chất Lượng Cao
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.</p>
+            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">
+              Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất. 
+              <span className="block mt-2 text-sm text-blue-600">
+                💡 Bạn có thể xem dịch vụ mà không cần đăng nhập. Đăng nhập để đặt lịch và xem thông tin chi tiết.
+              </span>
+            </p>
             
             {/* Stats */}
             <div className="flex flex-wrap gap-4 mt-6">
@@ -678,12 +692,14 @@ export const Services = (): React.JSX.Element => {
 
             {/* Error Warning */}
             {error && (
-              <div className="mb-8 p-4 bg-orange-100 border border-orange-200 rounded-lg">
+              <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <div className="flex items-center">
-                  <div className="mr-3 text-orange-600">⚠️</div>
+                  <div className="mr-3 text-blue-600">ℹ️</div>
                   <div>
-                    <p className="font-medium text-orange-800">{error}</p>
-                    <p className="text-sm text-orange-600">Vui lòng kiểm tra kết nối mạng.</p>
+                    <p className="font-medium text-blue-800">{error}</p>
+                    <p className="text-sm text-blue-600">
+                      Bạn có thể xem và tìm hiểu về các dịch vụ của chúng tôi. Để đặt lịch, vui lòng đăng nhập.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -786,6 +802,7 @@ export const Services = (): React.JSX.Element => {
                             });
                           }} 
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"
+                          title="Đăng nhập để đặt lịch"
                         >
                           <CalendarIcon className="w-4 h-4 mr-2" />
                           Đặt Lịch
@@ -902,13 +919,25 @@ export const Services = (): React.JSX.Element => {
             <p className="mb-8 text-xl leading-relaxed text-white/90">
               Liên hệ ngay với chúng tôi để được tư vấn và đặt lịch sử dụng dịch vụ phù hợp
             </p>
+            <p className="mb-6 text-sm text-white/80">
+              💡 Đăng nhập để đặt lịch và xem thông tin chi tiết dịch vụ
+            </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
                 onClick={() => openBookingModal()}
                 className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900"
+                title="Đăng nhập để đặt lịch"
               >
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 Đặt Lịch Ngay
+              </Button>
+              <Button 
+                onClick={() => navigate('/auth/login')}
+                variant="outline" 
+                className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900"
+              >
+                <UserCheckIcon className="w-5 h-5 mr-2" />
+                Đăng Nhập
               </Button>
               <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
                 <PhoneIcon className="w-5 h-5 mr-2" />

@@ -400,9 +400,9 @@ export const Doctors = (): React.JSX.Element => {
                         </p>
 
                         <div className="grid grid-cols-1 gap-2">
-                          <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
+                          {/* <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
                             Xem Chi Tiết
-                          </Button>
+                          </Button> */}
                         </div>
                       </CardContent>
                     </Card>
@@ -459,11 +459,11 @@ export const Doctors = (): React.JSX.Element => {
                         <span className="text-sm font-bold text-blue-900">{doctor.price}</span>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-2">
+                      {/* <div className="grid grid-cols-1 gap-2">
                       <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
                             Xem Chi Tiết
                           </Button>
-                      </div>
+                      </div> */}
                     </CardContent>
                   </Card>
                 ))}

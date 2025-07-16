@@ -1,6 +1,8 @@
 import type { ProgressStep } from '../../types/bookingTypes';
 import { Button } from '../ui/Button';
-import { FilePenIcon, CreditCardIcon, AlertCircleIcon, CheckCircleIcon, CalendarIcon } from 'lucide-react';
+import { FilePenIcon, CreditCardIcon, AlertCircleIcon, CheckCircleIcon, CalendarIcon, EyeIcon } from 'lucide-react';
+import { getTestResultsByUserId } from '../../api/testResultApi';
+import { useState } from 'react';
 
 interface ProgressStepProps {
   step: ProgressStep;
@@ -17,6 +19,7 @@ interface ProgressStepProps {
   shouldShowSampleButton: boolean;
   isDeliveryConfirmed: boolean;
   isCollectionConfirmed: boolean;
+  userId?: string | null;
 }
 
 export const ProgressStepProps = ({ 
@@ -32,9 +35,51 @@ export const ProgressStepProps = ({
   bookingId = '',
   shouldShowSampleButton,
   isDeliveryConfirmed,
-  isCollectionConfirmed
+  isCollectionConfirmed,
+  userId
 }: ProgressStepProps) => {
   const Icon = step.icon;
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultData, setResultData] = useState<any>(null);
+  const [loadingResult, setLoadingResult] = useState(false);
+  const [resultError, setResultError] = useState<string | null>(null);
+
+  // Hàm lấy kết quả xét nghiệm
+  const handleViewResult = async () => {
+    setLoadingResult(true);
+    setResultError(null);
+    setResultData(null);
+    try {
+      if (!userId) {
+        throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
+      }
+      
+      console.log('🔍 Debug info:', {
+        userId: userId,
+        bookingId: bookingId,
+        stepId: step.id
+      });
+      
+      const results = await getTestResultsByUserId(userId);
+      console.log('📊 All results:', results);
+      
+      const matched = results.find(r => r.testBookingId === bookingId);
+      console.log('🎯 Matched result:', matched);
+      
+      if (!matched) {
+        console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));
+        throw new Error("Không tìm thấy kết quả cho lịch này. Có thể kết quả chưa được cập nhật.");
+      }
+      
+      setResultData(matched);
+      setShowResultModal(true);
+    } catch (e: any) {
+      console.error('❌ Error in handleViewResult:', e);
+      setResultError(e.message || "Lỗi khi lấy kết quả");
+    } finally {
+      setLoadingResult(false);
+    }
+  };
 
   return (
     <div className="flex gap-4 items-start">
@@ -188,7 +233,56 @@ export const ProgressStepProps = ({
             )}
           </div>
         )}
+        
+        {/* Nút XEM KẾT QUẢ cho step Trả Kết Quả (id = 7) */}
+        {step.id === 7 && bookingStatus.toLowerCase() === 'completed' && (
+          <div className="mt-4">
+            <Button 
+              onClick={handleViewResult} 
+              disabled={loadingResult} 
+              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+            >
+              <EyeIcon className="w-4 h-4" />
+              {loadingResult ? "Đang tải..." : "XEM KẾT QUẢ"}
+            </Button>
+            {resultError && (
+              <div className="text-red-600 text-sm mt-2 p-2 bg-red-50 border border-red-200 rounded">
+                {resultError}
+                {resultError.includes("đăng nhập") && (
+                  <div className="mt-1">
+                    <Button 
+                      onClick={() => window.location.href = '/auth/login'} 
+                      className="text-xs bg-red-600 hover:bg-red-700 text-white px-2 py-1"
+                    >
+                      Đăng nhập ngay
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+      
+      {/* Modal hiển thị kết quả */}
+      {showResultModal && resultData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setShowResultModal(false)}>&times;</button>
+            <h2 className="text-xl font-bold mb-4 text-green-700">Kết Quả Xét Nghiệm</h2>
+            <div className="mb-2"><b>Mã booking:</b> {resultData.testBookingId}</div>
+            <div className="mb-2"><b>Kết luận:</b> {resultData.resultSummary}</div>
+            <div className="mb-2"><b>Ngày trả kết quả:</b> {new Date(resultData.resultDate).toLocaleDateString('vi-VN')}</div>
+            <div className="mb-2"><b>Khách hàng:</b> {resultData.client?.fullName} ({resultData.client?.email})</div>
+            <div className="mb-2"><b>Địa chỉ:</b> {resultData.client?.address}</div>
+            <div className="mb-4">
+              <b>File kết quả:</b><br />
+              <img src={resultData.resultFileUrl} alt="Kết quả" className="max-w-full max-h-60 border rounded mt-2" />
+            </div>
+            <Button onClick={() => setShowResultModal(false)} className="w-full bg-green-600 text-white mt-2">Đóng</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -11,7 +11,8 @@ import {
   MapPinIcon,
   PhoneIcon,
   SearchIcon,
-  StarIcon
+  StarIcon,
+  FileTextIcon
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +40,7 @@ import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/Sta
 import { FeedbackModal } from "../components/FeedbackModal";
 import { useExistingFeedback } from "../hooks/useExistingFeedback";
 import type { DetailedBookingStatus } from "../types/bookingTypes";
+import { getTestResultsByUserId } from "../api/testResultApi";
 
 interface Booking {
   id: string;
@@ -67,6 +69,10 @@ export const BookingList = (): React.JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [selectedBookingForFeedback, setSelectedBookingForFeedback] = useState<Booking | null>(null);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultData, setResultData] = useState<any>(null);
+  const [loadingResult, setLoadingResult] = useState(false);
+  const [resultError, setResultError] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [preloadedFeedbacks, setPreloadedFeedbacks] = useState<Set<string>>(new Set());
 
@@ -301,6 +307,64 @@ export const BookingList = (): React.JSX.Element => {
     setSelectedBookingForFeedback(null);
   };
 
+  // Hàm xử lý xem kết quả xét nghiệm
+  const handleViewResult = async (bookingId: string) => {
+    setLoadingResult(true);
+    setResultError(null);
+    setResultData(null);
+    try {
+      if (!userId) {
+        throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
+      }
+      
+      console.log('🔍 Debug info:', {
+        userId: userId,
+        bookingId: bookingId
+      });
+      
+      const results = await getTestResultsByUserId(userId);
+      console.log('📊 All results:', results);
+      
+      // Debug: In ra tất cả testBookingId và bookingId
+      console.log('📋 bookingId:', bookingId, typeof bookingId);
+      console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
+      
+      // Chuẩn hóa để so sánh
+      const normalize = (val: any) => String(val).replace(/\s+/g, '').toLowerCase();
+      const normBookingId = normalize(bookingId);
+      
+      // Tìm kết quả khớp
+      let matched = results.find(r => normalize(r.testBookingId) === normBookingId);
+      
+      if (!matched && results.length === 1) {
+        // Nếu chỉ có 1 kết quả, tự động chọn
+        matched = results[0];
+        console.warn('⚠️ Không khớp bookingId, nhưng chỉ có 1 kết quả. Sẽ hiển thị kết quả này.');
+      }
+      
+      if (!matched && results.length > 1) {
+        // Nếu có nhiều kết quả, cho phép user chọn
+        setResultData({ list: results });
+        setShowResultModal(true);
+        setLoadingResult(false);
+        return;
+      }
+      
+      if (!matched) {
+        console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));
+        throw new Error("Không tìm thấy kết quả cho lịch này. Có thể kết quả chưa được cập nhật.");
+      }
+      
+      setResultData(matched);
+      setShowResultModal(true);
+    } catch (e: any) {
+      console.error('❌ Error in handleViewResult:', e);
+      setResultError(e.message || "Lỗi khi lấy kết quả");
+    } finally {
+      setLoadingResult(false);
+    }
+  };
+
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
       <div className="relative w-full max-w-none">
@@ -514,6 +578,17 @@ export const BookingList = (): React.JSX.Element => {
                                   Sửa
                                 </Button>
                               )}
+                              {booking.status === 'Completed' && (
+                                <Button 
+                                  className="w-full bg-green-600 sm:w-auto hover:bg-green-700"
+                                  style={{ color: 'white' }}
+                                  onClick={() => handleViewResult(booking.id)}
+                                  disabled={loadingResult}
+                                >
+                                  <FileTextIcon className="w-4 h-4 mr-2" />
+                                  {loadingResult ? "Đang tải..." : "XEM KẾT QUẢ"}
+                                </Button>
+                              )}
                             </div>
                             {booking.status === 'Completed' && (() => {
                               const existingFeedback = userId && booking.testServiceId ? getExistingFeedback(userId, booking.testServiceId) : null;
@@ -612,6 +687,67 @@ export const BookingList = (): React.JSX.Element => {
           bookingId={selectedBookingForFeedback.id}
           testServiceId={selectedBookingForFeedback.testServiceId} // Use correct testServiceId
         />
+      )}
+
+      {/* Modal hiển thị kết quả */}
+      {showResultModal && resultData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setShowResultModal(false)}>&times;</button>
+            <h2 className="text-xl font-bold mb-4 text-green-700">Kết Quả Xét Nghiệm</h2>
+            {resultData.list ? (
+              <>
+                <div className="mb-2 text-blue-700 font-semibold">Chọn kết quả muốn xem:</div>
+                <ul className="mb-4 space-y-2">
+                  {resultData.list.map((r: any, idx: number) => (
+                    <li key={r.id} className="border rounded p-2 flex flex-col gap-1">
+                      <div><b>Mã booking:</b> {r.testBookingId}</div>
+                      <div><b>Kết luận:</b> {r.resultSummary}</div>
+                      <div><b>Ngày trả kết quả:</b> {new Date(r.resultDate).toLocaleDateString('vi-VN')}</div>
+                      <Button className="mt-1 bg-green-600 text-white" onClick={() => { setResultData(r); }}>
+                        Xem chi tiết kết quả này
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+                <Button onClick={() => setShowResultModal(false)} className="w-full bg-gray-600 text-white mt-2">Đóng</Button>
+              </>
+            ) : (
+              <>
+                <div className="mb-2"><b>Mã booking:</b> {resultData.testBookingId}</div>
+                <div className="mb-2"><b>Kết luận:</b> {resultData.resultSummary}</div>
+                <div className="mb-2"><b>Ngày trả kết quả:</b> {new Date(resultData.resultDate).toLocaleDateString('vi-VN')}</div>
+                <div className="mb-2"><b>Khách hàng:</b> {resultData.client?.fullName} ({resultData.client?.email})</div>
+                <div className="mb-2"><b>Địa chỉ:</b> {resultData.client?.address}</div>
+                <div className="mb-4">
+                  <b>File kết quả:</b><br />
+                  <img src={resultData.resultFileUrl} alt="Kết quả" className="max-w-full max-h-60 border rounded mt-2" />
+                </div>
+                <Button onClick={() => setShowResultModal(false)} className="w-full bg-green-600 text-white mt-2">Đóng</Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {resultError && !showResultModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
+            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setResultError(null)}>&times;</button>
+            <h2 className="text-xl font-bold mb-4 text-red-700">Lỗi</h2>
+            <p className="mb-4 text-red-600">{resultError}</p>
+            {resultError.includes("đăng nhập") && (
+              <Button 
+                onClick={() => window.location.href = '/auth/login'} 
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                Đăng nhập ngay
+              </Button>
+            )}
+            <Button onClick={() => setResultError(null)} className="w-full bg-gray-600 text-white mt-2">Đóng</Button>
+          </div>
+        </div>
       )}
     </div>
   );
