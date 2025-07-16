@@ -36,6 +36,7 @@ import {
   formatPrice, 
   getStatusDisplay 
 } from "../api/bookingListApi";
+import { AddressSelector } from "../components/AddressSelector";
 
 // Local interface for BookingItem to avoid import issues
 interface BookingItem {
@@ -206,6 +207,8 @@ export const EditBooking = (): React.JSX.Element => {
 
     if (!formData.address.trim()) {
       newErrors.address = 'Vui lòng nhập địa chỉ';
+    } else if (formData.address.split(',').length < 2) {
+      newErrors.address = 'Vui lòng chọn đầy đủ tỉnh/thành phố và địa chỉ chi tiết';
     }
 
     if (!formData.preferredDate) {
@@ -472,13 +475,13 @@ export const EditBooking = (): React.JSX.Element => {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label htmlFor="address" className="font-semibold text-gray-700">Địa chỉ lấy mẫu</label>
-                  <Input 
-                    id="address" 
+                  <label htmlFor="address" className="font-semibold text-gray-700">Địa chỉ lấy mẫu *</label>
+                  <AddressSelector
                     value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    onChange={(address) => handleInputChange('address', address)}
+                    placeholder="Nhập địa chỉ chi tiết"
+                    required={true}
                     className="mt-1"
-                    icon={<MapPinIcon />}
                   />
                   {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
                 </div>

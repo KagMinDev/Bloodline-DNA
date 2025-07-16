@@ -41,7 +41,7 @@ const Header: React.FC = () => {
     { label: "Trang chủ", path: "/" },
     { label: "Về chúng tôi", path: "/about" },
     { label: "Dịch vụ", path: "/services" },
-    { label: "Các Bác Sĩ", path: "/doctors" },
+    // { label: "Các Bác Sĩ", path: "/doctors" },
     { label: "Tin tức", path: "/blogs" },
     { label: "Liên hệ", path: "/contacts" },
   ];

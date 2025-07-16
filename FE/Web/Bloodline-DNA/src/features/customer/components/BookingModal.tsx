@@ -16,6 +16,7 @@ import { createBookingApi, mapFormDataToBookingRequest, getAvailableTestServices
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader } from "./ui/Card";
 import { Input } from "./ui/Input";
+import { AddressSelector } from "./AddressSelector";
 
 // Define interface locally to avoid import issues
 interface CreateBookingResponse {
@@ -151,6 +152,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       }));
     }
   }, [selectedService]);
+
+  // Reset address when serviceType changes
+  React.useEffect(() => {
+    if (formData.serviceType === 'clinic') {
+      setFormData(prev => ({
+        ...prev,
+        address: 'TẠI CƠ SỞ'
+      }));
+    } else if (formData.serviceType === 'home' && formData.address === 'TẠI CƠ SỞ') {
+      setFormData(prev => ({
+        ...prev,
+        address: ''
+      }));
+    }
+  }, [formData.serviceType]);
 
   // Debug: Fetch available TestServices when modal opens
   React.useEffect(() => {
@@ -485,12 +501,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const validateStep2 = () => {
+    const hasValidAddress = formData.serviceType === "clinic" 
+      ? formData.address === "TẠI CƠ SỞ"
+      : formData.address && formData.address.split(',').length >= 2;
+    
     return (
       formData.name &&
       formData.phone &&
       formData.preferredDate &&
       formData.preferredTime &&
-      formData.address // Address is always required now (will be "TẠI CƠ SỞ" for clinic)
+      hasValidAddress
     );
   };
 
@@ -799,25 +819,31 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       <MapPinIcon className="w-4 h-4 mr-2" />
                       {formData.serviceType === "home" ? "Địa chỉ nhận kit / Thu mẫu *" : "Địa chỉ thực hiện"}
                     </label>
-                    <Input
-                      type="text"
-                      value={formData.address}
-                      onChange={(e) =>
-                        handleInputChange("address", e.target.value)
-                      }
-                      placeholder={
-                        formData.serviceType === "home" 
-                          ? "Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
-                          : "Xét nghiệm tại cơ sở"
-                      }
-                      className="w-full"
-                      disabled={formData.serviceType === "clinic"}
-                      readOnly={formData.serviceType === "clinic"}
-                    />
-                    {formData.serviceType === "clinic" && (
-                      <p className="text-xs text-blue-600">
-                        <strong>Lưu ý:</strong> Bạn sẽ đến trung tâm để thực hiện xét nghiệm
-                      </p>
+                    {formData.serviceType === "home" ? (
+                      <AddressSelector
+                        value={formData.address}
+                        onChange={(address) => handleInputChange("address", address)}
+                        placeholder="Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
+                        required={true}
+                        className="md:col-span-2"
+                      />
+                    ) : (
+                      <div>
+                        <Input
+                          type="text"
+                          value={formData.address}
+                          onChange={(e) =>
+                            handleInputChange("address", e.target.value)
+                          }
+                          placeholder="Xét nghiệm tại cơ sở"
+                          className="w-full"
+                          disabled={true}
+                          readOnly={true}
+                        />
+                        <p className="text-xs text-blue-600 mt-1">
+                          <strong>Lưu ý:</strong> Bạn sẽ đến trung tâm để thực hiện xét nghiệm
+                        </p>
+                      </div>
                     )}
                   </div>
 

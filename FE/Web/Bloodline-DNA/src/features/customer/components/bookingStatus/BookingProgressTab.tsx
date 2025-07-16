@@ -58,6 +58,8 @@ export const BookingProgressTab = ({
   userId,
   testServiceId,
 }: BookingProgressTabProps) => {
+
+
   if (!progressData) return <p>Không có dữ liệu tiến trình.</p>;
 
   // Get existing feedback data if available
@@ -91,6 +93,7 @@ export const BookingProgressTab = ({
             shouldShowSampleButton={shouldShowSampleButton}
             isDeliveryConfirmed={isDeliveryConfirmed}
             isCollectionConfirmed={isCollectionConfirmed}
+            userId={userId}
           />
         ))}
       </div>
@@ -276,6 +279,7 @@ export const BookingProgressTab = ({
           </CardContent>
         </Card>
       </div>
+
     </div>
   );
 };

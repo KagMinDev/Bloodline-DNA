@@ -286,7 +286,7 @@ function BlogDetail() {
                     key={relatedBlog.id}
                     className="overflow-hidden transition-all duration-300 bg-white border border-gray-200 shadow-sm cursor-pointer rounded-xl hover:shadow-lg hover:border-blue-300 group"
                     onClick={() =>
-                      (window.location.href = `/blog/${relatedBlog.id}`)
+                      (window.location.href = `/blogs/${relatedBlog.id}`)
                     }
                   >
                     <div className="relative overflow-hidden">

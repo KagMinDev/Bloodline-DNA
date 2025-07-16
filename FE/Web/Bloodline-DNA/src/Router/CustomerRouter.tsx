@@ -26,7 +26,7 @@ export default function CustomerRouter() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<DetailServices />} />
-        <Route path="/doctors" element={<Doctors />} />
+        {/* <Route path="/doctors" element={<Doctors />} /> */}
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
