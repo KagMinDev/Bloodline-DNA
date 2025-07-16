@@ -20,7 +20,6 @@ interface BookingTableProps {
   setFilteredBookings: React.Dispatch<
     React.SetStateAction<TestBookingResponse[]>
   >;
-  token: string;
   refetchBookings: () => Promise<void>;
 }
 
@@ -30,7 +29,6 @@ const BookingTable: React.FC<BookingTableProps> = ({
   selectedStatuses,
   statusOptions,
   setSelectedStatuses,
-  token,
   refetchBookings,
 }) => {
   const [loadingBookings, setLoadingBookings] = useState<Set<string>>(
@@ -48,8 +46,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
     setLoadingBookings((prev) => new Set(prev).add(bookingId));
     try {
       await updateTestBookingStatusApi(
-        { bookingId, status: statusOption.value },
-        token
+        { bookingId, status: statusOption.value }
       );
       await refetchBookings();
 
