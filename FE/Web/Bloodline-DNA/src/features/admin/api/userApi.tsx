@@ -1,17 +1,10 @@
 import rootApi from "../../../apis/rootApi";
 import type { UserRequest, UserResponse } from "../types/User";
 
-export const createStaffApi = async (data: UserRequest, token: string): Promise<UserResponse> => {
+export const createStaffApi = async (data: UserRequest): Promise<UserResponse> => {
   try {
-    const response = await rootApi.post<UserResponse>(
-      "/admin/create-staff",
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    // rootApi sẽ tự động thêm Authorization header thông qua interceptor
+    const response = await rootApi.post<UserResponse>("/admin/create-staff", data);
     return response.data;
   } catch (error) {
     const errorDetails = {
@@ -25,18 +18,16 @@ export const createStaffApi = async (data: UserRequest, token: string): Promise<
 };
 
 // API lấy danh sách người dùng
-export const getAllUserApi = async (token: string): Promise<UserResponse[]> => {
+export const getAllUserApi = async (): Promise<UserResponse[]> => {
   const maxRetries = 3;
   const timeout = 10000; // 10 seconds
   let attempts = 0;
   while (attempts < maxRetries) {
     try {
-        console.log(`Attempt ${attempts + 1} to fetch all users`);
+      console.log(`Attempt ${attempts + 1} to fetch all users`);
 
+      // rootApi sẽ tự động thêm Authorization header thông qua interceptor
       const response = await rootApi.get<UserResponse[]>("/user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
         timeout, // Thêm timeout 10s cho mỗi request
       });
       return response.data;

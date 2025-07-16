@@ -10,19 +10,11 @@ function TestBooking() {
   const [bookings, setBookings] = useState<TestBookingResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const token = localStorage.getItem('token') || '';
 
   // Define fetchBookings outside useEffect
   const fetchBookings = async () => {
-    if (!token) {
-      setError('Không tìm thấy token xác thực');
-      setIsLoading(false);
-      toast.error('Vui lòng đăng nhập lại');
-      return;
-    }
-
     try {
-      const response = await getTestBookingApi(token);
+      const response = await getTestBookingApi();
       console.log('API Response:', response);
 
       if (!Array.isArray(response)) {
@@ -44,7 +36,7 @@ function TestBooking() {
 
   useEffect(() => {
     fetchBookings();
-  }, [token]);
+  }, []);
 
   // Hàm đếm booking theo ngày, dùng định dạng DD/MM/YYYY để khớp với Calendar
   const countBookingsByDate = (bookings: TestBookingResponse[]) => {
