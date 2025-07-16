@@ -96,7 +96,6 @@ function TestBooking() {
             events={bookings}
             onUpdateStatus={handleUpdateStatus}
             bookingsByDate={bookingsByDate}
-            token={token}
             refetchBookings={fetchBookings}
           />
         )}

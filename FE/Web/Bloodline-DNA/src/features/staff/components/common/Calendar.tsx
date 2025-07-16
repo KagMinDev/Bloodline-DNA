@@ -13,10 +13,11 @@ import BookingTable from '../booking/common/BookingTable';
 import { STATUS_MAPPING, type StatusOption } from '../booking/constants/statusMapping';
 import { getValidDate, renderCollectionMethod } from '../booking/utils/statusUtils';
 
-interface CalendarExtendedProps extends CalendarProps {
-  token: string;
-  refetchBookings: () => Promise<void>; // ✅ THÊM
-
+interface CalendarComponentProps {
+  bookingsByDate?: Record<string, number>;
+  events: TestBookingResponse[];
+  onUpdateStatus?: (updatedBooking: TestBookingResponse) => void;
+  refetchBookings: () => Promise<void>; // Callback to refetch bookings after status update
 }
 
 function formatToYYYYMMDD(date: Date): string {
@@ -26,7 +27,12 @@ function formatToYYYYMMDD(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, token, refetchBookings }) => {
+const Calendar: React.FC<CalendarComponentProps> = ({
+  events,
+  bookingsByDate,
+  onUpdateStatus,
+  refetchBookings
+}) => {
   const today = formatToYYYYMMDD(new Date());
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [localEvents, setLocalEvents] = useState<TestBookingResponse[]>([]);
@@ -148,7 +154,6 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
           statusOptions={statusOptions}
           setSelectedStatuses={setSelectedStatuses}
           setFilteredBookings={setLocalEvents}
-          token={token}
           refetchBookings={refetchBookings}
         />
 
