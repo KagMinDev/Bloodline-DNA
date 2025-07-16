@@ -504,13 +504,16 @@ export const BookingList = (): React.JSX.Element => {
                                 <EyeIcon className="w-4 h-4 mr-2" />
                                 Xem chi tiết
                               </Button>
-                              <Button 
-                                className="w-full text-white bg-blue-600 sm:w-auto hover:bg-blue-700"
-                                onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
-                              >
-                                <EditIcon className="w-4 h-4 mr-2" />
-                                Sửa
-                              </Button>
+                              {(booking.status === 'Pending' || booking.status === 'PreparingKit') && (
+                                <Button 
+                                  className="w-full bg-blue-600 sm:w-auto hover:bg-blue-700"
+                                  style={{ color: 'white' }}
+                                  onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
+                                >
+                                  <EditIcon className="w-4 h-4 mr-2" />
+                                  Sửa
+                                </Button>
+                              )}
                             </div>
                             {booking.status === 'Completed' && (() => {
                               const existingFeedback = userId && booking.testServiceId ? getExistingFeedback(userId, booking.testServiceId) : null;

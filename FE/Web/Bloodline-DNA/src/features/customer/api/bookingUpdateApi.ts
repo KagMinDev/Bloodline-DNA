@@ -1,7 +1,10 @@
 import type { AxiosError } from "axios";
 import axios from "axios";
 
-// Interface cho Update Booking request body
+// Cập nhật URL API mới
+const API_BASE_URL = "https://api.adntester.duckdns.org/api";
+
+// Interface cho Update Booking request body theo yêu cầu mới
 export interface UpdateBookingRequest {
   id: string;
   appointmentDate: string; // ISO date string
@@ -19,9 +22,6 @@ export interface UpdateBookingResponse {
   message: string;
   statusCode?: number;
 }
-
-// Base API URL
-const API_BASE_URL = "https://api.adntester.duckdns.org/api";
 
 // Function để lấy auth token
 const getAuthToken = (): string | null => {
@@ -421,19 +421,28 @@ export const mapFormDataToUpdateRequest = (
     throw new Error("Invalid date/time format");
   }
 
-  // Get status number
-  let statusNumber = statusToNumber[currentStatus || "pending"];
-  if (formData.status) {
-    statusNumber =
-      typeof formData.status === "number"
-        ? formData.status
-        : statusToNumber[formData.status];
+  // Get status number - đảm bảo luôn là số
+  let statusNumber = 0; // Default to Pending
+  
+  if (formData.status && typeof formData.status === "number") {
+    statusNumber = formData.status;
+  } else if (formData.status && typeof formData.status === "string") {
+    statusNumber = statusToNumber[formData.status] || 0;
+  } else if (currentStatus) {
+    statusNumber = statusToNumber[currentStatus] || 0;
   }
+
+  // Debug logging
+  console.log('🔍 Debug form data:', {
+    notes: formData.notes,
+    note: formData.note,
+    finalNote: (formData.notes || formData.note || "").trim()
+  });
 
   const updateRequest: UpdateBookingRequest = {
     id: bookingId,
     appointmentDate: appointmentDateTime.toISOString(),
-    status: statusNumber,
+    status: statusNumber, // Đảm bảo luôn là số
     note: (formData.notes || formData.note || "").trim(),
     clientName: (formData.name || formData.clientName || "").trim(),
     address: (formData.address || "").trim(),

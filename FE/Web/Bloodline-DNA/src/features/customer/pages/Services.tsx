@@ -782,7 +782,7 @@ export const Services = (): React.JSX.Element => {
                               category: service.category,
                               price: Number(service.priceNumeric),
                               collectionMethod: Number(service.collectionMethod),
-                              testServiceInfo: service.testServiceInfo ?? (service.serviceId ? { id: service.serviceId } : undefined)
+                              testServiceInfor: service.testServiceInfo ?? (service.serviceId ? { id: service.serviceId } : undefined)
                             });
                           }} 
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"
