@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   countText: {
+    marginTop: 18,
     fontSize: 16,
     color: "#475569", // slate-600
   },

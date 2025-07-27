@@ -132,7 +132,7 @@ const BlogDetailsScreen: React.FC = () => {
       <View style={styles.backButtonWrapper}>
         <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
           <ArrowLeft size={20} color="#374151" />
-          <Text style={styles.backButtonText}>Quay lại trang bài viết</Text>
+          <Text style={styles.backButtonText}>Quay lại</Text>
         </TouchableOpacity>
       </View>
 
@@ -200,8 +200,7 @@ const BlogDetailsScreen: React.FC = () => {
               activeOpacity={0.7}
               onPress={() => sharePost("twitter")}
             >
-              <Twitter size={20} color="white" />
-              <Text style={styles.shareButtonText}>Twitter</Text>
+              <Twitter size={18} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -209,8 +208,7 @@ const BlogDetailsScreen: React.FC = () => {
               activeOpacity={0.7}
               onPress={() => sharePost("facebook")}
             >
-              <Facebook size={20} color="white" />
-              <Text style={styles.shareButtonText}>Facebook</Text>
+              <Facebook size={19} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -218,8 +216,7 @@ const BlogDetailsScreen: React.FC = () => {
               activeOpacity={0.7}
               onPress={() => sharePost("copy")}
             >
-              <LinkIcon size={20} color="white" />
-              <Text style={styles.shareButtonText}>Sao chép link</Text>
+              <LinkIcon size={18} color="white" />
             </TouchableOpacity>
           </View>
         </View>

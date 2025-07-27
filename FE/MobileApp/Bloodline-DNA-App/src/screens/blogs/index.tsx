@@ -10,7 +10,6 @@ import {
 // import Sidebar from "../components/sidebar";
 import { getBlogsApi } from "./api/blogApi";
 import BlogPostList from "./components/blogPost-list";
-import { FeaturedPosts } from "./components/featured-posts";
 import BlogHero from "./components/hero";
 import BlogSearchFilter from "./components/search";
 import { styles } from "./styles";
@@ -126,7 +125,7 @@ const BlogsScreen: React.FC = () => {
 
         <BlogSearchFilter searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
-        <FeaturedPosts filteredPosts={filteredPosts} formatDate={formatDate} />
+        {/* <FeaturedPosts filteredPosts={filteredPosts} formatDate={formatDate} /> */}
 
         <View style={styles.mainContent}>
           <View style={styles.postList}>

@@ -209,20 +209,20 @@ export const styles = StyleSheet.create({
   },
   shareButtonsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+    gap: 12,
   },
   shareButton: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 12,
     paddingVertical: 10,
-    paddingHorizontal: 16,
-    gap: 8,
+    paddingHorizontal: 10,
   },
   shareButtonText: {
     color: "white",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 14,
   },
   relatedSection: {
     marginBottom: 48,

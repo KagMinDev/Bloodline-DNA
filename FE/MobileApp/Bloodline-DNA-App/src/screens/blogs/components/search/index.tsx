@@ -36,11 +36,11 @@ export default BlogSearchFilter;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 24, // tương đương py-12
+    paddingVertical: 20, // tương đương py-12
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb", // gray-200
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
   },
   searchWrapper: {
     maxWidth: 600,
@@ -55,10 +55,11 @@ const styles = StyleSheet.create({
     marginTop: -10,
   },
   input: {
+    width: 383,
     height: 48,
     paddingLeft: 44,
     paddingRight: 16,
-    fontSize: 18,
+    fontSize: 15,
     borderWidth: 2,
     borderColor: "#e5e7eb",
     borderRadius: 9999,

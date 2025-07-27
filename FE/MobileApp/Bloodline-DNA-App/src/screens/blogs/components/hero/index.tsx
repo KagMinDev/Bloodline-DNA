@@ -21,15 +21,6 @@ const BlogHero: React.FC<BlogHeroProps> = ({ isVisible }) => {
       </Svg>
 
       <View style={styles.contentWrapper}>
-        {/* Breadcrumb */}
-        <View style={styles.breadcrumb}>
-          <Text style={styles.breadcrumbLink} onPress={() => {/* navigate home */}}>
-            Trang Chủ
-          </Text>
-          <Text style={styles.breadcrumbSeparator}> / </Text>
-          <Text style={styles.breadcrumbCurrent}>Blog Y Tế</Text>
-        </View>
-
         {/* Title */}
         <Text style={styles.title}>
           Blog Y Tế
@@ -50,7 +41,7 @@ export default BlogHero;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    paddingVertical: 40, // py-20 = 20*2
+    marginTop: 20,
     backgroundColor: "#eff6ff", // bg-blue-50
     overflow: "hidden",
     position: "relative",
@@ -78,22 +69,21 @@ const styles = StyleSheet.create({
     color: "#1e3a8a", // text-blue-900
   },
   title: {
-    fontSize: 36, // text-4xl = 36px approx
+    fontSize: 20, // text-4xl = 36px approx
     fontWeight: "700",
     color: "#1e3a8a",
-    lineHeight: 44,
+    lineHeight: 40,
   },
   subtitle: {
-    fontSize: 20, // text-2xl
+    fontSize: 14, // text-2xl
     fontWeight: "500",
     color: "#2563eb", // text-blue-700
-    marginTop: 8,
   },
   description: {
     maxWidth: 600, // max-w-2xl ~ 40rem = 640px (tùy màn)
-    fontSize: 16, // text-base
+    fontSize: 13, // text-base
     lineHeight: 24,
     color: "#374151", // text-gray-700
-    marginTop: 8,
+    paddingBottom: 10,
   },
 });
