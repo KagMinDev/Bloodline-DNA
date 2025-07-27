@@ -5,9 +5,9 @@ const MENU_WIDTH = SCREEN_WIDTH * 0.8;
 
 const styles = StyleSheet.create({
   header: {
-    height: 80,
+    height: 88,
     top: 0,
-    backgroundColor: "#fff",
+    backgroundColor: "#e4f3fd",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -56,15 +56,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 10,
   },
-  menuHeader: {
+    menuHeader: {
     alignItems: "center",
     marginBottom: 20,
   },
   menuWelcome: {
     marginTop: 8,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#007bff",
+    textDecorationLine: "underline",
   },
   menuItem: {
     flexDirection: "row",

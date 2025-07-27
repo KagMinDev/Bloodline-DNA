@@ -17,7 +17,7 @@ const DeliveryStatusLabel: Record<DeliveryStatus, string> = {
   WaitingForPickup: "Đợi lấy mẫu",
   PickingUpSample: "Đang lấy mẫu",
   SampleReceived: "Đã nhận mẫu",
-  cancelled: "Đã hủy",
+  Cancelled: "Đã hủy",
 };
 
 function Delivery() {
@@ -76,7 +76,7 @@ function Delivery() {
       .length,
     sampleReceived: deliveries.filter((d) => d.status === "SampleReceived")
       .length,
-    cancelled: deliveries.filter((d) => d.status === "cancelled").length,
+    cancelled: deliveries.filter((d) => d.status === "Cancelled").length,
   };
 
   return (
@@ -141,7 +141,7 @@ function Delivery() {
               "WaitingForPickup",
               "PickingUpSample",
               "SampleReceived",
-              "cancelled",
+              "Cancelled",
             ].map((status) => {
               const isActive = filterStatus === status;
 

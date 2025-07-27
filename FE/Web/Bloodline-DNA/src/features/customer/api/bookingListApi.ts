@@ -42,12 +42,10 @@ import { getUserInfoApi } from './userApi';
 // Function để lấy userId từ API thay vì decode token
 export const getUserIdFromToken = async (): Promise<string | null> => {
   try {
-    console.log('🔍 Getting userId from userApi...');
     
     // Ưu tiên lấy từ API
     const userData = await getUserInfoApi();
     if (userData?.id) {
-      console.log('✅ Found userId from API:', userData.id);
       // Cache userId vào localStorage để sử dụng sau
       localStorage.setItem('userId', userData.id);
       return userData.id;
@@ -63,7 +61,6 @@ export const getUserIdFromToken = async (): Promise<string | null> => {
     if (!token) return null;
     
     try {
-      console.log('🔄 Falling back to token decode...');
       const base64Url = token.split('.')[1];
       if (!base64Url) {
         console.warn('⚠️ Invalid token format');
@@ -141,9 +138,7 @@ export const getBookingListApi = async (): Promise<BookingItem[]> => {
       console.warn('⚠️ No authentication token found');
       throw new Error('Authentication required. Please login to view bookings.');
     }
-    
-    console.log(`🔍 Fetching booking list for user ${userId} from API...`);
-    
+        
     const response = await fetch(`${API_BASE_URL}/TestBooking/user/${userId}`, {
       method: 'GET',
       headers,
@@ -165,7 +160,6 @@ export const getBookingListApi = async (): Promise<BookingItem[]> => {
           detailedMessage = errorData.message;
         }
         
-        console.log('Parsed error data:', errorData);
       } catch (parseError) {
         // If not JSON, use raw text
         detailedMessage = errorData || 'Unknown error';
@@ -185,7 +179,6 @@ export const getBookingListApi = async (): Promise<BookingItem[]> => {
     }
 
     const result = await response.json();
-    console.log('✅ Booking list fetched successfully:', result);
     
     // Handle different response structures
     if (Array.isArray(result)) {

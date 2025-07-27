@@ -1,8 +1,8 @@
-import { Card, CardHeader, CardContent } from '../ui/Card';
-import { Button } from '../ui/Button';
-import { HomeIcon, BuildingIcon, CalendarIcon, ClockIcon, UserIcon, PhoneIcon, MailIcon, MapPinIcon, CreditCardIcon, AlertCircleIcon } from 'lucide-react';
+import { AlertCircleIcon, BuildingIcon, CalendarIcon, ClockIcon, CreditCardIcon, HomeIcon, MailIcon, MapPinIcon, PhoneIcon, UserIcon } from 'lucide-react';
 import { calculateDeposit, formatPaymentAmount } from '../../api/paymentApi';
 import type { BookingDetail, TestProgressData } from '../../types/bookingTypes';
+import { Button } from '../ui/Button';
+import { Card, CardContent, CardHeader } from '../ui/Card';
 import { formatDate } from '../utils/bookingUtils';
 
 interface BookingDetailTabProps {
@@ -20,8 +20,8 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
   console.log('BookingDetailTab rendered with paymentError:', paymentError);
   
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-2 space-y-6">
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="space-y-6 lg:col-span-2">
         <Card>
           <CardHeader className="bg-blue-50/50">
             <h3 className="font-bold text-blue-900">Thông Tin Dịch Vụ</h3>
@@ -44,12 +44,12 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
           <CardHeader className="bg-blue-50/50">
             <h3 className="font-bold text-blue-900">Thông Tin Khách Hàng</h3>
           </CardHeader>
-          <CardContent className="p-6 grid grid-cols-2 gap-x-6 gap-y-4">
+          <CardContent className="grid grid-cols-2 p-6 gap-x-6 gap-y-4">
             <div className="flex items-center gap-3"><UserIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Họ tên</p><p className="font-medium">{booking.name}</p></div></div>
             <div className="flex items-center gap-3"><PhoneIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Điện thoại</p><p className="font-medium">{booking.phone}</p></div></div>
-            <div className="col-span-2 flex items-center gap-3"><MailIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Email</p><p className="font-medium">{booking.email}</p></div></div>
-            {booking.address && <div className="col-span-2 flex items-start gap-3"><MapPinIcon className="w-5 h-5 text-blue-500 mt-1" /><div><p className="text-sm text-slate-500">Địa chỉ</p><p className="font-medium">{booking.address}</p></div></div>}
-            {booking.notes && <div className="col-span-2 mt-4 pt-4 border-t"><p className="text-sm font-medium text-slate-600 mb-1">Ghi chú:</p><p className="text-sm text-slate-500 italic">"{booking.notes}"</p></div>}
+            <div className="flex items-center col-span-2 gap-3"><MailIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Email</p><p className="font-medium">{booking.email}</p></div></div>
+            {booking.address && <div className="flex items-start col-span-2 gap-3"><MapPinIcon className="w-5 h-5 mt-1 text-blue-500" /><div><p className="text-sm text-slate-500">Địa chỉ</p><p className="font-medium">{booking.address}</p></div></div>}
+            {booking.notes && <div className="col-span-2 pt-4 mt-4 border-t"><p className="mb-1 text-sm font-medium text-slate-600">Ghi chú:</p><p className="text-sm italic text-slate-500">"{booking.notes}"</p></div>}
           </CardContent>
         </Card>
       </div>
@@ -62,19 +62,19 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
             <div className="space-y-2">
               <div className="flex justify-between text-slate-600"><span>Giá dịch vụ</span><span>{booking.price}</span></div>
               {booking.priceNumeric && (
-                <div className="flex justify-between text-slate-600 text-sm">
+                <div className="flex justify-between text-sm text-slate-600">
                   <span>Đặt cọc (20%)</span>
                   <span className="font-medium text-orange-600">{formatPaymentAmount(calculateDeposit(booking.priceNumeric))}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-slate-800 pt-2 border-t"><span>Tổng cộng</span><span className="text-lg text-green-600">{booking.totalPrice}</span></div>
+              <div className="flex justify-between pt-2 font-bold border-t text-slate-800"><span>Tổng cộng</span><span className="text-lg text-green-600">{booking.totalPrice}</span></div>
             </div>
             {progressData?.steps.find(s => s.id === 2 && s.actionRequired && s.status === 'current') && (
               <div className="pt-4 border-t">
                 {paymentError && (
-                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="p-3 mb-3 border border-red-200 rounded-lg bg-red-50">
                     <div className="flex items-center">
-                      <AlertCircleIcon className="w-4 h-4 text-red-600 mr-2" />
+                      <AlertCircleIcon className="w-4 h-4 mr-2 text-red-600" />
                       <p className="text-sm text-red-800">{paymentError}</p>
                     </div>
                   </div>
@@ -82,24 +82,24 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
                 <Button
                   onClick={() => handlePayment({ type: 'deposit' })}
                   disabled={paymentLoading}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3"
+                  className="w-full py-3 font-semibold text-white bg-orange-600 hover:bg-orange-700"
                 >
                   {paymentLoading ? (
                     <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      <div className="w-5 h-5 mr-2 border-2 rounded-full border-white/30 border-t-white animate-spin"></div>
                       Đang xử lý thanh toán...
                     </div>
                   ) : (
-                    <>
-                      <CreditCardIcon className="w-5 h-5 mr-2" />
+                    <div className='flex text-white'>
+                      <CreditCardIcon className="w-5 h-5 mr-2 " />
                       Thanh toán đặt cọc {booking.priceNumeric ? formatPaymentAmount(calculateDeposit(booking.priceNumeric)) : ''}
-                    </>
+                    </div>
                   )}
                 </Button>
-                <p className="text-xs text-slate-500 mt-2 text-center">
+                <p className="mt-2 text-xs text-center text-slate-500">
                   Thanh toán an toàn với VNPay, MoMo, Banking
                 </p>
-                <p className="text-xs text-blue-600 mt-1 text-center font-medium">
+                <p className="mt-1 text-xs font-medium text-center text-blue-600">
                   Booking ID: {booking.id}
                 </p>
               </div>

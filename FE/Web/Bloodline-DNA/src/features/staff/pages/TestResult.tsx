@@ -1,14 +1,31 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/sample/ui/table";
-import ModalTestResult from "../components/testResult/ModalTestResult";
-import { createTestResultApi, deleteTestResultApi, getAllTestResultApi } from "../api/testResultApi";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../staff/components/sample/ui/card";
 import { getTestBookingApi } from "../api/testBookingApi";
-import type { TestResultRequest, TestResultResponse } from "../types/testResult";
-import type { TestBookingResponse } from "../types/testBooking";
+import {
+  createTestResultApi,
+  deleteTestResultApi,
+  getAllTestResultApi,
+} from "../api/testResultApi";
 import { Button } from "../components/sample/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../components/sample/ui/dropdown-menu";
-import { MoreVertical, Trash2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/sample/ui/table";
+import ModalTestResult from "../components/testResult/ModalTestResult";
+import type { TestBookingResponse } from "../types/testBooking";
+import type {
+  TestResultRequest,
+  TestResultResponse,
+} from "../types/testResult";
 
 interface BookingOption {
   id: string;
@@ -24,7 +41,9 @@ function TestResultPage() {
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState<Omit<TestResultRequest, "resultDate"> & { resultDate: string }>({
+  const [form, setForm] = useState<
+    Omit<TestResultRequest, "resultDate"> & { resultDate: string }
+  >({
     id: "",
     testBookingId: "",
     resultSummary: "",
@@ -56,13 +75,15 @@ function TestResultPage() {
       setIsLoadingBookings(true);
       try {
         const bookingData = await getTestBookingApi(token);
-        const bookingOptions: BookingOption[] = bookingData.map((booking: TestBookingResponse) => ({
-          id: booking.id,
-          clientName: booking.clientName,
-          email: booking.email,
-          appointmentDate: booking.appointmentDate,
-          status: booking.status,
-        }));
+        const bookingOptions: BookingOption[] = bookingData.map(
+          (booking: TestBookingResponse) => ({
+            id: booking.id,
+            clientName: booking.clientName,
+            email: booking.email,
+            appointmentDate: booking.appointmentDate,
+            status: booking.status,
+          })
+        );
         setBookings(bookingOptions);
       } catch {
         setBookings([]);
@@ -74,12 +95,20 @@ function TestResultPage() {
   }, [token]);
 
   const openCreateModal = () => {
-    setForm({ id: "", testBookingId: "", resultSummary: "", resultDate: "", resultFileUrl: "" });
+    setForm({
+      id: "",
+      testBookingId: "",
+      resultSummary: "",
+      resultDate: "",
+      resultFileUrl: "",
+    });
     setShowModal(true);
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -128,64 +157,77 @@ function TestResultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-[#1F2B6C]">Quản lý kết quả xét nghiệm</h1>
-        <Button
-          className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 text-white"
-          onClick={openCreateModal}
-        >
-          <span className="text-white">+ Thêm kết quả</span>
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="flex items-center justify-between">
+        <div className="w-full h-17 mb-2 px-5 bg-white flex items-center text-lg text-[#1F2B6C] before:content-['•'] before:mr-4">
+          Quản lý kết quả xét nghiệm
+        </div>
       </div>
-
-      <div className="max-w-7xl mx-auto">
-        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-[#1F2B6C]">Danh sách kết quả xét nghiệm</CardTitle>
-          </CardHeader>
+      <div className="mx-auto max-w-7xl">
+        <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-row justify-between">
+            <div className="w-full">
+              <CardHeader>
+                <CardTitle className="text-[#1F2B6C]">
+                  Danh sách kết quả xét nghiệm
+                </CardTitle>
+              </CardHeader>
+            </div>
+            <div className="pr-6 cursor-pointer">
+              <Button
+                className="flex items-center gap-2 text-white bg-green-300 cursor-pointer hover:bg-green-400"
+                onClick={openCreateModal}
+              >
+                <span className="text-sm text-green-950">+ Thêm kết quả</span>
+              </Button>
+            </div>
+          </div>
           <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center">Mã đặt xét nghiệm</TableHead>
+                  <TableHead className="text-center">
+                    Mã đặt xét nghiệm
+                  </TableHead>
                   <TableHead className="text-center">Tóm tắt kết quả</TableHead>
                   <TableHead className="text-center">Ngày trả</TableHead>
                   <TableHead className="text-center">File kết quả</TableHead>
                   <TableHead className="text-center">Khách hàng</TableHead>
-                  <TableHead className="text-center">Hành động</TableHead>
+                  {/* <TableHead className="text-center">Hành động</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingResults ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={6} className="py-12 text-center">
                       <div className="flex flex-col items-center gap-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div className="w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
                         <p className="text-gray-500">Đang tải dữ liệu...</p>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : results.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
+                    <TableCell colSpan={6} className="py-12 text-center">
                       <div className="text-gray-500">Chưa có kết quả nào</div>
                     </TableCell>
                   </TableRow>
                 ) : (
                   results.map((result, idx) => (
                     <TableRow key={result.id || idx}>
-                      <TableCell className="text-center text-xs font-mono">
-                        <span className="bg-green-100 text-green-700 px-2 py-1 rounded">
+                      <TableCell className="font-mono text-xs text-center">
+                        <span className="px-2 py-1 text-green-700 bg-green-100 rounded">
                           {result.testBookingId}
                         </span>
                       </TableCell>
-                      <TableCell className="max-w-xs truncate text-left">
+                      <TableCell className="max-w-xs text-left truncate">
                         {result.resultSummary}
                       </TableCell>
-                      <TableCell className="text-center text-sm">
+                      <TableCell className="text-sm text-center">
                         {result.resultDate
-                          ? new Date(result.resultDate).toLocaleDateString("vi-VN")
+                          ? new Date(result.resultDate).toLocaleDateString(
+                              "vi-VN"
+                            )
                           : "-"}
                       </TableCell>
                       <TableCell className="text-center">
@@ -194,25 +236,27 @@ function TestResultPage() {
                             href={result.resultFileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 text-xs underline hover:text-blue-800"
+                            className="text-xs text-blue-600 underline hover:text-blue-800"
                           >
                             Xem file
                           </a>
                         ) : (
-                          <span className="text-gray-400 text-xs">Chưa có file</span>
+                          <span className="text-xs text-gray-400">
+                            Chưa có file
+                          </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-center text-sm">
+                      <TableCell className="text-sm text-center">
                         {result.client?.fullName || "-"}
                       </TableCell>
-                      <TableCell className="text-center">
+                      {/* <TableCell className="text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button
-                              className="p-2 rounded-full hover:bg-gray-200 transition"
+                              className="p-2 transition rounded-full hover:bg-gray-200"
                               title="Tùy chọn"
                             >
-                              <MoreVertical className="h-5 w-5 text-gray-600" />
+                              <MoreVertical className="w-5 h-5 text-gray-600" />
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -225,7 +269,7 @@ function TestResultPage() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))
                 )}

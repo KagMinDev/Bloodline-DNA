@@ -70,21 +70,25 @@ export const servicesApi = async () => {
       const token = localStorage.getItem('token') || 
                     localStorage.getItem('authToken') || 
                     sessionStorage.getItem('token') ||
-                    sessionStorage.getItem('authToken') ||
-                    // Fallback token for testing
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI2MDNCN0Q2OUFFMTgxNzAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGFsYWxhbGEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJsYTEyQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkNsaWVudCIsImp0aSI6IjBkZjM5ZTEwLTRhNTktNDFlMC1hZGIzLTE4OWM1Mjg1Mjg3MCIsImV4cCI6MTc1MDIyNDgwNSwiaXNzIjoieW91cmRvbWFpbi5jb20iLCJhdWQiOiJ5b3VyZG9tYWluLmNvbSJ9.6ucR2Zmu8Ti5hyUUxVmMfytX37uAkfQ86LsKcDtwV-0';
+                    sessionStorage.getItem('authToken');
       
       console.log('🚀 Starting servicesApi call...');
       console.log('🔑 Token being used:', token ? `${token.substring(0, 20)}...` : 'No token');
       console.log('📋 API URL:', `${BASE_URL}/ServicePrice/latest`);
       console.log('🌐 Base URL:', BASE_URL);
       
+      // Prepare headers - only include Authorization if token exists
+      const headers: any = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await axios.get(`${BASE_URL}/ServicePrice/latest`, {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers,
         timeout: 10000, // 10 second timeout
       });
   
@@ -136,27 +140,27 @@ export const servicesApi = async () => {
         
         // Categorize errors with detailed messages
         if (error.response?.status === 401) {
-          throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để xem dữ liệu thực từ API.');
+          throw new Error('API yêu cầu đăng nhập. Đang hiển thị dữ liệu mẫu để bạn có thể xem dịch vụ.');
         } else if (error.response?.status === 403) {
-          throw new Error('Không có quyền truy cập endpoint này. Vui lòng kiểm tra quyền hạn tài khoản.');
+          throw new Error('Không có quyền truy cập endpoint này. Đang hiển thị dữ liệu mẫu.');
         } else if (error.response?.status === 404) {
-          throw new Error('Endpoint API không tồn tại. Vui lòng kiểm tra URL API hoặc liên hệ admin.');
+          throw new Error('Endpoint API không tồn tại. Đang hiển thị dữ liệu mẫu.');
         } else if (error.response?.status && error.response.status >= 500) {
-          throw new Error('Lỗi server. Vui lòng thử lại sau hoặc liên hệ admin.');
+          throw new Error('Lỗi server. Đang hiển thị dữ liệu mẫu.');
         } else if (error.code === 'ECONNABORTED') {
-          throw new Error('Kết nối API quá chậm (timeout). Vui lòng kiểm tra kết nối mạng và thử lại.');
+          throw new Error('Kết nối API quá chậm (timeout). Đang hiển thị dữ liệu mẫu.');
         } else if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
-          throw new Error('Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet và thử lại.');
-                 } else {
-           // Extract server message with more detail
-           const serverMessage =
-             error.response?.data?.message ||
-             error.response?.data?.title ||
-             error.response?.data?.error ||
-             error.response?.data?.detail ||
-             `Lỗi HTTP ${error.response?.status ?? 'Unknown'}: ${error.response?.statusText || 'Không thể kết nối tới API'}`;
-           throw new Error(serverMessage);
-         }
+          throw new Error('Lỗi kết nối mạng. Đang hiển thị dữ liệu mẫu.');
+        } else {
+          // Extract server message with more detail
+          const serverMessage =
+            error.response?.data?.message ||
+            error.response?.data?.title ||
+            error.response?.data?.error ||
+            error.response?.data?.detail ||
+            `Lỗi HTTP ${error.response?.status ?? 'Unknown'}: Đang hiển thị dữ liệu mẫu`;
+          throw new Error(serverMessage);
+        }
        } else {
          // Non-Axios errors
          console.error('🚫 Non-Axios Error Details:');
@@ -181,9 +185,7 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
     const token = localStorage.getItem('token') || 
                   localStorage.getItem('authToken') || 
                   sessionStorage.getItem('token') ||
-                  sessionStorage.getItem('authToken') ||
-                  // Fallback token for testing
-                  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjI2MDNCN0Q2OUFFMTgxNzAiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoibGFsYWxhbGEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJsYTEyQGdtYWlsLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkNsaWVudCIsImp0aSI6IjBkZjM5ZTEwLTRhNTktNDFlMC1hZGIzLTE4OWM1Mjg1Mjg3MCIsImV4cCI6MTc1MDIyNDgwNSwiaXNzIjoieW91cmRvbWFpbi5jb20iLCJhdWQiOiJ5b3VyZG9tYWluLmNvbSJ9.6ucR2Zmu8Ti5hyUUxVmMfytX37uAkfQ86LsKcDtwV-0';
+                  sessionStorage.getItem('authToken');
     
     console.log('🔍 Fetching service detail by ID:', serviceId);
     
@@ -202,12 +204,18 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
       try {
         console.log('🔄 Trying endpoint:', endpoint);
         
+        // Prepare headers - only include Authorization if token exists
+        const headers: any = {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        };
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         const response = await axios.get(endpoint, {
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
           timeout: 10000, // 10 second timeout
         });
 
@@ -377,11 +385,11 @@ export const getServiceById = async (serviceId: string): Promise<ServiceDetail> 
     
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
-        throw new Error('Endpoint API không tồn tại hoặc service ID không hợp lệ');
+        throw new Error('Không tìm thấy thông tin dịch vụ. Vui lòng kiểm tra lại ID dịch vụ.');
       } else if (error.response?.status === 401) {
-        throw new Error('Không có quyền truy cập. Vui lòng đăng nhập lại');
+        throw new Error('API yêu cầu đăng nhập để xem chi tiết dịch vụ. Vui lòng đăng nhập để xem thông tin đầy đủ.');
       } else if (error.code === 'ECONNABORTED') {
-        throw new Error('Kết nối quá chậm. Vui lòng thử lại sau');
+        throw new Error('Kết nối quá chậm. Vui lòng thử lại sau.');
       } else {
         const serverMessage =
           error.response?.data?.message ||

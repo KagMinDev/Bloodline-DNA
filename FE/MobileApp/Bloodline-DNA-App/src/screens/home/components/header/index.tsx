@@ -1,40 +1,48 @@
 import { useAuth } from "@/context/auth/AuthContext";
+import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
 import { RootStackParamList } from "@/types/root-stack/stack.types";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useRef, useState } from "react";
-import {
-  Animated,
-  Dimensions,
-  Easing,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Dimensions, Easing, Pressable, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import styles from "./styles";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MENU_WIDTH = SCREEN_WIDTH * 0.8;
 
 const navItems = [
   { label: "Trang chủ", screen: "Home" },
-  { label: "Về chúng tôi", screen: "About" },
   { label: "Dịch vụ", screen: "Services" },
+  { label: "Lịch sử đặt lịch", screen: "BookingHistory" },
+  { label: "Về chúng tôi", screen: "About" },
   { label: "Các Bác Sĩ", screen: "Doctors" },
-  { label: "Tin tức", screen: "News" },
+  { label: "Tin tức", screen: "Blogs" },
   { label: "Liên hệ", screen: "Contact" },
 ];
 
 const Header: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
+  const [fullName, setFullName] = useState<string | null>(null);
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { logout } = useAuth();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { logout, token } = useAuth();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const user = await getUserInfoApi(token);
+          setFullName(user?.fullName || "Bạn ơi đăng nhập lại nhé");
+        } catch (error) {
+          console.error("Không thể lấy thông tin user:", error);
+          setFullName("Bạn ơi đăng nhập lại nhé");
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
 
   const openMenu = () => {
     setMenuVisible(true);
@@ -56,73 +64,54 @@ const Header: React.FC = () => {
   };
 
   const toggleMenu = () => {
-    if (menuVisible) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
+    menuVisible ? closeMenu() : openMenu();
   };
 
   const onSelectMenu = (screen: string) => {
-    navigation.navigate(screen as never); // Chuyển trang
+    navigation.navigate(screen as never);
     closeMenu();
+  };
+
+  const handleLogout = async () => {
+    await logout();
   };
 
   const getIconName = (screen: string) => {
     switch (screen) {
-      case "Home":
-        return "home-outline";
-      case "About":
-        return "information-outline";
-      case "Services":
-        return "briefcase-outline";
-      case "Doctors":
-        return "stethoscope";
-      case "News":
-        return "newspaper-variant-outline";
-      case "Contact":
-        return "phone-outline";
-      default:
-        return "menu";
+      case "Home": return "home-outline";
+      case "Services": return "briefcase-outline";
+      case "About": return "information-outline";
+      case "BookingHistory": return "briefcase-outline";
+      case "Doctors": return "stethoscope";
+      case "Blogs": return "newspaper-variant-outline";
+      case "Contact": return "phone-outline";
+      default: return "menu";
     }
-  };
-
-  const handleLogout = async () => {
-    await logout(); // ✅ tự động setIsLoggedIn(false)
   };
 
   return (
     <View style={{ zIndex: 100 }}>
-      {/* Header Bar */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Icon style={styles.logoIcon} name="dna" size={24} color="#fff" />
           <Text style={styles.logoText}>ADN Huyết Thống</Text>
         </View>
-
         <TouchableOpacity onPress={toggleMenu}>
-          <Icon
-            name={menuVisible ? "close" : "menu"}
-            size={30}
-            color="#007bff"
-          />
+          <Icon name={menuVisible ? "close" : "menu"} size={30} color="#007bff" />
         </TouchableOpacity>
       </View>
 
-      {/* Overlay mờ nền */}
       {menuVisible && <Pressable style={styles.overlay} onPress={closeMenu} />}
 
-      {/* Menu trượt */}
       {menuVisible && (
         <Animated.View
-          style={[
-            styles.menuContainer,
-            { transform: [{ translateX: slideAnim }] },
-          ]}
+          style={[styles.menuContainer, { transform: [{ translateX: slideAnim }] }]}
         >
           <View style={styles.menuHeader}>
-            <Icon name="account-circle" size={60} color="#007bff" />
-            <Text style={styles.menuWelcome}>Xin chào!</Text>
+            <Icon name="account-circle" size={50} color="#007bff" />
+            <Text style={{ marginTop: 8, marginBottom: 10, fontStyle: "italic", fontSize: 12, fontWeight: "600", color: "#000" }}>
+              Xin chào  <Text style={styles.menuWelcome}>{fullName ? fullName : "Bạn ơi đăng nhập lại nhé"}!</Text>
+            </Text>
           </View>
 
           {navItems.map((item) => (

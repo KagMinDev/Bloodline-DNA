@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
@@ -12,10 +13,10 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import ErrorBoundary from "../../../components/common/error-boundary";
 import { PageLoading } from "../../../components/common/loading";
-import { useAuth } from "../../../context/auth/AuthContext";
+import { useAuth } from "../../../context/auth/AuthContext"; // Import hàm login từ
 import { Login } from "../../../types/auth/auth.types";
 import { RootStackParamList } from "../../../types/root-stack/stack.types";
-import { loginApi } from "../apis/loginApi";
+import { getUserInfoApi, loginApi } from "../apis/loginApi";
 import styles from "./styles";
 
 const LoginScreen: React.FC = () => {
@@ -67,35 +68,38 @@ const LoginScreen: React.FC = () => {
   };
 
   const handleLogin = async (data: Login) => {
-    if (!validateInputs()) return;
+  if (!validateInputs()) return;
 
-    setLoading(true);
-    try {
-      const { token, role, userName } = await loginApi(
-        data.email,
-        data.password
-      );
+  setLoading(true);
+  try {
+    const response = await loginApi(data.email, data.password);
+    const { token, role, userName } = response;
+    // console.log(response)
 
-      await login(token);
+    await login(token, userName);
 
-      if (role === "Staff") {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "StaffDashboard" }],
-        });
-      } else {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: "Home" }],
-        });
-      }
-    } catch (error: any) {
-      console.error("Đăng nhập thất bại:", error.message);
-      setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
-    } finally {
-      setLoading(false);
+    const userInfo = await getUserInfoApi(token);
+
+    if (role === "Client") {
+      await AsyncStorage.setItem("clientId", userInfo.id);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      });
+    } else if (role === "Staff") {
+      await AsyncStorage.setItem("staffId", userInfo.id);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "DeliveriesStaffTabs" }],
+      });
     }
-  };
+  } catch (error: any) {
+    console.error("Đăng nhập thất bại:", error);
+    setEmailError(error.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>

@@ -26,7 +26,7 @@ export default function CustomerRouter() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/:id" element={<DetailServices />} />
-        <Route path="/doctors" element={<Doctors />} />
+        {/* <Route path="/doctors" element={<Doctors />} /> */}
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/blogs/:id" element={<BlogDetail />} />
@@ -35,7 +35,7 @@ export default function CustomerRouter() {
         <Route path="/booking-list" element={<BookingList />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/checkout-success" element={<CheckoutSuccess />} />
-        <Route path="/checkout-remainsuccess" element={<CheckoutRemainSuccess />} />
+        <Route path="/checkout-remainsucess" element={<CheckoutRemainSuccess />} />
         <Route path="/checkout-error" element={<CheckoutError />} />
         {/* Not found */}
         <Route path="*" element={<NotFound />} />

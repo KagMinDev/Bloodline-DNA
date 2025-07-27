@@ -1,28 +1,20 @@
-import { useState, useEffect } from 'react';
+import { formatDate } from '@fullcalendar/core';
+import { useEffect, useState } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { getTestBookingApi } from '../api/testBookingApi';
 import Calendar from '../components/common/Calendar';
 import type { TestBookingResponse } from '../types/testBooking';
-import { getTestBookingApi } from '../api/testBookingApi';
-import { formatDate } from '@fullcalendar/core';
 
 function TestBooking() {
   const [bookings, setBookings] = useState<TestBookingResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const token = localStorage.getItem('token') || '';
 
   // Define fetchBookings outside useEffect
   const fetchBookings = async () => {
-    if (!token) {
-      setError('Không tìm thấy token xác thực');
-      setIsLoading(false);
-      toast.error('Vui lòng đăng nhập lại');
-      return;
-    }
-
     try {
-      const response = await getTestBookingApi(token);
+      const response = await getTestBookingApi();
       console.log('API Response:', response);
 
       if (!Array.isArray(response)) {
@@ -44,7 +36,7 @@ function TestBooking() {
 
   useEffect(() => {
     fetchBookings();
-  }, [token]);
+  }, []);
 
   // Hàm đếm booking theo ngày, dùng định dạng DD/MM/YYYY để khớp với Calendar
   const countBookingsByDate = (bookings: TestBookingResponse[]) => {
@@ -61,7 +53,7 @@ function TestBooking() {
           });
           counts[dateStr] = (counts[dateStr] || 0) + 1;
         }
-      } catch (e) {
+      } catch {
         console.warn('Invalid booking date:', booking.appointmentDate);
       }
     });
@@ -82,21 +74,21 @@ function TestBooking() {
 
   return (
     <div className="h-screen bg-blue-50">
-      <div className="flex h-[8%] items-center justify-between bg-white px-10">
-        <span className="text-xl font-bold text-[#1F2B6C]">
+      <div className="flex h-[8.4%] items-center justify-between bg-white px-5">
+        <li className="text-lg text-[#1F2B6C]">
           Quản lí đơn xét nghiệm
-        </span>
+        </li>
         <div className="rounded-full bg-blue-200 p-3 text-base text-[#1F2B6C]">
           <FaBell />
         </div>
       </div>
       <div className="h-[92%]">
         {error ? (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex items-center justify-center h-full">
             <p className="text-red-500">{error}</p>
           </div>
         ) : isLoading ? (
-          <div className="flex justify-center items-center h-full">
+          <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">Đang tải dữ liệu...</p>
           </div>
         ) : (
@@ -104,7 +96,6 @@ function TestBooking() {
             events={bookings}
             onUpdateStatus={handleUpdateStatus}
             bookingsByDate={bookingsByDate}
-            token={token}
             refetchBookings={fetchBookings}
           />
         )}

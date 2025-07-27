@@ -4,6 +4,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#E3F2FD", // Màu nền tương tự blue-50
+    paddingTop: 40
   },
   contentContainer: {
   },

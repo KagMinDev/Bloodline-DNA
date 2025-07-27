@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface BookingOption {
   id: string;
@@ -32,6 +32,9 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
   bookingOptions,
   isLoadingBookings,
 }) => {
+  useEffect(() => {
+  }, [bookingOptions]);
+
   if (!show) return null;
 
   return (
@@ -42,7 +45,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
           <h2 className="text-lg font-semibold text-gray-800">Tạo kết quả xét nghiệm</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl leading-none"
+            className="text-xl leading-none text-gray-500 hover:text-gray-700"
           >
             ×
           </button>
@@ -52,8 +55,8 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
         <form onSubmit={onSubmit} className="space-y-5 text-sm">
           {/* Booking select */}
           <div>
-            <label className="block mb-1 text-gray-700 font-medium">
-              Đặt lịch xét nghiệm
+            <label className="block mb-1 font-medium text-gray-700">
+              Tạo kết quả cho:
             </label>
             {isLoadingBookings ? (
               <div className="text-gray-500">Đang tải danh sách...</div>
@@ -61,12 +64,17 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               <select
                 name="testBookingId"
                 value={form.testBookingId}
-                onChange={onChange}
+                onChange={(e) => {
+                  console.log("User chọn booking ID:", e.target.value);
+                  onChange(e);
+                }}
                 required
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">-- Chọn --</option>
-                {bookingOptions.map((booking) => (
+                {bookingOptions
+                .filter((booking) => booking.status === "Testing")
+                .map((booking) => (
                   <option key={booking.id} value={booking.id}>
                     {booking.clientName} - {booking.id.slice(-6)}
                   </option>
@@ -77,7 +85,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
 
           {/* Result Summary */}
           <div>
-            <label className="block mb-1 text-gray-700 font-medium">
+            <label className="block mb-1 font-medium text-gray-700">
               Tóm tắt kết quả
             </label>
             <textarea
@@ -87,13 +95,13 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               placeholder="Mô tả ngắn gọn kết quả xét nghiệm"
               rows={4}
               required
-              className="w-full border border-gray-300 rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* Result Date */}
           <div>
-            <label className="block mb-1 text-gray-700 font-medium">
+            <label className="block mb-1 font-medium text-gray-700">
               Ngày trả kết quả
             </label>
             <input
@@ -102,13 +110,13 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               value={form.resultDate}
               onChange={onChange}
               required
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           {/* File URL */}
           <div>
-            <label className="block mb-1 text-gray-700 font-medium">
+            <label className="block mb-1 font-medium text-gray-700">
               Đường dẫn file kết quả
             </label>
             <input
@@ -118,7 +126,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               onChange={onChange}
               placeholder="https://example.com/result.pdf"
               required
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
@@ -127,15 +135,15 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700"
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
             >
-             <span className="text-white"> Tạo kết quả </span>
+              <span className="text-white">Tạo kết quả</span>
             </button>
           </div>
         </form>

@@ -1,4 +1,8 @@
-import { CloseOutlined, WechatOutlined, WechatWorkOutlined } from "@ant-design/icons";
+import {
+  CloseOutlined,
+  WechatOutlined,
+  WechatWorkOutlined,
+} from "@ant-design/icons";
 import { Button, Input, Spin } from "antd";
 import { useState } from "react";
 import { sendMessage } from "../api/chatbotAI.api";
@@ -23,22 +27,25 @@ const ChatbotAI: React.FC = () => {
   setIsLoading(true);
 
   try {
-    const response = await sendMessage(inputText); // 👈 dùng service
+    const response = await sendMessage(inputText); // 👈 API trả { reply }
     const botReply = response.reply;
 
     setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
   } catch (error: unknown) {
     let errorMessage = "Đã xảy ra lỗi.";
+
     if (error instanceof Error) {
-      errorMessage = error.message;
-    } else if (typeof error === "object" && error !== null && "message" in error) {
-      errorMessage = String((error as { message?: unknown }).message);
+      // 👇 Xử lý thông báo lỗi cụ thể từ Gemini
+      if (error.message.includes("The model is overloaded")) {
+        errorMessage = "⚠️ Hệ thống đang quá tải. Vui lòng thử lại sau ít phút.";
+      } else {
+        errorMessage = `❗${error.message}`;
+      }
     }
-    console.error("Lỗi gọi API:", errorMessage);
 
     setMessages((prev) => [
       ...prev,
-      { sender: "bot", text: `❗${errorMessage}` },
+      { sender: "bot", text: errorMessage },
     ]);
   } finally {
     setIsLoading(false);
@@ -107,7 +114,7 @@ const ChatbotAI: React.FC = () => {
             {isLoading && (
               <div className="flex justify-start">
                 <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-800 bg-gray-200 rounded-xl">
-                  <Spin size="small" /> <span>Đang xử lý...</span>
+                  <Spin size="small" /> <span>Đang trả lời...</span>
                 </div>
               </div>
             )}

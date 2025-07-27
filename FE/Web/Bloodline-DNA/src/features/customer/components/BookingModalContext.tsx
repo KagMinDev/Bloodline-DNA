@@ -11,6 +11,10 @@ interface SelectedService {
     id: string;
     [key: string]: any;
   };
+  testServiceInfor?: {
+    id: string;
+    [key: string]: any;
+  };
 }
 
 interface BookingModalContextType {

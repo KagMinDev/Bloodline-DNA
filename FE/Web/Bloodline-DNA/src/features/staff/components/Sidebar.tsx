@@ -1,7 +1,6 @@
 import { Dna } from 'lucide-react';
 import React, { useState } from 'react';
 import { FaAngleDown, FaAngleRight, FaShippingFast, } from 'react-icons/fa';
-import { GrTestDesktop } from "react-icons/gr";
 import { SiTestcafe } from "react-icons/si";
 import { TbTestPipe } from "react-icons/tb";
 import { Link, useLocation } from 'react-router-dom';
@@ -15,11 +14,6 @@ interface SidebarDataType {
 }
 
 const SidebarData: SidebarDataType[] = [
-  {
-    icon: GrTestDesktop,
-    heading: 'Quản lí đơn xét nghiệm',
-    href: '/staff/test-booking',
-  },
   {
     icon: TbTestPipe,
     heading: 'Quản lí mẫu xét nghiệm',

@@ -11,16 +11,20 @@ import {
   X,
 } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createBookingApi, mapFormDataToBookingRequest, getAvailableTestServicesApi } from "../api/bookingCreateApi";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader } from "./ui/Card";
 import { Input } from "./ui/Input";
+import { AddressSelector } from "./AddressSelector";
 
 // Define interface locally to avoid import issues
 interface CreateBookingResponse {
-  id: string;
+  data?: string; // Booking ID comes in 'data' field
+  id?: string; // Fallback for 'id' field
   message: string;
   success: boolean;
+  statusCode?: number;
 }
 
 interface BookingModalProps {
@@ -58,6 +62,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   onSubmit,
   selectedService,
 }) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<BookingData>({
     serviceType: "home",
     name: "",
@@ -148,10 +153,30 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     }
   }, [selectedService]);
 
+  // Reset address when serviceType changes
+  React.useEffect(() => {
+    if (formData.serviceType === 'clinic') {
+      setFormData(prev => ({
+        ...prev,
+        address: 'TẠI CƠ SỞ'
+      }));
+    } else if (formData.serviceType === 'home' && formData.address === 'TẠI CƠ SỞ') {
+      setFormData(prev => ({
+        ...prev,
+        address: ''
+      }));
+    }
+  }, [formData.serviceType]);
+
   // Debug: Fetch available TestServices when modal opens
   React.useEffect(() => {
     if (isOpen) {
       // Debug disabled for production
+      console.log('🔍 BookingModal opened with selectedService:', selectedService);
+      console.log('🔍 Service name:', selectedService?.name);
+      console.log('🔍 Service price:', selectedService?.price);
+      console.log('🔍 Service category:', selectedService?.category);
+      
       console.log('Modal opened, fetching available TestServices for debugging...');
       getAvailableTestServicesApi().then(testServices => {
         console.log('Available TestServices in database:', testServices);
@@ -262,16 +287,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   // Lấy gói xét nghiệm duy nhất từ selectedService thay vì tất cả gói available
   const getSelectedServiceAsTestType = (): TestType | null => {
-    if (!selectedService) return null;
+    if (!selectedService) {
+      console.log('❌ getSelectedServiceAsTestType: No selectedService');
+      return null;
+    }
     
-    // Tạo TestType object từ selectedService
-    return {
+    const testType = {
       id: selectedService.testServiceInfor?.id || selectedService.id,
-      name: selectedService.name,
-      price: `${selectedService.price.toLocaleString('vi-VN')}đ`,
+      name: selectedService.name || 'Dịch vụ xét nghiệm',
+      price: selectedService.price ? `${selectedService.price.toLocaleString('vi-VN')}đ` : 'Liên hệ',
       time: "3-7 ngày", // Default time, có thể customize
       category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
     };
+    
+    console.log('✅ getSelectedServiceAsTestType created:', testType);
+    return testType;
   };
 
   // Lấy gói xét nghiệm theo category của service và hình thức thu mẫu đã chọn (giữ để tương thích)
@@ -471,12 +501,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const validateStep2 = () => {
+    const hasValidAddress = formData.serviceType === "clinic" 
+      ? formData.address === "TẠI CƠ SỞ"
+      : formData.address && formData.address.split(',').length >= 2;
+    
     return (
       formData.name &&
       formData.phone &&
       formData.preferredDate &&
       formData.preferredTime &&
-      formData.address // Address is always required now (will be "TẠI CƠ SỞ" for clinic)
+      hasValidAddress
     );
   };
 
@@ -497,8 +531,21 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const handleClose = () => {
-    resetForm();
-    onClose();
+    // If we're on step 3 (success step) and have booking response, navigate to booking status
+    const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
+    if (step === 3 && bookingId) {
+      console.log('🔄 Closing success modal, navigating to booking status:', bookingId);
+      // Navigate first, then close modal to avoid any interference
+      navigate(`/customer/booking-status/${bookingId}`);
+      // Close modal after a brief delay to ensure navigation completes
+      setTimeout(() => {
+        resetForm();
+        onClose();
+      }, 100);
+    } else {
+      resetForm();
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -772,25 +819,31 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       <MapPinIcon className="w-4 h-4 mr-2" />
                       {formData.serviceType === "home" ? "Địa chỉ nhận kit / Thu mẫu *" : "Địa chỉ thực hiện"}
                     </label>
-                    <Input
-                      type="text"
-                      value={formData.address}
-                      onChange={(e) =>
-                        handleInputChange("address", e.target.value)
-                      }
-                      placeholder={
-                        formData.serviceType === "home" 
-                          ? "Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
-                          : "Xét nghiệm tại cơ sở"
-                      }
-                      className="w-full"
-                      disabled={formData.serviceType === "clinic"}
-                      readOnly={formData.serviceType === "clinic"}
-                    />
-                    {formData.serviceType === "clinic" && (
-                      <p className="text-xs text-blue-600">
-                        <strong>Lưu ý:</strong> Bạn sẽ đến trung tâm để thực hiện xét nghiệm
-                      </p>
+                    {formData.serviceType === "home" ? (
+                      <AddressSelector
+                        value={formData.address}
+                        onChange={(address) => handleInputChange("address", address)}
+                        placeholder="Nhập địa chỉ nhận bộ kit ADN hoặc địa chỉ thu mẫu tại nhà"
+                        required={true}
+                        className="md:col-span-2"
+                      />
+                    ) : (
+                      <div>
+                        <Input
+                          type="text"
+                          value={formData.address}
+                          onChange={(e) =>
+                            handleInputChange("address", e.target.value)
+                          }
+                          placeholder="Xét nghiệm tại cơ sở"
+                          className="w-full"
+                          disabled={true}
+                          readOnly={true}
+                        />
+                        <p className="text-xs text-blue-600 mt-1">
+                          <strong>Lưu ý:</strong> Bạn sẽ đến trung tâm để thực hiện xét nghiệm
+                        </p>
+                      </div>
                     )}
                   </div>
 
@@ -896,7 +949,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </p>
                 <div className="p-4 mb-6 rounded-lg bg-blue-50">
                   <p className="text-sm text-blue-800">
-                    <strong>Mã đăng ký:</strong> {bookingResponse?.id || `ADN${Date.now().toString().slice(-6)}`}
+                    <strong>Mã đăng ký:</strong> {(bookingResponse as any)?.data || bookingResponse?.id || `ADN${Date.now().toString().slice(-6)}`}
                   </p>
                   <p className="mt-1 text-sm text-blue-800">
                     <strong>Thời gian:</strong> {formData.preferredDate} lúc{" "}
@@ -910,7 +963,29 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </p>
                 </div>
                 <Button
-                  onClick={handleClose}
+                  onClick={() => {
+                    console.log('🔄 Success close button clicked');
+                    console.log('Current step:', step);
+                    console.log('Booking response:', bookingResponse);
+                    // Check both possible locations for booking ID
+                    const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
+                    if (bookingId) {
+                      console.log('🚀 Navigating to booking status:', bookingId);
+                      console.log('Current location:', window.location.href);
+                      navigate(`/customer/booking-status/${bookingId}`);
+                      console.log('✅ Navigation command sent');
+                      // Close modal after navigation
+                      setTimeout(() => {
+                        console.log('🔄 Closing modal and resetting form');
+                        resetForm();
+                        onClose();
+                      }, 150);
+                    } else {
+                      console.warn('⚠️ No booking ID found, just closing modal');
+                      resetForm();
+                      onClose();
+                    }
+                  }}
                   className="px-8 py-3 !text-white bg-blue-900 hover:bg-blue-800"
                 >
                   Đóng

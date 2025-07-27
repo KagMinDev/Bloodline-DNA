@@ -42,7 +42,7 @@ const LoginForm: React.FC = () => {
           navigate("/staff/");
           break;
         case "Manager":
-          navigate("/manager/test-management");
+          navigate("/manager/dashboard");
           break;
         case "Client":
           navigate("/customer");
