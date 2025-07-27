@@ -1,28 +1,19 @@
 import {
   ArrowLeftIcon,
   AwardIcon,
-  CheckCircleIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  FileTextIcon,
-  FlaskConicalIcon,
+  BookUser,
+  ClockIcon,
+  DnaIcon,
+  FileSignature,
+  Headset,
   HeartIcon,
-  HelpCircleIcon,
+  MicroscopeIcon,
   PackageIcon,
   ShieldCheckIcon,
-  ClockIcon,
-  CalendarCheck2,
-  DnaIcon,
-  MicroscopeIcon,
-  UserCheck,
-  CreditCardIcon,
-  Headset,
-  BookUser,
-  TestTube2,
-  FileSignature,
+  UserCheck
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Footer, Header } from "../../../components";
 import { type ServiceDetail, getServiceById } from "../api/servicesApi";
 import { useBookingModal } from "../components/BookingModalContext";
@@ -38,10 +29,10 @@ import { Button } from "../components/ui/Button";
 // ===== HELPER COMPONENTS =====
 
 const InfoCard: React.FC<{ icon: React.ElementType, title: string, children: React.ReactNode }> = ({ icon: Icon, title, children }) => (
-    <div className="bg-white p-6 rounded-lg border flex items-start space-x-4 transition-transform transform hover:-translate-y-1">
-        <Icon className="w-10 h-10 text-blue-600 mt-1 flex-shrink-0"/>
+    <div className="flex items-start p-6 space-x-4 transition-transform transform bg-white border rounded-lg hover:-translate-y-1">
+        <Icon className="flex-shrink-0 w-10 h-10 mt-1 text-blue-600"/>
         <div>
-            <h3 className="font-bold text-lg text-gray-800 mb-1">{title}</h3>
+            <h3 className="mb-1 text-lg font-bold text-gray-800">{title}</h3>
             <p className="text-gray-600">{children}</p>
         </div>
     </div>
@@ -49,9 +40,9 @@ const InfoCard: React.FC<{ icon: React.ElementType, title: string, children: Rea
 
 const ProcessStep: React.FC<{ number: string, title: string, children: React.ReactNode }> = ({ number, title, children }) => (
     <div className="relative flex flex-col items-center">
-        <div className="bg-blue-100 text-blue-600 rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold border-4 border-white shadow-md z-10">{number}</div>
-        <h3 className="font-semibold text-lg mt-4 mb-2 text-center">{title}</h3>
-        <p className="text-sm text-gray-600 text-center max-w-xs">{children}</p>
+        <div className="z-10 flex items-center justify-center w-16 h-16 text-2xl font-bold text-blue-600 bg-blue-100 border-4 border-white rounded-full shadow-md">{number}</div>
+        <h3 className="mt-4 mb-2 text-lg font-semibold text-center">{title}</h3>
+        <p className="max-w-xs text-sm text-center text-gray-600">{children}</p>
         {number !== '4' && <div className="absolute top-8 h-0.5 w-full bg-gray-200 hidden md:block" />}
     </div>
 );
@@ -93,11 +84,11 @@ export const DetailServices = (): React.JSX.Element => {
   
   if (loading) {
     return (
-      <div className="bg-white min-h-screen w-full">
+      <div className="w-full min-h-screen bg-white">
         <Header />
         <div className="flex items-center justify-center" style={{height: 'calc(100vh - 80px)'}}>
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
             <p className="text-lg text-gray-600">Đang tải thông tin dịch vụ...</p>
           </div>
         </div>
@@ -107,14 +98,14 @@ export const DetailServices = (): React.JSX.Element => {
 
   if (error || !serviceDetail) {
     return (
-      <div className="bg-white min-h-screen w-full">
+      <div className="w-full min-h-screen bg-white">
         <Header />
         <div className="flex items-center justify-center" style={{height: 'calc(100vh - 80px)'}}>
-          <div className="text-center p-4">
-            <DnaIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Không thể tải thông tin dịch vụ</h3>
-            <p className="text-gray-600 mb-4">{error || "Dịch vụ bạn tìm không tồn tại."}</p>
-            <Button onClick={() => navigate('/services')} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg">
+          <div className="p-4 text-center">
+            <DnaIcon className="w-16 h-16 mx-auto mb-4 text-red-400" />
+            <h3 className="mb-2 text-xl font-semibold text-gray-800">Không thể tải thông tin dịch vụ</h3>
+            <p className="mb-4 text-gray-600">{error || "Dịch vụ bạn tìm không tồn tại."}</p>
+            <Button onClick={() => navigate('/services')} className="px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
               <ArrowLeftIcon className="w-4 h-4 mr-2" /> Quay lại danh sách
             </Button>
           </div>
@@ -155,7 +146,7 @@ export const DetailServices = (): React.JSX.Element => {
     <div className="bg-gray-50">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container px-4 py-8 mx-auto">
         {/* Breadcrumb */}
         <div className="mb-8">
           <Breadcrumb>
@@ -170,11 +161,11 @@ export const DetailServices = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section id="hero-section" className="bg-white p-8 rounded-xl shadow-md border mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <section id="hero-section" className="p-8 mb-16 bg-white border shadow-md rounded-xl">
+          <div className="grid items-center grid-cols-1 gap-8 md:grid-cols-2">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4 leading-tight">{serviceDetail.name}</h1>
-                <p className="text-lg text-gray-600 mb-8">{serviceDetail.description || "Dịch vụ xét nghiệm ADN hàng đầu, cung cấp kết quả chính xác và đáng tin cậy cho các nhu cầu cá nhân và pháp lý."}</p>
+                <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl">{serviceDetail.name}</h1>
+                <p className="mb-8 text-lg text-gray-600">{serviceDetail.description || "Dịch vụ xét nghiệm ADN hàng đầu, cung cấp kết quả chính xác và đáng tin cậy cho các nhu cầu cá nhân và pháp lý."}</p>
                 
                 <Button onClick={handleBooking} size="lg" className="w-full md:w-auto text-lg !text-white bg-blue-600 hover:bg-blue-700">
                   Đặt Lịch Ngay
@@ -188,8 +179,8 @@ export const DetailServices = (): React.JSX.Element => {
 
         {/* What's Included Section */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Gói Dịch Vụ Bao Gồm</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <h2 className="mb-8 text-3xl font-bold text-center text-gray-800">Gói Dịch Vụ Bao Gồm</h2>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
               <InfoCard icon={PackageIcon} title="Bộ Kit Lấy Mẫu">Bộ dụng cụ chuyên dụng, vô trùng và dễ sử dụng tại nhà.</InfoCard>
               <InfoCard icon={FileSignature} title="Báo Cáo Chi Tiết">Bản phân tích kết quả đầy đủ, diễn giải rõ ràng và dễ hiểu.</InfoCard>
               <InfoCard icon={UserCheck} title="Bảo Mật Thông Tin">Cam kết bảo mật tuyệt đối dữ liệu cá nhân và kết quả xét nghiệm.</InfoCard>
@@ -198,9 +189,9 @@ export const DetailServices = (): React.JSX.Element => {
         </section>
 
         {/* How it works Section */}
-        <section className="bg-white rounded-xl shadow-md border p-8 md:p-12 mb-16">
-          <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">Quy Trình 4 Bước Đơn Giản</h2>
-          <div className="relative grid grid-cols-1 md:grid-cols-4 gap-8">
+        <section className="p-8 mb-16 bg-white border shadow-md rounded-xl md:p-12">
+          <h2 className="mb-10 text-3xl font-bold text-center text-gray-800">Quy Trình 4 Bước Đơn Giản</h2>
+          <div className="relative grid grid-cols-1 gap-8 md:grid-cols-4">
               <ProcessStep number="1" title="Đặt Lịch">Chọn dịch vụ và đặt lịch trực tuyến hoặc qua hotline.</ProcessStep>
               <ProcessStep number="2" title="Thu Mẫu">Tự thu mẫu tại nhà theo hướng dẫn hoặc đến trung tâm.</ProcessStep>
               <ProcessStep number="3" title="Phân Tích">Mẫu của bạn được xử lý tại phòng lab đạt chuẩn quốc tế.</ProcessStep>
@@ -210,8 +201,8 @@ export const DetailServices = (): React.JSX.Element => {
 
         {/* Why Choose Us Section */}
         <section className="mb-16">
-            <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Tại Sao Chọn Bloodline DNA?</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <h2 className="mb-8 text-3xl font-bold text-center text-gray-800">Tại Sao Chọn Bloodline DNA?</h2>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                 <InfoCard icon={ShieldCheckIcon} title="Độ Chính Xác 99.999%">Sử dụng công nghệ giải trình tự gen thế hệ mới nhất cho kết quả đáng tin cậy.</InfoCard>
                 <InfoCard icon={AwardIcon} title="Tiêu Chuẩn Quốc Tế">Phòng xét nghiệm đạt chuẩn ISO 17025, đảm bảo quy trình nghiêm ngặt.</InfoCard>
                 <InfoCard icon={MicroscopeIcon} title="Công Nghệ Hiện Đại">Hệ thống máy móc và trang thiết bị được nhập khẩu từ Mỹ, Đức.</InfoCard>
@@ -223,9 +214,9 @@ export const DetailServices = (): React.JSX.Element => {
 
         {/* Testimonial Section */}
         <section className="mb-16">
-            <div className="bg-blue-600 text-white rounded-xl p-8 md:p-12 text-center">
-                <p className="text-xl italic mb-4">"Dịch vụ rất chuyên nghiệp và nhanh chóng. Nhờ Bloodline DNA mà gia đình tôi đã giải tỏa được mọi nghi ngờ. Cảm ơn trung tâm rất nhiều!"</p>
-                <p className="font-bold text-lg">- Anh Nguyễn Văn A, TP. Hồ Chí Minh</p>
+            <div className="p-8 text-center text-white bg-blue-600 rounded-xl md:p-12">
+                <p className="mb-4 text-xl italic">"Dịch vụ rất chuyên nghiệp và nhanh chóng. Nhờ Bloodline DNA mà gia đình tôi đã giải tỏa được mọi nghi ngờ. Cảm ơn trung tâm rất nhiều!"</p>
+                <p className="text-lg font-bold">- Anh Nguyễn Văn A, TP. Hồ Chí Minh</p>
             </div>
         </section>
       </main>

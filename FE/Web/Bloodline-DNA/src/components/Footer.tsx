@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-blue-50 border-t border-blue-100">
+    <footer className="border-t border-blue-100 bg-blue-50">
       <div className="px-6 py-12 mx-auto max-w-7xl">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-3">
           {/* Logo & About */}
@@ -26,34 +26,18 @@ const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm text-gray-600">
               <li>
                 <Link
-                  to="/login"
+                  to="/about"
                   className="transition-colors hover:text-blue-600"
                 >
-                  Đăng nhập
+                  Về chúng tôi
                 </Link>
               </li>
               <li>
                 <Link
-                  to="/register"
+                  to="/blogs"
                   className="transition-colors hover:text-blue-600"
                 >
-                  Đăng ký
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/forgot-password"
-                  className="transition-colors hover:text-blue-600"
-                >
-                  Quên mật khẩu
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className="transition-colors hover:text-blue-600"
-                >
-                  Liên hệ hỗ trợ
+                  Tin tức
                 </Link>
               </li>
             </ul>
