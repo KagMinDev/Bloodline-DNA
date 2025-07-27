@@ -41,10 +41,10 @@ const Header: React.FC = () => {
       if (token) {
         try {
           const user = await getUserInfoApi(token);
-          setFullName(user?.fullName || "Người dùng");
+          setFullName(user?.fullName || "Bạn ơi đăng nhập lại nhé");
         } catch (error) {
           console.error("Không thể lấy thông tin user:", error);
-          setFullName("Người dùng");
+          setFullName("Bạn ơi đăng nhập lại nhé");
         }
       }
     };
@@ -147,7 +147,7 @@ const Header: React.FC = () => {
           <View style={styles.menuHeader}>
             <Icon name="account-circle" size={50} color="#007bff" />
             <Text style={{ marginTop: 8, marginBottom: 10, fontStyle: "italic", fontSize: 12, fontWeight: "600", color: "#000" }}>
-              Xin chào  <Text style={styles.menuWelcome}>{fullName ? fullName : "!"}!</Text>
+              Xin chào  <Text style={styles.menuWelcome}>{fullName ? fullName : "Bạn ơi đăng nhập lại nhé"}!</Text>
             </Text>
           </View>
 

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth/AuthContext";
-import { useNavigation } from "@react-navigation/native";
-import {View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator,} from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const navItems = [
   { label: "Trang chủ", screen: "Main" },
@@ -46,7 +46,7 @@ const ProfileScreen: React.FC = () => {
 
       try {
         const user = await getUserInfoApi(token);
-        setUserName(user?.username || "Người dùng");
+        setUserName(user?.username || "Bạn ơi đăng nhập lại nhé");
       } catch (err) {
         console.warn("Không thể lấy thông tin người dùng:", err);
         setUserName("Không xác định");
