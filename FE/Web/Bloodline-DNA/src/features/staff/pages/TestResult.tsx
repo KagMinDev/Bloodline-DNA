@@ -1,4 +1,3 @@
-import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -13,12 +12,6 @@ import {
   getAllTestResultApi,
 } from "../api/testResultApi";
 import { Button } from "../components/sample/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../components/sample/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -200,7 +193,7 @@ function TestResultPage() {
                   <TableHead className="text-center">Ngày trả</TableHead>
                   <TableHead className="text-center">File kết quả</TableHead>
                   <TableHead className="text-center">Khách hàng</TableHead>
-                  <TableHead className="text-center">Hành động</TableHead>
+                  {/* <TableHead className="text-center">Hành động</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -256,7 +249,7 @@ function TestResultPage() {
                       <TableCell className="text-sm text-center">
                         {result.client?.fullName || "-"}
                       </TableCell>
-                      <TableCell className="text-center">
+                      {/* <TableCell className="text-center">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button
@@ -276,7 +269,7 @@ function TestResultPage() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))
                 )}

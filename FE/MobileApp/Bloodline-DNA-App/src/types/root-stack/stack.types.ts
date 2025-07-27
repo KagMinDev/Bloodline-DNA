@@ -7,13 +7,13 @@ export type RootStackParamList = {
   Contact: undefined;
   About: undefined;
   Doctors: undefined;
-  News: undefined;
+  Blogs: undefined;
+  BlogDetailsScreen: { id: string };
   DeliveriesStaff: { tab: string };
   SampleReceived: undefined;
   ResultSent: undefined;
   StaffMenu: undefined;
   Calendar: undefined;
-  BlogDetail: { id: string };
   Main: undefined;
   AllService: undefined;
   DetailsService: { id: string };
