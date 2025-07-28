@@ -16,9 +16,10 @@ interface ModalTestResultProps {
     testBookingId: string;
     resultSummary: string;
     resultDate: string;
-    resultFileUrl: string;
+    resultFile: File | null;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onFileChange: (file: File | null) => void;
   bookingOptions: BookingOption[];
   isLoadingBookings: boolean;
 }
@@ -29,11 +30,28 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
   onSubmit,
   form,
   onChange,
+  onFileChange,
   bookingOptions,
   isLoadingBookings,
 }) => {
   useEffect(() => {
-  }, [bookingOptions]);
+    if (!form.resultDate) {
+      const today = new Date().toISOString().split("T")[0];
+      const fakeEvent = {
+        target: {
+          name: "resultDate",
+          value: today,
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      onChange(fakeEvent);
+    }
+  }, [form.resultDate, onChange]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    onFileChange(file);
+  };
 
   if (!show) return null;
 
@@ -73,12 +91,12 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               >
                 <option value="">-- Chọn --</option>
                 {bookingOptions
-                .filter((booking) => booking.status === "Testing")
-                .map((booking) => (
-                  <option key={booking.id} value={booking.id}>
-                    {booking.clientName} - {booking.id.slice(-6)}
-                  </option>
-                ))}
+                  .filter((booking) => booking.status === "Testing")
+                  .map((booking) => (
+                    <option key={booking.id} value={booking.id}>
+                      {booking.clientName} - {booking.id.slice(-6)}
+                    </option>
+                  ))}
               </select>
             )}
           </div>
@@ -105,29 +123,41 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               Ngày trả kết quả
             </label>
             <input
+              placeholder="YYYY-MM-DD"
               type="date"
               name="resultDate"
               value={form.resultDate}
               onChange={onChange}
               required
+              disabled
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          {/* File URL */}
+          {/* File Upload */}
           <div>
             <label className="block mb-1 font-medium text-gray-700">
-              Đường dẫn file kết quả
+              File kết quả xét nghiệm
             </label>
             <input
-              type="url"
-              name="resultFileUrl"
-              value={form.resultFileUrl}
-              onChange={onChange}
-              placeholder="https://example.com/result.pdf"
+              placeholder="Tải file kết quả"
+              type="file"
+              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+              onChange={handleFileChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
+            {form.resultFile && (
+              <div className="mt-2 text-sm text-gray-600">
+                <span className="font-medium">File đã chọn:</span> {form.resultFile.name}
+                <span className="ml-2 text-xs text-gray-500">
+                  ({(form.resultFile.size / 1024 / 1024).toFixed(2)} MB)
+                </span>
+              </div>
+            )}
+            <div className="mt-1 text-xs text-gray-500">
+              Chấp nhận: PDF, DOC, DOCX, JPG, JPEG, PNG (tối đa 10MB)
+            </div>
           </div>
 
           {/* Action buttons */}

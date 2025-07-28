@@ -1,16 +1,15 @@
 export interface TestResultRequest {
-  id?: string;
-  testBookingId: string;
-  resultSummary: string;
-  resultDate: Date;
-  resultFileUrl: string;
+  TestBookingId: string;
+  ResultSummary: string;
+  ResultDate: Date;
+  ResultFile: File;
 }
 
 export interface TestResultResponse {
   id: string;
   testBookingId: string;
   resultSummary: string;
-  resultDate: Date;
+  resultDate: string;
   resultFileUrl: string;
   client: {
     id: string;
@@ -18,7 +17,7 @@ export interface TestResultResponse {
     address: string;
     email: string;
     role: string;
-  }
-  createdAt: Date;
-  updatedAt: Date;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
