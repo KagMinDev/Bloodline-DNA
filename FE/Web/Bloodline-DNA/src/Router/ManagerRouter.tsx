@@ -7,6 +7,7 @@ import Delivery from "../features/manager/pages/Delivery";
 import Feedbacks from "../features/manager/pages/Feedbacks";
 import Tags from "../features/manager/pages/Tags";
 import TestManagement from "../features/manager/pages/TestManagement";
+import TestBooking from "../features/staff/pages/TestBooking";
 
 export default function ManagerRouter() {
     return (
@@ -18,6 +19,7 @@ export default function ManagerRouter() {
                     <Route path="blogs" element={<BlogsManager />} />
                     <Route path="tags" element={<Tags />} />
                     <Route path="test-management" element={<TestManagement />} />
+                    <Route path="test-booking" element={<TestBooking />} />
                     <Route path="delivery" element={<Delivery />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="feedback" element={<Feedbacks />} />

@@ -1,6 +1,5 @@
 import { Tabs } from "antd";
 import DeliveryTable from "../components/delivery/DeliveryTable";
-import ResultSent from "../components/delivery/ResultSentTable";
 import SampleReceived from "../components/delivery/SampleReceivedTable";
 
 const { TabPane } = Tabs;
@@ -24,12 +23,12 @@ const DeliveriesStaff = () => {
             />
           </TabPane>
 
-          <TabPane tab="Gửi kết quả" key="3">
+          {/* <TabPane tab="Gửi kết quả" key="3">
             <ResultSent
               onRowClick={(id) => console.log("Chi tiết đơn:", id)}
               onComplete={() => console.log("Đã gửi kết quả")}
             />
-          </TabPane>
+          </TabPane> */}
         </Tabs>
       </div>
     </div>
