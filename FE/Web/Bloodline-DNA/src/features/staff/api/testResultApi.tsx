@@ -32,19 +32,33 @@ export const getTestResultByIdApi = async (id: string, token: string): Promise<T
   }
 };
 
-// POST: Tạo mới TestResult
-export const createTestResultApi = async (data: TestResultRequest, token: string): Promise<TestResultResponse> => {
-  const response = await rootApi.post<{ data: TestResultResponse }>("/TestResult/with-file", data, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (response.data?.data) {
-    return response.data.data;
-  } else {
-    throw new Error("Invalid response structure from create API");
+// POST: Tạo mới TestResult (với file)
+export const createTestResultApi = async (
+  data: TestResultRequest,
+  token: string
+): Promise<TestResultResponse> => {
+  const formData = new FormData();
+
+  formData.append("TestBookingId", data.TestBookingId);
+  formData.append("ResultSummary", data.ResultSummary);
+  formData.append("ResultDate", data.ResultDate.toISOString());
+
+  if (data.ResultFile) {
+    formData.append("ResultFile", data.ResultFile);
   }
+
+  const response = await rootApi.post<{ data: TestResultResponse }>(
+    "/TestResult/with-file",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data.data;
 };
 
 // PUT: Cập nhật TestResult theo id

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { CheckCircle, Home } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Header, Footer } from "../../../components";
-import { callRemainingPaymentCallbackApi } from "../api/paymentApi";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Footer, Header } from "../../../components";
 import { getBookingByIdApi } from "../api/bookingListApi";
+import { callRemainingPaymentCallbackApi } from "../api/paymentApi";
+import { Button } from "../components/ui/Button";
 
 const CheckoutRemainSuccess = () => {
   const navigate = useNavigate();
@@ -159,9 +159,9 @@ const CheckoutRemainSuccess = () => {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-600 mx-auto mb-4"></div>
+        <main className="flex items-center justify-center flex-grow">
+          <div className="py-20 text-center">
+            <div className="w-12 h-12 mx-auto mb-4 border-t-2 border-b-2 border-teal-600 rounded-full animate-spin"></div>
             <p className="text-lg text-gray-700">Đang xác nhận thanh toán còn lại...</p>
           </div>
         </main>
@@ -175,41 +175,41 @@ const CheckoutRemainSuccess = () => {
       <Header />
       <main className="flex-grow">
         <div className="w-full min-h-[60vh] py-10 px-4 flex items-center justify-center bg-blue-50">
-          <div className="max-w-2xl mx-auto w-full">
-            <div className="bg-white rounded-2xl shadow-2xl border-none">
-              <div className="p-6 sm:p-8 text-center">
+          <div className="w-full max-w-2xl mx-auto">
+            <div className="bg-white border-none shadow-2xl rounded-2xl">
+              <div className="p-6 text-center sm:p-8">
                 {updateStatus.isSuccess ? (
                   <>
-                    <div className="w-20 h-20 rounded-full bg-green-50 inline-flex items-center justify-center mb-4">
+                    <div className="inline-flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-green-50">
                       <CheckCircle className="w-10 h-10 text-green-500" />
                     </div>
-                    <h2 className="text-3xl font-bold text-teal-800 m-0">
+                    <h2 className="m-0 text-3xl font-bold text-teal-800">
                       Thanh toán số tiền còn lại thành công!
                     </h2>
                   </>
                 ) : (
                   <>
-                    <div className="w-20 h-20 rounded-full bg-red-50 inline-flex items-center justify-center mb-4">
+                    <div className="inline-flex items-center justify-center w-20 h-20 mb-4 rounded-full bg-red-50">
                       <CheckCircle className="w-10 h-10 text-red-500" />
                     </div>
-                    <h2 className="text-3xl font-bold text-red-800 m-0">
+                    <h2 className="m-0 text-3xl font-bold text-red-800">
                       Xác nhận thanh toán số tiền còn lại thất bại
                     </h2>
                   </>
                 )}
               </div>
 
-              <div className="px-6 sm:px-8 pb-8">
+              <div className="px-6 pb-8 sm:px-8">
                 <div
                   className={`p-4 sm:p-6 mb-6 rounded-xl space-y-4 ${
                     updateStatus.isSuccess ? "bg-green-50/50" : "bg-red-50/50"
                   }`}
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <p className="text-slate-600">Mã đơn hàng:</p>
                     <p className="font-bold text-slate-800">{orderCode || "N/A"}</p>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center justify-between">
                     <p className="text-slate-600">Trạng thái:</p>
                     <span
                       className={`${
@@ -222,7 +222,7 @@ const CheckoutRemainSuccess = () => {
                     </span>
                   </div>
                   {amount && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                       <p className="text-slate-600">Số tiền còn lại:</p>
                       <p
                         className={`font-bold text-lg ${
@@ -234,7 +234,7 @@ const CheckoutRemainSuccess = () => {
                     </div>
                   )}
                   {bookingId && (
-                    <div className="flex justify-between items-center">
+                    <div className="flex items-center justify-between">
                       <p className="text-slate-600">Mã booking:</p>
                       <p className="font-mono text-sm text-slate-700">{bookingId}</p>
                     </div>
@@ -253,7 +253,7 @@ const CheckoutRemainSuccess = () => {
 
                 <div className="flex justify-center">
                   <Button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/customer/booking-list")}
                     className={`h-11 px-6 text-base rounded-lg ${
                       updateStatus.isSuccess
                         ? "bg-teal-600 hover:bg-teal-700"
@@ -261,7 +261,7 @@ const CheckoutRemainSuccess = () => {
                     } text-white`}
                   >
                     <Home className="w-4 h-4 mr-2" />
-                    Về trang chủ
+                    Xem chi tiết
                   </Button>
                 </div>
               </div>

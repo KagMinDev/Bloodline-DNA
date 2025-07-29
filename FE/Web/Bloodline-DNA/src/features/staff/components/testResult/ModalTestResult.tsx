@@ -13,10 +13,10 @@ interface ModalTestResultProps {
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
   form: {
-    testBookingId: string;
-    resultSummary: string;
-    resultDate: string;
-    resultFile: File | null;
+    TestBookingId: string;
+    ResultSummary: string;
+    ResultDate: string;
+    ResultFile: File | null;
   };
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onFileChange: (file: File | null) => void;
@@ -35,18 +35,18 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
   isLoadingBookings,
 }) => {
   useEffect(() => {
-    if (!form.resultDate) {
+    if (!form.ResultDate) {
       const today = new Date().toISOString().split("T")[0];
       const fakeEvent = {
         target: {
-          name: "resultDate",
+          name: "ResultDate",
           value: today,
         },
       } as React.ChangeEvent<HTMLInputElement>;
 
       onChange(fakeEvent);
     }
-  }, [form.resultDate, onChange]);
+  }, [form.ResultDate, onChange]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -80,8 +80,8 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               <div className="text-gray-500">Đang tải danh sách...</div>
             ) : (
               <select
-                name="testBookingId"
-                value={form.testBookingId}
+                name="TestBookingId"
+                value={form.TestBookingId}
                 onChange={(e) => {
                   console.log("User chọn booking ID:", e.target.value);
                   onChange(e);
@@ -107,8 +107,8 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               Tóm tắt kết quả
             </label>
             <textarea
-              name="resultSummary"
-              value={form.resultSummary}
+              name="ResultSummary"
+              value={form.ResultSummary}
               onChange={onChange}
               placeholder="Mô tả ngắn gọn kết quả xét nghiệm"
               rows={4}
@@ -125,8 +125,8 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
             <input
               placeholder="YYYY-MM-DD"
               type="date"
-              name="resultDate"
-              value={form.resultDate}
+              name="ResultDate"
+              value={form.ResultDate}
               onChange={onChange}
               required
               disabled
@@ -147,11 +147,11 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            {form.resultFile && (
+            {form.ResultFile && (
               <div className="mt-2 text-sm text-gray-600">
-                <span className="font-medium">File đã chọn:</span> {form.resultFile.name}
+                <span className="font-medium">File đã chọn:</span> {form.ResultFile.name}
                 <span className="ml-2 text-xs text-gray-500">
-                  ({(form.resultFile.size / 1024 / 1024).toFixed(2)} MB)
+                  ({(form.ResultFile.size / 1024 / 1024).toFixed(2)} MB)
                 </span>
               </div>
             )}
@@ -173,7 +173,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               type="submit"
               className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
             >
-              <span className="text-white">Tạo kết quả</span>
+              <span className="text-white">Tạo và gửi kết quả</span>
             </button>
           </div>
         </form>

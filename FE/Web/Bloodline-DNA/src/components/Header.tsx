@@ -9,8 +9,9 @@ const Header: React.FC = () => {
   const user = JSON.parse(localStorage.getItem("user") || "null");
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem('accountId');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     navigate("/login");
   };
 
@@ -50,31 +51,38 @@ const Header: React.FC = () => {
     <header className="sticky top-0 z-50 shadow-sm bg-white/90 backdrop-blur-md">
       <div className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {/* Logo */}
-        <div className="flex items-center space-x-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
-            <Dna size={24} className="text-white" />
+        <Link to={user?.role === "Client" ? "/customer" : "/"}>
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
+              <Dna size={24} className="text-white" />
+            </div>
+            <span className="text-2xl font-bold text-gray-800">
+              ADN Huyết Thống
+            </span>
           </div>
-          <span className="text-2xl font-bold text-gray-800">
-            ADN Huyết Thống
-          </span>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav className="hidden space-x-8 md:flex">
           {navItems.map((item) => {
-            const fullPath =
-              item.path === "/" ? "/" : `${basePath}${item.path}`;
+            let fullPath = "";
+
+            if (item.path === "/") {
+              // Trang chủ -> theo role
+              fullPath = user?.role === "Client" ? "/customer" : "/";
+            } else {
+              fullPath = `${basePath}${item.path}`;
+            }
+
             return (
               <a
                 key={item.path}
                 href={fullPath}
                 className={`relative transition-colors duration-300 after:absolute after:left-0 after:bottom-[-2px] after:h-[2px] after:transition-all after:duration-300 after:bg-blue-600
-        ${
-          isActive(fullPath)
-            ? "text-blue-600 after:w-full"
-            : "text-gray-600 hover:text-blue-600 after:w-0 hover:after:w-full"
-        }
-      `}
+          ${isActive(fullPath)
+                    ? "text-blue-600 after:w-full"
+                    : "text-gray-600 hover:text-blue-600 after:w-0 hover:after:w-full"}
+        `}
               >
                 {item.label}
               </a>
