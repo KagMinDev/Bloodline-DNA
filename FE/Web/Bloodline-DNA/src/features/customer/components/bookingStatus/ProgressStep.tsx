@@ -240,7 +240,7 @@ export const ProgressStepProps = ({
             <Button 
               onClick={handleViewResult} 
               disabled={loadingResult} 
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+              className="bg-green-600 hover:bg-green-700 !text-white flex items-center gap-2"
             >
               <EyeIcon className="w-4 h-4" />
               {loadingResult ? "Đang tải..." : "XEM KẾT QUẢ"}
