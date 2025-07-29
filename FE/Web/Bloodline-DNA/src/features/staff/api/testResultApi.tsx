@@ -34,20 +34,16 @@ export const getTestResultByIdApi = async (id: string, token: string): Promise<T
 
 // POST: Tạo mới TestResult
 export const createTestResultApi = async (data: TestResultRequest, token: string): Promise<TestResultResponse> => {
-  try {
-    const response = await rootApi.post<{ data: TestResultResponse }>("/TestResult", data, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (response.data?.data) {
-      return response.data.data;
-    } else {
-      throw new Error("Invalid response structure from create API");
-    }
-  } catch (error) {
-    throw error;
+  const response = await rootApi.post<{ data: TestResultResponse }>("/TestResult/with-file", data, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (response.data?.data) {
+    return response.data.data;
+  } else {
+    throw new Error("Invalid response structure from create API");
   }
 };
 

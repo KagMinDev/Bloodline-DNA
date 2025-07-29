@@ -1,7 +1,8 @@
 import { useAuth } from "@/context/auth/AuthContext";
+import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -23,7 +24,7 @@ const navItems = [
   { label: "Về chúng tôi", screen: "About" },
   { label: "Dịch vụ", screen: "Services" },
   { label: "Các Bác Sĩ", screen: "Doctors" },
-  { label: "Tin tức", screen: "News" },
+  { label: "Tin tức", screen: "Blogs" },
   { label: "Liên hệ", screen: "Contact" },
 ];
 
@@ -31,8 +32,25 @@ const Header: React.FC = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(MENU_WIDTH)).current;
   const navigation = useNavigation();
-  const { logout } = useAuth();
-  
+  const [fullName, setFullName] = useState<string | null>(null);
+  const { logout, token } = useAuth();
+
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const user = await getUserInfoApi(token);
+          setFullName(user?.fullName || "Bạn ơi đăng nhập lại nhé");
+        } catch (error) {
+          console.error("Không thể lấy thông tin user:", error);
+          setFullName("Bạn ơi đăng nhập lại nhé");
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
+
   const openMenu = () => {
     setMenuVisible(true);
     Animated.timing(slideAnim, {
@@ -61,14 +79,13 @@ const Header: React.FC = () => {
   };
 
   const onSelectMenu = (screen: string) => {
-    navigation.navigate(screen as never); // Chuyển trang
+    navigation.navigate(screen as never);
     closeMenu();
   };
 
   const handleLogout = async () => {
     try {
-      await logout(); // Gọi logout từ context
-      // Không cần reset navigation
+      await logout();
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -84,7 +101,7 @@ const Header: React.FC = () => {
         return "briefcase-outline";
       case "Doctors":
         return "stethoscope";
-      case "News":
+      case "Blogs":
         return "newspaper-variant-outline";
       case "Contact":
         return "phone-outline";
@@ -104,7 +121,7 @@ const Header: React.FC = () => {
 
         <TouchableOpacity
           style={{
-            top: 12,
+            top: 11,
           }}
           onPress={toggleMenu}
         >
@@ -128,8 +145,10 @@ const Header: React.FC = () => {
           ]}
         >
           <View style={styles.menuHeader}>
-            <Icon name="account-circle" size={60} color="#007bff" />
-            <Text style={styles.menuWelcome}>Xin chào!</Text>
+            <Icon name="account-circle" size={50} color="#007bff" />
+            <Text style={{ marginTop: 8, marginBottom: 10, fontStyle: "italic", fontSize: 12, fontWeight: "600", color: "#000" }}>
+              Xin chào  <Text style={styles.menuWelcome}>{fullName ? fullName : "Bạn ơi đăng nhập lại nhé"}!</Text>
+            </Text>
           </View>
 
           {navItems.map((item) => (

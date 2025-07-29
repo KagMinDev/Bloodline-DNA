@@ -7,7 +7,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import type { CalendarProps, TestBookingResponse } from '../../types/testBooking';
+import type { TestBookingResponse } from '../../types/testBooking';
 import BookingListPanel from '../booking/common/BookingListPanel';
 import BookingTable from '../booking/common/BookingTable';
 import { STATUS_MAPPING, type StatusOption } from '../booking/constants/statusMapping';
@@ -30,7 +30,7 @@ function formatToYYYYMMDD(date: Date): string {
 const Calendar: React.FC<CalendarComponentProps> = ({
   events,
   bookingsByDate,
-  onUpdateStatus,
+  // onUpdateStatus,
   refetchBookings
 }) => {
   const today = formatToYYYYMMDD(new Date());

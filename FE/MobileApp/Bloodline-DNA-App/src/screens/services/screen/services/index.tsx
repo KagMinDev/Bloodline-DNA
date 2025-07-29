@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, StyleSheet } from "react-native";
 import { useAuth } from "@/context/auth/AuthContext";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { getTestsApi } from "../../api/TestServiceApi";
 import { TestResponse } from "../../types/TestService";
 
@@ -35,12 +35,12 @@ export const ServicesSection: React.FC = () => {
   }, [token]);
 
   const filteredTests = tests.filter((test) =>
-  test.priceServices.some((ps) => {
-    if (selectedTab === "SelfSample") return ps.collectionMethod === 0;
-    if (selectedTab === "AtFacility") return ps.collectionMethod === 1;
-    return false;
-  })
-);
+    test.priceServices.some((ps) => {
+      if (selectedTab === "SelfSample") return ps.collectionMethod === 0;
+      if (selectedTab === "AtFacility") return ps.collectionMethod === 1;
+      return false;
+    })
+  );
 
 
   return (
@@ -68,28 +68,28 @@ export const ServicesSection: React.FC = () => {
         <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 20 }} />
       ) : (
         <FlatList
-  data={filteredTests}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => {
-    const matchingPrices = item.priceServices.filter((ps) =>
-      selectedTab === "SelfSample" ? ps.collectionMethod === 0 : ps.collectionMethod === 1
-    );
+          data={filteredTests}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            const matchingPrices = item.priceServices.filter((ps) =>
+              selectedTab === "SelfSample" ? ps.collectionMethod === 0 : ps.collectionMethod === 1
+            );
 
-    return (
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardDescription}>{item.description}</Text>
+            return (
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>{item.name}</Text>
+                <Text style={styles.cardDescription}>{item.description}</Text>
 
-        {matchingPrices.map((price) => (
-          <View key={price.id} style={{ marginTop: 8 }}>
-            <Text>Giá: {price.price} {price.currency}</Text>
-            <Text>Hiệu lực: {price.effectiveFrom} - {price.effectiveTo}</Text>
-          </View>
-        ))}
-      </View>
-    );
-  }}
-/>
+                {matchingPrices.map((price) => (
+                  <View key={price.id} style={{ marginTop: 8 }}>
+                    <Text>Giá: {price.price} {price.currency}</Text>
+                    <Text>Hiệu lực: {price.effectiveFrom} - {price.effectiveTo}</Text>
+                  </View>
+                ))}
+              </View>
+            );
+          }}
+        />
 
       )}
     </View>

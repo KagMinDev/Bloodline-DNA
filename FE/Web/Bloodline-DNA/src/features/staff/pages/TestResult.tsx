@@ -1,4 +1,3 @@
-import { MoreVertical, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -9,16 +8,9 @@ import {
 import { getTestBookingApi } from "../api/testBookingApi";
 import {
   createTestResultApi,
-  deleteTestResultApi,
-  getAllTestResultApi,
+  getAllTestResultApi
 } from "../api/testResultApi";
 import { Button } from "../components/sample/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../components/sample/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -28,6 +20,7 @@ import {
   TableRow,
 } from "../components/sample/ui/table";
 import ModalTestResult from "../components/testResult/ModalTestResult";
+import ModalTestResultDetail from "../components/testResult/ModalTestResultDetail";
 import type { TestBookingResponse } from "../types/testBooking";
 import type {
   TestResultRequest,
@@ -41,21 +34,25 @@ interface BookingOption {
   appointmentDate: string;
   status: string;
 }
+interface FormState {
+  testBookingId: string;
+  resultSummary: string;
+  resultDate: string;
+  resultFile: File | null;
+}
 
 function TestResultPage() {
   const [results, setResults] = useState<TestResultResponse[]>([]);
+  const [selectedResult, setSelectedResult] = useState<TestResultResponse | null>(null);
   const [bookings, setBookings] = useState<BookingOption[]>([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState<
-    Omit<TestResultRequest, "resultDate"> & { resultDate: string }
-  >({
-    id: "",
+  const [form, setForm] = useState<FormState>({
     testBookingId: "",
     resultSummary: "",
     resultDate: "",
-    resultFileUrl: "",
+    resultFile: null,
   });
 
   const token = localStorage.getItem("token") || "";
@@ -81,7 +78,7 @@ function TestResultPage() {
       if (!token) return;
       setIsLoadingBookings(true);
       try {
-        const bookingData = await getTestBookingApi(token);
+        const bookingData = await getTestBookingApi();
         const bookingOptions: BookingOption[] = bookingData.map(
           (booking: TestBookingResponse) => ({
             id: booking.id,
@@ -103,11 +100,10 @@ function TestResultPage() {
 
   const openCreateModal = () => {
     setForm({
-      id: "",
       testBookingId: "",
       resultSummary: "",
       resultDate: "",
-      resultFileUrl: "",
+      resultFile: null,
     });
     setShowModal(true);
   };
@@ -120,6 +116,10 @@ function TestResultPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (file: File | null) => {
+    setForm({ ...form, resultFile: file });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
@@ -127,39 +127,41 @@ function TestResultPage() {
       return;
     }
 
+    if (!form.resultFile) {
+      alert("Vui lòng chọn file kết quả!");
+      return;
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (form.resultFile.size > maxSize) {
+      alert("File quá lớn! Vui lòng chọn file dưới 10MB.");
+      return;
+    }
+
     const req: TestResultRequest = {
-      ...form,
-      resultDate: new Date(form.resultDate),
+      TestBookingId: form.testBookingId,
+      ResultSummary: form.resultSummary,
+      ResultDate: new Date(form.resultDate),
+      ResultFile: form.resultFile,
     };
 
     try {
       await createTestResultApi(req, token);
       const updatedResults = await getAllTestResultApi(token);
+      console.log("All kq:", getAllTestResultApi);
       setResults(updatedResults);
       setShowModal(false);
       setForm({
-        id: "",
         testBookingId: "",
         resultSummary: "",
         resultDate: "",
-        resultFileUrl: "",
+        resultFile: null,
       });
+      alert("Tạo kết quả thành công!");
     } catch (error) {
       console.error("Lỗi tạo kết quả:", error);
       alert("Có lỗi xảy ra khi tạo kết quả!");
-    }
-  };
-
-  const handleDelete = async (idx: number) => {
-    if (!token) return;
-    const id = results[idx].id;
-    if (!id) return;
-    if (!window.confirm("Bạn chắc chắn muốn xóa kết quả này?")) return;
-    try {
-      await deleteTestResultApi(id, token);
-      setResults((prev) => prev.filter((_, i) => i !== idx));
-    } catch {
-      alert("Xóa thất bại!");
     }
   };
 
@@ -200,7 +202,6 @@ function TestResultPage() {
                   <TableHead className="text-center">Ngày trả</TableHead>
                   <TableHead className="text-center">File kết quả</TableHead>
                   <TableHead className="text-center">Khách hàng</TableHead>
-                  <TableHead className="text-center">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -221,7 +222,11 @@ function TestResultPage() {
                   </TableRow>
                 ) : (
                   results.map((result, idx) => (
-                    <TableRow key={result.id || idx}>
+                    <TableRow
+                      key={result.id || idx}
+                      className="cursor-pointer hover:bg-blue-50"
+                      onClick={() => setSelectedResult(result)}
+                    >
                       <TableCell className="font-mono text-xs text-center">
                         <span className="px-2 py-1 text-green-700 bg-green-100 rounded">
                           {result.testBookingId}
@@ -233,8 +238,8 @@ function TestResultPage() {
                       <TableCell className="text-sm text-center">
                         {result.resultDate
                           ? new Date(result.resultDate).toLocaleDateString(
-                              "vi-VN"
-                            )
+                            "vi-VN"
+                          )
                           : "-"}
                       </TableCell>
                       <TableCell className="text-center">
@@ -256,27 +261,6 @@ function TestResultPage() {
                       <TableCell className="text-sm text-center">
                         {result.client?.fullName || "-"}
                       </TableCell>
-                      <TableCell className="text-center">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button
-                              className="p-2 transition rounded-full hover:bg-gray-200"
-                              title="Tùy chọn"
-                            >
-                              <MoreVertical className="w-5 h-5 text-gray-600" />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(idx)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Xóa
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -292,9 +276,17 @@ function TestResultPage() {
         onSubmit={handleSubmit}
         form={form}
         onChange={handleChange}
+        onFileChange={handleFileChange}
         bookingOptions={bookings}
         isLoadingBookings={isLoadingBookings}
       />
+
+      <ModalTestResultDetail
+        show={!!selectedResult}
+        result={selectedResult}
+        onClose={() => setSelectedResult(null)}
+      />
+
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   FaChartBar,
   FaShippingFast,
 } from "react-icons/fa";
+import { GrTestDesktop } from "react-icons/gr";
 import { MdDomainAdd } from "react-icons/md";
 import { TiStarHalfOutline } from "react-icons/ti";
 import { Link, useLocation } from "react-router-dom";
@@ -23,6 +24,11 @@ const SidebarData: SidebarDataType[] = [
     icon: FaChartBar,
     heading: "Quản lí doanh thu",
     href: "/manager/dashboard",
+  },
+  {
+    icon: GrTestDesktop,
+    heading: "Quản lí đơn xét nghiệm",
+    href: "/staff/test-booking",
   },
   {
     icon: MdDomainAdd,

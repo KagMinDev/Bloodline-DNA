@@ -72,7 +72,9 @@ namespace ADNTester.Service
             #region TestResult Mapping
             CreateMap<TestResult, TestResultDto>();
             CreateMap<CreateTestResultDto, TestResult>();
+            CreateMap<CreateTestResultWithFileDto, TestResult>();
             CreateMap<UpdateTestResultDto, TestResult>();
+            CreateMap<UpdateTestResultWithFileDto, TestResult>();
             CreateMap<TestResult, TestResultDetailDto>()
                 .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.TestBooking.Client));
             #endregion
