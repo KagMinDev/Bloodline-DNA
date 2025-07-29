@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBookingApi, mapFormDataToBookingRequest, getAvailableTestServicesApi } from "../api/bookingCreateApi";
+import { createBookingApi, getAvailableTestServicesApi, mapFormDataToBookingRequest } from "../api/bookingCreateApi";
+import { AddressSelector } from "./AddressSelector";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader } from "./ui/Card";
 import { Input } from "./ui/Input";
-import { AddressSelector } from "./AddressSelector";
 
 // Define interface locally to avoid import issues
 interface CreateBookingResponse {
@@ -82,11 +82,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
   // Check if user is authenticated
   const isAuthenticated = (): boolean => {
-    const token = localStorage.getItem('authToken') || 
-                  localStorage.getItem('token') || 
-                  localStorage.getItem('accessToken') ||
-                  sessionStorage.getItem('authToken') ||
-                  sessionStorage.getItem('token');
+    const token = localStorage.getItem('authToken') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('accessToken') ||
+      sessionStorage.getItem('authToken') ||
+      sessionStorage.getItem('token');
     return !!token;
   };
 
@@ -94,15 +94,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const validateTestServiceId = (): boolean => {
     const serviceToUse = enhancedSelectedService || selectedService;
     const testServiceId = serviceToUse?.testServiceInfor?.id || serviceToUse?.testServiceInfo?.id || serviceToUse?.id || formData.testType;
-    
+
     // Check if testServiceId exists and is not an internal code
-    if (!testServiceId || 
-        testServiceId.includes('civil-') || 
-        testServiceId.includes('legal-')) {
+    if (!testServiceId ||
+      testServiceId.includes('civil-') ||
+      testServiceId.includes('legal-')) {
       console.warn('Invalid testServiceId for submission:', testServiceId);
       return false;
     }
-    
+
     return true;
   };
 
@@ -112,7 +112,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // Determine default service type based on collectionMethod
       let defaultServiceType: 'home' | 'clinic';
       let defaultAddress = '';
-      
+
       if (selectedService.collectionMethod === 0) {
         defaultServiceType = 'home'; // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
         defaultAddress = ''; // User needs to input address
@@ -125,17 +125,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         defaultServiceType = 'home';
         defaultAddress = '';
       }
-      
+
       // Set testType to the selected service id
       const defaultTestType = selectedService.id;
-      
+
       console.log('🔧 Setting form data based on collectionMethod:', {
         collectionMethod: selectedService.collectionMethod,
         defaultServiceType,
         defaultTestType,
         defaultAddress
       });
-      
+
       setFormData(prev => ({
         ...prev,
         serviceType: defaultServiceType,
@@ -176,25 +176,25 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       console.log('🔍 Service name:', selectedService?.name);
       console.log('🔍 Service price:', selectedService?.price);
       console.log('🔍 Service category:', selectedService?.category);
-      
+
       console.log('Modal opened, fetching available TestServices for debugging...');
       getAvailableTestServicesApi().then(testServices => {
         console.log('Available TestServices in database:', testServices);
         console.log('Current selectedService:', selectedService);
-        
+
         // Enhance selectedService with testServiceInfo if missing
         let enhancedService = { ...selectedService };
-        
+
         if (selectedService && testServices.length > 0 && !selectedService.testServiceInfo) {
           console.log('🔧 selectedService missing testServiceInfo, attempting to find it...');
-          
+
           // Try to find matching TestService
-          const matchingTestService = testServices.find((ts: any) => 
+          const matchingTestService = testServices.find((ts: any) =>
             ts.id === selectedService?.id ||               // priceServiceId matches
             ts.serviceId === selectedService?.testServiceInfor?.id
-            
+
           );
-          
+
           if (matchingTestService) {
             console.log('✅ Found matching TestService for enhancement:', matchingTestService);
             enhancedService = {
@@ -215,45 +215,45 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         } else {
           setEnhancedSelectedService(selectedService);
         }
-        
+
         // Check if selectedService.id exists in available TestServices
         if (selectedService && testServices.length > 0) {
           const selectedServiceId = selectedService?.id;
           const testServiceInfoId = selectedService?.testServiceInfo?.id;
-          
+
           console.log('Checking IDs:', {
             selectedServiceId,
             testServiceInfoId,
             selectedServiceFull: selectedService
           });
-          
-          const matchingService = testServices.find((ts: any) => 
-            ts.id === selectedServiceId || 
+
+          const matchingService = testServices.find((ts: any) =>
+            ts.id === selectedServiceId ||
             ts.id === testServiceInfoId ||
             ts.serviceId === selectedServiceId ||
             ts.serviceId === testServiceInfoId ||
             ts.testServiceId === selectedServiceId ||
             ts.testServiceId === testServiceInfoId
           );
-          
+
           if (matchingService) {
             console.log('✅ Found matching TestService:', matchingService);
           } else {
             console.warn('❌ No matching TestService found');
             console.warn('selectedService.id:', selectedServiceId);
             console.warn('testServiceInfo.id:', testServiceInfoId);
-            console.warn('Available TestService IDs:', testServices.map((ts: any) => ({ 
-              id: ts.id, 
+            console.warn('Available TestService IDs:', testServices.map((ts: any) => ({
+              id: ts.id,
               serviceId: ts.serviceId,
               testServiceId: ts.testServiceId,
-              name: ts.name || ts.title 
+              name: ts.name || ts.title
             })));
           }
         }
       }).catch(err => {
         console.error('Failed to fetch TestServices for debugging:', err);
       });
-      
+
       // Removed testBookingApiRequirements call to avoid sending sample request
     }
   }, [isOpen, selectedService]);
@@ -291,7 +291,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       console.log('❌ getSelectedServiceAsTestType: No selectedService');
       return null;
     }
-    
+
     const testType = {
       id: selectedService.testServiceInfor?.id || selectedService.id,
       name: selectedService.name || 'Dịch vụ xét nghiệm',
@@ -299,7 +299,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       time: "3-7 ngày", // Default time, có thể customize
       category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
     };
-    
+
     console.log('✅ getSelectedServiceAsTestType created:', testType);
     return testType;
   };
@@ -316,16 +316,16 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // Nếu không có selectedService, trả về cả hai option
       return ['home', 'clinic'];
     }
-    
+
     const { collectionMethod } = selectedService;
-    
+
     // Dựa vào collectionMethod để trả về service types khả dụng
     if (collectionMethod === 0) {
       return ['home']; // collectionMethod 0 = chỉ home
     } else if (collectionMethod === 1) {
       return ['clinic']; // collectionMethod 1 = chỉ clinic
     }
-    
+
     // Fallback: nếu collectionMethod không rõ, trả về cả hai
     return ['home', 'clinic'];
   };
@@ -336,15 +336,15 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // Nếu không có selectedService, hiển thị cả hai option
       return 2;
     }
-    
+
     const { collectionMethod } = selectedService;
-    
+
     // Với logic mới dựa vào collectionMethod, luôn chỉ có 1 option
     // vì mỗi service chỉ có 1 collectionMethod cố định
     if (collectionMethod === 0 || collectionMethod === 1) {
       return 1;
     }
-    
+
     // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
     return 2;
   };
@@ -355,9 +355,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // Nếu không có selectedService, hiển thị cả hai option (fallback cho compatibility)
       return ['home', 'clinic'].includes(serviceType);
     }
-    
+
     const { collectionMethod } = selectedService;
-    
+
     // Dựa vào collectionMethod để quyết định hiển thị
     if (collectionMethod === 0) {
       // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
@@ -366,7 +366,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // collectionMethod 1 = Thu mẫu tại trung tâm  
       return serviceType === 'clinic';
     }
-    
+
     // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
     return ['home', 'clinic'].includes(serviceType);
   };
@@ -399,38 +399,38 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const handleSubmit = async () => {
     setLoading(true);
     setApiError(null);
-    
+
     console.log('🚀 SUBMIT STARTED - Form validation');
     console.log('Current form data:', formData);
     console.log('Selected service:', enhancedSelectedService || selectedService);
-    
+
     // Validate testServiceId before making API call
     if (!validateTestServiceId()) {
       setApiError("Có lỗi với dịch vụ được chọn. Vui lòng thử chọn lại dịch vụ từ trang trước.");
       setLoading(false);
       return;
     }
-    
+
     try {
       console.log('🔄 Mapping form data to API request...');
-      
+
       // Map form data to API request format (now async)
       const bookingRequest = await mapFormDataToBookingRequest(
-        formData, 
+        formData,
         enhancedSelectedService || selectedService, // Use enhanced version if available
         undefined // Don't pass temp clientId, let API handle it
       );
-      
+
       console.log('✅ Request mapping successful, calling API...');
-      
+
       // Call the API
       const result = await createBookingApi(bookingRequest);
-      
+
       console.log('✅ API call successful:', result);
-      
+
       // Store the response for success step
       setBookingResponse(result);
-      
+
       // Call onSubmit callback if provided
       if (onSubmit) {
         onSubmit(formData);
@@ -440,11 +440,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       setStep(3);
     } catch (error) {
       console.error('❌ Booking creation failed:', error);
-      
+
       // Handle validation errors (thrown by mapFormDataToBookingRequest)
       if (error instanceof Error) {
         const errorMessage = error.message;
-        
+
         if (errorMessage.includes('Missing required')) {
           setApiError("Vui lòng điền đầy đủ thông tin bắt buộc.");
         } else if (errorMessage.includes('Invalid priceServiceId')) {
@@ -472,7 +472,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         } else if (errorMessage.includes('400')) {
           // Extract more details from 400 errors
           let errorDetail = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin đã nhập.";
-          
+
           // Try to extract specific error from message
           if (errorMessage.includes('foreign key')) {
             errorDetail = "Lỗi liên kết dữ liệu. Có thể cần đăng nhập hoặc chọn lại dịch vụ.";
@@ -481,7 +481,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           } else if (errorMessage.includes('null')) {
             errorDetail = "Thiếu thông tin bắt buộc. Vui lòng điền đầy đủ form.";
           }
-          
+
           setApiError(errorDetail);
           console.error('400 Bad Request error:', errorMessage);
           console.error('Form data:', formData);
@@ -501,10 +501,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const validateStep2 = () => {
-    const hasValidAddress = formData.serviceType === "clinic" 
+    const hasValidAddress = formData.serviceType === "clinic"
       ? formData.address === "TẠI CƠ SỞ"
       : formData.address && formData.address.split(',').length >= 2;
-    
+
     return (
       formData.name &&
       formData.phone &&
@@ -578,11 +578,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               {[1, 2, 3].map((stepNum) => (
                 <div key={stepNum} className="flex items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                      step >= stepNum
-                        ? "bg-white text-blue-900"
-                        : "bg-white/20 text-white"
-                    }`}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${step >= stepNum
+                      ? "bg-white text-blue-900"
+                      : "bg-white/20 text-white"
+                      }`}
                   >
                     {step > stepNum ? (
                       <CheckCircleIcon className="w-5 h-5" />
@@ -592,9 +591,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   </div>
                   {stepNum < 3 && (
                     <div
-                      className={`w-8 h-0.5 ${
-                        step > stepNum ? "bg-white" : "bg-white/20"
-                      }`}
+                      className={`w-8 h-0.5 ${step > stepNum ? "bg-white" : "bg-white/20"
+                        }`}
                     ></div>
                   )}
                 </div>
@@ -610,16 +608,14 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <h3 className="mb-4 text-lg font-semibold text-blue-900">
                     Chọn hình thức thu mẫu
                   </h3>
-                  <div className={`grid gap-4 ${
-                    getAvailableServiceTypesCount() === 1 
-                      ? "grid-cols-1 place-items-center" 
-                      : "grid-cols-1 md:grid-cols-2"
-                  }`}>
+                  <div className={`grid gap-4 ${getAvailableServiceTypesCount() === 1
+                    ? "grid-cols-1 place-items-center"
+                    : "grid-cols-1 md:grid-cols-2"
+                    }`}>
                     {/* Service Type Options */}
                     {shouldShowServiceType('home') && (
-                      <label className={`cursor-pointer ${
-                        getAvailableServiceTypesCount() === 1 ? "max-w-md" : ""
-                      }`}>
+                      <label className={`cursor-pointer ${getAvailableServiceTypesCount() === 1 ? "max-w-md" : ""
+                        }`}>
                         <input
                           type="radio"
                           name="serviceType"
@@ -631,11 +627,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                           className="sr-only"
                         />
                         <div
-                          className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${
-                            formData.serviceType === "home"
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-gray-200 hover:border-blue-300"
-                          }`}
+                          className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${formData.serviceType === "home"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-blue-300"
+                            }`}
                         >
                           <HomeIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
                           <h4 className="mb-2 font-semibold text-slate-700">
@@ -653,9 +648,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
                     {/* Clinic Service */}
                     {shouldShowServiceType('clinic') && (
-                      <label className={`cursor-pointer ${
-                        getAvailableServiceTypesCount() === 1 ? "max-w-md" : ""
-                      }`}>
+                      <label className={`cursor-pointer ${getAvailableServiceTypesCount() === 1 ? "max-w-md" : ""
+                        }`}>
                         <input
                           type="radio"
                           name="serviceType"
@@ -667,11 +661,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                           className="sr-only"
                         />
                         <div
-                          className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${
-                            formData.serviceType === "clinic"
-                              ? "border-blue-500 bg-blue-50"
-                              : "border-gray-200 hover:border-blue-300"
-                          }`}
+                          className={`p-6 border-2 rounded-lg transition-all duration-200 text-center ${formData.serviceType === "clinic"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-blue-300"
+                            }`}
                         >
                           <BuildingIcon className="w-12 h-12 mx-auto mb-3 text-blue-600" />
                           <h4 className="mb-2 font-semibold text-slate-700">
@@ -693,7 +686,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <h3 className="mb-4 text-lg font-semibold text-blue-900">
                     Chọn gói xét nghiệm ADN
                   </h3>
-                  
+
                   {getAvailableTestTypes().length > 0 ? (
                     <div className="grid grid-cols-1 gap-3">
                       {getAvailableTestTypes().map((test) => (
@@ -709,11 +702,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                             className="sr-only"
                           />
                           <div
-                            className={`p-4 border-2 rounded-lg transition-all duration-200 ${
-                              formData.testType === test.id
-                                ? "border-blue-500 bg-blue-50"
-                                : "border-gray-200 hover:border-blue-300"
-                            }`}
+                            className={`p-4 border-2 rounded-lg transition-all duration-200 ${formData.testType === test.id
+                              ? "border-blue-500 bg-blue-50"
+                              : "border-gray-200 hover:border-blue-300"
+                              }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
@@ -721,11 +713,10 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                                   {test.name}
                                 </div>
                                 <div className="flex items-center gap-4 mt-1 text-sm text-slate-600">
-                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                    test.category === 'Dân sự' 
-                                      ? 'bg-green-100 text-green-700' 
-                                      : 'bg-blue-100 text-blue-700'
-                                  }`}>
+                                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${test.category === 'Dân sự'
+                                    ? 'bg-green-100 text-green-700'
+                                    : 'bg-blue-100 text-blue-700'
+                                    }`}>
                                     {test.category}
                                   </span>
                                   <span>⏱️ {test.time}</span>
@@ -740,7 +731,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       ))}
                     </div>
                   ) : (
-                    <div className="p-6 text-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                    <div className="p-6 text-center border-2 border-gray-300 border-dashed rounded-lg bg-gray-50">
                       <p className="text-gray-500">
                         Vui lòng chọn hình thức thu mẫu để xem các gói xét nghiệm có sẵn
                       </p>
@@ -769,7 +760,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
                 {/* Authentication Warning */}
                 {!isAuthenticated() && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
                     <div className="flex items-center">
                       <AlertCircleIcon className="w-5 h-5 mr-2 text-yellow-600" />
                       <p className="text-sm text-yellow-800">
@@ -804,15 +795,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     <Input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) =>
-                        handleInputChange("phone", e.target.value)
-                      }
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        const numericValue = inputValue.replace(/\D/g, ""); // Xoá ký tự không phải số
+                        if (numericValue.length <= 10) {
+                          handleInputChange("phone", numericValue);
+                        }
+                      }}
                       placeholder="Nhập số điện thoại"
                       className="w-full"
                     />
                   </div>
-
-
 
                   <div className="space-y-2 md:col-span-2">
                     <label className="flex items-center text-sm font-semibold text-blue-900">
@@ -840,7 +833,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                           disabled={true}
                           readOnly={true}
                         />
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className="mt-1 text-xs text-blue-600">
                           <strong>Lưu ý:</strong> Bạn sẽ đến trung tâm để thực hiện xét nghiệm
                         </p>
                       </div>
@@ -902,7 +895,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
 
                 {/* Error Display */}
                 {apiError && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="p-4 border border-red-200 rounded-lg bg-red-50">
                     <div className="flex items-center">
                       <AlertCircleIcon className="w-5 h-5 mr-2 text-red-600" />
                       <p className="text-sm text-red-800">{apiError}</p>
@@ -944,8 +937,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   Đăng ký thành công!
                 </h3>
                 <p className="mb-6 text-slate-600">
-                  {bookingResponse?.message || 
-                   "Chúng tôi đã nhận được yêu cầu xét nghiệm ADN của bạn. Nhân viên tư vấn sẽ liên hệ với bạn trong vòng 30 phút để xác nhận và hướng dẫn chi tiết."}
+                  {bookingResponse?.message ||
+                    "Chúng tôi đã nhận được yêu cầu xét nghiệm ADN của bạn. Nhân viên tư vấn sẽ liên hệ với bạn trong vòng 30 phút để xác nhận và hướng dẫn chi tiết."}
                 </p>
                 <div className="p-4 mb-6 rounded-lg bg-blue-50">
                   <p className="text-sm text-blue-800">

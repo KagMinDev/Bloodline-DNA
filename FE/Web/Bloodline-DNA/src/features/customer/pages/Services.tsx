@@ -678,7 +678,7 @@ export const Services = (): React.JSX.Element => {
                 Danh Sách Dịch Vụ Y Tế
               </h2>
               <p className="max-w-3xl mx-auto text-lg text-gray-600">
-                Tìm thấy <span className="font-semibold text-[#0066CC]">{filteredServices.length}</span> dịch vụ
+                Dịch vụ có sẵn: <span className="font-semibold text-[#0066CC]">{filteredServices.length}</span>
                 {selectedCategory !== "all" && (
                   <span> trong danh mục <span className="font-semibold text-[#0066CC]">{getCategoryName(selectedCategory)}</span></span>
                 )}

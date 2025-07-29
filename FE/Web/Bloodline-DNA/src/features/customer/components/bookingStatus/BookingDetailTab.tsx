@@ -1,4 +1,4 @@
-import { AlertCircleIcon, BuildingIcon, CalendarIcon, ClockIcon, CreditCardIcon, HomeIcon, MailIcon, MapPinIcon, PhoneIcon, UserIcon } from 'lucide-react';
+import { AlertCircleIcon, BuildingIcon, CalendarIcon, ClockIcon, CreditCardIcon, HomeIcon, MapPinIcon, PhoneIcon, UserIcon } from 'lucide-react';
 import { calculateDeposit, formatPaymentAmount } from '../../api/paymentApi';
 import type { BookingDetail, TestProgressData } from '../../types/bookingTypes';
 import { Button } from '../ui/Button';
@@ -47,7 +47,7 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
           <CardContent className="grid grid-cols-2 p-6 gap-x-6 gap-y-4">
             <div className="flex items-center gap-3"><UserIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Họ tên</p><p className="font-medium">{booking.name}</p></div></div>
             <div className="flex items-center gap-3"><PhoneIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Điện thoại</p><p className="font-medium">{booking.phone}</p></div></div>
-            <div className="flex items-center col-span-2 gap-3"><MailIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Email</p><p className="font-medium">{booking.email}</p></div></div>
+            {/* <div className="flex items-center col-span-2 gap-3"><MailIcon className="w-5 h-5 text-blue-500" /><div><p className="text-sm text-slate-500">Email</p><p className="font-medium">{booking.email}</p></div></div> */}
             {booking.address && <div className="flex items-start col-span-2 gap-3"><MapPinIcon className="w-5 h-5 mt-1 text-blue-500" /><div><p className="text-sm text-slate-500">Địa chỉ</p><p className="font-medium">{booking.address}</p></div></div>}
             {booking.notes && <div className="col-span-2 pt-4 mt-4 border-t"><p className="mb-1 text-sm font-medium text-slate-600">Ghi chú:</p><p className="text-sm italic text-slate-500">"{booking.notes}"</p></div>}
           </CardContent>
