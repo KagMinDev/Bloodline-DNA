@@ -1,116 +1,144 @@
-import { useState, useCallback } from "react";
-import { getUserFeedbacksApi, getFeedbackByIdApi, type UserFeedback } from "../api/existingFeedbackApi";
+import { useCallback, useRef, useState } from "react";
+import {
+  getFeedbackByIdApi,
+  getUserFeedbacksApi,
+  type UserFeedback,
+} from "../api/existingFeedbackApi";
 
 export const useExistingFeedback = () => {
-  const [existingFeedbackMap, setExistingFeedbackMap] = useState<Record<string, UserFeedback>>({});
+  const [existingFeedbackMap, setExistingFeedbackMap] = useState<Record<string, UserFeedback | null>>({});
   const [isCheckingFeedback, setIsCheckingFeedback] = useState<Record<string, boolean>>({});
   const [feedbackErrors, setFeedbackErrors] = useState<Record<string, string>>({});
 
-  const checkExistingFeedback = useCallback(async (userId: string, testServiceId: string) => {
-    if (!userId || !testServiceId) {
-      console.log("❌ Missing userId or testServiceId for feedback check");
-      return null;
-    }
+  // Use refs to access current state without causing re-renders
+  const existingFeedbackMapRef = useRef(existingFeedbackMap);
+  const isCheckingFeedbackRef = useRef(isCheckingFeedback);
 
-    const feedbackKey = `${userId}_${testServiceId}`;
-    
-    // If already checking, return existing promise to avoid race condition
-    if (isCheckingFeedback[feedbackKey]) {
-      console.log(`⏳ Already checking feedback for ${feedbackKey}, skipping...`);
-      return existingFeedbackMap[feedbackKey] || null;
-    }
-    
-    // If already have result, return it
-    if (existingFeedbackMap[feedbackKey]) {
-      console.log(`✅ Using cached feedback for ${feedbackKey}`);
-      return existingFeedbackMap[feedbackKey];
-    }
+  // Update refs when state changes
+  existingFeedbackMapRef.current = existingFeedbackMap;
+  isCheckingFeedbackRef.current = isCheckingFeedback;
 
-    try {
-      setIsCheckingFeedback(prev => ({ ...prev, [feedbackKey]: true }));
-      setFeedbackErrors(prev => ({ ...prev, [feedbackKey]: "" }));
-      
-      console.log(`🔄 Checking existing feedback for user ${userId} and testService ${testServiceId}`);
-
-      // Get all user feedbacks
-      const userFeedbacksResponse = await getUserFeedbacksApi(userId);
-      
-      if (userFeedbacksResponse.success && userFeedbacksResponse.data) {
-        const feedbacks = Array.isArray(userFeedbacksResponse.data) 
-          ? userFeedbacksResponse.data 
-          : [userFeedbacksResponse.data];
-        
-        // Find feedback with matching testServiceId
-        const matchingFeedback = feedbacks.find(
-          (feedback: UserFeedback) => feedback.testServiceId === testServiceId
-        );
-
-        if (matchingFeedback) {
-          console.log(`✅ Found existing feedback for ${feedbackKey}:`, matchingFeedback);
-          
-          // Get detailed feedback information
-          try {
-            const feedbackDetailsResponse = await getFeedbackByIdApi(matchingFeedback.id);
-            
-            if (feedbackDetailsResponse.success && feedbackDetailsResponse.data) {
-              const detailedFeedback = Array.isArray(feedbackDetailsResponse.data) 
-                ? feedbackDetailsResponse.data[0] 
-                : feedbackDetailsResponse.data;
-              
-              console.log(`✅ Got detailed feedback for ${feedbackKey}:`, detailedFeedback);
-              setExistingFeedbackMap(prev => ({ 
-                ...prev, 
-                [feedbackKey]: detailedFeedback as UserFeedback 
-              }));
-              return detailedFeedback as UserFeedback;
-            } else {
-              console.log("⚠️ Failed to get feedback details, using basic info");
-              setExistingFeedbackMap(prev => ({ 
-                ...prev, 
-                [feedbackKey]: matchingFeedback 
-              }));
-              return matchingFeedback;
-            }
-          } catch (detailError) {
-            console.warn("⚠️ Error getting feedback details, using basic info:", detailError);
-            setExistingFeedbackMap(prev => ({ 
-              ...prev, 
-              [feedbackKey]: matchingFeedback 
-            }));
-            return matchingFeedback;
-          }
-        } else {
-          console.log(`📝 No existing feedback found for ${feedbackKey}`);
-          return null;
-        }
-      } else {
-        console.log(`📝 No feedbacks found for user ${userId}`);
+  const checkExistingFeedback = useCallback(
+    async (userId: string, testServiceId: string) => {
+      if (!userId || !testServiceId) {
+        console.log("❌ Missing userId or testServiceId for feedback check");
         return null;
       }
-    } catch (error) {
-      console.error(`❌ Error checking existing feedback for ${feedbackKey}:`, error);
-      const errorMessage = error instanceof Error ? error.message : "Error checking feedback";
-      setFeedbackErrors(prev => ({ ...prev, [feedbackKey]: errorMessage }));
-      return null;
-    } finally {
-      setIsCheckingFeedback(prev => ({ ...prev, [feedbackKey]: false }));
-    }
-  }, [existingFeedbackMap, isCheckingFeedback]);
 
-  const getExistingFeedback = useCallback((userId: string, testServiceId: string) => {
-    const feedbackKey = `${userId}_${testServiceId}`;
-    return existingFeedbackMap[feedbackKey] || null;
-  }, [existingFeedbackMap]);
+      const feedbackKey = `${userId}_${testServiceId}`;
 
-  const isCheckingFeedbackFor = useCallback((userId: string, testServiceId: string) => {
-    const feedbackKey = `${userId}_${testServiceId}`;
-    return isCheckingFeedback[feedbackKey] || false;
-  }, [isCheckingFeedback]);
+      // ⏳ Nếu đang gọi API cho key này → không gọi lại
+      if (isCheckingFeedbackRef.current[feedbackKey]) {
+        console.log(`⏳ Already checking feedback for ${feedbackKey}, skipping...`);
+        return existingFeedbackMapRef.current[feedbackKey] || null;
+      }
 
-  const getFeedbackError = useCallback((userId: string, testServiceId: string) => {
-    const feedbackKey = `${userId}_${testServiceId}`;
-    return feedbackErrors[feedbackKey] || "";
-  }, [feedbackErrors]);
+      // ✅ Nếu đã có kết quả thì không gọi nữa (including null results)
+      if (feedbackKey in existingFeedbackMapRef.current) {
+        console.log(`✅ Using cached feedback for ${feedbackKey}`);
+        return existingFeedbackMapRef.current[feedbackKey];
+      }
+
+      try {
+        setIsCheckingFeedback(prev => ({ ...prev, [feedbackKey]: true }));
+        setFeedbackErrors(prev => ({ ...prev, [feedbackKey]: "" }));
+
+        console.log(`🔄 Checking existing feedback for ${feedbackKey}`);
+
+        const userFeedbacksResponse = await getUserFeedbacksApi(userId);
+
+        if (userFeedbacksResponse.success && userFeedbacksResponse.data) {
+          const feedbacks: UserFeedback[] = Array.isArray(userFeedbacksResponse.data)
+            ? userFeedbacksResponse.data
+            : [userFeedbacksResponse.data];
+
+          const matchingFeedback = feedbacks.find(
+            (feedback) => feedback.testServiceId === testServiceId
+          );
+
+          if (matchingFeedback) {
+            console.log(`✅ Found feedback for ${feedbackKey}:`, matchingFeedback);
+
+            // Lấy chi tiết nếu có
+            try {
+              const feedbackDetailsResponse = await getFeedbackByIdApi(matchingFeedback.id);
+
+              if (feedbackDetailsResponse.success && feedbackDetailsResponse.data) {
+                const detailedFeedback = Array.isArray(feedbackDetailsResponse.data)
+                  ? feedbackDetailsResponse.data[0]
+                  : feedbackDetailsResponse.data;
+
+                console.log(`✅ Got detailed feedback for ${feedbackKey}:`, detailedFeedback);
+
+                setExistingFeedbackMap(prev => ({
+                  ...prev,
+                  [feedbackKey]: detailedFeedback,
+                }));
+                return detailedFeedback;
+              }
+            } catch (detailError) {
+              console.warn("⚠️ Error getting detailed feedback:", detailError);
+            }
+
+            // Nếu không lấy được chi tiết, dùng bản gốc
+            setExistingFeedbackMap(prev => ({
+              ...prev,
+              [feedbackKey]: matchingFeedback,
+            }));
+            return matchingFeedback;
+          } else {
+            console.log(`📝 No feedback found for ${feedbackKey}`);
+            // Cache the "no feedback" result to avoid repeated API calls
+            setExistingFeedbackMap(prev => ({
+              ...prev,
+              [feedbackKey]: null,
+            }));
+            return null;
+          }
+        } else {
+          console.log(`📝 No feedbacks returned for user ${userId}`);
+          // Cache the "no feedback" result to avoid repeated API calls
+          setExistingFeedbackMap(prev => ({
+            ...prev,
+            [feedbackKey]: null,
+          }));
+          return null;
+        }
+      } catch (error) {
+        console.error(`❌ Error checking feedback for ${feedbackKey}:`, error);
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        setFeedbackErrors(prev => ({ ...prev, [feedbackKey]: errorMessage }));
+        return null;
+      } finally {
+        setIsCheckingFeedback(prev => ({ ...prev, [feedbackKey]: false }));
+      }
+    },
+    [] // Remove dependencies to prevent recreation
+  );
+
+  const getExistingFeedback = useCallback(
+    (userId: string, testServiceId: string) => {
+      const feedbackKey = `${userId}_${testServiceId}`;
+      return existingFeedbackMap[feedbackKey] || null;
+    },
+    [existingFeedbackMap]
+  );
+
+  const isCheckingFeedbackFor = useCallback(
+    (userId: string, testServiceId: string) => {
+      const feedbackKey = `${userId}_${testServiceId}`;
+      return isCheckingFeedback[feedbackKey] || false;
+    },
+    [isCheckingFeedback]
+  );
+
+  const getFeedbackError = useCallback(
+    (userId: string, testServiceId: string) => {
+      const feedbackKey = `${userId}_${testServiceId}`;
+      return feedbackErrors[feedbackKey] || "";
+    },
+    [feedbackErrors]
+  );
 
   const clearFeedbackCache = useCallback(() => {
     setExistingFeedbackMap({});
@@ -124,9 +152,9 @@ export const useExistingFeedback = () => {
     isCheckingFeedbackFor,
     getFeedbackError,
     clearFeedbackCache,
-    // For backward compatibility
+    // expose raw maps if needed
     existingFeedbackMap,
     isCheckingFeedback,
     feedbackErrors,
   };
-}; 
+};

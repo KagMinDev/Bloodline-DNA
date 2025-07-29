@@ -15,10 +15,10 @@ const LoginForm: React.FC = () => {
 
   const handleLogin = async (data: Login) => {
     console.log("Start loading");
-    
+
     setLoading(true);
     try {
-      const response = await loginApi(data.email, data.password);      
+      const response = await loginApi(data.email, data.password);
       localStorage.setItem("token", response.data.token);
       const userData = await getUserInfoApi(response.data.token);
       if (!userData) {
@@ -27,7 +27,7 @@ const LoginForm: React.FC = () => {
       }
       // Lưu thông tin người dùng vào localStorage
       localStorage.setItem("accountId", userData.id);
-      
+
       const user = {
         userName: response.data.userName,
         role: response.data.role,
@@ -311,13 +311,22 @@ const LoginForm: React.FC = () => {
 
           {/* Footer */}
           <div className="text-center">
-            <p className="mb-4 text-sm text-gray-600">
+            <p className="text-sm text-gray-600">
               Chưa có tài khoản?{" "}
               <Link
                 to="/register"
                 className="ml-2 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
               >
                 Đăng ký ngay
+              </Link>
+            </p>
+            <p className="text-sm text-gray-600">
+              Quay lại{""}
+              <Link
+                to="/"
+                className="ml-2 font-semibold text-green-600 hover:text-green-800 hover:underline"
+              >
+                Trang chủ
               </Link>
             </p>
             <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">

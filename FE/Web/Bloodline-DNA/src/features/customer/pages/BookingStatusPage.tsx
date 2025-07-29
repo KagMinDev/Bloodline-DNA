@@ -6,7 +6,6 @@ import { BookingDetailTab } from "../components/bookingStatus/BookingDetailTab";
 import { BookingProgressTab } from "../components/bookingStatus/BookingProgressTab";
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import { CollectionTimeModal } from "../components/CollectionTimeModal";
-import { PaymentDebugger } from "../components/PaymentDebugger";
 import { SampleInfoModal } from "../components/SampleInfoModal";
 import {
   Breadcrumb,
@@ -281,9 +280,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
       />
 
       {/* Payment Debugger - chỉ hiển thị trong development */}
-      {process.env.NODE_ENV === "development" && (
+      {/* {process.env.NODE_ENV === "development" && (
         <PaymentDebugger bookingId={booking.id} />
-      )}
+      )} */}
     </div>
   );
 };

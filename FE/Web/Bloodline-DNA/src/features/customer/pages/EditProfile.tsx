@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import { getMockUserData, getUserInfoApi, updateUserInfoApi, type UpdateUserData } from "../api/userApi";
+import { AddressSelector } from "../components/AddressSelector";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -119,6 +120,11 @@ export const EditProfile = (): React.JSX.Element => {
       }
       if (!profile.address || profile.address.trim() === '' || profile.address === 'Chưa cập nhật') {
         throw new Error('Vui lòng nhập địa chỉ');
+      }
+      // Validate address format (should have at least one comma for province/city)
+      const addressCommaCount = (profile.address.match(/,/g) || []).length;
+      if (addressCommaCount < 1) {
+        throw new Error('Vui lòng chọn tỉnh/thành phố và nhập địa chỉ chi tiết');
       }
 
       // Prepare update data (exclude email as it's not updatable)
@@ -283,7 +289,7 @@ export const EditProfile = (): React.JSX.Element => {
         )}
 
         {/* Profile Edit Form */}
-        <section className="py-16 md:py-20 bg-blue-50">
+        <section className="py-16 md:py-20 bg-white">
           <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
             <Card className="bg-white border-0 shadow-xl">
               <CardHeader className="p-6 text-white rounded-t-lg bg-gradient-to-r from-blue-900 to-blue-700">
@@ -404,12 +410,12 @@ export const EditProfile = (): React.JSX.Element => {
                         Địa Chỉ
                       </label>
                       {isEditing ? (
-                        <Input
-                          type="text"
+                        <AddressSelector
                           value={profile.address === 'Chưa cập nhật' ? '' : profile.address}
-                          onChange={(e) => handleInputChange('address', e.target.value)}
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
-                          placeholder="Nhập địa chỉ"
+                          onChange={(newAddress) => handleInputChange('address', newAddress)}
+                          placeholder="Nhập địa chỉ chi tiết của bạn"
+                          required={true}
+                          className="w-full"
                         />
                       ) : (
                         <Input

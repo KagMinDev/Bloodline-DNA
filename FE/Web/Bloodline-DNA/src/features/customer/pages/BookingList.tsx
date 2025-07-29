@@ -6,13 +6,13 @@ import {
   ClockIcon,
   EditIcon,
   EyeIcon,
+  FileTextIcon,
   FilterIcon,
   HomeIcon,
   MapPinIcon,
   PhoneIcon,
   SearchIcon,
-  StarIcon,
-  FileTextIcon
+  StarIcon
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -35,12 +35,12 @@ import {
   type BookingItem
 } from "../api/bookingListApi";
 // Import statusConfig từ BookingStatusPage để đồng bộ
+import { getTestResultsByUserId } from "../api/testResultApi";
 import { getUserInfoApi } from "../api/userApi";
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import { FeedbackModal } from "../components/FeedbackModal";
 import { useExistingFeedback } from "../hooks/useExistingFeedback";
 import type { DetailedBookingStatus } from "../types/bookingTypes";
-import { getTestResultsByUserId } from "../api/testResultApi";
 
 interface Booking {
   id: string;
@@ -85,9 +85,17 @@ export const BookingList = (): React.JSX.Element => {
 
   const { openBookingModal } = useBookingModal();
   const navigate = useNavigate();
-  
+
   // Debouncing refs
   const hoverTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
+
+  // Ref to store checkExistingFeedback function to avoid dependency issues
+  const checkExistingFeedbackRef = useRef(checkExistingFeedback);
+
+  // Update ref when function changes
+  useEffect(() => {
+    checkExistingFeedbackRef.current = checkExistingFeedback;
+  }, [checkExistingFeedback]);
   
   // Debounced feedback check function
   const debouncedCheckFeedback = useCallback((bookingId: string, userId: string, testServiceId: string, delay = 300) => {
@@ -189,23 +197,23 @@ export const BookingList = (): React.JSX.Element => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         // Get user info first
         const userData = await getUserInfoApi().catch(() => null);
         if (userData?.id) {
           setUserId(userData.id);
         }
-        
+
         const apiData = await getBookingListApi();
         const formattedBookings = apiData.map(transformApiDataToBooking);
-        
+
         // Sort bookings by createdAt descending (newest first)
         const sortedBookings = formattedBookings.sort((a, b) => {
           const dateA = new Date(a.bookingDate);
           const dateB = new Date(b.bookingDate);
           return dateB.getTime() - dateA.getTime();
         });
-        
+
         setBookings(sortedBookings);
         setFilteredBookings(sortedBookings);
 
@@ -214,16 +222,16 @@ export const BookingList = (): React.JSX.Element => {
           const completedBookings = sortedBookings
             .filter(booking => booking.status === 'Completed')
             .slice(0, 3); // Only first 3 to avoid performance issues
-          
+
           if (completedBookings.length > 0) {
             console.log(`🔄 Preloading feedback for top ${completedBookings.length} completed bookings`);
-            
+
             // Add small delays to avoid hitting API too hard
             completedBookings.forEach((booking, index) => {
               if (booking.testServiceId) {
                 setTimeout(() => {
                   const feedbackKey = `${userData.id}_${booking.testServiceId}`;
-                  checkExistingFeedback(userData.id, booking.testServiceId);
+                  checkExistingFeedbackRef.current(userData.id, booking.testServiceId);
                   setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
                 }, index * 100); // 100ms delay between each call
               }
@@ -242,7 +250,7 @@ export const BookingList = (): React.JSX.Element => {
     };
 
     fetchData();
-  }, [checkExistingFeedback]);
+  }, []); // Remove checkExistingFeedback dependency to prevent infinite loop
 
   useEffect(() => {
     let filtered = bookings;
@@ -285,19 +293,22 @@ export const BookingList = (): React.JSX.Element => {
 
   const handleFeedbackClick = (booking: Booking) => {
     console.log('🔄 Opening feedback modal for booking:', booking.id);
-    
-    // Check for existing feedback before opening modal to ensure latest data
+
+    // Only check for existing feedback if we haven't checked yet
     if (userId && booking.testServiceId) {
+      const feedbackKey = `${userId}_${booking.testServiceId}`;
       const existingFeedback = getExistingFeedback(userId, booking.testServiceId);
       const isAlreadyChecking = isCheckingFeedbackFor(userId, booking.testServiceId);
-      
-      // Refresh feedback check to ensure we have the latest data
-      if (!isAlreadyChecking) {
-        console.log(`🔄 Refreshing feedback check for booking: ${booking.id}`);
+      const hasPreloaded = preloadedFeedbacks.has(feedbackKey);
+
+      // Only refresh if we haven't preloaded and not currently checking
+      if (!hasPreloaded && !existingFeedback && !isAlreadyChecking) {
+        console.log(`🔄 Checking feedback for booking: ${booking.id}`);
         checkExistingFeedback(userId, booking.testServiceId);
+        setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
       }
     }
-    
+
     setSelectedBookingForFeedback(booking);
     setFeedbackModalOpen(true);
   };
@@ -692,25 +703,25 @@ export const BookingList = (): React.JSX.Element => {
       {/* Modal hiển thị kết quả */}
       {showResultModal && resultData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setShowResultModal(false)}>&times;</button>
-            <h2 className="text-xl font-bold mb-4 text-green-700">Kết Quả Xét Nghiệm</h2>
+          <div className="relative w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+            <button className="absolute text-gray-500 top-2 right-2 hover:text-red-600" onClick={() => setShowResultModal(false)}>&times;</button>
+            <h2 className="mb-4 text-xl font-bold text-green-700">Kết Quả Xét Nghiệm</h2>
             {resultData.list ? (
               <>
-                <div className="mb-2 text-blue-700 font-semibold">Chọn kết quả muốn xem:</div>
+                <div className="mb-2 font-semibold text-blue-700">Chọn kết quả muốn xem:</div>
                 <ul className="mb-4 space-y-2">
                   {resultData.list.map((r: any, idx: number) => (
-                    <li key={r.id} className="border rounded p-2 flex flex-col gap-1">
+                    <li key={r.id} className="flex flex-col gap-1 p-2 border rounded">
                       <div><b>Mã booking:</b> {r.testBookingId}</div>
                       <div><b>Kết luận:</b> {r.resultSummary}</div>
                       <div><b>Ngày trả kết quả:</b> {new Date(r.resultDate).toLocaleDateString('vi-VN')}</div>
-                      <Button className="mt-1 bg-green-600 text-white" onClick={() => { setResultData(r); }}>
+                      <Button className="mt-1 text-white bg-green-600" onClick={() => { setResultData(r); }}>
                         Xem chi tiết kết quả này
                       </Button>
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => setShowResultModal(false)} className="w-full bg-gray-600 text-white mt-2">Đóng</Button>
+                <Button onClick={() => setShowResultModal(false)} className="w-full mt-2 text-white bg-gray-600">Đóng</Button>
               </>
             ) : (
               <>
@@ -721,9 +732,9 @@ export const BookingList = (): React.JSX.Element => {
                 <div className="mb-2"><b>Địa chỉ:</b> {resultData.client?.address}</div>
                 <div className="mb-4">
                   <b>File kết quả:</b><br />
-                  <img src={resultData.resultFileUrl} alt="Kết quả" className="max-w-full max-h-60 border rounded mt-2" />
+                  <img src={resultData.resultFileUrl} alt="Kết quả" className="max-w-full mt-2 border rounded max-h-60" />
                 </div>
-                <Button onClick={() => setShowResultModal(false)} className="w-full bg-green-600 text-white mt-2">Đóng</Button>
+                <Button onClick={() => setShowResultModal(false)} className="w-full mt-2 text-white bg-green-600">Đóng</Button>
               </>
             )}
           </div>
@@ -733,22 +744,22 @@ export const BookingList = (): React.JSX.Element => {
       {/* Error Modal */}
       {resultError && !showResultModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setResultError(null)}>&times;</button>
-            <h2 className="text-xl font-bold mb-4 text-red-700">Lỗi</h2>
+          <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+            <button className="absolute text-gray-500 top-2 right-2 hover:text-red-600" onClick={() => setResultError(null)}>&times;</button>
+            <h2 className="mb-4 text-xl font-bold text-red-700">Lỗi</h2>
             <p className="mb-4 text-red-600">{resultError}</p>
             {resultError.includes("đăng nhập") && (
               <Button 
                 onClick={() => window.location.href = '/auth/login'} 
-                className="w-full bg-red-600 hover:bg-red-700 text-white"
+                className="w-full text-white bg-red-600 hover:bg-red-700"
               >
                 Đăng nhập ngay
               </Button>
             )}
-            <Button onClick={() => setResultError(null)} className="w-full bg-gray-600 text-white mt-2">Đóng</Button>
+            <Button onClick={() => setResultError(null)} className="w-full mt-2 text-white bg-gray-600">Đóng</Button>
           </div>
         </div>
       )}
     </div>
   );
-}; 
+};

@@ -40,6 +40,14 @@ const Footer: React.FC = () => {
                   Tin tức
                 </Link>
               </li>
+                            <li>
+                <Link
+                  to="/contacts"
+                  className="transition-colors hover:text-blue-600"
+                >
+                  Liên hệ
+                </Link>
+              </li>
             </ul>
           </div>
 

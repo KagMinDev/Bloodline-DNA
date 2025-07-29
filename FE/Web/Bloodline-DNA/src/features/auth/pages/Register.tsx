@@ -1,5 +1,4 @@
 import {
-  HomeOutlined,
   LockOutlined,
   MailOutlined,
   PhoneOutlined,
@@ -9,6 +8,7 @@ import { Button, Checkbox, Form, Input, message } from "antd";
 import { Activity, Clock, Heart, Shield, UserPlus, Users } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AddressSelector } from "../../customer/components/AddressSelector";
 import { SuccessModal } from "../../../components";
 import Loading from "../../../components/Loading";
 import {
@@ -30,6 +30,7 @@ const RegisterForm: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
   const navigate = useNavigate();
 
   const handleRegister = async (values: RegisterUser) => {
@@ -39,7 +40,7 @@ const RegisterForm: React.FC = () => {
       fullName: values.fullName,
       email: values.email,
       phone: values.phone,
-      address: values.address,
+      address: address || values.address, // Use address state or fallback to form value
       password: values.password,
       role: UserRole.Client,
     };
@@ -57,6 +58,7 @@ const RegisterForm: React.FC = () => {
       form.resetFields();
       setConfirmPassword("");
       setPasswordsMatch(true);
+      setAddress(""); // Reset address state
     } catch (error) {
       console.error("Đăng ký thất bại:", error);
 
@@ -380,13 +382,14 @@ const RegisterForm: React.FC = () => {
                 }
                 rules={addressRules}
               >
-                <Input
-                  size="middle"
-                  prefix={
-                    <HomeOutlined size={15} className="text-gray-400 mr-0.5" />
-                  }
-                  placeholder="Nhập địa chỉ của bạn"
-                  className="border-gray-300 rounded-lg hover:border-green-500 focus:border-green-500"
+                <AddressSelector
+                  value={address}
+                  onChange={(newAddress) => {
+                    setAddress(newAddress);
+                    form.setFieldValue('address', newAddress);
+                  }}
+                  placeholder="Nhập địa chỉ chi tiết của bạn"
+                  required={true}
                 />
               </Form.Item>
 
