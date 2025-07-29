@@ -39,6 +39,7 @@ import { Card, CardContent } from "../components/ui/Card";
 export const Contacts = (): React.JSX.Element => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,8 +47,10 @@ export const Contacts = (): React.JSX.Element => {
     subject: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   // const sectionRef = useRef<HTMLElement>(null);
+
+  // URL của Google Apps Script - thay thế bằng URL thực tế của bạn
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypEXvmJ75Har_K0AH4pT7SI-t2q_jyhYUO269P0iuMbOYHlIDvTNPVBigOqBSKdMJGRw/exec';
 
   // const contactInfo: ContactInfo[] = [
   //   {
@@ -110,6 +113,51 @@ export const Contacts = (): React.JSX.Element => {
     };
   }, []);
 
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      // Phương pháp 1: Dùng form submission thay vì fetch để tránh CORS
+      const formElement = document.createElement('form');
+      formElement.method = 'POST';
+      formElement.action = APPS_SCRIPT_URL;
+      formElement.target = 'hidden-iframe';
+      
+      // Thêm các field vào form
+      Object.entries(formData).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        formElement.appendChild(input);
+      });
+      
+      document.body.appendChild(formElement);
+      formElement.submit();
+      document.body.removeChild(formElement);
+      
+      // Giả lập thành công vì không thể đọc response từ cross-origin
+      setTimeout(() => {
+        alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+        setIsSubmitting(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.');
+      setIsSubmitting(false);
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -118,23 +166,35 @@ export const Contacts = (): React.JSX.Element => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  // Lắng nghe khi iframe load xong (tức là form đã được submit thành công)
+  // useEffect(() => {
+  //   const iframe = document.querySelector('iframe[name="hidden-iframe"]') as HTMLIFrameElement;
+    
+  //   if (iframe) {
+  //     const handleIframeLoad = () => {
+  //       if (isSubmitting) {
+  //         // Form đã được gửi thành công
+  //         setTimeout(() => {
+  //           alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+  //           // Reset form
+  //           const form = document.querySelector('form') as HTMLFormElement;
+  //           if (form) {
+  //             form.reset();
+  //           }
+  //           setIsSubmitting(false);
+  //         }, 500);
+  //       }
+  //     };
 
-    // Simulate form submission
-    setTimeout(() => {
-      alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: ''
-      });
-      setIsSubmitting(false);
-    }, 2000);
-  };
+  //     iframe.addEventListener('load', handleIframeLoad);
+      
+  //     return () => {
+  //       iframe.removeEventListener('load', handleIframeLoad);
+  //     };
+  //   }
+  // }, [isSubmitting]);
+
+
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
@@ -184,7 +244,14 @@ export const Contacts = (): React.JSX.Element => {
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleFormSubmit} className="space-y-6">
+                    {/* Hidden iframe để nhận response từ Google Apps Script */}
+                    <iframe 
+                      name="hidden-iframe" 
+                      style={{ display: 'none' }}
+                      title="Hidden iframe for form submission"
+                    ></iframe>
+                    
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
                         <label htmlFor="name" className="block mb-2 text-sm font-semibold text-slate-700">
@@ -243,14 +310,14 @@ export const Contacts = (): React.JSX.Element => {
                         name="subject"
                         value={formData.subject}
                         onChange={handleInputChange}
+                        required
                         className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                       >
                         <option value="">Chọn chủ đề</option>
-                        <option value="appointment">Đặt lịch khám</option>
-                        <option value="consultation">Tư vấn y tế</option>
-                        <option value="emergency">Cấp cứu</option>
-                        <option value="feedback">Góp ý</option>
-                        <option value="other">Khác</option>
+                        <option value="Đặt Lịch Khám">Đặt lịch khám</option>
+                        <option value="Tư Vấn Y Tế">Tư vấn y tế</option>      
+                        <option value="Góp Ý">Góp ý</option>
+                        <option value="Khác">Khác</option>
                       </select>
                     </div>
 
@@ -270,10 +337,10 @@ export const Contacts = (): React.JSX.Element => {
                       />
                     </div>
 
-                    <Button
+                    <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-blue-900 hover:bg-blue-800 !text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300"
+                      className="w-full bg-blue-900 hover:bg-blue-800 !text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <>
@@ -286,7 +353,7 @@ export const Contacts = (): React.JSX.Element => {
                           Gửi Tin Nhắn
                         </>
                       )}
-                    </Button>
+                    </button>
                   </form>
                 </div>
               </div>

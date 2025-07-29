@@ -27,6 +27,16 @@ export const phoneRules: Rule[] = [
 export const addressRules: Rule[] = [
   { required: true, message: "Vui lòng nhập địa chỉ" },
   { min: 5, message: "Địa chỉ phải có ít nhất 5 ký tự" },
+  {
+    validator: async (_: RuleObject, value: string) => {
+      if (value && value.trim()) {
+        const commaCount = (value.match(/,/g) || []).length;
+        if (commaCount < 1) {
+          throw new Error('Vui lòng chọn tỉnh/thành phố và nhập địa chỉ chi tiết');
+        }
+      }
+    },
+  },
 ];
 
 // Quy tắc xác thực cho trường mật khẩu
