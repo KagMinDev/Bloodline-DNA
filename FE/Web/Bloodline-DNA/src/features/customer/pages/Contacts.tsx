@@ -383,7 +383,7 @@ export const Contacts = (): React.JSX.Element => {
                           href="tel:1900xxxx"
                           className="block text-lg font-semibold text-blue-800 transition-colors duration-200 hover:text-blue-900 whitespace-nowrap"
                         >
-                          1900-xxxx
+                          0342 555 702
                         </a>
                       </div>
                     </CardContent>

@@ -15,6 +15,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import { type ServiceDetail, getServiceById } from "../api/servicesApi";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
@@ -84,13 +85,16 @@ export const DetailServices = (): React.JSX.Element => {
   
   if (loading) {
     return (
-      <div className="w-full min-h-screen bg-white">
-        <Header />
-        <div className="flex items-center justify-center" style={{height: 'calc(100vh - 80px)'}}>
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-            <p className="text-lg text-gray-600">Đang tải thông tin dịch vụ...</p>
-          </div>
+      <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
+        <div className="relative z-50">
+          <Header />
+        </div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loading 
+            size="large" 
+            message="Đang tải thông tin dịch vụ..." 
+            color="blue" 
+          />
         </div>
       </div>
     );

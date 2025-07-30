@@ -99,9 +99,6 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
                 <p className="mt-2 text-xs text-center text-slate-500">
                   Thanh toán an toàn với VNPay, MoMo, Banking
                 </p>
-                <p className="mt-1 text-xs font-medium text-center text-blue-600">
-                  Booking ID: {booking.id}
-                </p>
               </div>
             )}
           </CardContent>
@@ -112,8 +109,8 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
           </CardHeader>
           <CardContent className="p-6 text-sm text-slate-600">
             <p className="mb-2">Cần hỗ trợ? Liên hệ với chúng tôi qua:</p>
-            <p><strong>Hotline:</strong> <a href="tel:19001234" className="text-blue-600 hover:underline">1900-1234</a></p>
-            <p><strong>Email:</strong> <a href="mailto:support@bloodline.vn" className="text-blue-600 hover:underline">support@bloodline.vn</a></p>
+            <p><strong>Hotline:</strong> <a href="tel:0342555702" className="text-blue-600 hover:underline">0342555702</a></p>
+            <p><strong>Email:</strong> <a href="mailto:support@bloodline.vn" className="text-blue-600 hover:underline">bloodlineDNA@support.com</a></p>
           </CardContent>
         </Card>
       </div>

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import { getMockUserData, getUserInfoApi, updateUserInfoApi, type UpdateUserData } from "../api/userApi";
 import { AddressSelector } from "../components/AddressSelector";
@@ -154,8 +155,12 @@ export const EditProfile = (): React.JSX.Element => {
       setError(null);
       setSuccessMessage('Cập nhật thông tin thành công!');
       
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(null), 3000);
+      // Clear success message and reload page after 2 seconds
+      setTimeout(() => {
+        setSuccessMessage(null);
+        // Reload the page to show updated data
+        window.location.reload();
+      }, 2000);
       
       console.log('✅ Profile updated successfully!');
     } catch (error) {
@@ -188,11 +193,12 @@ export const EditProfile = (): React.JSX.Element => {
         <div className="relative z-50">
           <Header />
         </div>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-            <p className="text-lg text-gray-600">Đang tải thông tin người dùng...</p>
-          </div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loading 
+            size="large" 
+            message="Đang tải thông tin người dùng..." 
+            color="blue" 
+          />
         </div>
       </div>
     );
@@ -479,6 +485,16 @@ export const EditProfile = (): React.JSX.Element => {
           <Footer />
         </div>
       </div>
+      
+      {/* Fullscreen Loading when saving */}
+      {loading && (
+        <Loading
+          fullScreen={true}
+          message="Đang lưu thông tin cá nhân..."
+          size="large"
+          color="blue"
+        />
+      )}
     </div>
   );
 }; 
