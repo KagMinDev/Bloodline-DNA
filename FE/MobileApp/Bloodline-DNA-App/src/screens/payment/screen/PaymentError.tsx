@@ -1,12 +1,12 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "@/types/root-stack/stack.types";
-import { callbackApi, remainingCallbackApi } from "@/screens/checkout/api/paymentApi";
 import { useAuth } from "@/context/auth/AuthContext";
+import { callbackApi, remainingCallbackApi } from "@/screens/checkout/api/paymentApi";
+import { RootStackParamList } from "@/types/root-stack/stack.types";
+import { Feather } from "@expo/vector-icons";
+import type { RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useEffect } from "react";
+import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type PaymentErrorRouteProp = RouteProp<RootStackParamList, "PaymentError">;
 type PaymentErrorNavigationProp = NativeStackNavigationProp<RootStackParamList, "PaymentError">;
@@ -22,8 +22,6 @@ const PaymentError: React.FC = () => {
     paymentType,
     message = "Thanh toán thất bại. Vui lòng thử lại sau.",
   } = route.params || {};
-
-  console.log("PaymentError params received from WebViewScreen:", { bookingId, orderCode, paymentType, message });
 
   const scaleAnim = new Animated.Value(0);
   const fadeAnim = new Animated.Value(0);
@@ -46,16 +44,13 @@ const PaymentError: React.FC = () => {
       const callFailedCallback = async () => {
         try {
           const paymentTypeSafe: "deposit" | "remaining" = paymentType === "remaining" ? "remaining" : "deposit";
-          console.log("Using paymentTypeSafe for callback:", paymentTypeSafe);
           const api = paymentTypeSafe === "remaining" ? remainingCallbackApi : callbackApi;
           const payload = {
             bookingId,
             orderCode,
             status: "CANCELLED",
           };
-          console.log("Sending callback with payload:", payload);
           await api(payload, token);
-          console.log(`✅ Successfully sent callback for ${paymentTypeSafe}`);
         } catch (error) {
           console.error(`❌ Failed to send callback for ${paymentType || "unknown"}:`, error);
         }

@@ -54,17 +54,15 @@ export const ProgressStepProps = ({
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
       
-      console.log('🔍 Debug info:', {
-        userId: userId,
-        bookingId: bookingId,
-        stepId: step.id
-      });
+      // console.log('🔍 Debug info:', {
+      //   userId: userId,
+      //   bookingId: bookingId,
+      //   stepId: step.id
+      // });
       
       const results = await getTestResultsByUserId(userId);
-      console.log('📊 All results:', results);
       
       const matched = results.find(r => r.testBookingId === bookingId);
-      console.log('🎯 Matched result:', matched);
       
       if (!matched) {
         console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));

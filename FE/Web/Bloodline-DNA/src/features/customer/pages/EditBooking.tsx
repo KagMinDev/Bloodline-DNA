@@ -63,7 +63,7 @@ interface EditBookingData {
 export const EditBooking = (): React.JSX.Element => {
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState<EditBookingData>({
     id: '',
     name: '',
@@ -78,7 +78,7 @@ export const EditBooking = (): React.JSX.Element => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [apiError, setApiError] = useState<string | null>(null);
   const [originalBookingData, setOriginalBookingData] = useState<any>(null);
 
@@ -91,7 +91,7 @@ export const EditBooking = (): React.JSX.Element => {
   // Transform API data to form data - based on BookingItem interface
   const transformApiDataToFormData = (apiData: BookingItem): EditBookingData => {
     const { date, time } = formatDateForInput(apiData.appointmentDate);
-    
+
     return {
       id: apiData.id || '',
       name: apiData.clientName || '',
@@ -107,7 +107,7 @@ export const EditBooking = (): React.JSX.Element => {
   // Helper function to map API status to UI status
   const mapApiStatusToUIStatus = (apiStatus: string): EditBookingData['status'] => {
     const status = apiStatus.toLowerCase();
-    
+
     switch (status) {
       case 'pending':
       case 'chờ xử lý':
@@ -143,19 +143,16 @@ export const EditBooking = (): React.JSX.Element => {
       setApiError(null);
 
       try {
-        console.log('🔄 Fetching booking data for ID:', bookingId);
         const bookingData = await getBookingByIdApi(bookingId);
-        
+
         if (!bookingData) {
           throw new Error('Không tìm thấy thông tin đặt lịch');
         }
-        
-        console.log('✅ Received booking data:', bookingData);
+
         setOriginalBookingData(bookingData);
-        
+
         const transformedData = transformApiDataToFormData(bookingData);
-        console.log('📋 Transformed to form data:', transformedData);
-        
+
         setFormData(transformedData);
       } catch (error) {
         console.error('❌ Failed to fetch booking data:', error);
@@ -173,7 +170,7 @@ export const EditBooking = (): React.JSX.Element => {
       ...prev,
       [field]: value
     }));
-    
+
     // Clear error for this field when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
@@ -184,7 +181,7 @@ export const EditBooking = (): React.JSX.Element => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: { [key: string]: string } = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Vui lòng nhập họ và tên';
@@ -208,7 +205,7 @@ export const EditBooking = (): React.JSX.Element => {
       const selectedDate = new Date(formData.preferredDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (selectedDate < today) {
         newErrors.preferredDate = 'Ngày hẹn không thể trong quá khứ';
       }
@@ -234,13 +231,8 @@ export const EditBooking = (): React.JSX.Element => {
 
     setIsSaving(true);
     setApiError(null);
-    
+
     try {
-      console.log('🚀 Starting update process...');
-      
-      // Map form data to API request format theo yêu cầu mới
-      console.log('📋 Form data before mapping:', formData);
-      
       const updateRequest = mapFormDataToUpdateRequest(
         bookingId,
         {
@@ -254,29 +246,29 @@ export const EditBooking = (): React.JSX.Element => {
         },
         undefined // Không cần currentStatus vì đã set status = 0 trong formData
       );
-      
+
       console.log('📤 Sending update request:', updateRequest);
-      
+
       // Call update API
       const result = await updateBookingApi(updateRequest);
-      
+
       console.log('✅ Update successful:', result);
-      
+
       // Show success message
       setShowSuccess(true);
-      
+
       // Auto redirect after 2 seconds
       setTimeout(() => {
         navigate(`/customer/edit-booking/${bookingId}`);
       }, 2000);
-      
+
     } catch (error) {
       console.error('❌ Error updating booking:', error);
-      
+
       // Handle specific error messages
       if (error instanceof Error) {
         const errorMessage = error.message;
-        
+
         if (errorMessage.includes('Unauthorized') || errorMessage.includes('401')) {
           setApiError("Bạn cần đăng nhập để cập nhật thông tin. Vui lòng đăng nhập và thử lại.");
         } else if (errorMessage.includes('Access denied') || errorMessage.includes('403')) {
@@ -378,7 +370,7 @@ export const EditBooking = (): React.JSX.Element => {
   }
 
 
-  
+
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
       <div className="relative w-full max-w-none">
@@ -390,7 +382,7 @@ export const EditBooking = (): React.JSX.Element => {
         {/* Hero Section */}
         <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af" /></svg>
           </div>
           <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
@@ -437,14 +429,14 @@ export const EditBooking = (): React.JSX.Element => {
                   </div>
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {/* Form Fields */}
 
                 <div>
                   <label htmlFor="name" className="font-semibold text-gray-700">Họ và tên</label>
-                  <Input 
-                    id="name" 
+                  <Input
+                    id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className="mt-1"
@@ -452,11 +444,11 @@ export const EditBooking = (): React.JSX.Element => {
                   />
                   {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                 </div>
-                
+
                 <div>
                   <label htmlFor="phone" className="font-semibold text-gray-700">Số điện thoại</label>
-                  <Input 
-                    id="phone" 
+                  <Input
+                    id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="mt-1"
@@ -479,8 +471,8 @@ export const EditBooking = (): React.JSX.Element => {
 
                 <div>
                   <label htmlFor="preferredDate" className="font-semibold text-gray-700">Ngày hẹn</label>
-                  <Input 
-                    id="preferredDate" 
+                  <Input
+                    id="preferredDate"
                     type="date"
                     value={formData.preferredDate}
                     onChange={(e) => handleInputChange('preferredDate', e.target.value)}
@@ -491,7 +483,7 @@ export const EditBooking = (): React.JSX.Element => {
 
                 <div>
                   <label htmlFor="preferredTime" className="font-semibold text-gray-700">Giờ hẹn</label>
-                   <select
+                  <select
                     id="preferredTime"
                     value={formData.preferredTime}
                     onChange={(e) => handleInputChange('preferredTime', e.target.value)}
@@ -517,7 +509,7 @@ export const EditBooking = (): React.JSX.Element => {
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-4 mt-6 sm:flex-row">
-                <Button 
+                <Button
                   onClick={() => navigate('/customer/booking-list')}
                   variant="outline"
                   className="w-full sm:w-auto"
@@ -525,7 +517,7 @@ export const EditBooking = (): React.JSX.Element => {
                   <ArrowLeftIcon className="w-4 h-4 mr-2" />
                   Quay lại
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSave}
                   className="w-full font-semibold bg-blue-600 sm:w-auto hover:bg-blue-700"
                   style={{ color: 'white' }}
@@ -548,7 +540,7 @@ export const EditBooking = (): React.JSX.Element => {
             </CardContent>
           </Card>
         </main>
-        
+
         <div className="relative">
           <Footer />
         </div>

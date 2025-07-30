@@ -76,7 +76,6 @@ const DeliveryDetailModal = ({
   }, [delivery]);
 
   const handleStaffChange = async (value: string | undefined) => {
-    console.log("selected", value);
     if (!delivery) return;
 
     const token = localStorage.getItem("token");

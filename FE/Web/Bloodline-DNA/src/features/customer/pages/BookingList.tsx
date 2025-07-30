@@ -112,7 +112,6 @@ export const BookingList = (): React.JSX.Element => {
       
       // Only check if we haven't checked yet and not currently checking
       if (!existingFeedback && !isAlreadyChecking && !preloadedFeedbacks.has(feedbackKey)) {
-        console.log(`🔄 Debounced feedback check for booking: ${bookingId}`);
         checkExistingFeedback(userId, testServiceId);
         setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
       }
@@ -224,7 +223,6 @@ export const BookingList = (): React.JSX.Element => {
             .slice(0, 3); // Only first 3 to avoid performance issues
 
           if (completedBookings.length > 0) {
-            console.log(`🔄 Preloading feedback for top ${completedBookings.length} completed bookings`);
 
             // Add small delays to avoid hitting API too hard
             completedBookings.forEach((booking, index) => {
@@ -292,7 +290,6 @@ export const BookingList = (): React.JSX.Element => {
   };
 
   const handleFeedbackClick = (booking: Booking) => {
-    console.log('🔄 Opening feedback modal for booking:', booking.id);
 
     // Only check for existing feedback if we haven't checked yet
     if (userId && booking.testServiceId) {
@@ -303,7 +300,6 @@ export const BookingList = (): React.JSX.Element => {
 
       // Only refresh if we haven't preloaded and not currently checking
       if (!hasPreloaded && !existingFeedback && !isAlreadyChecking) {
-        console.log(`🔄 Checking feedback for booking: ${booking.id}`);
         checkExistingFeedback(userId, booking.testServiceId);
         setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
       }
@@ -328,17 +324,17 @@ export const BookingList = (): React.JSX.Element => {
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
       
-      console.log('🔍 Debug info:', {
-        userId: userId,
-        bookingId: bookingId
-      });
+      // console.log('🔍 Debug info:', {
+      //   userId: userId,
+      //   bookingId: bookingId
+      // });
       
       const results = await getTestResultsByUserId(userId);
-      console.log('📊 All results:', results);
+      // console.log('📊 All results:', results);
       
-      // Debug: In ra tất cả testBookingId và bookingId
-      console.log('📋 bookingId:', bookingId, typeof bookingId);
-      console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
+      // // Debug: In ra tất cả testBookingId và bookingId
+      // console.log('📋 bookingId:', bookingId, typeof bookingId);
+      // console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
       
       // Chuẩn hóa để so sánh
       const normalize = (val: any) => String(val).replace(/\s+/g, '').toLowerCase();
