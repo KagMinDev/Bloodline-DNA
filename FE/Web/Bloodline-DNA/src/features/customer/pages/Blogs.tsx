@@ -1,5 +1,4 @@
 
-import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
 import Loading from "../../../components/Loading";
