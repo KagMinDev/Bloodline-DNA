@@ -4,22 +4,22 @@ const team: TeamMember[] = [
   {
     name: "TS. Nguyễn Minh",
     title: "Chuyên gia Di truyền học",
-    image: "https://via.placeholder.com/150",
+    image: "https://taimuihongsg.com/wp-content/uploads/2023/10/BS-TRUONG-CONG-TRANG-KHOA-CHAN-DOAN-HINH-ANH_taimuihongsg.jpg",
   },
   {
     name: "PGS. Trần Hương",
     title: "Chuyên gia Phân tích ADN",
-    image: "https://via.placeholder.com/150",
+    image: "https://nhakhoadelia.vn/wp-content/uploads/2024/04/28-1713601052.jpg",
   },
   {
     name: "BS. Lê Quang",
     title: "Tư vấn Huyết thống",
-    image: "https://via.placeholder.com/150",
+    image: "https://taimuihongsg.com/wp-content/uploads/2018/05/Kim-Bun-ThuongE_taimuihongsg.jpg",
   },
   {
     name: "ThS. Phạm Linh",
     title: "Chuyên gia Phòng thí nghiệm",
-    image: "https://via.placeholder.com/150",
+    image: "https://nhakhoadelia.vn/wp-content/uploads/2024/04/25-1713601052.jpg",
   },
 ];
 

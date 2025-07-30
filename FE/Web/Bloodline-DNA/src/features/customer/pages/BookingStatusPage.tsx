@@ -1,6 +1,7 @@
 import { ArrowLeftIcon, EditIcon, XCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import { BookingDetailTab } from "../components/bookingStatus/BookingDetailTab";
 import { BookingProgressTab } from "../components/bookingStatus/BookingProgressTab";
@@ -59,16 +60,15 @@ export const BookingStatusPage = (): React.JSX.Element => {
   if (isLoading) {
     return (
       <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
-        <div className="fixed z-50 w-full">
+        <div className="relative z-50">
           <Header />
         </div>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-            <p className="text-lg text-gray-600">
-              Đang tải thông tin đơn hẹn...
-            </p>
-          </div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loading 
+            size="large" 
+            message="Đang tải thông tin đơn hẹn..." 
+            color="blue" 
+          />
         </div>
       </div>
     );
