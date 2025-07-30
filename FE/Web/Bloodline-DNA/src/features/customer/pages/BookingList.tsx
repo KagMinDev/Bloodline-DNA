@@ -17,6 +17,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
@@ -460,9 +461,12 @@ export const BookingList = (): React.JSX.Element => {
             </div>
 
             {isLoading ? (
-              <div className="py-16 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-                <p className="text-slate-600">Đang tải danh sách...</p>
+              <div className="flex items-center justify-center py-20">
+                <Loading 
+                  size="large" 
+                  message="Đang tải danh sách lịch hẹn..." 
+                  color="blue" 
+                />
               </div>
             ) : error ? (
               <div className="py-16 text-center">

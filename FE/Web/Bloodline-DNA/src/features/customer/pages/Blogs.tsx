@@ -2,6 +2,7 @@
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import { getBlogsApi } from "../api/blogApi";
 import { BlogPostList } from "../components/blogs/blogPost-list";
 import { FeaturedPosts } from "../components/blogs/featured-posts";
@@ -67,8 +68,17 @@ export const Blogs: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#fcfefe] to-gray-50">
-        <Loader2 className="w-8 h-8 text-blue-900 animate-spin" />
+      <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
+        <div className="relative z-50">
+          <Header />
+        </div>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Loading 
+            size="large" 
+            message="Đang tải danh sách blog..." 
+            color="blue" 
+          />
+        </div>
       </div>
     );
   }

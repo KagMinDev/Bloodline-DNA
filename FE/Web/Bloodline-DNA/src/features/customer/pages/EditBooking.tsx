@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import {
   getBookingByIdApi
 } from "../api/bookingListApi";
@@ -265,9 +266,25 @@ export const EditBooking = (): React.JSX.Element => {
       // Show success message
       setShowSuccess(true);
       
-      // Auto redirect after 2 seconds
+      // Auto redirect after 2 seconds - Stay on same edit page to show updated data
       setTimeout(() => {
-        navigate(`/customer/edit-booking/${bookingId}`);
+        // Stay on the EditBooking page and refresh data
+        setShowSuccess(false);
+        // Refresh the booking data to show updated information
+        const fetchUpdatedData = async () => {
+          try {
+            const updatedBookingData = await getBookingByIdApi(bookingId);
+            if (updatedBookingData) {
+              setOriginalBookingData(updatedBookingData);
+              const transformedData = transformApiDataToFormData(updatedBookingData);
+              setFormData(transformedData);
+            }
+          } catch (error) {
+            console.error('Error fetching updated data:', error);
+            // If fetch fails, just clear success message
+          }
+        };
+        fetchUpdatedData();
       }, 2000);
       
     } catch (error) {
@@ -315,10 +332,11 @@ export const EditBooking = (): React.JSX.Element => {
           <Header />
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-            <p className="text-slate-600">Đang tải thông tin...</p>
-          </div>
+          <Loading 
+            size="large" 
+            message="Đang tải thông tin đặt lịch..." 
+            color="blue" 
+          />
         </div>
       </div>
     );
@@ -368,9 +386,13 @@ export const EditBooking = (): React.JSX.Element => {
             <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 text-green-500" />
             <h3 className="mb-2 text-2xl font-bold text-green-600">Cập nhật thành công!</h3>
             <p className="mb-6 text-slate-600">
-              Thông tin đặt lịch đã được cập nhật. Đang chuyển hướng...
+              Thông tin đặt lịch đã được cập nhật. Đang tải lại trang...
             </p>
-            <div className="w-8 h-8 mx-auto border-2 border-green-200 rounded-full border-t-green-600 animate-spin"></div>
+            <Loading 
+              size="medium" 
+              message="Đang cập nhật dữ liệu..." 
+              color="green" 
+            />
           </div>
         </div>
       </div>
@@ -553,6 +575,16 @@ export const EditBooking = (): React.JSX.Element => {
           <Footer />
         </div>
       </div>
+      
+      {/* Fullscreen Loading when saving */}
+      {isSaving && (
+        <Loading
+          fullScreen={true}
+          message="Đang lưu thông tin đặt lịch..."
+          size="large"
+          color="blue"
+        />
+      )}
     </div>
   );
 }; 

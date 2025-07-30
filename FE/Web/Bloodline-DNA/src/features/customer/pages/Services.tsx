@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import { getServiceById, servicesApi, type TestService } from "../api/servicesApi";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
@@ -61,6 +62,7 @@ interface ServiceCategory {
 }
 
 // ===== HELPER FUNCTIONS =====
+// Category mappings for backward compatibility (fallback only)
 const categoryMappings: { [key: string]: string } = {
   'Civil': 'civil',
   'Legal': 'legal',
@@ -69,6 +71,10 @@ const categoryMappings: { [key: string]: string } = {
   'Checkup': 'civil',
   'Monitoring': 'civil'
 };
+
+// NOTE: Primary classification is now based on collectionMethod:
+// collectionMethod 0 = Dân Sự (Civil) 
+// collectionMethod 1 = Hành Chính (Legal)
 
 const categoryDurations: { [key: string]: string } = {
   'Civil': '45-60 phút',
@@ -117,7 +123,7 @@ const categoryLocations: { [key: string]: string } = {
 
 // Transform API data to UI format
 const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
-  // console.log('🔄 Transforming API data to UI format...');
+  console.log('🔄 Transforming API data to UI format...');
 
   if (!Array.isArray(apiServices)) {
     console.warn('⚠️ API services is not an array, using empty array');
@@ -125,7 +131,7 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
   }
 
   return apiServices.map((apiService, index) => {
-    // console.log(`🔄 Processing service ${index + 1}:`, apiService);
+    console.log(`🔄 Processing service ${index + 1}:`, apiService);
 
     const serviceInfo = apiService.testServiceInfor;
     const title = serviceInfo?.name || `Service ${apiService.id}`;
@@ -133,16 +139,27 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
     const apiCategory = serviceInfo?.category || 'Civil';
     const isActive = apiService.isActive;
 
-    // Map API category to UI category
-    const uiCategory = categoryMappings[apiCategory] || 'civil';
+    // Map API category to UI category based on collectionMethod
+    // collectionMethod 0 = Dân Sự (Civil)
+    // collectionMethod 1 = Hành Chính (Legal)
+    let uiCategory: string;
+    if (apiService.collectionMethod === 0) {
+      uiCategory = 'civil'; // Dân Sự
+    } else if (apiService.collectionMethod === 1) {
+      uiCategory = 'legal'; // Hành Chính  
+    } else {
+      // Fallback to original category mapping if collectionMethod is unexpected
+      uiCategory = categoryMappings[apiCategory] || 'civil';
+    }
 
-    /* console.log(`📝 Service ${index + 1} mapping:`, {
+    console.log(`📝 Service ${index + 1} mapping:`, {
       id: apiService.id,
       title: title,
       apiCategory: apiCategory,
+      collectionMethod: apiService.collectionMethod,
       uiCategory: uiCategory,
       isActive: isActive
-    }); */
+    });
 
     const transformedService = {
       id: apiService.id,
@@ -168,7 +185,7 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
       collectionMethod: apiService.collectionMethod
     };
 
-    // console.log(`✅ Transformed service:`, transformedService);
+    console.log(`✅ Transformed service:`, transformedService);
     return transformedService;
   });
 };
@@ -180,7 +197,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-1",
       serviceId: "mock-service-1",
       price: 500000,
-      collectionMethod: 0,
+      collectionMethod: 0, // Dân Sự
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -202,7 +219,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-2",
       serviceId: "mock-service-2",
       price: 2000000,
-      collectionMethod: 1,
+      collectionMethod: 1, // Hành Chính
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -224,7 +241,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-3",
       serviceId: "mock-service-3",
       price: 800000,
-      collectionMethod: 0,
+      collectionMethod: 0, // Dân Sự
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -246,7 +263,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-4",
       serviceId: "mock-service-4",
       price: 1500000,
-      collectionMethod: 1,
+      collectionMethod: 1, // Hành Chính
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -270,7 +287,6 @@ const getMockServices = (): TestService[] => {
 // ===== MAIN COMPONENT =====
 export const Services = (): React.JSX.Element => {
   // State
-  const [isVisible, setIsVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
@@ -323,11 +339,11 @@ export const Services = (): React.JSX.Element => {
   useEffect(() => {
     const loadServices = async () => {
       try {
-        // console.log('🚀 Loading services...');
+        console.log('🚀 Loading services...');
         setLoading(true);
 
         const apiResponse = await servicesApi();
-        // console.log('📦 API response:', apiResponse);
+        console.log('📦 API response:', apiResponse);
 
         // Handle different response structures
         let apiServices: TestService[] = [];
@@ -340,7 +356,7 @@ export const Services = (): React.JSX.Element => {
         const transformedServices = transformAPIDataToUIFormat(apiServices);
         setServices(transformedServices);
         setError(null);
-        // console.log('✅ Services loaded successfully!');
+        console.log('✅ Services loaded successfully!');
 
       } catch (err) {
         console.error('Error loading services:', err);
@@ -378,7 +394,6 @@ export const Services = (): React.JSX.Element => {
       name: "Tất Cả",
       icon: <StethoscopeIcon className="w-5 h-5" />,
       count: services.length
-      //sasasasas
     },
     {
       id: "civil",
@@ -394,42 +409,41 @@ export const Services = (): React.JSX.Element => {
     }
   ];
 
-  // Animation effect
+  // Log categories for debugging
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+    console.log('📊 Categories count:', categories.map(c => ({ name: c.name, count: c.count })));
+  }, [services]);
 
   // Filter services
   useEffect(() => {
-    // console.log('🔍 Starting filter process...');
-    // console.log('📊 Total services:', services.length);
-    // console.log('🏷️ Selected category:', selectedCategory);
-    // console.log('🔍 Search term:', searchTerm);
+    console.log('🔍 Starting filter process...');
+    console.log('📊 Total services:', services.length);
+    console.log('🏷️ Selected category:', selectedCategory);
+    console.log('🔍 Search term:', searchTerm);
 
-    // Log all services with their categories
-    // services.forEach((service, index) => {
-    //   console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
-    // });
+    // Log all services with their categories (based on collectionMethod)
+    services.forEach((service, index) => {
+      console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}" (CollectionMethod: ${service.collectionMethod})`);
+    });
 
     let filtered = services;
 
     // Filter by category
     if (selectedCategory !== "all") {
-      // console.log(`🔽 Filtering by category: ${selectedCategory}`);
+      console.log(`🔽 Filtering by category: ${selectedCategory}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(service => service.category === selectedCategory);
-      // console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
+      console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
 
       // Log which services passed the filter
-      // filtered.forEach((service, index) => {
-      //   console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
-      // });
+      filtered.forEach((service, index) => {
+        console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
+      });
     }
 
     // Filter by search term
     if (searchTerm) {
-      // console.log(`🔍 Filtering by search term: ${searchTerm}`);
+      console.log(`🔍 Filtering by search term: ${searchTerm}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(service =>
         service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -437,10 +451,10 @@ export const Services = (): React.JSX.Element => {
         service.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase())) ||
         service.doctor.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      // console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
+      console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
     }
 
-    // console.log('🎯 Final filtered services count:', filtered.length);
+    console.log('🎯 Final filtered services count:', filtered.length);
     setFilteredServices(filtered);
   }, [selectedCategory, searchTerm, services]);
 
@@ -459,7 +473,7 @@ export const Services = (): React.JSX.Element => {
   const getCollectionMethodInfo = (collectionMethod: number) => {
     if (collectionMethod === 0) {
       return {
-        text: "Tự thu mẫu / Thu tại nhà",
+        text: "Dân Sự - Tự thu mẫu / Thu tại nhà",
         icon: <HomeIcon className="w-4 h-4 mr-1.5 text-green-600" />,
         bgColor: "bg-green-50",
         textColor: "text-green-700",
@@ -467,7 +481,7 @@ export const Services = (): React.JSX.Element => {
       };
     } else if (collectionMethod === 1) {
       return {
-        text: "Thu mẫu tại trung tâm",
+        text: "Hành Chính - Thu mẫu tại trung tâm",
         icon: <MapPinIcon className="w-4 h-4 mr-1.5 text-blue-600" />,
         bgColor: "bg-blue-50",
         textColor: "text-blue-700",
@@ -494,10 +508,11 @@ export const Services = (): React.JSX.Element => {
           <Header />
         </div>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-            <p className="text-lg text-gray-600">Đang tải danh sách dịch vụ...</p>
-          </div>
+          <Loading 
+            size="large" 
+            message="Đang tải danh sách dịch vụ..." 
+            color="blue" 
+          />
         </div>
       </div>
     );
@@ -560,22 +575,8 @@ export const Services = (): React.JSX.Element => {
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">
               Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.
-              <span className="block mt-2 text-sm text-blue-600">
-                💡 Bạn có thể xem dịch vụ mà không cần đăng nhập. Đăng nhập để đặt lịch và xem thông tin chi tiết.
-              </span>
             </p>
 
-            {/* Stats */}
-            <div className="flex flex-wrap gap-4 mt-6">
-              <div className="px-4 py-2 border border-blue-200 rounded-lg bg-white/80 backdrop-blur-sm">
-                <span className="text-2xl font-bold text-blue-900">{services.length}</span>
-                <span className="block text-sm text-blue-600">Dịch vụ</span>
-              </div>
-              <div className="px-4 py-2 border border-blue-200 rounded-lg bg-white/80 backdrop-blur-sm">
-                <span className="text-2xl font-bold text-blue-900">{services.filter(s => s.isActive).length}</span>
-                <span className="block text-sm text-blue-600">Đang hoạt động</span>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -703,7 +704,7 @@ export const Services = (): React.JSX.Element => {
             {/* Services Grid */}
             {filteredServices.length > 0 ? (
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-3">
-                {filteredServices.map((service, index) => (
+                {filteredServices.map((service) => (
                   <Card
                     key={service.id}
                     className="relative overflow-hidden transition-all duration-300 bg-white border shadow-md group hover:shadow-xl hover:-translate-y-2 rounded-2xl"
