@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FaLock, FaPlus, FaUnlock } from 'react-icons/fa';
+import { FaPlus } from 'react-icons/fa';
 import { Loading } from '../../../components';
 import { Button } from '../../staff/components/sample/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../staff/components/sample/ui/card';
@@ -18,6 +18,7 @@ const UserMangement: React.FC = () => {
     try {
       setLoading(true);
       const res = await getAllUserApi();
+      console.log("getAllUserApi", res)
       setUsers(res);
     } catch {
       alert('Không thể tải danh sách người dùng');
@@ -84,8 +85,8 @@ const UserMangement: React.FC = () => {
                   <TableHead>Họ tên</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Vai trò</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead>Hành động</TableHead>
+                  {/* <TableHead>Trạng thái</TableHead> */}
+                  {/* <TableHead className='text-center'>Hành động</TableHead> */}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -102,15 +103,15 @@ const UserMangement: React.FC = () => {
                       <TableCell>{user.fullName}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.role}</TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full
                         ${user.status === 'Hoạt động'
                             ? 'bg-green-100 text-green-700'
                             : 'bg-red-100 text-red-700'}`}>
                           {user.status}
                         </span>
-                      </TableCell>
-                      <TableCell>
+                      </TableCell> */}
+                      {/* <TableCell>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -122,7 +123,7 @@ const UserMangement: React.FC = () => {
                         >
                           {user.status === 'Đã khóa' ? <FaLock /> : <FaUnlock />}
                         </Button>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))
                 )}
