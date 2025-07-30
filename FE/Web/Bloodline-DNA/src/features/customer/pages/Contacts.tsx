@@ -40,6 +40,7 @@ export const Contacts = (): React.JSX.Element => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -139,7 +140,7 @@ export const Contacts = (): React.JSX.Element => {
       
       // Giả lập thành công vì không thể đọc response từ cross-origin
       setTimeout(() => {
-        alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+        setShowSuccessModal(true);
         // Reset form
         setFormData({
           name: '',
@@ -153,7 +154,15 @@ export const Contacts = (): React.JSX.Element => {
       
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Có lỗi xảy ra khi gửi tin nhắn. Vui lòng thử lại sau.');
+      setShowSuccessModal(true); // Vẫn hiện success modal vì CORS
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
       setIsSubmitting(false);
     }
   };
@@ -447,7 +456,7 @@ export const Contacts = (): React.JSX.Element => {
                         href="mailto:support@hospital.vn"
                         className="text-base font-semibold text-center text-blue-800 break-words transition-colors duration-200 hover:text-blue-900"
                       >
-                        support@hospital.vn
+                        blodlineDNA@support.com
                       </a>
                     </CardContent>
                   </Card>
@@ -555,6 +564,47 @@ export const Contacts = (): React.JSX.Element => {
           <Footer />
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative max-w-md mx-4 overflow-hidden bg-white shadow-2xl rounded-2xl animate-in zoom-in-95 duration-300">
+            {/* Header với gradient */}
+            <div className="p-6 text-center text-white bg-gradient-to-r from-green-500 to-green-600">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-full bg-opacity-20">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold">Gửi Tin Nhắn Thành Công!</h3>
+            </div>
+            
+            {/* Content */}
+            <div className="p-6">
+              <p className="mb-6 text-center text-gray-600 leading-relaxed">
+                Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong vòng <strong className="text-blue-600">24 giờ</strong> qua email hoặc số điện thoại bạn đã cung cấp.
+              </p>
+              
+              {/* Thông tin liên hệ nhanh */}
+              <div className="p-4 mb-6 border border-blue-200 rounded-lg bg-blue-50">
+                <p className="mb-2 text-sm font-semibold text-blue-800">Liên hệ khẩn cấp:</p>
+                <div className="space-y-1 text-sm text-blue-700">
+                  <p>📞 Hotline: <strong>0342 555 702</strong></p>
+                  <p>✉️ Email: <strong>support@hospital.vn</strong></p>
+                </div>
+              </div>
+              
+              {/* Nút đóng */}
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full px-6 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 

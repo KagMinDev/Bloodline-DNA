@@ -384,11 +384,82 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     "17:00",
   ];
 
+  // Filter time slots based on selected date
+  const getAvailableTimeSlots = () => {
+    if (!formData.preferredDate) return timeSlots;
+    
+    const selectedDate = new Date(formData.preferredDate);
+    const today = new Date();
+    
+    // Reset time to 00:00:00 for accurate date comparison
+    const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    // If selected date is not today, return all time slots
+    if (selectedDateOnly.getTime() !== todayOnly.getTime()) {
+      return timeSlots;
+    }
+    
+    // If selected date is today, filter out past time slots
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    return timeSlots.filter(timeSlot => {
+      const [hours, minutes] = timeSlot.split(':').map(Number);
+      const slotTimeInMinutes = hours * 60 + minutes;
+      return slotTimeInMinutes > currentTimeInMinutes;
+    });
+  };
+
   const handleInputChange = (field: keyof BookingData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+      
+      // If preferredDate is changed, check if current preferredTime is still available
+      if (field === 'preferredDate' && prev.preferredTime) {
+        // Check available time slots for the new date
+        const availableSlots = getAvailableTimeSlotsForDate(value);
+        
+        // If current selected time is not available, reset it
+        if (!availableSlots.includes(prev.preferredTime)) {
+          newData.preferredTime = '';
+        }
+      }
+      
+      return newData;
+    });
+  };
+
+  // Helper function to get available time slots for a specific date
+  const getAvailableTimeSlotsForDate = (selectedDate: string) => {
+    if (!selectedDate) return timeSlots;
+    
+    const dateToCheck = new Date(selectedDate);
+    const today = new Date();
+    
+    // Reset time to 00:00:00 for accurate date comparison
+    const selectedDateOnly = new Date(dateToCheck.getFullYear(), dateToCheck.getMonth(), dateToCheck.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    // If selected date is not today, return all time slots
+    if (selectedDateOnly.getTime() !== todayOnly.getTime()) {
+      return timeSlots;
+    }
+    
+    // If selected date is today, filter out past time slots
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    return timeSlots.filter(timeSlot => {
+      const [hours, minutes] = timeSlot.split(':').map(Number);
+      const slotTimeInMinutes = hours * 60 + minutes;
+      return slotTimeInMinutes > currentTimeInMinutes;
+    });
   };
 
   const handleSubmit = async () => {
@@ -858,7 +929,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                       className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                     >
                       <option value="">Chọn thời gian</option>
-                      {timeSlots.map((time) => (
+                      {getAvailableTimeSlots().map((time) => (
                         <option key={time} value={time}>
                           {time}
                         </option>
