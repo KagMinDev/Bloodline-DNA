@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Loading } from "../../../components";
 import {
   Card,
   CardContent,
@@ -149,6 +150,7 @@ function TestResultPage() {
     try {
       await createTestResultApi(req, token);
       const updatedResults = await getAllTestResultApi(token);
+      console.log("All kq:", getAllTestResultApi);
       setResults(updatedResults);
       setShowModal(false);
       setForm({
@@ -207,9 +209,8 @@ function TestResultPage() {
                 {isLoadingResults ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-12 text-center">
-                      <div className="flex flex-col items-center gap-4">
-                        <div className="w-8 h-8 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-                        <p className="text-gray-500">Đang tải dữ liệu...</p>
+                      <div className="flex items-center justify-center py-10">
+                        <Loading message="Đang tải danh sách kết quả xét nghiệm..." />
                       </div>
                     </TableCell>
                   </TableRow>

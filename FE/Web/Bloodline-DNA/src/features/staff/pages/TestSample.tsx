@@ -1,6 +1,7 @@
 import { Button } from "antd";
 import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
+import { Loading } from "../../../components";
 import {
   Card,
   CardContent,
@@ -26,6 +27,8 @@ import {
 export default function TestSamplePage() {
   const [data, setData] = useState<SampleTestResponse[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const token = localStorage.getItem("token") || "";
 
   const fetchData = useCallback(async () => {
@@ -33,11 +36,17 @@ export default function TestSamplePage() {
       alert("Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn!");
       return;
     }
+    setLoading(true); // Bật loading
     try {
       const res = await getAllTestSampleApi(token);
-      setData(res);
+      const sortedData = res.sort((a, b) => {
+        return new Date(b.collectedAt).getTime() - new Date(a.collectedAt).getTime();
+      });
+      setData(sortedData);
     } catch {
       alert("Không thể tải dữ liệu mẫu");
+    } finally {
+      setLoading(false); // Tắt loading
     }
   }, [token]);
 
@@ -46,7 +55,7 @@ export default function TestSamplePage() {
   }, [fetchData]);
 
   return (
-    <div className="min-h-screen bg-blue-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-blue-50">
       <TestSampleModal
         open={open}
         onClose={() => {
@@ -54,78 +63,87 @@ export default function TestSamplePage() {
           fetchData();
         }}
       />
-      <div className="flex items-center justify-between">
+
+      {/* Header cố định */}
+      <div className="flex items-center justify-between flex-shrink-0">
         <li className="text-lg w-full bg-white p-5 text-[#1F2B6C]">
           Quản lý mẫu xét nghiệm
         </li>
       </div>
-      <div className="py-2">
-        <Card className="shadow-lg">
-          <div className="flex flex-row justify-between">
-            <CardHeader className="w-full">
+
+      <div className="flex-1 p-2 overflow-hidden" style={{ height: 'calc(100vh - 80px)' }}>
+        <Card className="flex flex-col h-full shadow-lg">
+          <div className="flex flex-row justify-between flex-shrink-0 border-b">
+            <CardHeader className="w-full pb-4">
               <CardTitle className="text-[#1F2B6C]">
                 Danh sách mẫu xét nghiệm
               </CardTitle>
             </CardHeader>
-            <div className="pr-6">
+            <div className="flex items-center pr-6">
               <Button
-                className="flex items-center gap-2] hover:bg-blue-800 text-white"
+                className="flex items-center gap-2 text-white bottom-2 hover:bg-blue-800"
                 onClick={() => setOpen(true)}
               >
                 + Thêm mẫu
               </Button>
             </div>
           </div>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Mã Mẫu</TableHead>
-                  <TableHead>Người Cho</TableHead>
-                  <TableHead>Quan Hệ</TableHead>
-                  <TableHead>Loại Mẫu</TableHead>
-                  <TableHead>Ngày Thu</TableHead>
-                  <TableHead>Ngày Nhận Lab</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="py-6 text-center text-gray-400"
-                    >
-                      Không có mẫu nào.
-                    </TableCell>
+
+          <CardContent className="flex-1 p-0 overflow-hidden">
+            <div className="h-full overflow-auto">
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-white shadow-sm">
+                  <TableRow className="[&_th]:font-bold [&_th]:py-3">
+                    <TableHead className="text-center">Mã Mẫu</TableHead>
+                    <TableHead className="pl-10">Người Cho</TableHead>
+                    <TableHead className="pl-10">Quan Hệ</TableHead>
+                    <TableHead className="pl-10">Loại Mẫu</TableHead>
+                    <TableHead className="text-center">Ngày Thu</TableHead>
                   </TableRow>
-                ) : (
-                  data.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium text-blue-700">
-                        {item.sampleCode}
-                      </TableCell>
-                      <TableCell>{item.donorName}</TableCell>
-                      <TableCell>
-                        {getRelationshipLabelViByKey(
-                          item.relationshipToSubject
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {getSampleTypeLabelViByKey(item.sampleType)}
-                      </TableCell>
-                      <TableCell>
-                        {format(new Date(item.collectedAt), "dd/MM/yyyy")}
-                      </TableCell>
-                      <TableCell>
-                        {item.labReceivedAt
-                          ? format(new Date(item.labReceivedAt), "dd/MM/yyyy")
-                          : "—"}
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-6 text-center text-blue-500">
+                        <div className="flex items-center justify-center h-[550px]">
+                          <Loading message="Đang tải danh sách mẫu..." />
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : data.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="py-6 text-center text-gray-400"
+                      >
+                        Không có mẫu nào.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    data.map((item) => (
+                      <TableRow key={item.id} className="hover:bg-gray-50">
+                        <TableCell className="w-[12%] text-sm font-medium text-center text-blue-700">
+                          {item.sampleCode}
+                        </TableCell>
+                        <TableCell className="w-[14%] pl-10 text-sm font-medium">
+                          {item.donorName}
+                        </TableCell>
+                        <TableCell className="w-[14%] pl-10 text-sm font-medium">
+                          {getRelationshipLabelViByKey(item.relationshipToSubject)}
+                        </TableCell>
+                        <TableCell className="w-[14%] pl-10 text-sm font-medium">
+                          {getSampleTypeLabelViByKey(item.sampleType)}
+                        </TableCell>
+                        <TableCell className="text-sm w-[14%] font-medium text-center">
+                          {format(new Date(item.collectedAt), "dd/MM/yyyy")}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

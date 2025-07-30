@@ -2,6 +2,7 @@ import { formatDate } from '@fullcalendar/core';
 import { useEffect, useState } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { Loading } from '../../../components';
 import { getTestBookingApi } from '../api/testBookingApi';
 import Calendar from '../components/common/Calendar';
 import type { TestBookingResponse } from '../types/testBooking';
@@ -87,7 +88,7 @@ function TestBooking() {
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">Đang tải dữ liệu...</p>
+              <Loading message="Đang tải danh sách đơn xét nghiệm..." />
           </div>
         ) : (
           <Calendar

@@ -1,7 +1,8 @@
 import { CheckOutlined } from "@ant-design/icons";
-import { Button, Modal, Select, Spin, Table, Tag, message } from "antd";
+import { Button, Modal, Select, Table, Tag, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useCallback, useEffect, useState } from "react";
+import { Loading } from "../../../../components";
 import { completeDelivery, getAssignedDeliveries } from "../../api/deliveryApi";
 import {
   statusColorMap,
@@ -184,9 +185,9 @@ const DeliveryTable = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center min-h-[200px]">
-          <Spin size="large" />
-        </div>
+            <div className="flex items-center justify-center py-10">
+              <Loading message="Đang tải danh sách giao Kit..." />
+            </div>
       ) : (
         <Table
           rowKey="id"

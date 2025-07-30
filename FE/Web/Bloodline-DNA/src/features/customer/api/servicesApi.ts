@@ -296,7 +296,6 @@ export const getServiceById = async (
       }
     }
 
-    // If all endpoints failed, try to get from services list as fallback
     try {
       const allServices = await servicesApi();
       const matchedService = allServices.find(
