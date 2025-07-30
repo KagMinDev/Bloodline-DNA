@@ -206,6 +206,8 @@ function Delivery() {
           setIsModalVisible(false);
           setSelectedDelivery(null);
         }}
+        onRefresh={fetchDeliveries}
+        canAssignStaff={selectedDelivery?.status === "PreparingKit"}
       />
     </>
   );

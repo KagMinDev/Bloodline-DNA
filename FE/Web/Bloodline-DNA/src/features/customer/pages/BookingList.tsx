@@ -97,26 +97,26 @@ export const BookingList = (): React.JSX.Element => {
   useEffect(() => {
     checkExistingFeedbackRef.current = checkExistingFeedback;
   }, [checkExistingFeedback]);
-  
+
   // Debounced feedback check function
   const debouncedCheckFeedback = useCallback((bookingId: string, userId: string, testServiceId: string, delay = 300) => {
     // Clear existing timeout for this booking
     if (hoverTimeoutRef.current[bookingId]) {
       clearTimeout(hoverTimeoutRef.current[bookingId]);
     }
-    
+
     // Set new timeout
     hoverTimeoutRef.current[bookingId] = setTimeout(() => {
       const feedbackKey = `${userId}_${testServiceId}`;
       const existingFeedback = getExistingFeedback(userId, testServiceId);
       const isAlreadyChecking = isCheckingFeedbackFor(userId, testServiceId);
-      
+
       // Only check if we haven't checked yet and not currently checking
       if (!existingFeedback && !isAlreadyChecking && !preloadedFeedbacks.has(feedbackKey)) {
         checkExistingFeedback(userId, testServiceId);
         setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
       }
-      
+
       // Clean up timeout reference
       delete hoverTimeoutRef.current[bookingId];
     }, delay);
@@ -128,33 +128,33 @@ export const BookingList = (): React.JSX.Element => {
     const appointmentDate = new Date(item.appointmentDate);
     const preferredDate = appointmentDate.toISOString().split('T')[0]; // YYYY-MM-DD
     const preferredTime = appointmentDate.toTimeString().substring(0, 5); // HH:MM
-    
+
     // Parse createdAt for bookingDate
     const createdAt = new Date(item.createdAt);
     const bookingDate = createdAt.toISOString().split('T')[0];
-    
+
     // Map collectionMethod to serviceType - FIX: sử dụng logic đúng 0/1
     const serviceType: 'home' | 'clinic' = (() => {
       // Kiểm tra nếu collectionMethod là number
       if (typeof item.collectionMethod === 'number') {
         return item.collectionMethod === 0 ? 'home' : 'clinic';
       }
-      
+
       // Kiểm tra nếu collectionMethod là string number
       const methodNum = parseInt(item.collectionMethod);
       if (!isNaN(methodNum)) {
         return methodNum === 0 ? 'home' : 'clinic';
       }
-      
+
       // Fallback: nếu là string, kiểm tra nội dung
       const methodStr = item.collectionMethod?.toLowerCase() || '';
       return methodStr.includes('home') || methodStr.includes('nhà') || methodStr.includes('0') ? 'home' : 'clinic';
     })();
-    
+
     // Normalize status to match DetailedBookingStatus - FIX: sử dụng PascalCase  
     const normalizeStatus = (status: string): DetailedBookingStatus => {
       const statusLower = status.toLowerCase();
-      
+
       // Map theo DetailedBookingStatus (PascalCase)
       if (statusLower.includes('pending') || statusLower.includes('chờ')) return 'Pending';
       if (statusLower.includes('confirmed') || statusLower.includes('xác nhận')) return 'PreparingKit'; // Assume confirmed moves to preparing
@@ -168,10 +168,10 @@ export const BookingList = (): React.JSX.Element => {
       if (statusLower.includes('payment') || statusLower.includes('thanh toán')) return 'Completed'; // Map payment to completed for now
       if (statusLower.includes('completed') || statusLower.includes('hoàn thành')) return 'Completed';
       if (statusLower.includes('cancelled') || statusLower.includes('hủy')) return 'Cancelled';
-      
+
       return 'Pending'; // Default fallback
     };
-    
+
     return {
       id: item.id,
       testServiceId: item.testServiceId, // Add testServiceId from API
@@ -256,7 +256,7 @@ export const BookingList = (): React.JSX.Element => {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(booking => 
+      filtered = filtered.filter(booking =>
         booking.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.testType.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -324,32 +324,32 @@ export const BookingList = (): React.JSX.Element => {
       if (!userId) {
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
-      
+
       // console.log('🔍 Debug info:', {
       //   userId: userId,
       //   bookingId: bookingId
       // });
-      
+
       const results = await getTestResultsByUserId(userId);
       // console.log('📊 All results:', results);
-      
+
       // // Debug: In ra tất cả testBookingId và bookingId
       // console.log('📋 bookingId:', bookingId, typeof bookingId);
       // console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
-      
+
       // Chuẩn hóa để so sánh
       const normalize = (val: any) => String(val).replace(/\s+/g, '').toLowerCase();
       const normBookingId = normalize(bookingId);
-      
+
       // Tìm kết quả khớp
       let matched = results.find(r => normalize(r.testBookingId) === normBookingId);
-      
+
       if (!matched && results.length === 1) {
         // Nếu chỉ có 1 kết quả, tự động chọn
         matched = results[0];
         console.warn('⚠️ Không khớp bookingId, nhưng chỉ có 1 kết quả. Sẽ hiển thị kết quả này.');
       }
-      
+
       if (!matched && results.length > 1) {
         // Nếu có nhiều kết quả, cho phép user chọn
         setResultData({ list: results });
@@ -357,12 +357,12 @@ export const BookingList = (): React.JSX.Element => {
         setLoadingResult(false);
         return;
       }
-      
+
       if (!matched) {
         console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));
         throw new Error("Không tìm thấy kết quả cho lịch này. Có thể kết quả chưa được cập nhật.");
       }
-      
+
       setResultData(matched);
       setShowResultModal(true);
     } catch (e: any) {
@@ -384,7 +384,7 @@ export const BookingList = (): React.JSX.Element => {
         {/* Hero Section */}
         <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af" /></svg>
           </div>
           <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
@@ -458,20 +458,20 @@ export const BookingList = (): React.JSX.Element => {
 
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
-                <Loading 
-                  size="large" 
-                  message="Đang tải danh sách lịch hẹn..." 
-                  color="blue" 
+                <Loading
+                  size="large"
+                  message="Đang tải danh sách lịch hẹn..."
+                  color="blue"
                 />
               </div>
             ) : error ? (
               <div className="py-16 text-center">
                 <CircleSlash2 className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <p className="mb-4 text-slate-500">{error}</p>
-                <Button 
-                  onClick={() => window.location.reload()} 
+                <Button
+                  onClick={() => window.location.reload()}
                   className="text-white bg-blue-900 hover:bg-blue-800"
-                  style={{color: "white"}}
+                  style={{ color: "white" }}
                 >
                   Thử Lại
                 </Button>
@@ -490,14 +490,14 @@ export const BookingList = (): React.JSX.Element => {
                   const statusInfo = getStatusConfigByDetailedStatus(booking.status);
                   const StatusIcon = statusInfo?.icon || AlertCircleIcon;
                   const ServiceIcon = booking.serviceType === 'home' ? HomeIcon : BuildingIcon;
-                  
+
                   // Handler to check feedback on hover (lazy loading with debouncing)
                   const handleCardHover = () => {
                     if (booking.status === 'Completed' && userId && booking.testServiceId) {
                       debouncedCheckFeedback(booking.id, userId, booking.testServiceId);
                     }
                   };
-                  
+
                   // Handler to cancel hover timeout when mouse leaves
                   const handleCardLeave = () => {
                     if (hoverTimeoutRef.current[booking.id]) {
@@ -505,10 +505,10 @@ export const BookingList = (): React.JSX.Element => {
                       delete hoverTimeoutRef.current[booking.id];
                     }
                   };
-                  
+
                   return (
-                    <Card 
-                      key={booking.id} 
+                    <Card
+                      key={booking.id}
                       className="transition-shadow duration-300 bg-white border-0 shadow-lg hover:shadow-xl"
                       onMouseEnter={handleCardHover}
                       onMouseLeave={handleCardLeave}
@@ -529,9 +529,9 @@ export const BookingList = (): React.JSX.Element => {
                                 <p className="font-medium text-blue-600">{booking.name}</p>
                               </div>
                               <div className="text-right">
-                              <p className="text-sm text-slate-500">Tổng chi phí</p>
+                                <p className="text-sm text-slate-500">Tổng chi phí</p>
                                 <p className="text-2xl font-bold text-green-600">{booking.price}</p>
-                                
+
                               </div>
                             </div>
 
@@ -571,8 +571,8 @@ export const BookingList = (): React.JSX.Element => {
 
                           <div className="flex flex-col gap-3 mt-4">
                             <div className="flex flex-col gap-3 sm:flex-row">
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 className="w-full sm:w-auto"
                                 onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
                               >
@@ -580,7 +580,7 @@ export const BookingList = (): React.JSX.Element => {
                                 Xem chi tiết
                               </Button>
                               {(booking.status === 'Pending' || booking.status === 'PreparingKit') && (
-                                <Button 
+                                <Button
                                   className="w-full bg-blue-600 sm:w-auto hover:bg-blue-700"
                                   style={{ color: 'white' }}
                                   onClick={() => navigate(`/customer/edit-booking/${booking.id}`)}
@@ -590,7 +590,7 @@ export const BookingList = (): React.JSX.Element => {
                                 </Button>
                               )}
                               {booking.status === 'Completed' && (
-                                <Button 
+                                <Button
                                   className="w-full bg-green-600 sm:w-auto hover:bg-green-700"
                                   style={{ color: 'white' }}
                                   onClick={() => handleViewResult(booking.id)}
@@ -628,11 +628,10 @@ export const BookingList = (): React.JSX.Element => {
                                         {[1, 2, 3, 4, 5].map((star) => (
                                           <StarIcon
                                             key={star}
-                                            className={`w-4 h-4 ${
-                                              existingFeedback.rating >= star
+                                            className={`w-4 h-4 ${existingFeedback.rating >= star
                                                 ? "text-yellow-400 fill-yellow-400"
                                                 : "text-gray-300"
-                                            }`}
+                                              }`}
                                           />
                                         ))}
                                         <span className="ml-2 text-sm text-gray-600">
@@ -644,8 +643,8 @@ export const BookingList = (): React.JSX.Element => {
                                       </p>
                                       {existingFeedback.comment && (
                                         <p className="mt-1 text-xs italic text-gray-600">
-                                          "{existingFeedback.comment.length > 50 
-                                            ? `${existingFeedback.comment.substring(0, 50)}...` 
+                                          "{existingFeedback.comment.length > 50
+                                            ? `${existingFeedback.comment.substring(0, 50)}...`
                                             : existingFeedback.comment}"
                                         </p>
                                       )}
@@ -657,7 +656,7 @@ export const BookingList = (): React.JSX.Element => {
                               // Show evaluate button if checked but no feedback found
                               if (hasPreloaded || userId && booking.testServiceId) {
                                 return (
-                                  <Button 
+                                  <Button
                                     className="w-full text-white bg-yellow-500 hover:bg-yellow-600"
                                     onClick={() => handleFeedbackClick(booking)}
                                   >
@@ -749,8 +748,8 @@ export const BookingList = (): React.JSX.Element => {
             <h2 className="mb-4 text-xl font-bold text-red-700">Lỗi</h2>
             <p className="mb-4 text-red-600">{resultError}</p>
             {resultError.includes("đăng nhập") && (
-              <Button 
-                onClick={() => window.location.href = '/auth/login'} 
+              <Button
+                onClick={() => window.location.href = '/auth/login'}
                 className="w-full text-white bg-red-600 hover:bg-red-700"
               >
                 Đăng nhập ngay

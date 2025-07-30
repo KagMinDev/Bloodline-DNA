@@ -204,7 +204,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
           rowKey="id"
           dataSource={data}
           columns={columns}
-          pagination={{ pageSize: 6 }}
+          pagination={{ pageSize: 10 }}
           onRow={(record) => ({
             onClick: () => onRowClick(record.id),
             style: { cursor: "pointer" },

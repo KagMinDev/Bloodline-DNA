@@ -197,7 +197,7 @@ const DeliveryTable = () => {
               new Date(a.scheduledAt).getTime()
           )}
           columns={columns}
-          pagination={{ pageSize: 6 }}
+          pagination={{ pageSize: 10 }}
           onRow={(record) => ({
             onClick: () => console.log("Xem chi tiết:", record.id),
             style: { cursor: "pointer" },
