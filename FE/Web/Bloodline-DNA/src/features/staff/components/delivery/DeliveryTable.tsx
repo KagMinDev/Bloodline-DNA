@@ -68,6 +68,12 @@ const DeliveryTable = () => {
       render: (id: string) => <span style={{ fontSize: "10px" }}>#{id}</span>,
     },
     {
+      title: <span style={{ fontSize: "12px" }}>Khách hàng</span>,
+      dataIndex: "name",
+      key: "name",
+      render: (text: string) => <span style={{ fontSize: "10px" }}>{text}</span>,
+    },
+    {
       title: <span style={{ fontSize: "12px" }}>Địa chỉ</span>,
       dataIndex: "address",
       key: "address",
@@ -143,11 +149,10 @@ const DeliveryTable = () => {
               e.stopPropagation();
               handleClickComplete(record.id);
             }}
-            className={`px-2 py-1 text-xs rounded ${
-              canComplete
+            className={`px-2 py-1 text-xs rounded ${canComplete
                 ? "bg-green-500 text-white hover:bg-green-600"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
+              }`}
             style={{ fontSize: 10 }}
           >
             Hoàn thành
@@ -185,9 +190,9 @@ const DeliveryTable = () => {
       </div>
 
       {loading ? (
-            <div className="flex items-center justify-center py-10">
-              <Loading message="Đang tải danh sách giao Kit..." />
-            </div>
+        <div className="flex items-center justify-center py-10">
+          <Loading message="Đang tải danh sách giao Kit..." />
+        </div>
       ) : (
         <Table
           rowKey="id"
@@ -238,7 +243,7 @@ const DeliveryTable = () => {
               <div>
                 <strong>Ghi chú:</strong>{" "}
                 {selectedOrder.note &&
-                selectedOrder.note.trim().toLowerCase() !== "string"
+                  selectedOrder.note.trim().toLowerCase() !== "string"
                   ? selectedOrder.note
                   : "Không có"}
               </div>

@@ -36,6 +36,7 @@ export const getDeliveryLogistics = async (): Promise<DeliveryOrder[]> => {
 
       return {
         id: item.id,
+        name: item.name,
         staff: item.staff?.fullName || "Chưa phân công",
         address: item.address,
         phone: item.phone,
@@ -66,6 +67,7 @@ export const getDeliveryLogisticById = async (
     return {
       id: item.id,
       staff: item.staff?.fullName || "Chưa phân công",
+      name: item.name,
       address: item.address,
       phone: item.phone,
       scheduleAt: item.scheduledAt,

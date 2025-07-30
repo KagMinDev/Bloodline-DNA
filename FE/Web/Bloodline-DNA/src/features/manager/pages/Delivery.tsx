@@ -33,7 +33,7 @@ function Delivery() {
     setIsLoading(true);
     try {
       const data = await getDeliveryLogistics();
-      console.log("getDeliveryLogistics", data)
+      console.log("getDeliveryLogistics 123", data)
       setDeliveries(data);
     } catch (error) {
       console.error("Lỗi khi tải danh sách logistics:", error);

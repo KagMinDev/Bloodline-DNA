@@ -8,6 +8,7 @@ export type DeliveryStatus =
   | "Cancelled";
 export interface DeliveryLogistic {
   id: string;
+  name: string;
   staffId: string | null;
   staff: { fullName?: string } | null;
   address: string;
@@ -21,6 +22,7 @@ export interface DeliveryLogistic {
 export interface DeliveryOrder {
   id: string;
   staff: string;
+  name: string;
   address: string;
   phone: string;
   scheduleAt: string;

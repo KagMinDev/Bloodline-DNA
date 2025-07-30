@@ -2,11 +2,11 @@ import { CheckOutlined } from "@ant-design/icons";
 import { Button, message, Modal, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
-import { updateTestBookingStatusStaff } from "../../api/deliveryApi";
-import { statusColorMap, statusTextMap } from "../../types/delivery"; // Dùng chung map
-
+import { RiImageAddLine } from "react-icons/ri";
 import { Loading } from "../../../../components";
+import { updateTestBookingStatusStaff } from "../../api/deliveryApi";
 import { getTestBookingApi } from "../../api/testBookingApi";
+import { statusColorMap, statusTextMap } from "../../types/delivery"; // Dùng chung map
 import type { TestBookingResponse } from "../../types/testBooking";
 
 interface Props {
@@ -20,6 +20,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -216,8 +217,12 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
 
       <Modal
         open={openModal}
-        onCancel={() => setOpenModal(false)}
+        onCancel={() => {
+          setOpenModal(false);
+          setUploadedImage(null); // reset ảnh nếu đóng modal
+        }}
         onOk={handleConfirm}
+        okButtonProps={{ disabled: !uploadedImage }}
         confirmLoading={confirmLoading}
         okText="Xác nhận"
         cancelText="Hủy"
@@ -240,7 +245,9 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
               </div>
               <div className="flex gap-1">
                 <strong>Địa chỉ:</strong>{" "}
-                {data.find((d) => d.id === selectedId)?.address || <div className="italic">Chưa cập nhật</div>}
+                {data.find((d) => d.id === selectedId)?.address || (
+                  <div className="italic">Chưa cập nhật</div>
+                )}
               </div>
               <div>
                 <strong>Ghi chú:</strong>{" "}
@@ -261,9 +268,35 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
                 </Tag>
               </div>
             </div>
+
+            <div>
+              <div className="mt-4">
+                <label className="flex flex-col items-start gap-1 mb-1 text-sm font-medium text-gray-700">
+                  <div className="flex items-center gap-1">
+                    <RiImageAddLine className="text-lg" />
+                    <span>Tải ảnh lấy mẫu Kit để xác nhận</span>
+                  </div>
+                  <p className="text-xs italic text-red-500">* (bắt buộc)</p>
+                </label>
+                {/* Upload ảnh xác nhận */}
+                <div className="px-4 py-2 mb-5 transition border border-blue-300 rounded cursor-pointer w-fit bg-blue-50 hover:bg-blue-100">
+                  <input
+                    placeholder="Tải ảnh xác nhận"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setUploadedImage(file);
+                    }}
+                    className="text-sm text-gray-700 cursor-pointer file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                  />
+                </div>
+              </div>
+            </div>
           </>
         )}
       </Modal>
+
     </>
   );
 };

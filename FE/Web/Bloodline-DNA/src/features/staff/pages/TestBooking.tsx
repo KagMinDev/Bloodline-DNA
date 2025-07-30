@@ -16,6 +16,7 @@ function TestBooking() {
   const fetchBookings = async () => {
     try {
       const response = await getTestBookingApi();
+      console.log("fetchBookings 1 12", response)
 
       if (!Array.isArray(response)) {
         console.error('Dữ liệu không phải mảng:', response);

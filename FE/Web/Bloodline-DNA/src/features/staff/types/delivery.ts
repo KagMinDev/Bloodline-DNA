@@ -53,7 +53,6 @@ export interface DeliveryLogistic {
   type: number;
   status: string;
 }
-
 export interface DeliveryOrder {
   id: string;
   staffId: string | null;
@@ -66,7 +65,6 @@ export interface DeliveryOrder {
   type: number;
   status: DeliveryStatus;
 }
-
 export interface TestBookingStatusRequest {
   bookingId: string;
   status: number;
