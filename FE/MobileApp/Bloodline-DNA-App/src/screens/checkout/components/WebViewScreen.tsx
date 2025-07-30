@@ -1,9 +1,9 @@
+import type { RootStackParamList } from "@/types/root-stack/stack.types";
+import type { RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React from "react";
 import { WebView } from "react-native-webview";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import type { RouteProp } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "@/types/root-stack/stack.types";
 
 type WebViewRouteProp = RouteProp<RootStackParamList, "WebViewScreen">;
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -13,8 +13,6 @@ const WebViewScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const { url } = route.params;
 
-  console.log("URL in WebViewScreen:", url);
-
   const extractParam = (url: string, key: string): string | null => {
     const match = url.match(new RegExp(`[?&]${key}=([^&#]*)`));
     return match ? decodeURIComponent(match[1]) : null;
@@ -22,7 +20,6 @@ const WebViewScreen = () => {
 
   // Lấy paymentType từ URL ban đầu
   const initialPaymentType = extractParam(url, "paymentType") ?? undefined;
-  console.log("Initial paymentType from URL:", initialPaymentType);
 
   const navigateToResult = (
     type: "success" | "error",
@@ -50,7 +47,6 @@ const WebViewScreen = () => {
     }
 
     if (type === "success") {
-      console.log("Navigating to PaymentSuccess with params:", { bookingId, orderCode, paymentType: paymentTypeSafe });
       navigation.reset({
         index: 0,
         routes: [
@@ -90,13 +86,9 @@ const WebViewScreen = () => {
 
   const handleNavigationStateChange = (navState: any) => {
     const currentUrl = navState.url;
-    console.log("Current WebView URL:", currentUrl);
-
     const rawBookingId = extractParam(currentUrl, "bookingId");
     const orderCode = extractParam(currentUrl, "orderCode");
     const paymentType = extractParam(currentUrl, "paymentType") ?? undefined;
-
-    console.log("Extracted params:", { rawBookingId, orderCode, paymentType });
 
     if (!rawBookingId) {
       console.log("Booking ID is missing in URL:", currentUrl);
@@ -104,14 +96,12 @@ const WebViewScreen = () => {
     }
 
     if (currentUrl.includes("status=PAID")) {
-      console.log("Payment successful, navigating to success screen.");
       navigateToResult("success", {
         bookingId: rawBookingId,
         orderCode: orderCode ?? undefined,
         paymentType,
       });
     } else if (currentUrl.includes("status=CANCELLED")) {
-      console.log("Payment cancelled, navigating to error screen.");
       navigateToResult("error", {
         bookingId: rawBookingId,
         orderCode: orderCode ?? undefined,

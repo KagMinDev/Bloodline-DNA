@@ -14,8 +14,8 @@ export const getTestResultsByUserId = async (userId: string): Promise<TestResult
       throw new Error("Không có token xác thực. Vui lòng đăng nhập lại.");
     }
     
-    console.log('🔍 Calling TestResult API with userId:', userId);
-    console.log('🔑 Using token:', token.substring(0, 20) + '...');
+    // console.log('🔍 Calling TestResult API with userId:', userId);
+    // console.log('🔑 Using token:', token.substring(0, 20) + '...');
     
     const response = await axios.get(`https://api.adntester.duckdns.org/api/TestResult/user/${userId}`, {
       headers: {
@@ -25,10 +25,10 @@ export const getTestResultsByUserId = async (userId: string): Promise<TestResult
       timeout: 10000,
     });
     
-    console.log('✅ TestResult API response:', response.data);
+    // console.log('✅ TestResult API response:', response.data);
     
     if (Array.isArray(response.data)) {
-      console.log('📊 Found', response.data.length, 'test results');
+      // console.log('📊 Found', response.data.length, 'test results');
       return response.data;
     }
     

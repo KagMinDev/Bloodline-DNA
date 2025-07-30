@@ -14,8 +14,6 @@ const LoginForm: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (data: Login) => {
-    console.log("Start loading");
-
     setLoading(true);
     try {
       const response = await loginApi(data.email, data.password);

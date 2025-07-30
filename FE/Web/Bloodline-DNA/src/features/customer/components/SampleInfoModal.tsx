@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../staff/components/booking/ui/dialog";
+import { AlertCircleIcon, CheckCircle, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../../staff/components/booking/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../staff/components/booking/ui/select";
+import { getTestKitByBookingIdApi, submitSampleInfoApi, type SampleInfoPayload } from "../api/sampleApi";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../staff/components/booking/ui/select";
-import { submitSampleInfoApi, getTestKitByBookingIdApi, type SampleInfoPayload } from "../api/sampleApi";
-import { AlertCircleIcon, CheckCircle, Loader2 } from "lucide-react";
 
 // Enums for dropdowns, matching backend enums exactly
 const RelationshipToSubjectLabelVi: Record<number, string> = {
@@ -66,12 +66,10 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
         setApiError(null);
         
         try {
-          console.log('🔄 Fetching TestKit for booking:', bookingId);
           const response = await getTestKitByBookingIdApi(bookingId);
           
           if (response.success && response.data?.id) {
             setKitId(response.data.id);
-            console.log('✅ TestKit ID found:', response.data.id);
           } else {
             setApiError(response.message || "Không tìm thấy TestKit cho booking này.");
           }
@@ -136,21 +134,20 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
       sampleType: sampleTypeNumber,
     };
 
-    console.log('🔄 Submitting sample info with payload:', {
-      kitId: payload.kitId,
-      donorName: payload.donorName,
-      relationshipToSubject: payload.relationshipToSubject,
-      sampleType: payload.sampleType,
-      relationshipLabel: RelationshipToSubjectLabelVi[relationshipNumber],
-      sampleTypeLabel: SampleTypeLabelVi[sampleTypeNumber]
-    });
+    // console.log('🔄 Submitting sample info with payload:', {
+    //   kitId: payload.kitId,
+    //   donorName: payload.donorName,
+    //   relationshipToSubject: payload.relationshipToSubject,
+    //   sampleType: payload.sampleType,
+    //   relationshipLabel: RelationshipToSubjectLabelVi[relationshipNumber],
+    //   sampleTypeLabel: SampleTypeLabelVi[sampleTypeNumber]
+    // });
 
     const response = await submitSampleInfoApi(payload);
 
     setIsSubmitting(false);
 
     if (response.success) {
-      console.log('✅ Sample info submitted successfully');
       onSubmitSuccess();
       onClose();
     } else {

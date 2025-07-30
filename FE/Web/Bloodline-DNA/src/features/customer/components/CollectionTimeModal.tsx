@@ -30,11 +30,11 @@ export const CollectionTimeModal = ({
     const [hour, minute] = selectedTime.split(':');
     const formattedDateTime = `Ngày ${day}/${month}/${year} lúc ${hour}:${minute}`;
 
-    console.log("🕒 Selected DateTime:", {
-      date: selectedDate,
-      time: selectedTime,
-      formatted: formattedDateTime
-    });
+    // console.log("🕒 Selected DateTime:", {
+    //   date: selectedDate,
+    //   time: selectedTime,
+    //   formatted: formattedDateTime
+    // });
 
     onConfirm(formattedDateTime);
   };
@@ -80,6 +80,7 @@ export const CollectionTimeModal = ({
                 Chọn ngày
               </label>
               <input
+                placeholder="Chọn ngày"
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
@@ -100,6 +101,7 @@ export const CollectionTimeModal = ({
                 Chọn giờ
               </label>
               <input
+                placeholder="Chọn giờ"
                 type="time"
                 value={selectedTime}
                 onChange={(e) => setSelectedTime(e.target.value)}

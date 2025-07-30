@@ -15,7 +15,6 @@ function TestBooking() {
   const fetchBookings = async () => {
     try {
       const response = await getTestBookingApi();
-      console.log('API Response:', response);
 
       if (!Array.isArray(response)) {
         console.error('Dữ liệu không phải mảng:', response);
@@ -62,7 +61,6 @@ function TestBooking() {
   };
 
   const bookingsByDate = countBookingsByDate(bookings);
-  console.log('Bookings by date:', bookingsByDate);
 
   const handleUpdateStatus = (updatedBooking: TestBookingResponse) => {
     setBookings((prevBookings) =>

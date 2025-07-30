@@ -1,12 +1,11 @@
 import rootApi from "@/api/rootApi";
-import { UpdateBookingResponse } from "../types/sampleInf";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UpdateBookingResponse } from "../types/sampleInf";
 
 /**
  * ✅ Xác nhận giao hàng cho booking
  */
 export const confirmDeliveryApi = async ( bookingId: string): Promise<UpdateBookingResponse> => {
-  console.log("bookignId in confirmDeliveryApi", bookingId);
   
   const token = await AsyncStorage.getItem("token") || "";
   if (!token) throw new Error("Vui lòng đăng nhập để xác nhận giao hàng.");

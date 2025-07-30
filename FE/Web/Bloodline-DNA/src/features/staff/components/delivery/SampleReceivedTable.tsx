@@ -25,7 +25,6 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
     try {
       const token = localStorage.getItem("token") || "";
       const result = await getTestBookingApi(token);
-      console.log("getTestBookingApi", result);
       const filtered = result.filter(
         (item) => item.status === "ReturningSample"
       );
@@ -65,9 +64,9 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
         token
       );
 
-      console.log(
-        `Đơn hàng ${selectedId}: Trạng thái thay đổi từ ${oldStatus} => SampleReceived (6)`
-      );
+      // console.log(
+      //   `Đơn hàng ${selectedId}: Trạng thái thay đổi từ ${oldStatus} => SampleReceived (6)`
+      // );
 
       message.success("Đã xác nhận nhận mẫu Kit.");
       setOpenModal(false);

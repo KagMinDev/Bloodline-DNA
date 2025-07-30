@@ -1,6 +1,6 @@
 import axios from "axios";
 // src/apis/chatbotApi.ts
-export const CHATBOTAI_URL = "https://bloodlinedna-chatbotai.onrender.com/api";
+export const CHATBOTAI_URL = "http://localhost:3000/api";
 /**
  * Gửi tin nhắn đến Gemini và lấy phản hồi
  */
