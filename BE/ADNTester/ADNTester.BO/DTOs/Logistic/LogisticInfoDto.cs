@@ -16,6 +16,7 @@ namespace ADNTester.BO.DTOs.Logistic
         public DateTime? ScheduledAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string? Note { get; set; }
+        public string? ImageUrl { get; set; }
 
         // Trả về tên Enum dưới dạng chuỗi
         public string Type { get; set; }

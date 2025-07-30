@@ -25,6 +25,8 @@ namespace ADNTester.BO.Entities
         public DateTime? CompletedAt { get; set; }
 
         public string? Note { get; set; }
+        public string? EvidenceImageUrl { get; set; }
+
 
         // Optional: add a discriminator if needed
         public LogisticsType Type { get; set; } // Enum: Delivery or Pickup
