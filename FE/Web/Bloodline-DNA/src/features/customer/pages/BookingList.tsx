@@ -66,6 +66,7 @@ export const BookingList = (): React.JSX.Element => {
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [collectionMethodFilter, setCollectionMethodFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -268,8 +269,21 @@ export const BookingList = (): React.JSX.Element => {
       filtered = filtered.filter(booking => booking.status === statusFilter);
     }
 
+    // Filter by collectionMethod
+    if (collectionMethodFilter !== "all") {
+      filtered = filtered.filter(booking => {
+        const method = booking.collectionMethod?.toString().toLowerCase() || '';
+        if (collectionMethodFilter === "home") {
+          return method === "selfsample" || method === "0" || method.includes("home") || method.includes("nhà") || method.includes("selfsample");
+        } else if (collectionMethodFilter === "facility") {
+          return method === "atfacility" || method === "1" || method.includes("facility") || method.includes("cơ sở") || method.includes("atfacility");
+        }
+        return true;
+      });
+    }
+
     setFilteredBookings(filtered);
-  }, [bookings, searchTerm, statusFilter]);
+  }, [bookings, searchTerm, statusFilter, collectionMethodFilter]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -442,6 +456,19 @@ export const BookingList = (): React.JSX.Element => {
                   <option value="Completed">Hoàn thành</option>
                   <option value="Cancelled">Đã hủy</option>
                 </select>
+                
+                <div className="flex items-center">
+                  <span className="text-sm font-medium text-gray-700">Phương thức:</span>
+                </div>
+                <select
+                  value={collectionMethodFilter}
+                  onChange={(e) => setCollectionMethodFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="all">Tất cả</option>
+                  <option value="home">Tại nhà</option>
+                  <option value="facility">Tại cơ sở</option>
+                </select>
               </div>
             </div>
           </div>
@@ -571,14 +598,17 @@ export const BookingList = (): React.JSX.Element => {
 
                           <div className="flex flex-col gap-3 mt-4">
                             <div className="flex flex-col gap-3 sm:flex-row">
-                              <Button 
-                                variant="outline" 
-                                className="w-full sm:w-auto"
-                                onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
-                              >
-                                <EyeIcon className="w-4 h-4 mr-2" />
-                                Xem chi tiết
-                              </Button>
+                              {/* Ẩn nút "Xem chi tiết" cho booking có collectionMethod là "AtFacility" */}
+                              {booking.collectionMethod?.toString().toLowerCase() !== "atfacility" && (
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full sm:w-auto"
+                                  onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
+                                >
+                                  <EyeIcon className="w-4 h-4 mr-2" />
+                                  Xem chi tiết
+                                </Button>
+                              )}
                               {(booking.status === 'Pending' || booking.status === 'PreparingKit') && (
                                 <Button 
                                   className="w-full bg-blue-600 sm:w-auto hover:bg-blue-700"
