@@ -1,10 +1,11 @@
 import { CheckOutlined } from "@ant-design/icons";
-import { Button, message, Modal, Spin, Table, Tag } from "antd";
+import { Button, message, Modal, Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { updateTestBookingStatusStaff } from "../../api/deliveryApi";
 import { statusColorMap, statusTextMap } from "../../types/delivery"; // Dùng chung map
 
+import { Loading } from "../../../../components";
 import { getTestBookingApi } from "../../api/testBookingApi";
 import type { TestBookingResponse } from "../../types/testBooking";
 
@@ -195,8 +196,8 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
   return (
     <>
       {loading ? (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Spin size="large" />
+        <div className="flex items-center justify-center py-10">
+          <Loading message="Đang tải danh sách nhận mẫu Kit..." />
         </div>
       ) : (
         <Table
@@ -250,7 +251,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
                 <Tag
                   color={
                     statusColorMap[
-                      data.find((d) => d.id === selectedId)?.status || ""
+                    data.find((d) => d.id === selectedId)?.status || ""
                     ]
                   }
                 >
