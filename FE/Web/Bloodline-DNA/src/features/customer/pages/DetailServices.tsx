@@ -118,14 +118,6 @@ export const DetailServices = (): React.JSX.Element => {
     // Get the first active price service as default
     const firstPriceService = serviceDetail.priceServices?.[0];
     
-    console.log('🔍 Debug booking data:', {
-      serviceDetail,
-      firstPriceService,
-      serviceName: serviceDetail.name,
-      servicePrice: serviceDetail.price,
-      priceServicePrice: firstPriceService?.price
-    });
-    
     openBookingModal({
       id: firstPriceService?.id || serviceDetail.id, // Use priceService.id as main id
       serviceId: serviceDetail.id, // Service detail id as serviceId

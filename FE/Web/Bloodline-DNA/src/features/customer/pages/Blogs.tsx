@@ -28,7 +28,6 @@ export const Blogs: React.FC = () => {
       setError(null);
       try {
         const blogs = await getBlogsApi();
-        console.log("Blogs fetched:", blogs);
         const publishedBlogs = blogs
           .filter((post) => post.status === "Published")
           .map((post) => ({

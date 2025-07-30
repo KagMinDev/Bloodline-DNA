@@ -149,7 +149,6 @@ function TestResultPage() {
     try {
       await createTestResultApi(req, token);
       const updatedResults = await getAllTestResultApi(token);
-      console.log("All kq:", getAllTestResultApi);
       setResults(updatedResults);
       setShowModal(false);
       setForm({

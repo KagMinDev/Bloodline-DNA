@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import { CheckCircle, Home } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Header, Footer } from "../../../components";
-import { callPaymentCallbackApi } from "../api/checkoutApi";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Footer, Header } from "../../../components";
 import { getBookingByIdApi } from "../api/bookingListApi";
+import { callPaymentCallbackApi } from "../api/checkoutApi";
+import { Button } from "../components/ui/Button";
 
 const CheckoutSuccess = () => {
   const navigate = useNavigate();
@@ -52,13 +52,13 @@ const CheckoutSuccess = () => {
 
   const normalizedStatus = queryStatus === "PAID" ? "PAID" : "CANCELLED";
 
-  console.log("CheckoutSuccess mounted with:", {
-    orderCode: queryOrderCode,
-    amount: queryAmount,
-    bookingId: storedBookingId,
-    status: normalizedStatus,
-    timestamp: new Date().toISOString(),
-  });
+  // console.log("CheckoutSuccess mounted with:", {
+  //   orderCode: queryOrderCode,
+  //   amount: queryAmount,
+  //   bookingId: storedBookingId,
+  //   status: normalizedStatus,
+  //   timestamp: new Date().toISOString(),
+  // });
 
   if (queryOrderCode && storedBookingId) {
     handlePaymentCallback(queryOrderCode, normalizedStatus, storedBookingId);

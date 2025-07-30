@@ -41,7 +41,6 @@ export const completeDelivery = async (id: string): Promise<void> => {
 // Hàm PUT: Cập nhật trạng thái đặt lịch xét nghiệm
 // https://api.adntester.duckdns.org/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
 export const updateTestBookingStatusStaff = async (request: TestBookingStatusRequest): Promise<TestBookingResponse> => {
-  console.log("Updating booking status:", request.bookingId, "to status:", request.status);
 
   // rootApi sẽ tự động thêm Authorization header thông qua interceptor
   const response = await rootApi.put<{ data: TestBookingResponse }>(

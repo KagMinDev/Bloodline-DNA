@@ -129,12 +129,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       // Set testType to the selected service id
       const defaultTestType = selectedService.id;
 
-      console.log('🔧 Setting form data based on collectionMethod:', {
-        collectionMethod: selectedService.collectionMethod,
-        defaultServiceType,
-        defaultTestType,
-        defaultAddress
-      });
+      // console.log('🔧 Setting form data based on collectionMethod:', {
+      //   collectionMethod: selectedService.collectionMethod,
+      //   defaultServiceType,
+      //   defaultTestType,
+      //   defaultAddress
+      // });
 
       setFormData(prev => ({
         ...prev,
@@ -172,21 +172,20 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   React.useEffect(() => {
     if (isOpen) {
       // Debug disabled for production
-      console.log('🔍 BookingModal opened with selectedService:', selectedService);
-      console.log('🔍 Service name:', selectedService?.name);
-      console.log('🔍 Service price:', selectedService?.price);
-      console.log('🔍 Service category:', selectedService?.category);
+      // console.log('🔍 BookingModal opened with selectedService:', selectedService);
+      // console.log('🔍 Service name:', selectedService?.name);
+      // console.log('🔍 Service price:', selectedService?.price);
+      // console.log('🔍 Service category:', selectedService?.category);
 
-      console.log('Modal opened, fetching available TestServices for debugging...');
+      // console.log('Modal opened, fetching available TestServices for debugging...');
       getAvailableTestServicesApi().then(testServices => {
-        console.log('Available TestServices in database:', testServices);
-        console.log('Current selectedService:', selectedService);
+        // console.log('Available TestServices in database:', testServices);
+        // console.log('Current selectedService:', selectedService);
 
         // Enhance selectedService with testServiceInfo if missing
         let enhancedService = { ...selectedService };
 
         if (selectedService && testServices.length > 0 && !selectedService.testServiceInfo) {
-          console.log('🔧 selectedService missing testServiceInfo, attempting to find it...');
 
           // Try to find matching TestService
           const matchingTestService = testServices.find((ts: any) =>
@@ -196,7 +195,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           );
 
           if (matchingTestService) {
-            console.log('✅ Found matching TestService for enhancement:', matchingTestService);
             enhancedService = {
               ...selectedService,
               testServiceInfo: {
@@ -207,7 +205,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
               collectionMethod: selectedService.collectionMethod
             };
             setEnhancedSelectedService(enhancedService);
-            console.log('🚀 Enhanced selectedService with testServiceInfo:', enhancedService);
           } else {
             console.warn('❌ Could not find matching TestService for auto-enhancement');
             setEnhancedSelectedService(selectedService);
@@ -221,11 +218,11 @@ export const BookingModal: React.FC<BookingModalProps> = ({
           const selectedServiceId = selectedService?.id;
           const testServiceInfoId = selectedService?.testServiceInfo?.id;
 
-          console.log('Checking IDs:', {
-            selectedServiceId,
-            testServiceInfoId,
-            selectedServiceFull: selectedService
-          });
+          // console.log('Checking IDs:', {
+          //   selectedServiceId,
+          //   testServiceInfoId,
+          //   selectedServiceFull: selectedService
+          // });
 
           const matchingService = testServices.find((ts: any) =>
             ts.id === selectedServiceId ||
@@ -267,28 +264,27 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   }
 
   // Gói xét nghiệm theo category và hình thức thu mẫu
-  const testTypesByCategory: Record<string, Record<string, TestType[]>> = {
-    civil: {
-      home: [
-        { id: "civil-self", name: "ADN Dân Sự - Tự Thu Mẫu (Kit)", price: "1.500.000đ", time: "5-7 ngày", category: "Dân sự" },
-        { id: "civil-home", name: "ADN Dân Sự - Thu Tại Nhà", price: "2.500.000đ", time: "3-5 ngày", category: "Dân sự" },
-      ],
-      clinic: [
-        { id: "civil-center", name: "ADN Dân Sự - Thu Tại Trung Tâm", price: "2.000.000đ", time: "3-5 ngày", category: "Dân sự" },
-      ]
-    },
-    legal: {
-      clinic: [
-        { id: "legal-center", name: "ADN Hành Chính - Thu Tại Trung Tâm", price: "3.500.000đ", time: "7-10 ngày", category: "Hành chính" },
-        { id: "legal-bone", name: "ADN Hành Chính - Giám Định Hài Cốt", price: "Liên hệ", time: "30+ ngày", category: "Hành chính" },
-      ]
-    }
-  };
+  // const testTypesByCategory: Record<string, Record<string, TestType[]>> = {
+  //   civil: {
+  //     home: [
+  //       { id: "civil-self", name: "ADN Dân Sự - Tự Thu Mẫu (Kit)", price: "1.500.000đ", time: "5-7 ngày", category: "Dân sự" },
+  //       { id: "civil-home", name: "ADN Dân Sự - Thu Tại Nhà", price: "2.500.000đ", time: "3-5 ngày", category: "Dân sự" },
+  //     ],
+  //     clinic: [
+  //       { id: "civil-center", name: "ADN Dân Sự - Thu Tại Trung Tâm", price: "2.000.000đ", time: "3-5 ngày", category: "Dân sự" },
+  //     ]
+  //   },
+  //   legal: {
+  //     clinic: [
+  //       { id: "legal-center", name: "ADN Hành Chính - Thu Tại Trung Tâm", price: "3.500.000đ", time: "7-10 ngày", category: "Hành chính" },
+  //       { id: "legal-bone", name: "ADN Hành Chính - Giám Định Hài Cốt", price: "Liên hệ", time: "30+ ngày", category: "Hành chính" },
+  //     ]
+  //   }
+  // };
 
   // Lấy gói xét nghiệm duy nhất từ selectedService thay vì tất cả gói available
   const getSelectedServiceAsTestType = (): TestType | null => {
     if (!selectedService) {
-      console.log('❌ getSelectedServiceAsTestType: No selectedService');
       return null;
     }
 
@@ -300,7 +296,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
     };
 
-    console.log('✅ getSelectedServiceAsTestType created:', testType);
     return testType;
   };
 
@@ -400,9 +395,9 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     setLoading(true);
     setApiError(null);
 
-    console.log('🚀 SUBMIT STARTED - Form validation');
-    console.log('Current form data:', formData);
-    console.log('Selected service:', enhancedSelectedService || selectedService);
+    // console.log('🚀 SUBMIT STARTED - Form validation');
+    // console.log('Current form data:', formData);
+    // console.log('Selected service:', enhancedSelectedService || selectedService);
 
     // Validate testServiceId before making API call
     if (!validateTestServiceId()) {
@@ -412,7 +407,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     }
 
     try {
-      console.log('🔄 Mapping form data to API request...');
 
       // Map form data to API request format (now async)
       const bookingRequest = await mapFormDataToBookingRequest(
@@ -421,12 +415,8 @@ export const BookingModal: React.FC<BookingModalProps> = ({
         undefined // Don't pass temp clientId, let API handle it
       );
 
-      console.log('✅ Request mapping successful, calling API...');
-
       // Call the API
       const result = await createBookingApi(bookingRequest);
-
-      console.log('✅ API call successful:', result);
 
       // Store the response for success step
       setBookingResponse(result);
@@ -534,7 +524,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     // If we're on step 3 (success step) and have booking response, navigate to booking status
     const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
     if (step === 3 && bookingId) {
-      console.log('🔄 Closing success modal, navigating to booking status:', bookingId);
       // Navigate first, then close modal to avoid any interference
       navigate(`/customer/booking-status/${bookingId}`);
       // Close modal after a brief delay to ensure navigation completes
@@ -957,19 +946,12 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 </div>
                 <Button
                   onClick={() => {
-                    console.log('🔄 Success close button clicked');
-                    console.log('Current step:', step);
-                    console.log('Booking response:', bookingResponse);
                     // Check both possible locations for booking ID
                     const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
                     if (bookingId) {
-                      console.log('🚀 Navigating to booking status:', bookingId);
-                      console.log('Current location:', window.location.href);
                       navigate(`/customer/booking-status/${bookingId}`);
-                      console.log('✅ Navigation command sent');
                       // Close modal after navigation
                       setTimeout(() => {
-                        console.log('🔄 Closing modal and resetting form');
                         resetForm();
                         onClose();
                       }, 150);

@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { getTestsApi, createTestApi, updateTestApi, deleteTestApi, getTestByIdApi } from '../api/testApi';
-import type { PriceServiceRequest, TestRequest, TestResponse, TestUpdateRequest } from '../types/testService';
-import ModalTest from '../components/testManagement/ModalTest';
-import ModalDetail from '../components/testManagement/ModalDetail';
-import TestList from '../components/testManagement/TestList';
-import { Button } from '../../staff/components/sample/ui/button';
 import { FaPlus } from 'react-icons/fa';
+import { Button } from '../../staff/components/sample/ui/button';
+import { createTestApi, deleteTestApi, getTestByIdApi, getTestsApi, updateTestApi } from '../api/testApi';
+import ModalDetail from '../components/testManagement/ModalDetail';
 import ModalEdit from '../components/testManagement/ModalEdit';
+import ModalTest from '../components/testManagement/ModalTest';
+import TestList from '../components/testManagement/TestList';
+import type { PriceServiceRequest, TestRequest, TestResponse, TestUpdateRequest } from '../types/testService';
 
 export default function TestManagement() {
   const [tests, setTests] = useState<TestResponse[]>([]);
@@ -73,7 +73,6 @@ export default function TestManagement() {
   // Sửa dịch vụ (PUT)
   const handleUpdateTest = async (data: TestUpdateRequest) => {
     try {
-      console.log('Update request:', data);
       await updateTestApi(data, token);
       setShowEditTest(false);
       const newTests = await getTestsApi(token);

@@ -61,7 +61,6 @@ export const getTestBookingByIdApi = async (id: string, token: string): Promise<
 // Hàm PUT: Cập nhật trạng thái đặt lịch xét nghiệm
 // https://api.adntester.duckdns.org/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
 export const updateTestBookingStatusApi = async (request: TestBookingStatusRequest, token: string): Promise<TestBookingResponse> => {
-  console.log("Updating booking status:", request.bookingId, "to status:", request.status);
   
   try {
     const response = await rootApi.put<{ data: TestBookingResponse }>(

@@ -21,7 +21,6 @@ export const useExistingFeedback = () => {
   const checkExistingFeedback = useCallback(
     async (userId: string, testServiceId: string) => {
       if (!userId || !testServiceId) {
-        console.log("❌ Missing userId or testServiceId for feedback check");
         return null;
       }
 
@@ -29,13 +28,12 @@ export const useExistingFeedback = () => {
 
       // ⏳ Nếu đang gọi API cho key này → không gọi lại
       if (isCheckingFeedbackRef.current[feedbackKey]) {
-        console.log(`⏳ Already checking feedback for ${feedbackKey}, skipping...`);
         return existingFeedbackMapRef.current[feedbackKey] || null;
       }
 
       // ✅ Nếu đã có kết quả thì không gọi nữa (including null results)
       if (feedbackKey in existingFeedbackMapRef.current) {
-        console.log(`✅ Using cached feedback for ${feedbackKey}`);
+        // console.log(`✅ Using cached feedback for ${feedbackKey}`);
         return existingFeedbackMapRef.current[feedbackKey];
       }
 
@@ -43,7 +41,7 @@ export const useExistingFeedback = () => {
         setIsCheckingFeedback(prev => ({ ...prev, [feedbackKey]: true }));
         setFeedbackErrors(prev => ({ ...prev, [feedbackKey]: "" }));
 
-        console.log(`🔄 Checking existing feedback for ${feedbackKey}`);
+        // console.log(`🔄 Checking existing feedback for ${feedbackKey}`);
 
         const userFeedbacksResponse = await getUserFeedbacksApi(userId);
 
@@ -57,7 +55,7 @@ export const useExistingFeedback = () => {
           );
 
           if (matchingFeedback) {
-            console.log(`✅ Found feedback for ${feedbackKey}:`, matchingFeedback);
+            // console.log(`✅ Found feedback for ${feedbackKey}:`, matchingFeedback);
 
             // Lấy chi tiết nếu có
             try {
@@ -68,7 +66,7 @@ export const useExistingFeedback = () => {
                   ? feedbackDetailsResponse.data[0]
                   : feedbackDetailsResponse.data;
 
-                console.log(`✅ Got detailed feedback for ${feedbackKey}:`, detailedFeedback);
+                // console.log(`✅ Got detailed feedback for ${feedbackKey}:`, detailedFeedback);
 
                 setExistingFeedbackMap(prev => ({
                   ...prev,
@@ -87,7 +85,7 @@ export const useExistingFeedback = () => {
             }));
             return matchingFeedback;
           } else {
-            console.log(`📝 No feedback found for ${feedbackKey}`);
+            // console.log(`📝 No feedback found for ${feedbackKey}`);
             // Cache the "no feedback" result to avoid repeated API calls
             setExistingFeedbackMap(prev => ({
               ...prev,
@@ -96,7 +94,7 @@ export const useExistingFeedback = () => {
             return null;
           }
         } else {
-          console.log(`📝 No feedbacks returned for user ${userId}`);
+          // console.log(`📝 No feedbacks returned for user ${userId}`);
           // Cache the "no feedback" result to avoid repeated API calls
           setExistingFeedbackMap(prev => ({
             ...prev,

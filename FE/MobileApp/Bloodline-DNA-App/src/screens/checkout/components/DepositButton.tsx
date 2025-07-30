@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, Linking,} from "react-native";
+import { deepLinkService, PaymentCallbackData } from "@/services/DeepLinkService";
+import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/types/root-stack/stack.types";
-import { deepLinkService, PaymentCallbackData } from "@/services/DeepLinkService";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Linking, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
 import { checkoutApi } from "../api/paymentApi";
 
 interface DepositButtonProps {
@@ -56,7 +56,6 @@ const DepositButton: React.FC<DepositButtonProps> = ({
   const handleDepositPayment = async () => {
 
     if (!bookingId) {
-      console.log("❌ BookingId is missing!");
       Alert.alert("Lỗi", "Không tìm thấy thông tin đặt lịch");
       return;
     }

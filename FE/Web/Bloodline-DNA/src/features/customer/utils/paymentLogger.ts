@@ -40,7 +40,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('🚀 PAYMENT_START:', logEntry);
   }
 
   // Log khi gọi API thanh toán
@@ -56,7 +55,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('📞 PAYMENT_API_CALL:', logEntry);
   }
 
   // Log khi nhận response từ API thanh toán
@@ -71,7 +69,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('📦 PAYMENT_API_RESPONSE:', logEntry);
   }
 
   // Log khi redirect đến trang thanh toán
@@ -87,7 +84,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('🔗 PAYMENT_REDIRECT:', logEntry);
   }
 
   // Log khi user quay lại từ trang thanh toán
@@ -103,7 +99,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('🔙 PAYMENT_RETURN:', logEntry);
   }
 
   // Log khi xử lý callback thanh toán
@@ -118,7 +113,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('🔄 PAYMENT_CALLBACK:', logEntry);
   }
 
   // Log khi thanh toán thành công
@@ -133,7 +127,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('✅ PAYMENT_SUCCESS:', logEntry);
   }
 
   // Log khi thanh toán thất bại
@@ -164,7 +157,6 @@ export class PaymentLogger {
     };
     
     this.logs.push(logEntry);
-    console.log('❌ PAYMENT_CANCEL:', logEntry);
   }
 
   // Lấy tất cả logs
@@ -190,7 +182,6 @@ export class PaymentLogger {
   // Clear all logs
   public clearLogs(): void {
     this.logs = [];
-    console.log('🗑️ Payment logs cleared');
   }
 
   // Log summary cho một booking
@@ -213,7 +204,6 @@ export class PaymentLogger {
       timestamp: new Date().toISOString()
     };
 
-    console.log('📊 PAYMENT_SUMMARY:', summary);
     return summary;
   }
 }

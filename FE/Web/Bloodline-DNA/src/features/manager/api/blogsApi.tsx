@@ -1,5 +1,5 @@
 import rootApi from "../../../apis/rootApi";
-import type { BlogResponse, BlogCreateRequest, BlogUpdateRequest } from "../types/blogs";
+import type { BlogCreateRequest, BlogResponse, BlogUpdateRequest } from "../types/blogs";
 
 // Hàm GET: Lấy danh sách bài viết
 export const getBlogsApi = async (): Promise<BlogResponse[]> => {
@@ -48,7 +48,6 @@ export const getBlogByIdApi = async (id: string): Promise<BlogResponse> => {
 // Hàm POST: Tạo bài viết mới
 export const createBlogApi = async (data: BlogCreateRequest): Promise<BlogResponse> => {
   const accountId = localStorage.getItem("accountId") || "";
-  console.log(accountId, "accountId");
   
   try {
     const formData = new FormData();
@@ -87,8 +86,6 @@ export const updateBlogApi = async (id: string, data: BlogUpdateRequest): Promis
       Status: data.status,
       AuthorId: accountId,
     };
-
-    console.log("Sending updateBlogApi payload:", jsonData); // Debug payload
 
     const response = await rootApi.put(`/Blog/${id}`, jsonData, {
       headers: {

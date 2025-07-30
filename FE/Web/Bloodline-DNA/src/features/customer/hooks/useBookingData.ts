@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { getBookingByIdApi } from "../api/bookingListApi";
-import { confirmDeliveryApi, updateBookingStatusApi, confirmCollectionApi } from "../api/bookingUpdateApi";
+import {
+  confirmCollectionApi,
+  confirmDeliveryApi,
+  updateBookingStatusApi,
+} from "../api/bookingUpdateApi";
 import { callPaymentCallbackApi } from "../api/checkoutApi";
-import { useExistingFeedback } from "./useExistingFeedback";
 import { submitFeedbackApi } from "../api/feedbackApi";
-import type { UserFeedback } from "../api/existingFeedbackApi";
 import {
   callRemainingPaymentCallbackApi,
   checkoutPaymentApi,
@@ -26,6 +28,7 @@ import type {
   DetailedBookingStatus,
   TestProgressData,
 } from "../types/bookingTypes";
+import { useExistingFeedback } from "./useExistingFeedback";
 
 const statusNumberMapping: Record<number, DetailedBookingStatus> = {
   0: "Pending",
@@ -75,41 +78,31 @@ export const useBookingData = () => {
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
   const [collectionLoading, setCollectionLoading] = useState(false);
   // Use existing feedback hook
-  const {
-    checkExistingFeedback,
-    getExistingFeedback,
-    isCheckingFeedbackFor,
-  } = useExistingFeedback();
+  const { checkExistingFeedback, getExistingFeedback, isCheckingFeedbackFor } =
+    useExistingFeedback();
 
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const hasProcessedCallback = useRef(false);
 
-
-
   const checkSampleInfoStatus = useCallback(async (bookingId: string) => {
     try {
-      console.log("🔄 Checking sample info status for booking:", bookingId);
 
       // First get the TestKit ID
       const testKitResponse = await getTestKitByBookingIdApi(bookingId);
       if (!testKitResponse.success || !testKitResponse.data?.id) {
-        console.log("📝 No TestKit found, showing sample button");
         setShouldShowSampleButton(true);
         return;
       }
 
       const kitId = testKitResponse.data.id;
-      console.log("✅ TestKit found:", kitId);
 
       // Check if TestSample exists for this kit
       const testSampleResponse = await getTestSampleByKitIdApi(kitId);
       if (testSampleResponse.success && testSampleResponse.data) {
-        console.log("✅ TestSample found - hiding sample button");
         setShouldShowSampleButton(false);
         setHasSampleInfo(true);
       } else {
-        console.log("📝 No TestSample found - showing sample button");
         setShouldShowSampleButton(true);
         setHasSampleInfo(false);
       }
@@ -166,12 +159,14 @@ export const useBookingData = () => {
 
       // Check if delivery has been confirmed for this booking
       const deliveryConfirmKey = `delivery_confirmed_${bookingId}`;
-      const isDeliveryConfirmed = localStorage.getItem(deliveryConfirmKey) === 'true';
+      const isDeliveryConfirmed =
+        localStorage.getItem(deliveryConfirmKey) === "true";
       setIsDeliveryConfirmed(isDeliveryConfirmed);
 
       // Check if collection has been confirmed for this booking
       const collectionConfirmKey = `collection_confirmed_${bookingId}`;
-      const isCollectionConfirmed = localStorage.getItem(collectionConfirmKey) === 'true';
+      const isCollectionConfirmed =
+        localStorage.getItem(collectionConfirmKey) === "true";
       setIsCollectionConfirmed(isCollectionConfirmed);
 
       // Check if sample info has been submitted for WaitingForSample status
@@ -211,7 +206,10 @@ export const useBookingData = () => {
   // Check existing feedback after testServiceId and userId are set
   useEffect(() => {
     if (booking?.status === "Completed" && userId && testServiceId) {
-      console.log("🔄 Checking existing feedback for:", { userId, testServiceId });
+      // console.log("🔄 Checking existing feedback for:", {
+      //   userId,
+      //   testServiceId,
+      // });
       checkExistingFeedback(userId, testServiceId);
     }
   }, [booking?.status, userId, testServiceId, checkExistingFeedback]);
@@ -270,13 +268,13 @@ export const useBookingData = () => {
         // Check if this is a remaining payment
         const isRemainingPayment = paymentData?.isRemainingPayment || false;
 
-        console.log("🔄 Processing payment callback:", {
-          orderCode,
-          status: normalizedStatus,
-          bookingId: effectiveBookingId,
-          isRemainingPayment,
-          timestamp: new Date().toISOString(),
-        });
+        // console.log("🔄 Processing payment callback:", {
+        //   orderCode,
+        //   status: normalizedStatus,
+        //   bookingId: effectiveBookingId,
+        //   isRemainingPayment,
+        //   timestamp: new Date().toISOString(),
+        // });
 
         // Use the appropriate callback API based on payment type
         const response = isRemainingPayment
@@ -293,22 +291,22 @@ export const useBookingData = () => {
 
         if (response.success && response.status === "PAID") {
           setPaymentStatus("PAID");
-          console.log("✅ Payment callback successful:", {
-            paymentType: isRemainingPayment ? "remaining" : "deposit",
-            orderCode,
-            bookingId: effectiveBookingId,
-            timestamp: new Date().toISOString(),
-          });
+          // console.log("✅ Payment callback successful:", {
+          //   paymentType: isRemainingPayment ? "remaining" : "deposit",
+          //   orderCode,
+          //   bookingId: effectiveBookingId,
+          //   timestamp: new Date().toISOString(),
+          // });
         } else {
           setPaymentStatus("CANCELLED");
           setPaymentError("Thanh toán thất bại hoặc bị hủy");
-          console.log("❌ Payment callback failed:", {
-            paymentType: isRemainingPayment ? "remaining" : "deposit",
-            orderCode,
-            bookingId: effectiveBookingId,
-            response,
-            timestamp: new Date().toISOString(),
-          });
+          // console.log("❌ Payment callback failed:", {
+          //   paymentType: isRemainingPayment ? "remaining" : "deposit",
+          //   orderCode,
+          //   bookingId: effectiveBookingId,
+          //   response,
+          //   timestamp: new Date().toISOString(),
+          // });
         }
 
         await fetchBookingData();
@@ -404,43 +402,45 @@ export const useBookingData = () => {
 
     setConfirmDeliveryLoading(true);
     try {
-      console.log("🔄 Confirming delivery for booking:", bookingId);
       const result = await confirmDeliveryApi(bookingId);
-      
-      // Log chi tiết response từ API
-      console.log("📥 API Response:", {
-        success: result.success,
-        message: result.message,
-        statusCode: result.statusCode,
-        data: result.data
-      });
+
+      // // Log chi tiết response từ API
+      // console.log("📥 API Response:", {
+      //   success: result.success,
+      //   message: result.message,
+      //   statusCode: result.statusCode,
+      //   data: result.data,
+      // });
 
       if (result.success) {
-        console.log("✅ Delivery confirmed successfully");
-        
+
         // Save delivery confirmation status to localStorage
         const deliveryConfirmKey = `delivery_confirmed_${bookingId}`;
-        localStorage.setItem(deliveryConfirmKey, 'true');
-        
+        localStorage.setItem(deliveryConfirmKey, "true");
+
         // Update local state immediately
         setIsDeliveryConfirmed(true);
-        
+
         // Update booking status to WaitingForSample (newStatus=2)
         try {
-          console.log("🔄 Updating booking status to WaitingForSample...");
           const statusUpdateResult = await updateBookingStatusApi(bookingId, 4);
-          
+
           if (statusUpdateResult.success) {
-            console.log("✅ Booking status updated to WaitingForSample successfully");
+            console.log(
+              "✅ Booking status updated to WaitingForSample successfully"
+            );
           } else {
-            console.warn("⚠️ Failed to update booking status:", statusUpdateResult.message);
+            console.warn(
+              "⚠️ Failed to update booking status:",
+              statusUpdateResult.message
+            );
           }
         } catch (statusError) {
           console.error("❌ Error updating booking status:", statusError);
           // Don't throw error here as the main confirm delivery was successful
           // Just log the error and continue
         }
-        
+
         // Refresh booking data to get updated status
         await fetchBookingData();
       } else {
@@ -465,20 +465,23 @@ export const useBookingData = () => {
 
     setCollectionLoading(true);
     try {
-      console.log("🔄 Confirming collection for booking:", bookingId, "at:", dateTime);
+      // console.log(
+      //   "🔄 Confirming collection for booking:",
+      //   bookingId,
+      //   "at:",
+      //   dateTime
+      // );
       const result = await confirmCollectionApi(bookingId, dateTime);
 
       if (result.success) {
-        console.log("✅ Collection confirmed successfully");
-        
         // Save collection confirmation status to localStorage
         const collectionConfirmKey = `collection_confirmed_${bookingId}`;
-        localStorage.setItem(collectionConfirmKey, 'true');
-        
+        localStorage.setItem(collectionConfirmKey, "true");
+
         // Update local state immediately
         setIsCollectionConfirmed(true);
         setIsCollectionModalOpen(false);
-        
+
         // Refresh booking data to get updated status
         await fetchBookingData();
       } else {

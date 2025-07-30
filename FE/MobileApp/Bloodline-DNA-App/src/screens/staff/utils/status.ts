@@ -33,10 +33,7 @@ export const statusToNumber = (
   if (numericStatus === -1) {
     console.warn(`Unknown status received: "${status}"`);
   }
-
-  console.log(
-    `Status: ${status}, Normalized: ${normalizedStatus}, Numeric: ${numericStatus}`
-  );
+  
   return numericStatus;
 };
 
