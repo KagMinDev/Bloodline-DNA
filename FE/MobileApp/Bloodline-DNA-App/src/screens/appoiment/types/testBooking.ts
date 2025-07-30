@@ -12,7 +12,7 @@ export interface TestBookingRequest {
 export interface TestBookingResponse {
   id: string;
   testServiceId: string;
-  clientId: string;
+  clientId?: string;
   email: string;
   appointmentDate: string;
   price: number;

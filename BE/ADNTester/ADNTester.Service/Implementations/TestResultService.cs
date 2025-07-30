@@ -21,18 +21,21 @@ namespace ADNTester.Service.Implementations
         private readonly IMapper _mapper;
         private readonly ITestBookingService _testBookingService;
         private readonly IEmailService _emailService;
+        private readonly ICloudinaryService _cloudinaryService;
         private static readonly Regex EmailRegex = new Regex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
 
         public TestResultService(
             IUnitOfWork unitOfWork, 
             IMapper mapper,
             ITestBookingService testBookingService,
-            IEmailService emailService)
+            IEmailService emailService,
+            ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _testBookingService = testBookingService;
             _emailService = emailService;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<IEnumerable<TestResultDetailDto>> GetAllAsync()
@@ -85,6 +88,64 @@ namespace ADNTester.Service.Implementations
                     throw new Exception($"Invalid email address format: {booking.Client.Email}");
 
                 var testResult = _mapper.Map<TestResult>(dto);
+                await _unitOfWork.TestResultRepository.AddAsync(testResult);
+
+                await _testBookingService.UpdateBookingStatusAsync(dto.TestBookingId, BookingStatus.Completed);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                try
+                {
+                    var emailSubject = "Test Results Available";
+                    var emailBody = GenerateResultEmailBody(booking, testResult);
+                    await _emailService.SendEmailAsync(booking.Client.Email, emailSubject, emailBody);
+                }
+                catch (Exception emailEx)
+                {
+                    
+                    Console.WriteLine($"Failed to send email: {emailEx.Message}");
+                   
+                }
+
+                return testResult.Id;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error creating test result: {ex.Message}");
+            }
+        }
+
+        public async Task<string> CreateWithFileAsync(CreateTestResultWithFileDto dto)
+        {
+            try
+            {
+                
+                var booking = await _testBookingService.GetByIdAsync(dto.TestBookingId);
+                if (booking == null)
+                    throw new Exception("Booking not found");
+
+                if (booking.Client == null)
+                    throw new Exception("Client information not found");
+
+                if (string.IsNullOrEmpty(booking.Client.Email))
+                    throw new Exception("Client email address is missing");
+
+                if (!IsValidEmail(booking.Client.Email))
+                    throw new Exception($"Invalid email address format: {booking.Client.Email}");
+
+                string resultFileUrl = null;
+                if (dto.ResultFile != null)
+                {
+                    resultFileUrl = await _cloudinaryService.UploadImageAsync(dto.ResultFile, "TestResults");
+                }
+
+                var testResult = new TestResult
+                {
+                    TestBookingId = dto.TestBookingId,
+                    ResultSummary = dto.ResultSummary,
+                    ResultDate = dto.ResultDate,
+                    ResultFileUrl = resultFileUrl
+                };
                 await _unitOfWork.TestResultRepository.AddAsync(testResult);
 
                 await _testBookingService.UpdateBookingStatusAsync(dto.TestBookingId, BookingStatus.Completed);
@@ -215,6 +276,28 @@ namespace ADNTester.Service.Implementations
                 return false;
 
             _mapper.Map(dto, testResult);
+            _unitOfWork.TestResultRepository.Update(testResult);
+            return await _unitOfWork.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> UpdateWithFileAsync(UpdateTestResultWithFileDto dto)
+        {
+            var testResult = await _unitOfWork.TestResultRepository.GetByIdAsync(dto.Id);
+            if (testResult == null)
+                return false;
+
+            // Upload new file to Cloudinary if provided
+            if (dto.ResultFile != null)
+            {
+                var fileUrl = await _cloudinaryService.UploadImageAsync(dto.ResultFile, "TestResults");
+                testResult.ResultFileUrl = fileUrl;
+            }
+
+            // Update other properties
+            testResult.TestBookingId = dto.TestBookingId;
+            testResult.ResultSummary = dto.ResultSummary;
+            testResult.ResultDate = dto.ResultDate;
+
             _unitOfWork.TestResultRepository.Update(testResult);
             return await _unitOfWork.SaveChangesAsync() > 0;
         }

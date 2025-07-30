@@ -3,8 +3,10 @@ export const statusColorMap: Record<string, string> = {
   DeliveringKit: "blue",
   KitDelivered: "green",
   WaitingForPickup: "gold",
+  ReturningSample: "gold",
   PickingUpSample: "purple",
   SampleReceived: "cyan",
+  Testing: "cyan",
   Cancelled: "red",
 };
 
@@ -13,8 +15,10 @@ export const statusTextMap: Record<string, string> = {
   DeliveringKit: "Đang giao bộ Kit",
   KitDelivered: "Đã nhận Kit",
   WaitingForPickup: "Đợi đến lấy mẫu",
+  ReturningSample: "Đợi đến lấy mẫu",
   PickingUpSample: "Đang lấy mẫu",
   SampleReceived: "Đã nhận mẫu",
+  Testing: "Đang xét nghiệm",
   Cancelled: "Đã hủy",
 };
 
@@ -47,7 +51,7 @@ export interface DeliveryLogistic {
   completedAt: string | null;
   note: string;
   type: number;
-  status: number;
+  status: string;
 }
 
 export interface DeliveryOrder {
@@ -56,9 +60,14 @@ export interface DeliveryOrder {
   staff: { fullName?: string } | null;
   address: string;
   phone: string;
-  scheduleAt: string;
+  scheduledAt: string;
   completeAt: string | null;
   note: string;
   type: number;
   status: DeliveryStatus;
+}
+
+export interface TestBookingStatusRequest {
+  bookingId: string;
+  status: number;
 }

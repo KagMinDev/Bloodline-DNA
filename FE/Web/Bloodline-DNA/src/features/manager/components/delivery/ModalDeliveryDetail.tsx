@@ -14,6 +14,7 @@ interface Props {
   onRefresh?: () => void;
 }
 
+// Định nghĩa trạng thái với text & màu
 const statusMap: Record<DeliveryStatus, { text: string; color: string }> = {
   PreparingKit: { text: "Đang chuẩn bị bộ Kit", color: "orange" },
   DeliveringKit: { text: "Đang giao bộ Kit", color: "blue" },
@@ -21,7 +22,7 @@ const statusMap: Record<DeliveryStatus, { text: string; color: string }> = {
   WaitingForPickup: { text: "Đợi đến lấy mẫu", color: "gold" },
   PickingUpSample: { text: "Đang lấy mẫu", color: "purple" },
   SampleReceived: { text: "Đã nhận mẫu", color: "cyan" },
-  cancelled: { text: "Huỷ giao hoặc lấy mẫu", color: "red" },
+  Cancelled: { text: "Huỷ giao hoặc lấy mẫu", color: "red" },
 };
 
 const formatDateTime = (dateString: string) => {
@@ -75,7 +76,7 @@ const DeliveryDetailModal = ({
   }, [delivery]);
 
   const handleStaffChange = async (value: string | undefined) => {
-    console.log("selected",value )
+    console.log("selected", value);
     if (!delivery) return;
 
     const token = localStorage.getItem("token");
@@ -109,6 +110,12 @@ const DeliveryDetailModal = ({
   };
 
   if (!delivery) return null;
+
+  // Lấy status info an toàn
+  const statusInfo = statusMap[delivery.status] ?? {
+    text: delivery.status || "Không xác định",
+    color: "gray",
+  };
 
   return (
     <Modal
@@ -162,11 +169,7 @@ const DeliveryDetailModal = ({
             {delivery.note || "Không có"}
           </Descriptions.Item>
           <Descriptions.Item label="Trạng thái">
-            <Badge
-              status="processing"
-              color={statusMap[delivery.status].color}
-              text={statusMap[delivery.status].text}
-            />
+            <Badge color={statusInfo.color} text={statusInfo.text} />
           </Descriptions.Item>
         </Descriptions>
       )}

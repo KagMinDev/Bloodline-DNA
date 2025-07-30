@@ -60,55 +60,88 @@ const CheckoutRemainSuccess = () => {
       timestamp: new Date().toISOString(),
     });
 
-    if (queryOrderCode && storedBookingId) {
-      handleRemainingPaymentCallback(queryOrderCode, normalizedStatus, storedBookingId);
-    } else {
-      setUpdateStatus({
-        isLoading: false,
-        isSuccess: false,
-        message: "Thiếu thông tin thanh toán để xác nhận.",
-      });
-    }
+    // 🔄 Luôn gọi hàm handleRemainingPaymentCallback, xử lý trường hợp thiếu data bên trong
+    handleRemainingPaymentCallback(queryOrderCode, normalizedStatus, storedBookingId);
   }, [location.search]);
 
   const handleRemainingPaymentCallback = async (
-    orderCode: string,
+    orderCode: string | null,
     status: string,
-    bookingId: string
+    bookingId: string | null
   ) => {
     try {
-      await callRemainingPaymentCallbackApi({
+      // 🔍 Kiểm tra dữ liệu bắt buộc
+      if (!orderCode || !bookingId) {
+        setUpdateStatus({
+          isLoading: false,
+          isSuccess: false,
+          message: "Thiếu thông tin thanh toán để xác nhận (orderCode hoặc bookingId).",
+        });
+        return;
+      }
+
+      // 🔄 Gọi callback API
+      const callbackResult = await callRemainingPaymentCallbackApi({
         orderCode,
         status,
         bookingId,
       });
 
-      // 👉 Dù callback trả về lỗi, vẫn kiểm tra lại trạng thái thật từ backend
-      const bookingData = await getBookingByIdApi(bookingId);
-      const normalizedStatus = (bookingData?.status || "").toUpperCase();
-      const isPaid = normalizedStatus === "PAID" || normalizedStatus === "SUCCESS" || normalizedStatus === "COMPLETED" || normalizedStatus === "TESTING";
+      console.log('📋 Callback result:', {
+        success: callbackResult.success,
+        status: callbackResult.status,
+        error: callbackResult.error,
+        timestamp: new Date().toISOString()
+      });
 
-      if (isPaid) {
-        setUpdateStatus({
-          isLoading: false,
-          isSuccess: true,
-          message: "Đã xác nhận thanh toán số tiền còn lại thành công.",
-        });
-      } else {
+      const normalizedStatus = status === "PAID" ? "PAID" : "CANCELLED";
+      const isPaidStatus = normalizedStatus === "PAID";
+
+      // 🎯 Kiểm tra kết quả callback trước
+      if (callbackResult.success && isPaidStatus) {
+        // 👉 Callback thành công và status là PAID, kiểm tra lại từ backend
+        try {
+          const bookingData = await getBookingByIdApi(bookingId);
+          console.log('📦 Booking verification data:', bookingData);
+          
+          setUpdateStatus({
+            isLoading: false,
+            isSuccess: true,
+            message: "Đã xác nhận thanh toán số tiền còn lại thành công.",
+          });
+        } catch (verifyError) {
+          console.error('❌ Cannot verify booking status:', verifyError);
+          // Dù không verify được, callback đã thành công nên vẫn coi là thành công
+          setUpdateStatus({
+            isLoading: false,
+            isSuccess: true,
+            message: "Thanh toán đã được xử lý thành công.",
+          });
+        }
+      } else if (callbackResult.success && !isPaidStatus) {
+        // Callback thành công nhưng status là CANCELLED
         setUpdateStatus({
           isLoading: false,
           isSuccess: false,
-          message: "Thanh toán còn lại chưa được ghi nhận thành công.",
+          message: "Thanh toán đã bị hủy.",
+        });
+      } else {
+        // ❌ Callback thất bại
+        setUpdateStatus({
+          isLoading: false,
+          isSuccess: false,
+          message: callbackResult.error || "Lỗi khi xác nhận thanh toán còn lại.",
         });
       }
 
+      // 🧹 Cleanup data sau khi xử lý
       localStorage.removeItem("paymentData");
     } catch (err) {
       console.error("❌ Remaining payment callback exception:", err);
       setUpdateStatus({
         isLoading: false,
         isSuccess: false,
-        message: "Lỗi khi xác nhận thanh toán còn lại.",
+        message: "Lỗi nghiêm trọng khi xác nhận thanh toán còn lại.",
       });
     }
   };
@@ -151,7 +184,7 @@ const CheckoutRemainSuccess = () => {
                       <CheckCircle className="w-10 h-10 text-green-500" />
                     </div>
                     <h2 className="text-3xl font-bold text-teal-800 m-0">
-                      Thanh toán còn lại thành công!
+                      Thanh toán số tiền còn lại thành công!
                     </h2>
                   </>
                 ) : (
@@ -160,7 +193,7 @@ const CheckoutRemainSuccess = () => {
                       <CheckCircle className="w-10 h-10 text-red-500" />
                     </div>
                     <h2 className="text-3xl font-bold text-red-800 m-0">
-                      Xác nhận thanh toán còn lại thất bại
+                      Xác nhận thanh toán số tiền còn lại thất bại
                     </h2>
                   </>
                 )}

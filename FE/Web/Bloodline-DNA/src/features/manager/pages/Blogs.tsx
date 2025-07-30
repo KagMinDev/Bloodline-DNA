@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { FaPlus } from 'react-icons/fa';
+import { Loading } from '../../../components';
 import { Button } from '../../staff/components/sample/ui/button';
+import { createBlogApi, deleteBlogApi, getBlogByIdApi, getBlogsApi, updateBlogApi } from '../api/blogsApi';
+import { getTagsApi } from '../api/tagApi'; // import hàm getTagsApi
 import BlogCard from '../components/blogs/BlogCard';
 import BlogDialog from '../components/blogs/BlogDialog';
-import { FaPlus } from 'react-icons/fa';
-import { getBlogsApi, createBlogApi, getBlogByIdApi, updateBlogApi, deleteBlogApi } from '../api/blogsApi';
-import { getTagsApi } from '../api/tagApi'; // import hàm getTagsApi
-import type { BlogResponse, BlogCreateRequest, BlogUpdateRequest } from '../types/blogs';
-import { Loading } from '../../../components';
+import type { BlogCreateRequest, BlogResponse, BlogUpdateRequest } from '../types/blogs';
 import type { TagResponse } from '../types/tags';
 
-function Blogs() {
+function BlogsManager() {
   const [blogs, setBlogs] = useState<BlogResponse[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [editingBlog, setEditingBlog] = useState<BlogResponse | null>(null);
@@ -236,4 +236,4 @@ function Blogs() {
   );
 }
 
-export default Blogs;
+export default BlogsManager;

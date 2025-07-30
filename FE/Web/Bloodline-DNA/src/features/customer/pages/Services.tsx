@@ -11,13 +11,13 @@ import {
   PhoneIcon,
   SearchIcon,
   ShieldIcon,
-  StarIcon,
   StethoscopeIcon,
   UserCheckIcon
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Footer, Header } from "../../../components";
+import { getServiceById, servicesApi, type TestService } from "../api/servicesApi";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
@@ -28,7 +28,6 @@ import {
 } from "../components/ui/Breadcrumb";
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
-import { servicesApi, getServiceById, type TestService, type ServiceDetail } from "../api/servicesApi";
 
 // UI Interface for displaying services
 interface Service {
@@ -297,7 +296,14 @@ export const Services = (): React.JSX.Element => {
         }
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Không thể tải chi tiết dịch vụ';
+      let errorMessage = 'Không thể tải chi tiết dịch vụ';
+      if (error instanceof Error) {
+        if (error.message.includes('yêu cầu đăng nhập')) {
+          errorMessage = 'Để xem chi tiết đầy đủ, vui lòng đăng nhập. Đang hiển thị thông tin cơ bản.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
       navigate(`/services/${id}`, {
         state: {
           error: errorMessage,
@@ -349,9 +355,11 @@ export const Services = (): React.JSX.Element => {
         let errorMessage = 'API không khả dụng, đang hiển thị dữ liệu mẫu.';
         if (err instanceof Error) {
           if (err.message.includes('401')) {
-            errorMessage = 'Phiên đăng nhập đã hết hạn. Đang hiển thị dữ liệu mẫu.';
+            errorMessage = 'Bạn có thể xem dịch vụ mà không cần đăng nhập. Đang hiển thị dữ liệu mẫu.';
           } else if (err.message.includes('timeout')) {
             errorMessage = 'Kết nối quá chậm. Đang hiển thị dữ liệu mẫu.';
+          } else if (err.message.includes('yêu cầu đăng nhập')) {
+            errorMessage = 'Bạn có thể xem dịch vụ mà không cần đăng nhập. Đang hiển thị dữ liệu mẫu.';
           }
         }
         setError(errorMessage);
@@ -488,7 +496,7 @@ export const Services = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
             <p className="text-lg text-gray-600">Đang tải danh sách dịch vụ...</p>
           </div>
         </div>
@@ -505,14 +513,14 @@ export const Services = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="text-red-500 mb-4">
+            <div className="mb-4 text-red-500">
               <ClipboardCheckIcon className="w-16 h-16 mx-auto" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Có lỗi xảy ra</h3>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <h3 className="mb-2 text-xl font-semibold text-gray-800">Có lỗi xảy ra</h3>
+            <p className="mb-4 text-gray-600">{error}</p>
             <Button
               onClick={() => window.location.reload()}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg"
+              className="px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
             >
               Thử lại
             </Button>
@@ -532,11 +540,11 @@ export const Services = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -551,15 +559,20 @@ export const Services = (): React.JSX.Element => {
                 Chất Lượng Cao
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.</p>
+            <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">
+              Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất. 
+              <span className="block mt-2 text-sm text-blue-600">
+                💡 Bạn có thể xem dịch vụ mà không cần đăng nhập. Đăng nhập để đặt lịch và xem thông tin chi tiết.
+              </span>
+            </p>
             
             {/* Stats */}
             <div className="flex flex-wrap gap-4 mt-6">
-              <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-200">
+              <div className="px-4 py-2 border border-blue-200 rounded-lg bg-white/80 backdrop-blur-sm">
                 <span className="text-2xl font-bold text-blue-900">{services.length}</span>
                 <span className="block text-sm text-blue-600">Dịch vụ</span>
               </div>
-              <div className="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-blue-200">
+              <div className="px-4 py-2 border border-blue-200 rounded-lg bg-white/80 backdrop-blur-sm">
                 <span className="text-2xl font-bold text-blue-900">{services.filter(s => s.isActive).length}</span>
                 <span className="block text-sm text-blue-600">Đang hoạt động</span>
               </div>
@@ -678,12 +691,14 @@ export const Services = (): React.JSX.Element => {
 
             {/* Error Warning */}
             {error && (
-              <div className="mb-8 p-4 bg-orange-100 border border-orange-200 rounded-lg">
+              <div className="p-4 mb-8 border border-blue-200 rounded-lg bg-blue-50">
                 <div className="flex items-center">
-                  <div className="mr-3 text-orange-600">⚠️</div>
+                  <div className="mr-3 text-blue-600">ℹ️</div>
                   <div>
-                    <p className="font-medium text-orange-800">{error}</p>
-                    <p className="text-sm text-orange-600">Vui lòng kiểm tra kết nối mạng.</p>
+                    <p className="font-medium text-blue-800">{error}</p>
+                    <p className="text-sm text-blue-600">
+                      Bạn có thể xem và tìm hiểu về các dịch vụ của chúng tôi. Để đặt lịch, vui lòng đăng nhập.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -698,12 +713,12 @@ export const Services = (): React.JSX.Element => {
                     className="relative overflow-hidden transition-all duration-300 bg-white border shadow-md group hover:shadow-xl hover:-translate-y-2 rounded-2xl"
                   >
                     {/* Background Gradient */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                    <div className="absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none group-hover:opacity-100">
                       <div className="absolute inset-0 bg-gradient-to-br from-[#0066CC]/5 via-[#00D4FF]/5 to-[#0052A3]/5"></div>
                     </div>
                     
                     {/* Status Badge */}
-                    <div className="absolute top-4 left-4 z-20">
+                    <div className="absolute z-20 top-4 left-4">
                       <span className="px-3 py-1.5 rounded-full text-xs font-semibold shadow-md backdrop-blur-sm transition-all duration-300 bg-emerald-100/80 text-emerald-800 border border-emerald-200">
                         ✓ Đang hoạt động
                       </span>
@@ -711,7 +726,7 @@ export const Services = (): React.JSX.Element => {
 
                     {/* Featured Badge */}
                     {service.featured && (
-                      <div className="absolute top-4 right-4 z-20">
+                      <div className="absolute z-20 top-4 right-4">
                         <span className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full text-xs font-bold shadow-lg">
                           ⭐ Nổi bật
                         </span>
@@ -728,7 +743,7 @@ export const Services = (): React.JSX.Element => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
                       
                       {/* Hover Info */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out pointer-events-none">
+                      <div className="absolute bottom-0 left-0 right-0 p-4 transition-transform duration-300 ease-in-out transform translate-y-full pointer-events-none group-hover:translate-y-0">
                         <div className="flex items-center justify-between text-sm">
                           <span className="font-semibold text-white">{service.doctor}</span>
                           <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">{service.location}</span>
@@ -739,7 +754,7 @@ export const Services = (): React.JSX.Element => {
                     <CardContent className="p-5">
                       {/* Title & Description */}
                       <div className="mb-4">
-                        <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors duration-300 leading-tight">
+                        <h3 className="mb-2 text-xl font-bold leading-tight text-gray-800 transition-colors duration-300 group-hover:text-blue-600">
                           {service.title}
                         </h3>
                         <p className="text-sm leading-relaxed text-gray-600 line-clamp-2">
@@ -782,10 +797,11 @@ export const Services = (): React.JSX.Element => {
                               category: service.category,
                               price: Number(service.priceNumeric),
                               collectionMethod: Number(service.collectionMethod),
-                              testServiceInfo: service.testServiceInfo ?? (service.serviceId ? { id: service.serviceId } : undefined)
+                              testServiceInfor: service.testServiceInfo ?? (service.serviceId ? { id: service.serviceId } : undefined)
                             });
                           }} 
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"
+                          title="Đăng nhập để đặt lịch"
                         >
                           <CalendarIcon className="w-4 h-4 mr-2" />
                           Đặt Lịch
@@ -797,7 +813,7 @@ export const Services = (): React.JSX.Element => {
                           className="px-4 font-semibold transition-all duration-300 transform rounded-lg shadow-md border-slate-300 text-slate-600 hover:bg-slate-50 hover:shadow-lg hover:scale-105 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:transform-none"
                         >
                           {detailLoading === service.id ? (
-                            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 rounded-full border-slate-400 border-t-transparent animate-spin"></div>
                           ) : (
                             'Chi Tiết'
                           )}
@@ -811,7 +827,7 @@ export const Services = (): React.JSX.Element => {
               /* No Results */
               <div className="py-20 text-center">
                 <div className="relative inline-block mb-8">
-                  <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-lg">
+                  <div className="flex items-center justify-center w-24 h-24 mx-auto rounded-full shadow-lg bg-gradient-to-br from-gray-100 to-gray-200">
                     <StethoscopeIcon className="w-12 h-12 text-gray-400" />
                   </div>
                   <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-[#0066CC] to-[#0052A3] rounded-full flex items-center justify-center">
@@ -820,11 +836,11 @@ export const Services = (): React.JSX.Element => {
                 </div>
                 
                 <h3 className="mb-4 text-2xl font-bold text-gray-700">Không tìm thấy dịch vụ phù hợp</h3>
-                <p className="mb-8 text-gray-500 max-w-md mx-auto leading-relaxed">
+                <p className="max-w-md mx-auto mb-8 leading-relaxed text-gray-500">
                   Hãy thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc để khám phá các dịch vụ y tế của chúng tôi
                 </p>
                 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                   <Button 
                     onClick={handleResetFilters}
                     className="bg-gradient-to-r from-[#0066CC] to-[#0052A3] hover:from-[#0052A3] hover:to-[#003875] text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
@@ -902,13 +918,25 @@ export const Services = (): React.JSX.Element => {
             <p className="mb-8 text-xl leading-relaxed text-white/90">
               Liên hệ ngay với chúng tôi để được tư vấn và đặt lịch sử dụng dịch vụ phù hợp
             </p>
+            <p className="mb-6 text-sm text-white/80">
+              💡 Đăng nhập để đặt lịch và xem thông tin chi tiết dịch vụ
+            </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Button
                 onClick={() => openBookingModal()}
                 className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900"
+                title="Đăng nhập để đặt lịch"
               >
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 Đặt Lịch Ngay
+              </Button>
+              <Button 
+                onClick={() => navigate('/auth/login')}
+                variant="outline" 
+                className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900"
+              >
+                <UserCheckIcon className="w-5 h-5 mr-2" />
+                Đăng Nhập
               </Button>
               <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
                 <PhoneIcon className="w-5 h-5 mr-2" />

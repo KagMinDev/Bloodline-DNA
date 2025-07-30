@@ -13,7 +13,6 @@ export const loginApi = async (
 ): Promise<LoginResponse> => {
   try {
     const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
-
     if (response.data.success) {
       const { token, userName, role } = response.data.data;
       return { token, userName, role };
@@ -24,6 +23,25 @@ export const loginApi = async (
     if (axios.isAxiosError(error)) {
       const message = error.response?.data?.message || "Lỗi không xác định từ server";
       throw new Error(message);
+    }
+    throw new Error("Đã xảy ra lỗi không mong muốn");
+  }
+};
+
+export const getUserInfoApi = async (token: string) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/user/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const serverMessage =
+        error.response?.data?.message || "Lỗi không xác định từ server";
+      throw new Error(serverMessage);
     }
     throw new Error("Đã xảy ra lỗi không mong muốn");
   }

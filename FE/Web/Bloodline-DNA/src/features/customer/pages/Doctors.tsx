@@ -15,7 +15,7 @@ import {
   StethoscopeIcon,
   UserIcon
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
@@ -60,7 +60,7 @@ export const Doctors = (): React.JSX.Element => {
   const [selectedSpecialization, setSelectedSpecialization] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
-  const sectionRef = useRef<HTMLElement>(null);
+  // const sectionRef = useRef<HTMLElement>(null);
 
   const { openBookingModal } = useBookingModal();
 
@@ -216,6 +216,7 @@ export const Doctors = (): React.JSX.Element => {
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
+    console.log(scrollY, isVisible);
     window.addEventListener("scroll", handleScroll);
     
     const timer = setTimeout(() => setIsVisible(true), 100);
@@ -258,11 +259,11 @@ export const Doctors = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -277,7 +278,7 @@ export const Doctors = (): React.JSX.Element => {
                 Chuyên Gia Hàng Đầu
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Gặp gỡ các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm và trình độ chuyên môn cao, cam kết mang lại dịch vụ chăm sóc sức khỏe tốt nhất.</p>
+            <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">Gặp gỡ các chuyên gia y tế hàng đầu với nhiều năm kinh nghiệm và trình độ chuyên môn cao, cam kết mang lại dịch vụ chăm sóc sức khỏe tốt nhất.</p>
           </div>
         </section>
 
@@ -400,9 +401,9 @@ export const Doctors = (): React.JSX.Element => {
                         </p>
 
                         <div className="grid grid-cols-1 gap-2">
-                          <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
+                          {/* <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
                             Xem Chi Tiết
-                          </Button>
+                          </Button> */}
                         </div>
                       </CardContent>
                     </Card>
@@ -459,11 +460,11 @@ export const Doctors = (): React.JSX.Element => {
                         <span className="text-sm font-bold text-blue-900">{doctor.price}</span>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-2">
+                      {/* <div className="grid grid-cols-1 gap-2">
                       <Button variant="outline" className="border-blue-900 text-blue-900 hover:bg-blue-900 hover:!text-white text-sm py-2">
                             Xem Chi Tiết
                           </Button>
-                      </div>
+                      </div> */}
                     </CardContent>
                   </Card>
                 ))}

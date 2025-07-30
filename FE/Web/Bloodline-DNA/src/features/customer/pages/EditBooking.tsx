@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { 
-  CalendarIcon, 
-  ClockIcon, 
-  MapPinIcon,
-  UserIcon,
-  PhoneIcon,
-  MailIcon,
-  SaveIcon,
-  ArrowLeftIcon,
+import {
   AlertCircleIcon,
+  ArrowLeftIcon,
   CheckCircleIcon,
-  HomeIcon,
-  BuildingIcon,
-  XCircleIcon
+  PhoneIcon,
+  SaveIcon,
+  UserIcon
 } from "lucide-react";
-import { Button } from "../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../components/ui/Card";
-import { Input } from "../components/ui/Input";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { Footer, Header } from "../../../components";
+import {
+  getBookingByIdApi
+} from "../api/bookingListApi";
+import {
+  formatDateForInput,
+  mapFormDataToUpdateRequest,
+  updateBookingApi
+} from "../api/bookingUpdateApi";
+import { AddressSelector } from "../components/AddressSelector";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,20 +25,9 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "../components/ui/Breadcrumb";
-import { Header } from "../../../components";
-import { Footer } from "../../../components";
-import { 
-  updateBookingApi, 
-  mapFormDataToUpdateRequest,
-  formatDateForInput,
-  statusToNumber
-} from "../api/bookingUpdateApi";
-import { 
-  getBookingByIdApi, 
-  formatBookingDate, 
-  formatPrice, 
-  getStatusDisplay 
-} from "../api/bookingListApi";
+import { Button } from "../components/ui/Button";
+import { Card, CardContent, CardHeader } from "../components/ui/Card";
+import { Input } from "../components/ui/Input";
 
 // Local interface for BookingItem to avoid import issues
 interface BookingItem {
@@ -60,11 +49,8 @@ interface BookingItem {
 
 interface EditBookingData {
   id: string;
-  testType: string;
-  serviceType: 'home' | 'clinic';
   name: string;
   phone: string;
-  email: string;
   address: string;
   preferredDate: string;
   preferredTime: string;
@@ -72,17 +58,7 @@ interface EditBookingData {
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'in_progress';
 }
 
-const statusConfig: Record<EditBookingData['status'], { label: string; color: string; icon: React.ElementType }> = {
-  pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800', icon: AlertCircleIcon },
-  confirmed: { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-800', icon: CheckCircleIcon },
-  in_progress: { label: 'Đang thực hiện', color: 'bg-indigo-100 text-indigo-800', icon: ClockIcon },
-  completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800', icon: CheckCircleIcon },
-  cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800', icon: XCircleIcon }
-};
 
-const getStatusDisplayInfo = (status: EditBookingData['status']) => {
-  return statusConfig[status] || statusConfig.pending;
-};
 
 export const EditBooking = (): React.JSX.Element => {
   const { id: bookingId } = useParams<{ id: string }>();
@@ -90,11 +66,8 @@ export const EditBooking = (): React.JSX.Element => {
   
   const [formData, setFormData] = useState<EditBookingData>({
     id: '',
-    testType: '',
-    serviceType: 'home',
     name: '',
     phone: '',
-    email: '',
     address: '',
     preferredDate: '',
     preferredTime: '',
@@ -119,28 +92,14 @@ export const EditBooking = (): React.JSX.Element => {
   const transformApiDataToFormData = (apiData: BookingItem): EditBookingData => {
     const { date, time } = formatDateForInput(apiData.appointmentDate);
     
-    // Map collectionMethod to serviceType
-    let serviceType: 'home' | 'clinic' = 'home';
-    if (apiData.collectionMethod) {
-      const method = apiData.collectionMethod.toLowerCase();
-      if (method.includes('clinic') || method.includes('center') || method.includes('trung tâm')) {
-        serviceType = 'clinic';
-      } else if (method.includes('home') || method.includes('nhà') || method.includes('kit')) {
-        serviceType = 'home';
-      }
-    }
-    
     return {
       id: apiData.id || '',
-      testType: getTestTypeFromCollectionMethod(apiData.collectionMethod) || 'Unknown Service',
-      serviceType: serviceType,
       name: apiData.clientName || '',
       phone: apiData.phone || '',
-      email: apiData.email || '',
       address: apiData.address || '',
       preferredDate: date,
       preferredTime: time,
-      notes: apiData.note || '',
+      notes: apiData.note || '', // API trả về 'note', form sử dụng 'notes'
       status: mapApiStatusToUIStatus(apiData.status)
     };
   };
@@ -170,31 +129,7 @@ export const EditBooking = (): React.JSX.Element => {
     }
   };
 
-  // Helper function to get test type from collection method
-  const getTestTypeFromCollectionMethod = (collectionMethod: string): string => {
-    if (!collectionMethod) return 'Unknown Service';
-    
-    const method = collectionMethod.toLowerCase();
-    
-    if (method.includes('dân sự') || method.includes('civil')) {
-      if (method.includes('kit') || method.includes('tự thu')) {
-        return 'ADN Dân Sự - Tự Thu Mẫu (Kit)';
-      } else if (method.includes('nhà') || method.includes('home')) {
-        return 'ADN Dân Sự - Thu Tại Nhà';
-      } else if (method.includes('trung tâm') || method.includes('center') || method.includes('clinic')) {
-        return 'ADN Dân Sự - Thu Tại Trung Tâm';
-      }
-    } else if (method.includes('hành chính') || method.includes('legal')) {
-      if (method.includes('hài cốt') || method.includes('bone')) {
-        return 'ADN Hành Chính - Giám Định Hài Cốt';
-      } else {
-        return 'ADN Hành Chính - Thu Tại Trung Tâm';
-      }
-    }
-    
-    // Fallback: return the original collection method
-    return collectionMethod;
-  };
+
 
   useEffect(() => {
     const fetchBookingData = async () => {
@@ -261,14 +196,10 @@ export const EditBooking = (): React.JSX.Element => {
       newErrors.phone = 'Số điện thoại không hợp lệ';
     }
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Vui lòng nhập email';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email không hợp lệ';
-    }
-
-    if (formData.serviceType === 'home' && !formData.address.trim()) {
-      newErrors.address = 'Vui lòng nhập địa chỉ nhận kit';
+    if (!formData.address.trim()) {
+      newErrors.address = 'Vui lòng nhập địa chỉ';
+    } else if (formData.address.split(',').length < 2) {
+      newErrors.address = 'Vui lòng chọn đầy đủ tỉnh/thành phố và địa chỉ chi tiết';
     }
 
     if (!formData.preferredDate) {
@@ -307,19 +238,21 @@ export const EditBooking = (): React.JSX.Element => {
     try {
       console.log('🚀 Starting update process...');
       
-      // Map form data to API request format
+      // Map form data to API request format theo yêu cầu mới
+      console.log('📋 Form data before mapping:', formData);
+      
       const updateRequest = mapFormDataToUpdateRequest(
         bookingId,
         {
           name: formData.name,
           phone: formData.phone,
-          email: formData.email,
           address: formData.address,
           preferredDate: formData.preferredDate,
           preferredTime: formData.preferredTime,
           notes: formData.notes,
+          status: 0, // Luôn đặt status = 0 (Pending) cho edit booking
         },
-        formData.status
+        undefined // Không cần currentStatus vì đã set status = 0 trong formData
       );
       
       console.log('📤 Sending update request:', updateRequest);
@@ -334,7 +267,7 @@ export const EditBooking = (): React.JSX.Element => {
       
       // Auto redirect after 2 seconds
       setTimeout(() => {
-        navigate(`/customer/booking-detail/${bookingId}`);
+        navigate(`/customer/edit-booking/${bookingId}`);
       }, 2000);
       
     } catch (error) {
@@ -365,15 +298,15 @@ export const EditBooking = (): React.JSX.Element => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  // const formatDate = (dateString: string) => {
+  //   const date = new Date(dateString);
+  //   return date.toLocaleDateString('vi-VN', {
+  //     weekday: 'long',
+  //     year: 'numeric',
+  //     month: 'long',
+  //     day: 'numeric'
+  //   });
+  // };
 
   if (isLoading) {
     return (
@@ -383,7 +316,7 @@ export const EditBooking = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
             <p className="text-slate-600">Đang tải thông tin...</p>
           </div>
         </div>
@@ -399,21 +332,21 @@ export const EditBooking = (): React.JSX.Element => {
           <Header />
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center max-w-md mx-auto">
-            <AlertCircleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-red-600 mb-2">Có lỗi xảy ra</h3>
-            <p className="text-slate-600 mb-6">{apiError}</p>
+          <div className="max-w-md mx-auto text-center">
+            <AlertCircleIcon className="w-16 h-16 mx-auto mb-4 text-red-500" />
+            <h3 className="mb-2 text-2xl font-bold text-red-600">Có lỗi xảy ra</h3>
+            <p className="mb-6 text-slate-600">{apiError}</p>
             <div className="space-y-3">
               <Button
                 onClick={() => window.location.reload()}
-                className="bg-blue-900 hover:bg-blue-800 text-white"
+                className="text-white bg-blue-900 hover:bg-blue-800"
               >
                 Thử lại
               </Button>
               <Button
                 onClick={() => navigate('/customer/booking-list')}
                 variant="outline"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="text-gray-700 border-gray-300 hover:bg-gray-50"
               >
                 Quay về danh sách
               </Button>
@@ -432,19 +365,19 @@ export const EditBooking = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-green-600 mb-2">Cập nhật thành công!</h3>
-            <p className="text-slate-600 mb-6">
+            <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 text-green-500" />
+            <h3 className="mb-2 text-2xl font-bold text-green-600">Cập nhật thành công!</h3>
+            <p className="mb-6 text-slate-600">
               Thông tin đặt lịch đã được cập nhật. Đang chuyển hướng...
             </p>
-            <div className="w-8 h-8 border-2 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto"></div>
+            <div className="w-8 h-8 mx-auto border-2 border-green-200 rounded-full border-t-green-600 animate-spin"></div>
           </div>
         </div>
       </div>
     );
   }
 
-  const statusDisplay = getStatusDisplayInfo(formData.status);
+
   
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
@@ -455,11 +388,11 @@ export const EditBooking = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -473,24 +406,20 @@ export const EditBooking = (): React.JSX.Element => {
             </div>
             <h1 className="mb-4 text-4xl font-bold leading-tight text-blue-900 md:text-5xl lg:text-6xl">Chỉnh Sửa Lịch Hẹn
               <span className="block mt-2 text-2xl font-medium text-blue-700 md:text-3xl">
-                Cập nhật thông tin cho đơn hẹn #{formData.id.slice(-6)}
+                Cập nhật thông tin cho đơn hẹn #{formData.id}
               </span>
             </h1>
           </div>
         </section>
 
         {/* Main Content */}
-        <main className="container mx-auto px-4 md:px-6 lg:px-8 max-w-4xl py-12">
-          <Card className="shadow-2xl border-0 overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+        <main className="container max-w-4xl px-4 py-12 mx-auto md:px-6 lg:px-8">
+          <Card className="overflow-hidden border-0 shadow-2xl">
+            <CardHeader className="p-6 bg-gradient-to-r from-blue-600 to-blue-700">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold text-white">Thông Tin Lịch Hẹn</h2>
                   <p className="text-white/80">Cập nhật thông tin chi tiết cho lịch hẹn của bạn.</p>
-                </div>
-                <div className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${statusDisplay.color}`}>
-                  <statusDisplay.icon className="w-4 h-4" />
-                  {statusDisplay.label}
                 </div>
               </div>
             </CardHeader>
@@ -498,9 +427,9 @@ export const EditBooking = (): React.JSX.Element => {
 
               {/* API Error Display */}
               {apiError && (
-                <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+                <div className="p-4 border border-red-200 rounded-lg bg-red-50">
                   <div className="flex items-center">
-                    <AlertCircleIcon className="w-5 h-5 text-red-600 mr-3" />
+                    <AlertCircleIcon className="w-5 h-5 mr-3 text-red-600" />
                     <div>
                       <p className="font-semibold text-red-800">Đã có lỗi xảy ra</p>
                       <p className="text-red-700">{apiError}</p>
@@ -511,10 +440,6 @@ export const EditBooking = (): React.JSX.Element => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {/* Form Fields */}
-                <div className="md:col-span-2">
-                  <label className="font-semibold text-gray-700">Dịch vụ</label>
-                  <p className="text-lg text-blue-800 font-medium mt-1">{formData.testType}</p>
-                </div>
 
                 <div>
                   <label htmlFor="name" className="font-semibold text-gray-700">Họ và tên</label>
@@ -525,7 +450,7 @@ export const EditBooking = (): React.JSX.Element => {
                     className="mt-1"
                     icon={<UserIcon />}
                   />
-                  {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
+                  {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                 </div>
                 
                 <div>
@@ -537,30 +462,19 @@ export const EditBooking = (): React.JSX.Element => {
                     className="mt-1"
                     icon={<PhoneIcon />}
                   />
-                  {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
+                  {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                 </div>
 
                 <div className="md:col-span-2">
-                  <label htmlFor="email" className="font-semibold text-gray-700">Email</label>
-                  <Input 
-                    id="email" 
-                    value={formData.email}
-                    readOnly
-                    className="mt-1 bg-gray-100 cursor-not-allowed"
-                    icon={<MailIcon />}
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label htmlFor="address" className="font-semibold text-gray-700">Địa chỉ lấy mẫu (nếu tại nhà)</label>
-                  <Input 
-                    id="address" 
+                  <label htmlFor="address" className="font-semibold text-gray-700">Địa chỉ lấy mẫu *</label>
+                  <AddressSelector
                     value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    onChange={(address) => handleInputChange('address', address)}
+                    placeholder="Nhập địa chỉ chi tiết"
+                    required={true}
                     className="mt-1"
-                    icon={<MapPinIcon />}
                   />
-                  {errors.address && <p className="text-red-600 text-sm mt-1">{errors.address}</p>}
+                  {errors.address && <p className="mt-1 text-sm text-red-600">{errors.address}</p>}
                 </div>
 
                 <div>
@@ -572,7 +486,7 @@ export const EditBooking = (): React.JSX.Element => {
                     onChange={(e) => handleInputChange('preferredDate', e.target.value)}
                     className="mt-1"
                   />
-                  {errors.preferredDate && <p className="text-red-600 text-sm mt-1">{errors.preferredDate}</p>}
+                  {errors.preferredDate && <p className="mt-1 text-sm text-red-600">{errors.preferredDate}</p>}
                 </div>
 
                 <div>
@@ -581,12 +495,12 @@ export const EditBooking = (): React.JSX.Element => {
                     id="preferredTime"
                     value={formData.preferredTime}
                     onChange={(e) => handleInputChange('preferredTime', e.target.value)}
-                    className="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Chọn giờ hẹn</option>
                     {timeSlots.map(slot => <option key={slot} value={slot}>{slot}</option>)}
                   </select>
-                  {errors.preferredTime && <p className="text-red-600 text-sm mt-1">{errors.preferredTime}</p>}
+                  {errors.preferredTime && <p className="mt-1 text-sm text-red-600">{errors.preferredTime}</p>}
                 </div>
 
                 <div className="md:col-span-2">
@@ -602,7 +516,7 @@ export const EditBooking = (): React.JSX.Element => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              <div className="flex flex-col gap-4 mt-6 sm:flex-row">
                 <Button 
                   onClick={() => navigate('/customer/booking-list')}
                   variant="outline"
@@ -613,12 +527,13 @@ export const EditBooking = (): React.JSX.Element => {
                 </Button>
                 <Button 
                   onClick={handleSave}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  className="w-full font-semibold bg-blue-600 sm:w-auto hover:bg-blue-700"
+                  style={{ color: 'white' }}
                   disabled={isSaving}
                 >
                   {isSaving ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white/50 border-t-white rounded-full animate-spin mr-2"></div>
+                      <div className="w-4 h-4 mr-2 border-2 rounded-full border-white/50 border-t-white animate-spin"></div>
                       Đang lưu...
                     </>
                   ) : (

@@ -7,16 +7,17 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import type { CalendarProps, TestBookingResponse } from '../../types/testBooking';
+import type { TestBookingResponse } from '../../types/testBooking';
 import BookingListPanel from '../booking/common/BookingListPanel';
 import BookingTable from '../booking/common/BookingTable';
 import { STATUS_MAPPING, type StatusOption } from '../booking/constants/statusMapping';
 import { getValidDate, renderCollectionMethod } from '../booking/utils/statusUtils';
 
-interface CalendarExtendedProps extends CalendarProps {
-  token: string;
-  refetchBookings: () => Promise<void>; // ✅ THÊM
-
+interface CalendarComponentProps {
+  bookingsByDate?: Record<string, number>;
+  events: TestBookingResponse[];
+  onUpdateStatus?: (updatedBooking: TestBookingResponse) => void;
+  refetchBookings: () => Promise<void>; // Callback to refetch bookings after status update
 }
 
 function formatToYYYYMMDD(date: Date): string {
@@ -26,7 +27,12 @@ function formatToYYYYMMDD(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, token, refetchBookings }) => {
+const Calendar: React.FC<CalendarComponentProps> = ({
+  events,
+  bookingsByDate,
+  // onUpdateStatus,
+  refetchBookings
+}) => {
   const today = formatToYYYYMMDD(new Date());
   const [selectedDay, setSelectedDay] = useState<string>(today);
   const [localEvents, setLocalEvents] = useState<TestBookingResponse[]>([]);
@@ -61,7 +67,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
     return localEvents.map((booking) => ({
       id: booking.id,
       start: new Date(formatToYYYYMMDD(new Date(booking.appointmentDate)) + 'T00:00:00'),
-      title: booking.email || 'Không có email',
+      title: booking.clientName || 'Không có',
       extendedProps: {
         status: booking.status,
         collectionMethod: booking.collectionMethod,
@@ -83,9 +89,9 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
   };
 
   return (
-    <div className="relative flex items-start justify-start w-full h-full px-10 py-10 bg-blue-50">
+    <div className="relative flex items-start justify-start w-full h-full py-2 bg-blue-50">
       <ToastContainer />
-      <div className="flex flex-col w-2/3 h-full p-5 mr-2 bg-white rounded-lg shadow-lg">
+      <div className="flex flex-col w-2/3 h-full p-5 mr-2 text-xs bg-white rounded-lg shadow-lg">
         <div className="mb-6">
           <FullCalendar
             ref={calendarRef}
@@ -148,8 +154,7 @@ const Calendar: React.FC<CalendarExtendedProps> = ({ events, bookingsByDate, tok
           statusOptions={statusOptions}
           setSelectedStatuses={setSelectedStatuses}
           setFilteredBookings={setLocalEvents}
-          token={token}
-          refetchBookings={refetchBookings} // ✅ THÊM
+          refetchBookings={refetchBookings}
         />
 
       </div>

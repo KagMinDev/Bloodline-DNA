@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import { NotFound } from "../components";
 import Sidebar from "../features/manager/components/Sidebar";
-import Blogs from "../features/manager/pages/Blogs";
+import BlogsManager from "../features/manager/pages/Blogs";
 import Dashboard from "../features/manager/pages/Dashboard";
 import Delivery from "../features/manager/pages/Delivery";
 import Feedbacks from "../features/manager/pages/Feedbacks";
@@ -15,7 +15,7 @@ export default function ManagerRouter() {
             <div className="flex-1 overflow-y-auto">
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="blogs" element={<Blogs />} />
+                    <Route path="blogs" element={<BlogsManager />} />
                     <Route path="tags" element={<Tags />} />
                     <Route path="test-management" element={<TestManagement />} />
                     <Route path="delivery" element={<Delivery />} />

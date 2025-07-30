@@ -1,9 +1,10 @@
-import { Card, CardHeader, CardContent } from '../ui/Card';
-import { Button } from '../ui/Button';
-import { StarIcon, FilePenIcon } from 'lucide-react';
-import type { TestProgressData, BookingDetail } from '../../types/bookingTypes';
-import { formatDate } from '../utils/bookingUtils';
-import { ProgressStepProps } from './ProgressStep';
+import { FilePenIcon, StarIcon } from "lucide-react";
+import type { BookingDetail, TestProgressData } from "../../types/bookingTypes";
+import type { UserFeedback } from "../../api/existingFeedbackApi";
+import { Button } from "../ui/Button";
+import { Card, CardContent, CardHeader } from "../ui/Card";
+import { formatDate } from "../utils/bookingUtils";
+import { ProgressStepProps } from "./ProgressStep";
 
 interface BookingProgressTabProps {
   progressData: TestProgressData | null;
@@ -23,6 +24,13 @@ interface BookingProgressTabProps {
   setIsSampleModalOpen: (open: boolean) => void;
   handleConfirmDelivery?: (bookingId: string) => void;
   confirmDeliveryLoading?: boolean;
+  shouldShowSampleButton: boolean;
+  isDeliveryConfirmed: boolean;
+  isCollectionConfirmed: boolean;
+  getExistingFeedback: (userId: string, testServiceId: string) => UserFeedback | null;
+  isCheckingFeedbackFor: (userId: string, testServiceId: string) => boolean;
+  userId: string | null;
+  testServiceId: string | null;
 }
 
 export const BookingProgressTab = ({
@@ -41,16 +49,33 @@ export const BookingProgressTab = ({
   handleStepAction,
   setIsSampleModalOpen,
   handleConfirmDelivery,
-  confirmDeliveryLoading = false
+  confirmDeliveryLoading = false,
+  shouldShowSampleButton,
+  isDeliveryConfirmed,
+  isCollectionConfirmed,
+  getExistingFeedback,
+  isCheckingFeedbackFor,
+  userId,
+  testServiceId,
 }: BookingProgressTabProps) => {
+
+
   if (!progressData) return <p>Không có dữ liệu tiến trình.</p>;
 
-  const completedSteps = progressData.steps.filter(s => s.status === 'completed').length;
-  const progressPercentage = Math.round((completedSteps / progressData.steps.length) * 100);
+  // Get existing feedback data if available
+  const existingFeedback = userId && testServiceId ? getExistingFeedback(userId, testServiceId) : null;
+  const isCheckingExistingFeedback = userId && testServiceId ? isCheckingFeedbackFor(userId, testServiceId) : false;
+
+  const completedSteps = progressData.steps.filter(
+    (s) => s.status === "completed"
+  ).length;
+  const progressPercentage = Math.round(
+    (completedSteps / progressData.steps.length) * 100
+  );
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
-      <div className="flex-grow space-y-1 relative lg:w-2/3">
+    <div className="flex flex-col gap-8 lg:flex-row">
+      <div className="relative flex-grow space-y-1 lg:w-2/3">
         {progressData.steps.map((step, index) => (
           <ProgressStepProps
             key={step.id}
@@ -65,6 +90,10 @@ export const BookingProgressTab = ({
             handleConfirmDelivery={handleConfirmDelivery}
             confirmDeliveryLoading={confirmDeliveryLoading}
             bookingId={booking.id}
+            shouldShowSampleButton={shouldShowSampleButton}
+            isDeliveryConfirmed={isDeliveryConfirmed}
+            isCollectionConfirmed={isCollectionConfirmed}
+            userId={userId}
           />
         ))}
       </div>
@@ -74,24 +103,34 @@ export const BookingProgressTab = ({
             <h3 className="!font-bold text-slate-800">Tổng Quan Tiến Trình</h3>
           </CardHeader>
           <CardContent>
-            <div className="text-center mb-6">
-              <p className="text-5xl font-bold text-blue-600 mb-2">{progressPercentage}%</p>
+            <div className="mb-6 text-center">
+              <p className="mb-2 text-5xl font-bold text-blue-600">
+                {progressPercentage}%
+              </p>
               <p className="text-slate-500">Hoàn thành</p>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
+            <div className="w-full h-3 mb-6 bg-gray-200 rounded-full">
               <div
-                className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+                className="h-3 transition-all duration-500 rounded-full bg-gradient-to-r from-blue-500 to-green-500"
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-slate-600">Bước hiện tại:</span>
-                <span className="font-medium">{completedSteps + 1 > progressData.steps.length ? progressData.steps.length : completedSteps + 1}/{progressData.steps.length}</span>
+                <span className="font-medium">
+                  {completedSteps + 1 > progressData.steps.length
+                    ? progressData.steps.length
+                    : completedSteps + 1}
+                  /{progressData.steps.length}
+                </span>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="p-3 border border-blue-200 rounded-lg bg-blue-50">
                 <p className="font-medium text-blue-800">
-                  {progressData.steps.find(s => s.status === 'current')?.title}
+                  {
+                    progressData.steps.find((s) => s.status === "current")
+                      ?.title
+                  }
                 </p>
               </div>
               {progressData.expectedResultDate && (
@@ -109,28 +148,99 @@ export const BookingProgressTab = ({
                   <p className="text-slate-600">
                     <strong>Mã theo dõi:</strong>
                   </p>
-                  <p className="font-mono text-blue-600 font-medium">
+                  <p className="font-mono font-medium text-blue-600">
                     {progressData.trackingNumber}
                   </p>
                 </div>
               )}
             </div>
-            {booking.status === 'Completed' && (
+            {booking.status === "Completed" && (
               <div className="pt-4 mt-4 border-t">
-                {feedbackSuccess ? (
-                  <div className="p-3 bg-green-100 border border-green-200 rounded-lg text-center">
-                    <p className="font-semibold text-green-800">{feedbackSuccess}</p>
+                {/* Loading state while checking existing feedback */}
+                {isCheckingExistingFeedback ? (
+                  <div className="p-4 text-center bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-blue-700 font-medium">Đang kiểm tra đánh giá...</span>
+                    </div>
                   </div>
-                ) : (
+                ) : existingFeedback ? (
+                  /* Display existing feedback */
                   <div className="space-y-4">
                     <div>
-                      <p className="font-bold text-slate-800">Đánh giá của bạn</p>
+                      <p className="font-bold text-slate-800 mb-3">
+                        Đánh giá của bạn
+                      </p>
+                      
+                      {/* Display existing rating */}
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <StarIcon
+                              key={star}
+                              className={`w-6 h-6 ${
+                                existingFeedback.rating >= star
+                                  ? "text-yellow-400 fill-yellow-400 stroke-black"
+                                  : "text-gray-300"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-slate-600">
+                          ({existingFeedback.rating}/5 sao)
+                        </span>
+                      </div>
+                      
+                      {/* Display existing comment */}
+                      {existingFeedback.comment && (
+                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                          <p className="text-sm font-medium text-slate-600 mb-1">Bình luận:</p>
+                          <p className="text-slate-700 leading-relaxed">
+                            {existingFeedback.comment}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Display feedback date */}
+                      <div className="mt-3 text-xs text-slate-500">
+                        Đánh giá vào: {new Date(existingFeedback.createdAt).toLocaleString('vi-VN', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-700 font-medium text-center">
+                        ✓ Cảm ơn bạn đã đánh giá dịch vụ của chúng tôi!
+                      </p>
+                    </div>
+                  </div>
+                ) : feedbackSuccess ? (
+                  /* Display success message for new feedback */
+                  <div className="p-3 text-center bg-green-100 border border-green-200 rounded-lg">
+                    <p className="font-semibold text-green-800">
+                      {feedbackSuccess}
+                    </p>
+                  </div>
+                ) : (
+                  /* Display feedback form for new feedback */
+                  <div className="space-y-4">
+                    <div>
+                      <p className="font-bold text-slate-800">
+                        Đánh giá của bạn
+                      </p>
                       <div className="flex items-center space-x-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <StarIcon
                             key={star}
                             className={`w-6 h-6 cursor-pointer transition-colors ${
-                              rating >= star ? 'text-yellow-400 fill-yellow-400 stroke-black' : 'text-gray-300'
+                              rating >= star
+                                ? "text-yellow-400 fill-yellow-400 stroke-black"
+                                : "text-gray-300"
                             }`}
                             onClick={() => setRating(star)}
                           />
@@ -138,7 +248,12 @@ export const BookingProgressTab = ({
                       </div>
                     </div>
                     <div>
-                      <label htmlFor="comment" className="text-sm font-medium text-slate-600">Bình luận</label>
+                      <label
+                        htmlFor="comment"
+                        className="text-sm font-medium text-slate-600"
+                      >
+                        Bình luận
+                      </label>
                       <textarea
                         id="comment"
                         value={comment}
@@ -155,30 +270,16 @@ export const BookingProgressTab = ({
                       disabled={isSubmittingFeedback}
                       className="w-full bg-blue-500 !text-white hover:bg-blue-600"
                     >
-                      {isSubmittingFeedback ? 'Đang gửi...' : 'Gửi đánh giá'}
+                      {isSubmittingFeedback ? "Đang gửi..." : "Gửi đánh giá"}
                     </Button>
                   </div>
                 )}
               </div>
             )}
-            {booking.status === 'ReturningSample' && (
-              <div className="pt-4 mt-4 border-t">
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-center space-y-3">
-                  <p className="font-semibold text-blue-800">Cập nhật thông tin mẫu</p>
-                  <p className="text-sm text-blue-700">Bạn đã nhận được Kit. Vui lòng điền thông tin mẫu của bạn để tiếp tục.</p>
-                  <Button
-                    onClick={() => setIsSampleModalOpen(true)}
-                    className="w-full bg-blue-600 hover:bg-blue-700 !text-white"
-                  >
-                    <FilePenIcon className="w-4 h-4 mr-2" />
-                    Điền thông tin mẫu
-                  </Button>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
+
     </div>
   );
 };

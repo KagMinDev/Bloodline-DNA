@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
+import { getMockUserData, getUserInfoApi, updateUserInfoApi, type UpdateUserData } from "../api/userApi";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,7 +21,6 @@ import {
 import { Button } from "../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
-import { getUserInfoApi, getMockUserData, updateUserInfoApi, type User, type UpdateUserData } from "../api/userApi";
 
 interface UserProfile {
   name: string;
@@ -184,7 +184,7 @@ export const EditProfile = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
             <p className="text-lg text-gray-600">Đang tải thông tin người dùng...</p>
           </div>
         </div>
@@ -201,11 +201,11 @@ export const EditProfile = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
             <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -222,15 +222,15 @@ export const EditProfile = (): React.JSX.Element => {
                 Cập nhật thông tin cá nhân
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Cập nhật và quản lý thông tin cá nhân của bạn để nhận được dịch vụ tốt nhất.</p>
+            <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">Cập nhật và quản lý thông tin cá nhân của bạn để nhận được dịch vụ tốt nhất.</p>
           </div>
         </section>
 
         {/* Success Message Display */}
         {successMessage && (
-          <section className="py-4 bg-green-50 border-y-2 border-green-200">
+          <section className="py-4 border-green-200 bg-green-50 border-y-2">
             <div className="container max-w-4xl px-4 mx-auto md:px-6 lg:px-8">
-              <div className="flex items-center p-4 rounded-lg bg-green-100 border border-green-200">
+              <div className="flex items-center p-4 bg-green-100 border border-green-200 rounded-lg">
                 <div className="mr-3 text-green-600">✅</div>
                 <div className="flex-1">
                   <p className="font-medium text-green-800">{successMessage}</p>
@@ -267,12 +267,12 @@ export const EditProfile = (): React.JSX.Element => {
                       : 'text-yellow-800'
                   }`}>{error}</p>
                   {error.includes('mẫu') && !error.includes('đăng nhập') && (
-                    <p className="text-sm text-yellow-600 mt-1">
+                    <p className="mt-1 text-sm text-yellow-600">
                       Để xem dữ liệu thực từ API, vui lòng kiểm tra kết nối mạng hoặc liên hệ hỗ trợ.
                     </p>
                   )}
                                      {error.includes('đăng nhập') && (
-                     <p className="text-sm text-orange-600 mt-1">
+                     <p className="mt-1 text-sm text-orange-600">
                        Vui lòng đăng nhập để xem thông tin cá nhân. Hiện tại đang hiển thị dữ liệu mẫu.
                      </p>
                    )}
@@ -353,7 +353,7 @@ export const EditProfile = (): React.JSX.Element => {
                           type="text"
                           value={profile.name}
                           readOnly
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                          className="w-full p-3 border-2 border-gray-200 rounded-lg cursor-not-allowed bg-gray-50"
                         />
                       )}
                     </div>
@@ -369,7 +369,7 @@ export const EditProfile = (): React.JSX.Element => {
                         type="email"
                         value={profile.email}
                         readOnly
-                        className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                        className="w-full p-3 border-2 border-gray-200 rounded-lg cursor-not-allowed bg-gray-50"
                       />
                     </div>
 
@@ -392,7 +392,7 @@ export const EditProfile = (): React.JSX.Element => {
                           type="tel"
                           value={profile.phone}
                           readOnly
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                          className="w-full p-3 border-2 border-gray-200 rounded-lg cursor-not-allowed bg-gray-50"
                         />
                       )}
                     </div>
@@ -416,7 +416,7 @@ export const EditProfile = (): React.JSX.Element => {
                           type="text"
                           value={profile.address}
                           readOnly
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                          className="w-full p-3 border-2 border-gray-200 rounded-lg cursor-not-allowed bg-gray-50"
                         />
                       )}
                     </div>

@@ -1,11 +1,27 @@
-import { useEffect, useState, useCallback } from "react";
-import { format } from "date-fns";
-import { getRelationshipLabelViByKey, getSampleTypeLabelViByKey, type SampleTestResponse} from "../types/sampleTest";
-import { getAllTestSampleApi } from "../api/testSampleApi";
 import { Button } from "antd";
-import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/sample/ui/table";
+import { format } from "date-fns";
+import { useCallback, useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../staff/components/sample/ui/card";
+import { getAllTestSampleApi } from "../api/testSampleApi";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/sample/ui/table";
 import TestSampleModal from "../components/testSample/TestSampleModal";
+import {
+  getRelationshipLabelViByKey,
+  getSampleTypeLabelViByKey,
+  type SampleTestResponse,
+} from "../types/sampleTest";
 
 export default function TestSamplePage() {
   const [data, setData] = useState<SampleTestResponse[]>([]);
@@ -30,59 +46,89 @@ export default function TestSamplePage() {
   }, [fetchData]);
 
   return (
-    <div className="min-h-screen bg-blue-50 p-8">
-      <TestSampleModal open={open} onClose={() => { setOpen(false); fetchData(); }} />
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-[#1F2B6C]">Quản lý mẫu xét nghiệm</h1>
-        <Button 
-          className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 text-white"
-          onClick={() => setOpen(true)}
-        >
-          + Thêm mẫu
-        </Button>
+    <div className="min-h-screen bg-blue-50">
+      <TestSampleModal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          fetchData();
+        }}
+      />
+      <div className="flex items-center justify-between">
+        <li className="text-lg w-full bg-white p-5 text-[#1F2B6C]">
+          Quản lý mẫu xét nghiệm
+        </li>
       </div>
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-[#1F2B6C]">Danh sách mẫu xét nghiệm</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Mã Mẫu</TableHead>
-                <TableHead>Người Cho</TableHead>
-                <TableHead>Quan Hệ</TableHead>
-                <TableHead>Loại Mẫu</TableHead>
-                <TableHead>Ngày Thu</TableHead>
-                <TableHead>Ngày Nhận Lab</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.length === 0 ? (
+      <div className="py-2">
+        <Card className="shadow-lg">
+          <div className="flex flex-row justify-between">
+            <CardHeader className="w-full">
+              <CardTitle className="text-[#1F2B6C]">
+                Danh sách mẫu xét nghiệm
+              </CardTitle>
+            </CardHeader>
+            <div className="pr-6">
+              <Button
+                className="flex items-center gap-2] hover:bg-blue-800 text-white"
+                onClick={() => setOpen(true)}
+              >
+                + Thêm mẫu
+              </Button>
+            </div>
+          </div>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-400 py-6">
-                    Không có mẫu nào.
-                  </TableCell>
+                  <TableHead>Mã Mẫu</TableHead>
+                  <TableHead>Người Cho</TableHead>
+                  <TableHead>Quan Hệ</TableHead>
+                  <TableHead>Loại Mẫu</TableHead>
+                  <TableHead>Ngày Thu</TableHead>
+                  <TableHead>Ngày Nhận Lab</TableHead>
                 </TableRow>
-              ) : (
-                data.map(item => (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium text-blue-700">{item.sampleCode}</TableCell>
-                    <TableCell>{item.donorName}</TableCell>
-                    <TableCell>{getRelationshipLabelViByKey(item.relationshipToSubject)}</TableCell>
-                    <TableCell>{getSampleTypeLabelViByKey(item.sampleType)}</TableCell>
-                    <TableCell>{format(new Date(item.collectedAt), "dd/MM/yyyy")}</TableCell>
-                    <TableCell>
-                      {item.labReceivedAt ? format(new Date(item.labReceivedAt), "dd/MM/yyyy") : "—"}
+              </TableHeader>
+              <TableBody>
+                {data.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      className="py-6 text-center text-gray-400"
+                    >
+                      Không có mẫu nào.
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                ) : (
+                  data.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium text-blue-700">
+                        {item.sampleCode}
+                      </TableCell>
+                      <TableCell>{item.donorName}</TableCell>
+                      <TableCell>
+                        {getRelationshipLabelViByKey(
+                          item.relationshipToSubject
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {getSampleTypeLabelViByKey(item.sampleType)}
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(item.collectedAt), "dd/MM/yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        {item.labReceivedAt
+                          ? format(new Date(item.labReceivedAt), "dd/MM/yyyy")
+                          : "—"}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

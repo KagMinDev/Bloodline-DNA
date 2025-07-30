@@ -51,10 +51,27 @@ namespace ADNTester.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, id);
         }
 
+        [HttpPost("with-file")]
+        public async Task<ActionResult<string>> CreateWithFile([FromForm] CreateTestResultWithFileDto dto)
+        {
+            var id = await _testResultService.CreateWithFileAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id }, id);
+        }
+
         [HttpPut]
         public async Task<IActionResult> Update(UpdateTestResultDto dto)
         {
             var result = await _testResultService.UpdateAsync(dto);
+            if (!result)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPut("with-file")]
+        public async Task<IActionResult> UpdateWithFile([FromForm] UpdateTestResultWithFileDto dto)
+        {
+            var result = await _testResultService.UpdateWithFileAsync(dto);
             if (!result)
                 return NotFound();
 

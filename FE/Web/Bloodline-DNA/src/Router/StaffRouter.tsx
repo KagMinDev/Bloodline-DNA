@@ -12,7 +12,7 @@ export default function StaffRouter() {
             <Sidebar />
             <div className="flex-1 overflow-y-auto">
                 <Routes>
-                    <Route path="/" element={<TestBooking />} />
+                    <Route path="/" element={<TestSample />} />
                     <Route path="test-sample" element={<TestSample />} />
                     <Route path="test-booking" element={<TestBooking />} />
                     <Route path="test-result" element={<TestResult />} />

@@ -2,13 +2,12 @@ import {
   ArrowRightIcon,
   CarIcon,
   ClockIcon,
-  HeadphonesIcon,
   MailIcon,
   MapPinIcon,
   PhoneIcon,
   SendIcon
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Footer, Header } from "../../../components";
 import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
 import {
@@ -21,21 +20,21 @@ import {
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 
-interface ContactInfo {
-  id: number;
-  title: string;
-  description: string;
-  value: string;
-  icon: React.ReactNode;
-  type: 'phone' | 'email' | 'address' | 'hours';
-  link?: string;
-}
+// interface ContactInfo {
+//   id: number;
+//   title: string;
+//   description: string;
+//   value: string;
+//   icon: React.ReactNode;
+//   type: 'phone' | 'email' | 'address' | 'hours';
+//   link?: string;
+// }
 
-interface OfficeHour {
-  day: string;
-  hours: string;
-  isToday?: boolean;
-}
+// interface OfficeHour {
+//   day: string;
+//   hours: string;
+//   isToday?: boolean;
+// }
 
 export const Contacts = (): React.JSX.Element => {
   const [scrollY, setScrollY] = useState(0);
@@ -48,62 +47,63 @@ export const Contacts = (): React.JSX.Element => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const sectionRef = useRef<HTMLElement>(null);
+  // const sectionRef = useRef<HTMLElement>(null);
 
-  const contactInfo: ContactInfo[] = [
-    {
-      id: 1,
-      title: "Hotline 24/7",
-      description: "Hỗ trợ khẩn cấp và tư vấn",
-      value: "1900-xxxx",
-      icon: <PhoneIcon className="w-8 h-8 text-blue-600" />,
-      type: 'phone',
-      link: "tel:1900xxxx"
-    },
-    {
-      id: 2,
-      title: "Email Hỗ Trợ",
-      description: "Gửi câu hỏi và nhận tư vấn",
-      value: "support@hospital.vn",
-      icon: <MailIcon className="w-8 h-8 text-blue-600" />,
-      type: 'email',
-      link: "mailto:support@hospital.vn"
-    },
-    {
-      id: 3,
-      title: "Địa Chỉ Bệnh Viện",
-      description: "Số 123, Đường ABC, Quận XYZ",
-      value: "TP. Hồ Chí Minh",
-      icon: <MapPinIcon className="w-8 h-8 text-blue-600" />,
-      type: 'address',
-      link: "https://maps.google.com"
-    },
-    {
-      id: 4,
-      title: "Giờ Làm Việc",
-      description: "Thứ 2 - Chủ Nhật",
-      value: "24/7",
-      icon: <ClockIcon className="w-8 h-8 text-blue-600" />,
-      type: 'hours'
-    }
-  ];
+  // const contactInfo: ContactInfo[] = [
+  //   {
+  //     id: 1,
+  //     title: "Hotline 24/7",
+  //     description: "Hỗ trợ khẩn cấp và tư vấn",
+  //     value: "1900-xxxx",
+  //     icon: <PhoneIcon className="w-8 h-8 text-blue-600" />,
+  //     type: 'phone',
+  //     link: "tel:1900xxxx"
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Email Hỗ Trợ",
+  //     description: "Gửi câu hỏi và nhận tư vấn",
+  //     value: "support@hospital.vn",
+  //     icon: <MailIcon className="w-8 h-8 text-blue-600" />,
+  //     type: 'email',
+  //     link: "mailto:support@hospital.vn"
+  //   },
+  //   {
+  //     id: 3,
+  //     title: "Địa Chỉ Bệnh Viện",
+  //     description: "Số 123, Đường ABC, Quận XYZ",
+  //     value: "TP. Hồ Chí Minh",
+  //     icon: <MapPinIcon className="w-8 h-8 text-blue-600" />,
+  //     type: 'address',
+  //     link: "https://maps.google.com"
+  //   },
+  //   {
+  //     id: 4,
+  //     title: "Giờ Làm Việc",
+  //     description: "Thứ 2 - Chủ Nhật",
+  //     value: "24/7",
+  //     icon: <ClockIcon className="w-8 h-8 text-blue-600" />,
+  //     type: 'hours'
+  //   }
+  // ];
 
-  const officeHours: OfficeHour[] = [
-    { day: "Thứ Hai", hours: "7:00 - 22:00" },
-    { day: "Thứ Ba", hours: "7:00 - 22:00", isToday: true },
-    { day: "Thứ Tư", hours: "7:00 - 22:00" },
-    { day: "Thứ Năm", hours: "7:00 - 22:00" },
-    { day: "Thứ Sáu", hours: "7:00 - 22:00" },
-    { day: "Thứ Bảy", hours: "8:00 - 20:00" },
-    { day: "Chủ Nhật", hours: "8:00 - 18:00" }
-  ];
+  // const officeHours: OfficeHour[] = [
+  //   { day: "Thứ Hai", hours: "7:00 - 22:00" },
+  //   { day: "Thứ Ba", hours: "7:00 - 22:00", isToday: true },
+  //   { day: "Thứ Tư", hours: "7:00 - 22:00" },
+  //   { day: "Thứ Năm", hours: "7:00 - 22:00" },
+  //   { day: "Thứ Sáu", hours: "7:00 - 22:00" },
+  //   { day: "Thứ Bảy", hours: "8:00 - 20:00" },
+  //   { day: "Chủ Nhật", hours: "8:00 - 18:00" }
+  // ];
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
+    console.log(scrollY, isVisible);
     window.addEventListener("scroll", handleScroll);
-    
+
     const timer = setTimeout(() => setIsVisible(true), 100);
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(timer);
@@ -121,7 +121,7 @@ export const Contacts = (): React.JSX.Element => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     // Simulate form submission
     setTimeout(() => {
       alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
@@ -145,11 +145,11 @@ export const Contacts = (): React.JSX.Element => {
         </div>
 
         {/* Hero Section */}
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af" /></svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
@@ -164,7 +164,7 @@ export const Contacts = (): React.JSX.Element => {
                 Hỗ Trợ 24/7
               </span>
             </h1>
-            <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn với đội ngũ chuyên viên tận tâm, giải đáp mọi thắc mắc về dịch vụ y tế.</p>
+            <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn với đội ngũ chuyên viên tận tâm, giải đáp mọi thắc mắc về dịch vụ y tế.</p>
           </div>
         </section>
 
@@ -270,7 +270,7 @@ export const Contacts = (): React.JSX.Element => {
                       />
                     </div>
 
-                    <Button 
+                    <Button
                       type="submit"
                       disabled={isSubmitting}
                       className="w-full bg-blue-900 hover:bg-blue-800 !text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300"
@@ -352,9 +352,9 @@ export const Contacts = (): React.JSX.Element => {
 
                 {/* Bottom Row: Email and Working Hours */}
                 <div className="grid grid-cols-2 gap-8">
-  {/* Email Card */}
-  <Card
-    className="
+                  {/* Email Card */}
+                  <Card
+                    className="
       w-full aspect-square             /* đảm bảo width = height */
       group text-center
       p-6                               /* giảm padding để tránh nội dung chèn tràn */
@@ -363,58 +363,57 @@ export const Contacts = (): React.JSX.Element => {
       flex flex-col justify-center items-center  /* căn giữa nội dung */
       overflow-hidden                    /* nếu nội dung quá cao sẽ bị ẩn bớt */
     "
-  >
-    <CardContent className="flex flex-col items-center justify-center p-0">
-      <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
-          <MailIcon className="w-8 h-8 text-blue-700" />
-        </div>
-      </div>
-      <h3 className="mb-2 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700">
-        Email
-      </h3>
-      <p className="mb-3 text-sm text-center text-slate-600 whitespace-nowrap">
-        Gửi câu hỏi và nhận tư vấn
-      </p>
-      <a
-        href="mailto:support@hospital.vn"
-        className="text-base font-semibold text-center text-blue-800 break-words transition-colors duration-200 hover:text-blue-900"
-      >
-        support@hospital.vn
-      </a>
-    </CardContent>
-  </Card>
+                  >
+                    <CardContent className="flex flex-col items-center justify-center p-0">
+                      <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
+                          <MailIcon className="w-8 h-8 text-blue-700" />
+                        </div>
+                      </div>
+                      <h3 className="mb-2 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700">
+                        Email
+                      </h3>
+                      <p className="mb-3 text-sm text-center text-slate-600 whitespace-nowrap">
+                        Gửi câu hỏi và nhận tư vấn
+                      </p>
+                      <a
+                        href="mailto:support@hospital.vn"
+                        className="text-base font-semibold text-center text-blue-800 break-words transition-colors duration-200 hover:text-blue-900"
+                      >
+                        support@hospital.vn
+                      </a>
+                    </CardContent>
+                  </Card>
 
-  {/* Working Hours Card */}
-  <Card
-    className="flex flex-col items-center justify-center w-full p-6 overflow-hidden text-center transition-all duration-300 border-0 aspect-square group hover:shadow-xl hover:-translate-y-2 bg-gradient-to-br from-blue-100 to-blue-50"
-  >
-    <CardContent className="flex flex-col items-center justify-center p-0">
-      <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
-        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
-          <ClockIcon className="w-8 h-8 text-blue-700" />
-        </div>
-      </div>
-      <h3 className="mb-2 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700">
-        Giờ Làm Việc
-      </h3>
-      <p className="mb-3 text-sm text-center text-slate-600">
-        Thứ 2 – Chủ Nhật
-      </p>
-      <p className="text-lg font-semibold text-center text-blue-800">
-        24/7
-      </p>
-    </CardContent>
-  </Card>
-</div>
-
+                  {/* Working Hours Card */}
+                  <Card
+                    className="flex flex-col items-center justify-center w-full p-6 overflow-hidden text-center transition-all duration-300 border-0 aspect-square group hover:shadow-xl hover:-translate-y-2 bg-gradient-to-br from-blue-100 to-blue-50"
+                  >
+                    <CardContent className="flex flex-col items-center justify-center p-0">
+                      <div className="mb-4 transition-transform duration-300 group-hover:scale-110">
+                        <div className="flex items-center justify-center w-16 h-16 mx-auto transition-colors duration-300 bg-white rounded-full shadow-lg group-hover:bg-blue-200">
+                          <ClockIcon className="w-8 h-8 text-blue-700" />
+                        </div>
+                      </div>
+                      <h3 className="mb-2 text-lg font-bold tracking-wider text-blue-900 uppercase transition-colors duration-300 group-hover:text-blue-700">
+                        Giờ Làm Việc
+                      </h3>
+                      <p className="mb-3 text-sm text-center text-slate-600">
+                        Thứ 2 – Chủ Nhật
+                      </p>
+                      <p className="text-lg font-semibold text-center text-blue-800">
+                        24/7
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Map Section */}
-        <section className="py-16 bg-white md:py-20">
+        <section className="py-16 bg-white md:py-0">
           <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-12 text-center">
               <h2 className="mb-4 text-3xl font-bold text-blue-900 md:text-4xl">

@@ -1,16 +1,22 @@
-import { useState } from 'react';
-import { useBookingData } from '../hooks/useBookingData';
-import { Footer, Header } from '../../../components';
-import { ArrowLeftIcon, EditIcon, XCircleIcon } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { getStatusConfigByDetailedStatus } from '../components/bookingStatus/StatusConfig';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '../components/ui/Breadcrumb';
-import { BookingDetailTab } from '../components/bookingStatus/BookingDetailTab';
-import { BookingProgressTab } from '../components/bookingStatus/BookingProgressTab';
-import ChatbotAI from '../../chatbotAI/components/ChatbotAI';
-import { SampleInfoModal } from '../components/SampleInfoModal';
-import { PaymentDebugger } from '../components/PaymentDebugger';
-import type { DetailedBookingStatus } from '../types/bookingTypes';
+import { ArrowLeftIcon, EditIcon, XCircleIcon } from "lucide-react";
+import { useState } from "react";
+import { Footer, Header } from "../../../components";
+import ChatbotAI from "../../chatbotAI/components/ChatbotAI";
+import { BookingDetailTab } from "../components/bookingStatus/BookingDetailTab";
+import { BookingProgressTab } from "../components/bookingStatus/BookingProgressTab";
+import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
+import { CollectionTimeModal } from "../components/CollectionTimeModal";
+import { PaymentDebugger } from "../components/PaymentDebugger";
+import { SampleInfoModal } from "../components/SampleInfoModal";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "../components/ui/Breadcrumb";
+import { Button } from "../components/ui/Button";
+import { useBookingData } from "../hooks/useBookingData";
 
 export const BookingStatusPage = (): React.JSX.Element => {
   const {
@@ -30,15 +36,26 @@ export const BookingStatusPage = (): React.JSX.Element => {
     isSampleModalOpen,
     setIsSampleModalOpen,
     confirmDeliveryLoading,
+    shouldShowSampleButton,
+    isDeliveryConfirmed,
+    isCollectionConfirmed,
+    isCollectionModalOpen,
+    setIsCollectionModalOpen,
+    collectionLoading,
+    getExistingFeedback,
+    isCheckingFeedbackFor,
+    userId,
+    testServiceId,
     navigate,
     handlePayment,
     handleFeedbackSubmit,
     handleSampleSubmitSuccess,
     handleStepAction,
     handleConfirmDelivery,
+    handleConfirmCollection,
   } = useBookingData();
 
-  const [activeTab, setActiveTab] = useState<'detail' | 'progress'>('detail');
+  const [activeTab, setActiveTab] = useState<"detail" | "progress">("detail");
 
   if (isLoading) {
     return (
@@ -48,8 +65,10 @@ export const BookingStatusPage = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Đang tải thông tin đơn hẹn...</p>
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
+            <p className="text-lg text-gray-600">
+              Đang tải thông tin đơn hẹn...
+            </p>
           </div>
         </div>
       </div>
@@ -64,10 +83,21 @@ export const BookingStatusPage = (): React.JSX.Element => {
         </div>
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
-            <XCircleIcon className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-600 mb-2">{error || 'Không tìm thấy lịch hẹn'}</h3>
-            <p className="text-slate-500 mb-6">{error ? 'Vui lòng thử lại sau.' : 'Lịch hẹn không tồn tại hoặc đã bị xóa.'}</p>
-            <Button onClick={() => navigate('/booking-list')} className="bg-blue-900 hover:bg-blue-800 text-white">Về Danh Sách</Button>
+            <XCircleIcon className="w-16 h-16 mx-auto mb-4 text-red-400" />
+            <h3 className="mb-2 text-xl font-semibold text-slate-600">
+              {error || "Không tìm thấy lịch hẹn"}
+            </h3>
+            <p className="mb-6 text-slate-500">
+              {error
+                ? "Vui lòng thử lại sau."
+                : "Lịch hẹn không tồn tại hoặc đã bị xóa."}
+            </p>
+            <Button
+              onClick={() => navigate("/booking-list")}
+              className="text-white bg-blue-900 hover:bg-blue-800"
+            >
+              Về Danh Sách
+            </Button>
           </div>
         </div>
       </div>
@@ -84,30 +114,45 @@ export const BookingStatusPage = (): React.JSX.Element => {
         <div className="fixed z-50 w-full">
           <Header />
         </div>
-        <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+        <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              <path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/>
+            <svg
+              className="w-full h-full"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z"
+                fill="#1e40af"
+              />
             </svg>
           </div>
-          <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+          <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/" className="text-blue-600 hover:text-blue-800">
+                    <BreadcrumbLink
+                      href="/"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       Trang Chủ
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/customer/booking-list" className="text-blue-600 hover:text-blue-800">
+                    <BreadcrumbLink
+                      href="/customer/booking-list"
+                      className="text-blue-600 hover:text-blue-800"
+                    >
                       Danh Sách Đặt Lịch
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <span className="font-semibold text-blue-900">Trạng Thái Đơn Hẹn</span>
+                    <span className="font-semibold text-blue-900">
+                      Trạng Thái Đơn Hẹn
+                    </span>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -120,47 +165,51 @@ export const BookingStatusPage = (): React.JSX.Element => {
                     Theo Dõi Tiến Trình Xét Nghiệm
                   </span>
                 </h1>
-                <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700 mb-4">
-                  Theo dõi chi tiết tiến trình xét nghiệm ADN của bạn từ khi đăng ký đến lúc nhận kết quả.
+                <p className="max-w-2xl mb-4 text-base leading-relaxed text-gray-700 md:text-lg">
+                  Theo dõi chi tiết tiến trình xét nghiệm ADN của bạn từ khi
+                  đăng ký đến lúc nhận kết quả.
                 </p>
                 <div className="flex items-center gap-4">
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${statusInfo.color}`}>
+                  <div
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${statusInfo.color}`}
+                  >
                     <StatusIcon className="w-5 h-5" />
                     {statusInfo.label}
                   </div>
                   <div className="text-sm text-blue-700">
-                    <span className="font-medium">Mã đơn:</span> #{booking.id.slice(-8)}
+                    <span className="font-medium">Mã đơn:</span> #
+                    {booking.id.slice(-8)}
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        <main className="container mx-auto px-4 md:px-6 lg:px-8 py-8">
-          <div className="mb-8 flex border-b">
+        <main className="container px-4 py-8 mx-auto md:px-6 lg:px-8">
+          <div className="flex mb-8 border-b">
             <button
-              onClick={() => setActiveTab('detail')}
+              onClick={() => setActiveTab("detail")}
               className={`px-4 py-3 font-semibold transition-colors duration-200 ${
-                activeTab === 'detail'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-500 hover:text-slate-700'
+                activeTab === "detail"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               Chi Tiết Đơn Hẹn
             </button>
             <button
-              onClick={() => setActiveTab('progress')}
+              onClick={() => setActiveTab("progress")}
               className={`px-4 py-3 font-semibold transition-colors duration-200 ${
-                activeTab === 'progress'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-500 hover:text-slate-700'
+                activeTab === "progress"
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-slate-500 hover:text-slate-700"
               }`}
             >
               Theo Dõi Tiến Trình
             </button>
           </div>
           <div>
-            {activeTab === 'detail' ? (
+            {activeTab === "detail" ? (
               <BookingDetailTab
                 booking={booking}
                 progressData={progressData}
@@ -187,20 +236,27 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 setIsSampleModalOpen={setIsSampleModalOpen}
                 handleConfirmDelivery={handleConfirmDelivery}
                 confirmDeliveryLoading={confirmDeliveryLoading}
+                shouldShowSampleButton={shouldShowSampleButton}
+                isDeliveryConfirmed={isDeliveryConfirmed}
+                isCollectionConfirmed={isCollectionConfirmed}
+                getExistingFeedback={getExistingFeedback}
+                isCheckingFeedbackFor={isCheckingFeedbackFor}
+                userId={userId}
+                testServiceId={testServiceId}
               />
             )}
           </div>
         </main>
-        <div className="fixed bottom-20 right-4 md:hidden flex flex-col gap-3">
+        <div className="fixed flex flex-col gap-3 bottom-20 right-4 md:hidden">
           <Button
-            onClick={() => navigate('/booking-list')}
-            className="w-12 h-12 rounded-full bg-gray-600 hover:bg-gray-700 text-white shadow-lg"
+            onClick={() => navigate("/booking-list")}
+            className="w-12 h-12 text-white bg-gray-600 rounded-full shadow-lg hover:bg-gray-700"
           >
             <ArrowLeftIcon className="w-5 h-5" />
           </Button>
           <Button
             onClick={() => navigate(`/edit-booking/${booking.id}`)}
-            className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            className="w-12 h-12 text-white bg-blue-600 rounded-full shadow-lg hover:bg-blue-700"
           >
             <EditIcon className="w-5 h-5" />
           </Button>
@@ -217,8 +273,15 @@ export const BookingStatusPage = (): React.JSX.Element => {
         onSubmitSuccess={handleSampleSubmitSuccess}
       />
 
+      <CollectionTimeModal
+        isOpen={isCollectionModalOpen}
+        onClose={() => setIsCollectionModalOpen(false)}
+        onConfirm={handleConfirmCollection}
+        isLoading={collectionLoading}
+      />
+
       {/* Payment Debugger - chỉ hiển thị trong development */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NODE_ENV === "development" && (
         <PaymentDebugger bookingId={booking.id} />
       )}
     </div>

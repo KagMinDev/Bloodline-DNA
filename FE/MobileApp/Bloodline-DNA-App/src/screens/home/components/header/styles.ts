@@ -5,10 +5,10 @@ const MENU_WIDTH = SCREEN_WIDTH * 0.8;
 
 const styles = StyleSheet.create({
   header: {
-    height: 80,
-    top: 12,
+    height: 48,
+    top: 0,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     paddingHorizontal: 16,
   },
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     position: "absolute",
-    top: 0,
+    top: -20,
     left: 0,
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: "absolute",
-    top: 80,
+    top: 48,
     right: 0,
     width: MENU_WIDTH,
     height: SCREEN_HEIGHT - 60,
@@ -60,9 +60,10 @@ const styles = StyleSheet.create({
   },
   menuWelcome: {
     marginTop: 8,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#007bff",
+    textDecorationLine: "underline",
   },
   menuItem: {
     flexDirection: "row",

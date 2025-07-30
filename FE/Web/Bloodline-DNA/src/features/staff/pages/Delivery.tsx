@@ -1,54 +1,37 @@
-import { Spin } from "antd";
-import { useCallback, useEffect, useState } from "react";
-import { getAssignedDeliveries } from "../api/deliveryApi";
+import { Tabs } from "antd";
 import DeliveryTable from "../components/delivery/DeliveryTable";
-import type { DeliveryOrder } from "../types/delivery";
+import ResultSent from "../components/delivery/ResultSentTable";
+import SampleReceived from "../components/delivery/SampleReceivedTable";
+
+const { TabPane } = Tabs;
 
 const DeliveriesStaff = () => {
-  const [deliveries, setDeliveries] = useState<DeliveryOrder[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  const fetchDeliveries = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getAssignedDeliveries();
-      setDeliveries(data);
-    } catch (error) {
-      console.error("Lỗi khi lấy đơn được phân công:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchDeliveries();
-  }, [fetchDeliveries]);
-
-  const handleRowClick = (id: string) => {
-    setSelectedId(id);
-    console.log("Click đơn:", id);
-    setTimeout(() => setSelectedId(null), 500);
-  };
-
   return (
-    <div className="min-h-screen p-6 bg-blue-50">
-      <h2 className="mb-6 text-2xl font-bold text-blue-800">
-        Danh sách đơn được phân công
-      </h2>
+    <div className="min-h-screen bg-blue-50">
+      <li className="mb-2 text-lg bg-white p-5 text-[#1F2B6C]">
+        Quản lý danh sách đơn được phân công
+      </li>
+      <div className="px-5">
+        <Tabs defaultActiveKey="1">
+          <TabPane tab="Giao Kit" key="1">
+            <DeliveryTable />
+          </TabPane>
 
-      {loading ? (
-        <div className="flex items-center justify-center min-h-[200px]">
-          <Spin size="large" />
-        </div>
-      ) : (
-        <DeliveryTable
-          data={deliveries}
-          onRowClick={handleRowClick}
-          loadingId={selectedId}
-          onComplete={fetchDeliveries}
-        />
-      )}
+          <TabPane tab="Nhận mẫu Kit" key="2">
+            <SampleReceived
+              onRowClick={(id) => console.log("Chi tiết đơn:", id)}
+              onComplete={() => console.log("Đã xác nhận nhận mẫu")}
+            />
+          </TabPane>
+
+          <TabPane tab="Gửi kết quả" key="3">
+            <ResultSent
+              onRowClick={(id) => console.log("Chi tiết đơn:", id)}
+              onComplete={() => console.log("Đã gửi kết quả")}
+            />
+          </TabPane>
+        </Tabs>
+      </div>
     </div>
   );
 };

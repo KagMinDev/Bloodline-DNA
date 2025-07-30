@@ -126,7 +126,7 @@ const RegisterScreen: React.FC = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       // @ts-ignore
-      navigation.navigate('Main');
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Đăng ký thất bại:', error);
       setErrors((prev) => ({

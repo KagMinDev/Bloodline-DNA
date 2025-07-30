@@ -1,4 +1,3 @@
-import { BookmarkIcon, HeartIcon, TrendingUpIcon } from "lucide-react";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "../../ui/Breadcrumb";
 
 interface BlogHeroProps {
@@ -7,11 +6,11 @@ interface BlogHeroProps {
 
 export const BlogHero: React.FC<BlogHeroProps> = ({ isVisible }) => {
   return (
-    <section className="relative w-full py-20 md:py-28 bg-blue-50 overflow-hidden">
+    <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
       </div>
-      <div className="relative z-10 container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
+      <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
         <div className="mb-6">
           <Breadcrumb>
             <BreadcrumbList>
@@ -26,7 +25,7 @@ export const BlogHero: React.FC<BlogHeroProps> = ({ isVisible }) => {
             Kiến Thức Sức Khỏe
           </span>
         </h1>
-        <p className="max-w-2xl text-base leading-relaxed md:text-lg text-gray-700">Khám phá những bài viết chuyên sâu về sức khỏe, y học và lối sống khỏe mạnh từ đội ngũ chuyên gia hàng đầu.</p>
+        <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">Khám phá những bài viết chuyên sâu về sức khỏe, y học và lối sống khỏe mạnh từ đội ngũ chuyên gia hàng đầu.</p>
       </div>
     </section>
   );

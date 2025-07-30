@@ -7,15 +7,37 @@ export type RootStackParamList = {
   Contact: undefined;
   About: undefined;
   Doctors: undefined;
-  News: undefined;
-  BlogDetail: { id: string };
+  Blogs: undefined;
+  BlogDetailsScreen: { id: string };
+  DeliveriesStaff: { tab: string };
+  SampleReceived: undefined;
+  ResultSent: undefined;
+  StaffMenu: undefined;
+  Calendar: undefined;
   Main: undefined;
   AllService: undefined;
   DetailsService: { id: string };
-  AppointmentScreen: { serviceId: string };
-  StaffDashboard: undefined;
-};
+  DeliveriesStaffTabs: undefined;
+  AppointmentScreen: { testServiceId: string; priceServiceId: string };
+  Profile: undefined;
 
+  CheckoutScreen: { bookingId: string };
+  WebViewScreen: { url: string };
+  PaymentSuccess: {
+    bookingId: string;
+    orderCode?: string;
+    amount?: number;
+    paymentType?: "deposit" | "remaining" | "full_payment";
+  };
+  PaymentError: {
+    bookingId?: string;
+    orderCode?: string;
+    paymentType?: "deposit" | "remaining" | "full_payment";
+    message?: string;
+  };
+  TestPayment: undefined;
+  BookingHistory: undefined;
+};
 
 export type MainTabParamList = {
   Home: undefined;
