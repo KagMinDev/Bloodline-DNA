@@ -89,6 +89,62 @@ export const EditBooking = (): React.JSX.Element => {
     '16:00', '16:30', '17:00'
   ];
 
+  // Filter time slots based on selected date
+  const getAvailableTimeSlots = () => {
+    if (!formData.preferredDate) return timeSlots;
+    
+    const selectedDate = new Date(formData.preferredDate);
+    const today = new Date();
+    
+    // Reset time to 00:00:00 for accurate date comparison
+    const selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    // If selected date is not today, return all time slots
+    if (selectedDateOnly.getTime() !== todayOnly.getTime()) {
+      return timeSlots;
+    }
+    
+    // If selected date is today, filter out past time slots
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    return timeSlots.filter(timeSlot => {
+      const [hours, minutes] = timeSlot.split(':').map(Number);
+      const slotTimeInMinutes = hours * 60 + minutes;
+      return slotTimeInMinutes > currentTimeInMinutes;
+    });
+  };
+
+  // Helper function to get available time slots for a specific date
+  const getAvailableTimeSlotsForDate = (selectedDate: string) => {
+    if (!selectedDate) return timeSlots;
+    
+    const dateToCheck = new Date(selectedDate);
+    const today = new Date();
+    
+    // Reset time to 00:00:00 for accurate date comparison
+    const selectedDateOnly = new Date(dateToCheck.getFullYear(), dateToCheck.getMonth(), dateToCheck.getDate());
+    const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    
+    // If selected date is not today, return all time slots
+    if (selectedDateOnly.getTime() !== todayOnly.getTime()) {
+      return timeSlots;
+    }
+    
+    // If selected date is today, filter out past time slots
+    const currentHour = today.getHours();
+    const currentMinute = today.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    return timeSlots.filter(timeSlot => {
+      const [hours, minutes] = timeSlot.split(':').map(Number);
+      const slotTimeInMinutes = hours * 60 + minutes;
+      return slotTimeInMinutes > currentTimeInMinutes;
+    });
+  };
+
   // Transform API data to form data - based on BookingItem interface
   const transformApiDataToFormData = (apiData: BookingItem): EditBookingData => {
     const { date, time } = formatDateForInput(apiData.appointmentDate);
@@ -167,10 +223,25 @@ export const EditBooking = (): React.JSX.Element => {
   }, [bookingId]);
 
   const handleInputChange = (field: keyof EditBookingData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // If preferredDate is changed, check if current preferredTime is still available
+      if (field === 'preferredDate' && prev.preferredTime) {
+        // Check available time slots for the new date
+        const availableSlots = getAvailableTimeSlotsForDate(value);
+        
+        // If current selected time is not available, reset it
+        if (!availableSlots.includes(prev.preferredTime)) {
+          newData.preferredTime = '';
+        }
+      }
+      
+      return newData;
+    });
 
     // Clear error for this field when user starts typing
     if (errors[field]) {
@@ -512,7 +583,7 @@ export const EditBooking = (): React.JSX.Element => {
                     className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Chọn giờ hẹn</option>
-                    {timeSlots.map(slot => <option key={slot} value={slot}>{slot}</option>)}
+                    {getAvailableTimeSlots().map(slot => <option key={slot} value={slot}>{slot}</option>)}
                   </select>
                   {errors.preferredTime && <p className="mt-1 text-sm text-red-600">{errors.preferredTime}</p>}
                 </div>

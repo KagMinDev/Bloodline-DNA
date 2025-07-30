@@ -47,6 +47,14 @@ export const EditProfile = (): React.JSX.Element => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [originalProfile, setOriginalProfile] = useState<UserProfile | null>(null);
+  
+  // Field validation errors
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  }>({});
 
   // Load user data from API
   useEffect(() => {
@@ -107,27 +115,96 @@ export const EditProfile = (): React.JSX.Element => {
       ...prev,
       [field]: value
     }));
+    
+    // Clear field error when user starts typing (only for validated fields)
+    if ((field === 'name' || field === 'phone' || field === 'address') && fieldErrors[field]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [field]: undefined
+      }));
+    }
+  };
+
+  // Validation function
+  const validateField = (field: keyof UserProfile, value: string): string | undefined => {
+    switch (field) {
+      case 'name':
+        if (!value || value.trim() === '' || value === 'Chưa cập nhật') {
+          return 'Họ và tên không được để trống';
+        }
+        if (value.trim().length < 2) {
+          return 'Họ và tên phải có ít nhất 2 ký tự';
+        }
+        break;
+      
+      case 'phone':
+        if (!value || value.trim() === '' || value === 'Chưa cập nhật') {
+          return 'Số điện thoại không được để trống';
+        }
+        const phoneRegex = /^(0[3-9])[0-9]{8}$/;
+        if (!phoneRegex.test(value.trim())) {
+          return 'Số điện thoại không hợp lệ (ví dụ: 0901234567)';
+        }
+        break;
+      
+      case 'address':
+        if (!value || value.trim() === '' || value === 'Chưa cập nhật') {
+          return 'Địa chỉ không được để trống';
+        }
+        const addressCommaCount = (value.match(/,/g) || []).length;
+        if (addressCommaCount < 1) {
+          return 'Vui lòng chọn tỉnh/thành phố từ danh sách';
+        }
+        break;
+      
+      default:
+        break;
+    }
+    return undefined;
+  };
+
+  // Validate all fields
+  const validateAllFields = (): boolean => {
+    const errors: typeof fieldErrors = {};
+    let hasErrors = false;
+
+    // Validate name
+    const nameError = validateField('name', profile.name || '');
+    if (nameError) {
+      errors.name = nameError;
+      hasErrors = true;
+    }
+
+    // Validate phone
+    const phoneError = validateField('phone', profile.phone || '');
+    if (phoneError) {
+      errors.phone = phoneError;
+      hasErrors = true;
+    }
+
+    // Validate address
+    const addressError = validateField('address', profile.address || '');
+    if (addressError) {
+      errors.address = addressError;
+      hasErrors = true;
+    }
+
+    setFieldErrors(errors);
+    return !hasErrors;
   };
 
   const handleSave = async () => {
+    // Clear previous errors
+    setError(null);
+    
+    // Validate all fields first
+    if (!validateAllFields()) {
+      setError('Vui lòng kiểm tra và sửa các lỗi trong form');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Validate required fields
-      if (!profile.name || profile.name.trim() === '' || profile.name === 'Chưa cập nhật') {
-        throw new Error('Vui lòng nhập họ và tên');
-      }
-      if (!profile.phone || profile.phone.trim() === '' || profile.phone === 'Chưa cập nhật') {
-        throw new Error('Vui lòng nhập số điện thoại');
-      }
-      if (!profile.address || profile.address.trim() === '' || profile.address === 'Chưa cập nhật') {
-        throw new Error('Vui lòng nhập địa chỉ');
-      }
-      // Validate address format (should have at least one comma for province/city)
-      const addressCommaCount = (profile.address.match(/,/g) || []).length;
-      if (addressCommaCount < 1) {
-        throw new Error('Vui lòng chọn tỉnh/thành phố và nhập địa chỉ chi tiết');
-      }
-
       // Prepare update data (exclude email as it's not updatable)
       const updateData: UpdateUserData = {
         fullName: profile.name.trim(),
@@ -153,6 +230,7 @@ export const EditProfile = (): React.JSX.Element => {
       
       // Clear any previous errors and show success
       setError(null);
+      setFieldErrors({});
       setSuccessMessage('Cập nhật thông tin thành công!');
       
       // Clear success message and reload page after 2 seconds
@@ -184,6 +262,9 @@ export const EditProfile = (): React.JSX.Element => {
     if (originalProfile) {
       setProfile(originalProfile);
     }
+    // Clear validation errors
+    setFieldErrors({});
+    setError(null);
   };
 
   // Loading state
@@ -353,13 +434,22 @@ export const EditProfile = (): React.JSX.Element => {
                         Họ và Tên
                       </label>
                       {isEditing ? (
-                        <Input
-                          type="text"
-                          value={profile.name === 'Chưa cập nhật' ? '' : profile.name}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
-                          placeholder="Nhập họ và tên"
-                        />
+                        <div>
+                          <Input
+                            type="text"
+                            value={profile.name === 'Chưa cập nhật' ? '' : profile.name}
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className={`w-full p-3 border-2 rounded-lg focus:border-blue-500 ${
+                              fieldErrors.name 
+                                ? 'border-red-500 focus:border-red-500' 
+                                : 'border-gray-200'
+                            }`}
+                            placeholder="Nhập họ và tên"
+                          />
+                          {fieldErrors.name && (
+                            <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+                          )}
+                        </div>
                       ) : (
                         <Input
                           type="text"
@@ -392,13 +482,22 @@ export const EditProfile = (): React.JSX.Element => {
                         Số Điện Thoại
                       </label>
                       {isEditing ? (
-                        <Input
-                          type="tel"
-                          value={profile.phone === 'Chưa cập nhật' ? '' : profile.phone}
-                          onChange={(e) => handleInputChange('phone', e.target.value)}
-                          className="w-full p-3 border-2 border-gray-200 rounded-lg focus:border-blue-500"
-                          placeholder="Nhập số điện thoại"
-                        />
+                        <div>
+                          <Input
+                            type="tel"
+                            value={profile.phone === 'Chưa cập nhật' ? '' : profile.phone}
+                            onChange={(e) => handleInputChange('phone', e.target.value)}
+                            className={`w-full p-3 border-2 rounded-lg focus:border-blue-500 ${
+                              fieldErrors.phone 
+                                ? 'border-red-500 focus:border-red-500' 
+                                : 'border-gray-200'
+                            }`}
+                            placeholder="Nhập số điện thoại"
+                          />
+                          {fieldErrors.phone && (
+                            <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
+                          )}
+                        </div>
                       ) : (
                         <Input
                           type="tel"
@@ -416,13 +515,22 @@ export const EditProfile = (): React.JSX.Element => {
                         Địa Chỉ
                       </label>
                       {isEditing ? (
-                        <AddressSelector
-                          value={profile.address === 'Chưa cập nhật' ? '' : profile.address}
-                          onChange={(newAddress) => handleInputChange('address', newAddress)}
-                          placeholder="Nhập địa chỉ chi tiết của bạn"
-                          required={true}
-                          className="w-full"
-                        />
+                        <div>
+                          <AddressSelector
+                            value={profile.address === 'Chưa cập nhật' ? '' : profile.address}
+                            onChange={(newAddress) => handleInputChange('address', newAddress)}
+                            placeholder="Nhập địa chỉ chi tiết của bạn"
+                            required={true}
+                            className={`w-full ${
+                              fieldErrors.address 
+                                ? 'border-red-500 focus:border-red-500' 
+                                : ''
+                            }`}
+                          />
+                          {fieldErrors.address && (
+                            <p className="mt-1 text-sm text-red-600">{fieldErrors.address}</p>
+                          )}
+                        </div>
                       ) : (
                         <Input
                           type="text"

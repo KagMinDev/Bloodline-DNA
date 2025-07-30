@@ -238,9 +238,9 @@ export const ProgressStepProps = ({
             <Button 
               onClick={handleViewResult} 
               disabled={loadingResult} 
-              className="flex items-center gap-2 text-white bg-green-600 hover:bg-green-700"
+              className="flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 !text-white font-semibold"
             >
-              <EyeIcon className="w-4 h-4" />
+              <EyeIcon className="w-4 h-4 !text-white" />
               {loadingResult ? "Đang tải..." : "XEM KẾT QUẢ"}
             </Button>
             {resultError && (
