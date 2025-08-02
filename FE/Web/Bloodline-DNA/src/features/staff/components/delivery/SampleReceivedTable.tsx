@@ -196,6 +196,14 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
 
   return (
     <>
+      <div className="flex justify-between">
+        <div>
+          <p className="text-xs text-yellow-600 before:content-['•'] before:mr-2">Xác nhận và nhận lại mẫu Kit từ khách hàng.</p>
+        </div>
+        <div className="italic">
+          Số đơn yêu cầu nhận: <span className="font-semibold text-yellow-600">{data.length}/{data.length}</span> đơn
+        </div>
+      </div>
       {loading ? (
         <div className="flex items-center justify-center py-10">
           <Loading message="Đang tải danh sách nhận mẫu Kit..." />

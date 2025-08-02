@@ -1,7 +1,8 @@
 import { CheckOutlined } from "@ant-design/icons";
-import { Button, Modal, Select, Table, Tag, message } from "antd";
+import { Button, Modal, Table, Tag, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useCallback, useEffect, useState } from "react";
+import { RiImageAddLine } from "react-icons/ri";
 import { Loading } from "../../../../components";
 import { completeDelivery, getAssignedDeliveries } from "../../api/deliveryApi";
 import {
@@ -17,12 +18,14 @@ const DeliveryTable = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const selectedOrder = data.find((item) => item.id === selectedId);
+  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getAssignedDeliveries();
-      setData(result);
+      const filteredResult = result.filter(item => item.status === "DeliveringKit");
+      setData(filteredResult);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách đơn giao Kit:", error);
       message.error("Không thể lấy danh sách đơn hàng.");
@@ -40,12 +43,20 @@ const DeliveryTable = () => {
   };
 
   const handleConfirmComplete = async () => {
-    if (!selectedId) return;
+    if (!selectedId || !uploadedImage) {
+      message.error("Vui lòng tải ảnh xác nhận.");
+      return;
+    }
+
     setConfirmLoading(true);
     try {
-      await completeDelivery(selectedId);
+      const formData = new FormData();
+      formData.append("evidence", uploadedImage);
+
+      await completeDelivery(selectedId, formData);
       message.success(`Đã hoàn thành đơn hàng #${selectedId}`);
       setSelectedId(null);
+      setUploadedImage(null);
       fetchData();
     } catch (error) {
       console.error("Lỗi hoàn thành đơn:", error);
@@ -150,8 +161,8 @@ const DeliveryTable = () => {
               handleClickComplete(record.id);
             }}
             className={`px-2 py-1 text-xs rounded ${canComplete
-                ? "bg-green-500 text-white hover:bg-green-600"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ? "bg-green-500 text-white hover:bg-green-600"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             style={{ fontSize: 10 }}
           >
@@ -164,29 +175,13 @@ const DeliveryTable = () => {
 
   return (
     <>
-      <div className="flex flex-row items-center gap-3 mb-4">
-        <div className="text-xs">Lọc trạng thái:</div>
-        <Select
-          value={filterStatus}
-          onChange={setFilterStatus}
-          style={{ width: 200, fontSize: 12 }}
-          dropdownStyle={{ fontSize: 12 }}
-          options={[
-            {
-              label: <span style={{ fontSize: 12 }}>Tất cả trạng thái</span>,
-              value: "All",
-            },
-            {
-              label: <span style={{ fontSize: 12 }}>Đang giao bộ Kit</span>,
-              value: "DeliveringKit",
-            },
-            {
-              label: <span style={{ fontSize: 12 }}>Đã nhận Kit</span>,
-              value: "KitDelivered",
-            },
-          ]}
-          size="small"
-        />
+      <div className="flex justify-between">
+        <div>
+          <p className="text-xs text-blue-500 before:content-['•'] before:mr-2">Giao mẫu Kit tới tận tay khách hàng.</p>
+        </div>
+        <div className="italic">
+          Số đơn đang cần giao: <span className="font-semibold text-blue-500">{filteredData.length}/{filteredData.length}</span> đơn
+        </div>
       </div>
 
       {loading ? (
@@ -222,10 +217,14 @@ const DeliveryTable = () => {
         open={!!selectedId}
         title="Xác nhận hoàn thành giao Kit"
         onOk={handleConfirmComplete}
-        onCancel={() => setSelectedId(null)}
+        onCancel={() => {
+          setSelectedId(null);
+          setUploadedImage(null);
+        }}
         confirmLoading={confirmLoading}
         okText="Hoàn thành"
         cancelText="Hủy"
+        okButtonProps={{ disabled: !uploadedImage }}
       >
         {selectedOrder ? (
           <div className="space-y-2 text-sm">
@@ -252,6 +251,30 @@ const DeliveryTable = () => {
                 <Tag color={statusColorMap[selectedOrder.status]}>
                   {statusTextMap[selectedOrder.status] || selectedOrder.status}
                 </Tag>
+              </div>
+            </div>
+            <div>
+              <div className="mt-4">
+                <label className="flex flex-col items-start gap-1 mb-1 text-sm font-medium text-gray-700">
+                  <div className="flex items-center gap-1">
+                    <RiImageAddLine className="text-lg" />
+                    <span>Tải ảnh lấy mẫu Kit để xác nhận</span>
+                  </div>
+                  <p className="text-xs italic text-red-500">* (bắt buộc)</p>
+                </label>
+                {/* Upload ảnh xác nhận */}
+                <div className="px-4 py-2 mb-5 transition border border-blue-300 rounded cursor-pointer w-fit bg-blue-50 hover:bg-blue-100">
+                  <input
+                    placeholder="Tải ảnh xác nhận"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setUploadedImage(file);
+                    }}
+                    className="text-sm text-gray-700 cursor-pointer file:mr-4 file:py-1 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                  />
+                </div>
               </div>
             </div>
           </div>
