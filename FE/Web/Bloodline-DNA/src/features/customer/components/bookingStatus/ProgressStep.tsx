@@ -1,4 +1,4 @@
-import { AlertCircleIcon, CalendarIcon, CheckCircleIcon, CreditCardIcon, EyeIcon, FilePenIcon } from 'lucide-react';
+import { AlertCircleIcon, CalendarIcon, CheckCircleIcon, CreditCardIcon, EyeIcon, FilePenIcon, TruckIcon } from 'lucide-react';
 import { useState } from 'react';
 import { getTestResultsByUserId } from '../../api/testResultApi';
 import type { ProgressStep } from '../../types/bookingTypes';
@@ -157,8 +157,10 @@ export const ProgressStepProps = ({
             )}
           </div>
         )}
-        {step.id === 3 && bookingStatus.toLowerCase() === 'deliveringkit' && handleConfirmDelivery && (
+        {step.id === 3 && (bookingStatus.toLowerCase() === 'deliveringkit' || bookingStatus.toLowerCase() === 'kitdelivered') && handleConfirmDelivery && (
           <div className="mt-4">
+           
+            
             {isDeliveryConfirmed ? (
               <div className="p-3 border border-green-200 rounded-lg bg-green-50">
                 <div className="flex items-center text-green-700">
@@ -168,25 +170,40 @@ export const ProgressStepProps = ({
               </div>
             ) : (
               <>
-                <Button
-                  onClick={() => handleConfirmDelivery(bookingId)}
-                  disabled={confirmDeliveryLoading}
-                  className="bg-green-600 hover:bg-green-700 !text-white font-semibold"
-                >
-                  {confirmDeliveryLoading ? (
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 mr-2 border-2 rounded-full border-white/30 border-t-white animate-spin"></div>
-                      Đang xử lý...
-                    </div>
-                  ) : (
-                    <>
-                      <CheckCircleIcon className="w-4 h-4 mr-2 text-white" />
-                      Đã Nhận Kit
-                    </>
-                  )}
-                </Button>
+                {/* Chỉ hiển thị nút "Đã Nhận Kit" khi status là KitDelivered */}
+                {bookingStatus.toLowerCase() === 'kitdelivered' ? (
+                  <Button
+                    onClick={() => handleConfirmDelivery(bookingId)}
+                    disabled={confirmDeliveryLoading}
+                    className="bg-green-600 hover:bg-green-700 !text-white font-semibold"
+                  >
+                    {confirmDeliveryLoading ? (
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 mr-2 border-2 rounded-full border-white/30 border-t-white animate-spin"></div>
+                        Đang xử lý...
+                      </div>
+                    ) : (
+                      <>
+                        <CheckCircleIcon className="w-4 h-4 mr-2 text-white" />
+                        Đã Nhận Kit
+                      </>
+                    )}
+                  </Button>
+                ) : (
+                  /* Hiển thị nút disabled khi status là DeliveringKit */
+                  <Button
+                    disabled={true}
+                    className="bg-gray-400 text-gray-600 cursor-not-allowed hover:bg-gray-400 font-semibold"
+                  >
+                    <CheckCircleIcon className="w-4 h-4 mr-2 text-gray-600" />
+                    Đã Nhận Kit
+                  </Button>
+                )}
                 <p className="mt-2 text-xs text-slate-500">
-                  Xác nhận bạn đã nhận được kit xét nghiệm.
+                  {bookingStatus.toLowerCase() === 'deliveringkit' 
+                    ? 'Nút sẽ được kích hoạt khi kit được giao đến bạn.'
+                    : 'Xác nhận bạn đã nhận được kit xét nghiệm.'
+                  }
                 </p>
               </>
             )}
