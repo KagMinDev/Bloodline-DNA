@@ -13,6 +13,7 @@ import {
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createBookingApi, getAvailableTestServicesApi, mapFormDataToBookingRequest } from "../api/bookingCreateApi";
+import { getUserInfoApi } from "../api/userApi";
 import { AddressSelector } from "./AddressSelector";
 import { Button } from "./ui/Button";
 import { Card, CardContent, CardHeader } from "./ui/Card";
@@ -79,6 +80,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   const [apiError, setApiError] = useState<string | null>(null);
   const [bookingResponse, setBookingResponse] = useState<CreateBookingResponse | null>(null);
   const [enhancedSelectedService, setEnhancedSelectedService] = useState<any>(null);
+  const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
 
   // Check if user is authenticated
   const isAuthenticated = (): boolean => {
@@ -152,6 +154,39 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       }));
     }
   }, [selectedService]);
+
+  // Auto-populate user information when moving to step 2
+  React.useEffect(() => {
+    const populateUserInfo = async () => {
+      // Only populate if we're on step 2, modal is open, and user is authenticated
+      if (step === 2 && isOpen && isAuthenticated()) {
+        // Check if form is currently empty (not filled by user)
+        const isFormEmpty = !formData.name.trim() && !formData.phone.trim() && (!formData.address.trim() || formData.address === 'TẠI CƠ SỞ');
+        
+        if (isFormEmpty) {
+          setIsLoadingUserInfo(true);
+          try {
+            const userInfo = await getUserInfoApi();
+            if (userInfo) {
+              setFormData(prev => ({
+                ...prev,
+                name: userInfo.fullName || prev.name,
+                phone: userInfo.phone || prev.phone,
+                address: (formData.serviceType === 'clinic') ? 'TẠI CƠ SỞ' : (userInfo.address || prev.address)
+              }));
+            }
+          } catch (error) {
+            console.log('Could not auto-populate user info:', error);
+            // Không hiển thị lỗi cho user vì đây là optional feature
+          } finally {
+            setIsLoadingUserInfo(false);
+          }
+        }
+      }
+    };
+
+    populateUserInfo();
+  }, [step, isOpen, formData.serviceType]);
 
   // Reset address when serviceType changes
   React.useEffect(() => {
@@ -305,26 +340,6 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return selectedTest ? [selectedTest] : [];
   };
 
-  // Lấy tất cả service types khả dụng cho collectionMethod đã chọn (để validate)
-  const getAvailableServiceTypes = (): string[] => {
-    if (!selectedService) {
-      // Nếu không có selectedService, trả về cả hai option
-      return ['home', 'clinic'];
-    }
-
-    const { collectionMethod } = selectedService;
-
-    // Dựa vào collectionMethod để trả về service types khả dụng
-    if (collectionMethod === 0) {
-      return ['home']; // collectionMethod 0 = chỉ home
-    } else if (collectionMethod === 1) {
-      return ['clinic']; // collectionMethod 1 = chỉ clinic
-    }
-
-    // Fallback: nếu collectionMethod không rõ, trả về cả hai
-    return ['home', 'clinic'];
-  };
-
   // Đếm số lượng service types có sẵn
   const getAvailableServiceTypesCount = (): number => {
     if (!selectedService) {
@@ -344,26 +359,17 @@ export const BookingModal: React.FC<BookingModalProps> = ({
     return 2;
   };
 
-  // Kiểm tra xem có nên hiển thị service type không dựa vào collectionMethod
-  const shouldShowServiceType = (serviceType: string): boolean => {
-    if (!selectedService) {
-      // Nếu không có selectedService, hiển thị cả hai option (fallback cho compatibility)
-      return ['home', 'clinic'].includes(serviceType);
+  // Helper function to check if service type should be shown
+  const shouldShowServiceType = (type: 'home' | 'clinic'): boolean => {
+    if (!selectedService) return true;
+    
+    if (type === 'home') {
+      return selectedService.collectionMethod === 0;
+    } else if (type === 'clinic') {
+      return selectedService.collectionMethod === 1;
     }
-
-    const { collectionMethod } = selectedService;
-
-    // Dựa vào collectionMethod để quyết định hiển thị
-    if (collectionMethod === 0) {
-      // collectionMethod 0 = Tự thu mẫu / Thu tại nhà
-      return serviceType === 'home';
-    } else if (collectionMethod === 1) {
-      // collectionMethod 1 = Thu mẫu tại trung tâm  
-      return serviceType === 'clinic';
-    }
-
-    // Fallback: nếu collectionMethod không rõ, hiển thị cả hai option
-    return ['home', 'clinic'].includes(serviceType);
+    
+    return true;
   };
 
   const timeSlots = [
@@ -817,6 +823,18 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 <h3 className="text-lg font-semibold text-blue-900">
                   Thông tin liên hệ và đặt lịch
                 </h3>
+
+                {/* User Info Loading */}
+                {isLoadingUserInfo && (
+                  <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                    <div className="flex items-center">
+                      <div className="w-5 h-5 mr-2 border-2 rounded-full border-blue-300 border-t-blue-900 animate-spin"></div>
+                      <p className="text-sm text-blue-800">
+                        Đang tự động điền thông tin của bạn...
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Authentication Warning */}
                 {!isAuthenticated() && (
