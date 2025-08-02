@@ -2,6 +2,7 @@ import { AlertCircleIcon, CheckCircle, Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../../staff/components/booking/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../staff/components/booking/ui/select";
+import { getBookingByIdApi } from "../api/bookingListApi";
 import { getTestKitByBookingIdApi, submitSampleInfoApi, type SampleInfoPayload } from "../api/sampleApi";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -49,6 +50,7 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
 }) => {
   const [formData, setFormData] = useState({
     donorName: "",
+    donorName2: "",
     relationshipToSubject: "",
     sampleType: "",
   });
@@ -57,6 +59,7 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [clientName, setClientName] = useState<string>("");
 
   // Fetch TestKit information when modal opens
   useEffect(() => {
@@ -85,11 +88,31 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
     fetchTestKit();
   }, [isOpen, bookingId]);
 
+  // Fetch booking information to get clientName
   useEffect(() => {
-    // Reset form when modal opens
+    const fetchBookingInfo = async () => {
+      if (isOpen && bookingId) {
+        try {
+          const bookingData = await getBookingByIdApi(bookingId);
+          if (bookingData?.clientName) {
+            setClientName(bookingData.clientName);
+          }
+        } catch (error) {
+          console.error('❌ Error fetching booking info:', error);
+          // Không hiển thị lỗi vì đây là optional feature
+        }
+      }
+    };
+
+    fetchBookingInfo();
+  }, [isOpen, bookingId]);
+
+  useEffect(() => {
+    // Reset form when modal opens và auto-populate donorName với clientName
     if (isOpen) {
       setFormData({
-        donorName: "",
+        donorName: clientName || "", // Auto-populate with clientName
+        donorName2: "",
         relationshipToSubject: "",
         sampleType: "",
       });
@@ -97,12 +120,13 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
       setErrors({});
       setApiError(null);
     }
-  }, [isOpen]);
+  }, [isOpen, clientName]); // Depend on clientName để re-populate khi có data
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!kitId.trim()) newErrors.kitId = "Không tìm thấy mã Kit. Vui lòng thử lại.";
     if (!formData.donorName.trim()) newErrors.donorName = "Vui lòng nhập tên người cho mẫu.";
+    if (!formData.donorName2.trim()) newErrors.donorName2 = "Vui lòng nhập tên người cho mẫu 2.";
     if (!formData.relationshipToSubject) newErrors.relationshipToSubject = "Vui lòng chọn mối quan hệ.";
     if (!formData.sampleType) newErrors.sampleType = "Vui lòng chọn loại mẫu.";
     
@@ -127,9 +151,12 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
       return;
     }
 
+    // Combine two donor names
+    const combinedDonorName = `${formData.donorName.trim()} và ${formData.donorName2.trim()}`;
+
     const payload: SampleInfoPayload = {
       kitId: kitId,
-      donorName: formData.donorName,
+      donorName: combinedDonorName,
       relationshipToSubject: relationshipNumber,
       sampleType: sampleTypeNumber,
     };
@@ -191,14 +218,32 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
             <Input
               value={formData.donorName}
               onChange={(e) => setFormData({ ...formData, donorName: e.target.value })}
-              placeholder="Họ và tên người cung cấp mẫu"
+              placeholder={clientName ? `${clientName} (từ thông tin đặt lịch)` : "Họ và tên người cung cấp mẫu"}
+              className="mt-1"
+              readOnly={!!clientName} // Make readonly if we have clientName from booking
+              style={clientName ? { backgroundColor: '#f8f9fa', color: '#6c757d' } : {}}
+            />
+            {clientName && (
+              <p className="text-xs text-blue-600 mt-1">
+                <strong>Lưu ý:</strong> Tên được tự động điền từ thông tin đặt lịch
+              </p>
+            )}
+            {errors.donorName && <p className="text-sm text-red-600 mt-1">{errors.donorName}</p>}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium">Tên người cho mẫu 2 *</label>
+            <Input
+              value={formData.donorName2}
+              onChange={(e) => setFormData({ ...formData, donorName2: e.target.value })}
+              placeholder="Họ và tên người cung cấp mẫu thứ 2"
               className="mt-1"
             />
-            {errors.donorName && <p className="text-sm text-red-600 mt-1">{errors.donorName}</p>}
+            {errors.donorName2 && <p className="text-sm text-red-600 mt-1">{errors.donorName2}</p>}
           </div>
           
           <div>
-            <label className="text-sm font-medium">Mối quan hệ với người đăng ký *</label>
+            <label className="text-sm font-medium">Mối quan hệ với người cho mẫu 2 *</label>
             <Select onValueChange={(value: string) => setFormData({ ...formData, relationshipToSubject: value })}>
               <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Chọn mối quan hệ" /></SelectTrigger>
               <SelectContent>

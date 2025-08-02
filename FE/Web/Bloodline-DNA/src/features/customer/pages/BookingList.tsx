@@ -58,7 +58,7 @@ interface Booking {
   notes?: string;
   bookingDate: string;
   price: string;
-  collectionMethod: string;
+  collectionMethod: string | number; // Support both string and number
 }
 
 export const BookingList = (): React.JSX.Element => {
@@ -272,11 +272,31 @@ export const BookingList = (): React.JSX.Element => {
     // Filter by collectionMethod
     if (collectionMethodFilter !== "all") {
       filtered = filtered.filter(booking => {
-        const method = booking.collectionMethod?.toString().toLowerCase() || '';
+        const method = booking.collectionMethod;
         if (collectionMethodFilter === "home") {
-          return method === "selfsample" || method === "0" || method.includes("home") || method.includes("nhà") || method.includes("selfsample");
+          // Home: collectionMethod = 0 hoặc SelfSample
+          if (typeof method === 'number') {
+            return method === 0;
+          } else if (typeof method === 'string') {
+            const methodStr = method.toLowerCase();
+            return methodStr === "0" || 
+                   methodStr.includes("selfsample") || 
+                   methodStr.includes("home") || 
+                   methodStr.includes("nhà");
+          }
+          return false;
         } else if (collectionMethodFilter === "facility") {
-          return method === "atfacility" || method === "1" || method.includes("facility") || method.includes("cơ sở") || method.includes("atfacility");
+          // Facility: collectionMethod = 1 hoặc AtFacility
+          if (typeof method === 'number') {
+            return method === 1;
+          } else if (typeof method === 'string') {
+            const methodStr = method.toLowerCase();
+            return methodStr === "1" || 
+                   methodStr.includes("atfacility") || 
+                   methodStr.includes("facility") || 
+                   methodStr.includes("cơ sở");
+          }
+          return false;
         }
         return true;
       });
@@ -598,8 +618,23 @@ export const BookingList = (): React.JSX.Element => {
 
                           <div className="flex flex-col gap-3 mt-4">
                             <div className="flex flex-col gap-3 sm:flex-row">
-                              {/* Ẩn nút "Xem chi tiết" cho booking có collectionMethod là "AtFacility" */}
-                              {booking.collectionMethod?.toString().toLowerCase() !== "atfacility" && (
+                              {/* Ẩn nút "Xem chi tiết" cho booking có collectionMethod là "AtFacility" (giá trị 1) */}
+                              {(() => {
+                                // Kiểm tra collectionMethod: 1 = AtFacility, 0 = SelfSample
+                                const method = booking.collectionMethod;
+                                let isAtFacility = false;
+                                
+                                if (typeof method === 'number') {
+                                  isAtFacility = method === 1;
+                                } else if (typeof method === 'string') {
+                                  const methodStr = method.toLowerCase();
+                                  isAtFacility = methodStr === '1' || 
+                                                methodStr.includes('atfacility') ||
+                                                methodStr.includes('facility');
+                                }
+                                
+                                return !isAtFacility;
+                              })() && (
                                 <Button 
                                   variant="outline" 
                                   className="w-full sm:w-auto"
@@ -740,7 +775,7 @@ export const BookingList = (): React.JSX.Element => {
               <>
                 <div className="mb-2 font-semibold text-blue-700">Chọn kết quả muốn xem:</div>
                 <ul className="mb-4 space-y-2">
-                  {resultData.list.map((r: any, idx: number) => (
+                  {resultData.list.map((r: any) => (
                     <li key={r.id} className="flex flex-col gap-1 p-2 border rounded">
                       <div><b>Mã booking:</b> {r.testBookingId}</div>
                       <div><b>Kết luận:</b> {r.resultSummary}</div>

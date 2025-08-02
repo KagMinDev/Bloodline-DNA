@@ -67,7 +67,15 @@ export const BookingDetailTab = ({ booking, progressData, paymentLoading, paymen
                   <span className="font-medium text-orange-600">{formatPaymentAmount(calculateDeposit(booking.priceNumeric))}</span>
                 </div>
               )}
-              <div className="flex justify-between pt-2 font-bold border-t text-slate-800"><span>Tổng cộng</span><span className="text-lg text-green-600">{booking.totalPrice}</span></div>
+              <div className="flex justify-between pt-2 font-bold border-t text-slate-800">
+                <span>Số tiền còn lại</span>
+                <span className="text-lg text-green-600">
+                  {booking.priceNumeric 
+                    ? formatPaymentAmount(booking.priceNumeric - calculateDeposit(booking.priceNumeric))
+                    : booking.totalPrice
+                  }
+                </span>
+              </div>
             </div>
             {progressData?.steps.find(s => s.id === 2 && s.actionRequired && s.status === 'current') && (
               <div className="pt-4 border-t">

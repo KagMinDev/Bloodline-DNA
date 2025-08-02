@@ -772,6 +772,19 @@ export const Services = (): React.JSX.Element => {
                         })()}
                       </div>
 
+                      {/* Sample Requirements */}
+                      <div className="mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                        <div className="flex items-center mb-2">
+                          <h4 className="text-sm font-medium text-amber-800">Yêu Cầu Mẫu Xét Nghiệm</h4>
+                        </div>
+                        <div className="text-sm text-amber-700 mb-2">
+                          <strong>Số Lượng:</strong> 2 mẫu bắt buộc
+                        </div>
+                        <div className="text-sm text-amber-700">
+                          <strong>Loại Mẫu:</strong> Máu, Tóc, Móng, Nước ối, Dịch ối
+                        </div>
+                      </div>
+
                       {/* Divider */}
                       <hr className="my-4 border-gray-100" />
 
