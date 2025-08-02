@@ -101,7 +101,7 @@ const DeliveryTable = () => {
       ),
     },
     {
-      title: <span style={{ fontSize: "10px" }}>Thời gian giao</span>,
+      title: <span style={{ fontSize: "12px" }}>Thời gian giao</span>,
       dataIndex: "scheduledAt",
       key: "scheduledAt",
       align: "center",
@@ -258,7 +258,7 @@ const DeliveryTable = () => {
                 <label className="flex flex-col items-start gap-1 mb-1 text-sm font-medium text-gray-700">
                   <div className="flex items-center gap-1">
                     <RiImageAddLine className="text-lg" />
-                    <span>Tải ảnh lấy mẫu Kit để xác nhận</span>
+                    <span>Tải ảnh giao mẫu Kit để xác nhận!</span>
                   </div>
                   <p className="text-xs italic text-red-500">* (bắt buộc)</p>
                 </label>

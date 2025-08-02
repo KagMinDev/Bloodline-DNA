@@ -4,10 +4,8 @@ import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import { RiImageAddLine } from "react-icons/ri";
 import { Loading } from "../../../../components";
-import { updateTestBookingStatusStaff } from "../../api/deliveryApi";
-import { getTestBookingApi } from "../../api/testBookingApi";
-import { statusColorMap, statusTextMap } from "../../types/delivery"; // Dùng chung map
-import type { TestBookingResponse } from "../../types/testBooking";
+import { completeDelivery, getAssignedDeliveries } from "../../api/deliveryApi";
+import { statusColorMap, statusTextMap, type DeliveryOrder } from "../../types/delivery";
 
 interface Props {
   onRowClick: (id: string) => void;
@@ -15,7 +13,7 @@ interface Props {
 }
 
 const SampleReceived = ({ onRowClick, onComplete }: Props) => {
-  const [data, setData] = useState<TestBookingResponse[]>([]);
+  const [data, setData] = useState<DeliveryOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -23,21 +21,21 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
   const [uploadedImage, setUploadedImage] = useState<File | null>(null);
 
   const fetchData = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token") || "";
-      const result = await getTestBookingApi(token);
-      const filtered = result.filter(
-        (item) => item.status === "ReturningSample"
-      );
-      setData(filtered);
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách đơn:", error);
-      message.error("Không thể lấy danh sách đơn.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const result = await getAssignedDeliveries();
+    const filtered = result
+      .filter((item) => item.status === "WaitingForPickup")
+      .sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime());
+
+    setData(filtered);
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách đơn:", error);
+    message.error("Không thể lấy danh sách đơn.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchData();
@@ -49,41 +47,30 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
   };
 
   const handleConfirm = async () => {
-    if (!selectedId) return;
+    if (!selectedId || !uploadedImage) return;
     setConfirmLoading(true);
 
-    const currentOrder = data.find((item) => item.id === selectedId);
-    const oldStatus = currentOrder?.status;
-
     try {
-      const token = localStorage.getItem("token") || "";
+      const formData = new FormData();
+      formData.append("evidence", uploadedImage);
 
-      await updateTestBookingStatusStaff(
-        {
-          bookingId: selectedId,
-          status: 6, // SampleReceived
-        },
-        token
-      );
+      await completeDelivery(selectedId, formData);
 
-      // console.log(
-      //   `Đơn hàng ${selectedId}: Trạng thái thay đổi từ ${oldStatus} => SampleReceived (6)`
-      // );
-
-      message.success("Đã xác nhận nhận mẫu Kit.");
+      message.success("Đã xác nhận nhận lại mẫu Kit.");
       setOpenModal(false);
       setSelectedId(null);
-      onComplete();
-      fetchData(); // refetch lại
+      setUploadedImage(null);
+      onComplete(); // gọi callback nếu có
+      fetchData(); // refetch lại danh sách
     } catch (err) {
-      console.error("Lỗi cập nhật trạng thái:", err);
-      message.error("Lỗi khi xác nhận nhận mẫu Kit.");
+      console.error("Lỗi khi hoàn tất đơn hàng:", err);
+      message.error("Lỗi khi xác nhận nhận lại mẫu Kit.");
     } finally {
       setConfirmLoading(false);
     }
   };
 
-  const columns: ColumnsType<TestBookingResponse> = [
+  const columns: ColumnsType<DeliveryOrder> = [
     {
       title: <span style={{ fontSize: "12px" }}>Mã đơn</span>,
       dataIndex: "id",
@@ -91,7 +78,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
     },
     {
       title: <span style={{ fontSize: "12px" }}>Khách hàng</span>,
-      dataIndex: "clientName",
+      dataIndex: "name",
       render: (text: string) => <span style={{ fontSize: 10 }}>{text}</span>,
     },
     {
@@ -126,7 +113,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
     },
     {
       title: <span style={{ fontSize: "12px" }}>Ngày tạo</span>,
-      dataIndex: "createdAt",
+      dataIndex: "scheduledAt",
       align: "center",
       render: (text?: string) => {
         if (!text || text.trim().toLowerCase() === "string")
@@ -143,25 +130,25 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
         return <span style={{ fontSize: 10 }}>{formatted}</span>;
       },
     },
-    {
-      title: <span style={{ fontSize: "12px" }}>Ngày cật nhật</span>,
-      dataIndex: "updatedAt",
-      align: "center",
-      render: (text?: string) => {
-        if (!text || text.trim().toLowerCase() === "string")
-          return <span style={{ fontSize: 10 }}>Không có</span>;
-        const date = new Date(text);
-        const formatted = date.toLocaleString("vi-VN", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        });
-        return <span style={{ fontSize: 10 }}>{formatted}</span>;
-      },
-    },
+    // {
+    //   title: <span style={{ fontSize: "12px" }}>Ngày cập nhật</span>,
+    //   dataIndex: "updatedAt",
+    //   align: "center",
+    //   render: (text?: string) => {
+    //     if (!text || text.trim().toLowerCase() === "string")
+    //       return <span style={{ fontSize: 10 }}>Không có</span>;
+    //     const date = new Date(text);
+    //     const formatted = date.toLocaleString("vi-VN", {
+    //       day: "2-digit",
+    //       month: "2-digit",
+    //       year: "numeric",
+    //       hour: "2-digit",
+    //       minute: "2-digit",
+    //       hour12: false,
+    //     });
+    //     return <span style={{ fontSize: 10 }}>{formatted}</span>;
+    //   },
+    // },
     {
       title: <span style={{ fontSize: "12px" }}>Trạng thái</span>,
       dataIndex: "status",
@@ -180,7 +167,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
         <Button
           icon={<CheckOutlined />}
           size="small"
-          disabled={record.status !== "ReturningSample"}
+          // disabled={record.status !== "ReturningSample"}
           onClick={(e) => {
             e.stopPropagation();
             handleClickMarkReceived(record.id);
@@ -219,7 +206,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
             style: { cursor: "pointer" },
           })}
           size="small"
-          locale={{ emptyText: "Không có đơn ReturningSample nào." }}
+          locale={{ emptyText: "Không có đơn yêu cầu nhận mẫu Kit nào." }}
         />
       )}
 
@@ -245,7 +232,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
               </div>
               <div>
                 <strong>Khách hàng:</strong>{" "}
-                {data.find((d) => d.id === selectedId)?.clientName || "N/A"}
+                {data.find((d) => d.id === selectedId)?.name || "N/A"}
               </div>
               <div>
                 <strong>Số điện thoại:</strong>{" "}
@@ -282,7 +269,7 @@ const SampleReceived = ({ onRowClick, onComplete }: Props) => {
                 <label className="flex flex-col items-start gap-1 mb-1 text-sm font-medium text-gray-700">
                   <div className="flex items-center gap-1">
                     <RiImageAddLine className="text-lg" />
-                    <span>Tải ảnh lấy mẫu Kit để xác nhận</span>
+                    <span>Tải ảnh nhận lại mẫu Kit để xác nhận!</span>
                   </div>
                   <p className="text-xs italic text-red-500">* (bắt buộc)</p>
                 </label>
