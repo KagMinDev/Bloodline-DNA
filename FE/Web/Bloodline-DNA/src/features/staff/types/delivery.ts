@@ -15,13 +15,11 @@ export const statusTextMap: Record<string, string> = {
   DeliveringKit: "Đang giao bộ Kit",
   KitDelivered: "Đã nhận Kit",
   WaitingForPickup: "Đợi đến lấy mẫu",
-  ReturningSample: "Đợi đến lấy mẫu",
   PickingUpSample: "Đang lấy mẫu",
   SampleReceived: "Đã nhận mẫu",
   Testing: "Đang xét nghiệm",
   Cancelled: "Đã hủy",
 };
-
 
 export type DeliveryStatus =
   | "PreparingKit"
@@ -57,6 +55,7 @@ export interface DeliveryOrder {
   id: string;
   staffId: string | null;
   staff: { fullName?: string } | null;
+  name: string;
   address: string;
   phone: string;
   scheduledAt: string;
