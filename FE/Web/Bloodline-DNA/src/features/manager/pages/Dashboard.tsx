@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { getAuthToken } from "../../../apis/rootApi";
+import { Loading } from "../../../components";
+import { getTestBookingApi } from "../../staff/api/testBookingApi";
 import { getBlogsApi } from "../api/blogsApi";
 import { getFeedbacksApi } from "../api/feedbackApi";
-import { getTestBookingApi } from "../../staff/api/testBookingApi";
-import { getAuthToken } from "../../../apis/rootApi";
 import type { BlogResponse } from "../types/blogs";
 import type { FeedbackResponse } from "../types/feedback";
 
@@ -112,20 +113,28 @@ function Dashboard() {
     }));
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loading message="Đang tải dữ liệu thống kê..." fullScreen={false} />
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 overflow-auto min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold text-blue-800 mb-6"> Thống kê tổng quan</h1>
+    <div className="min-h-screen p-6 overflow-auto bg-gray-50">
+      <h1 className="mb-6 text-3xl font-bold text-blue-800"> Thống kê tổng quan</h1>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 md:grid-cols-3">
         <CardStat title="Bài viết" count={filterDataByDate(blogs, dateFilter.startDate, dateFilter.endDate).length} color="blue" />
         <CardStat title="Lịch xét nghiệm" count={filterDataByDate(tests, dateFilter.startDate, dateFilter.endDate).length} color="green" />
         <CardStat title="Phản hồi" count={filterDataByDate(feedbacks, dateFilter.startDate, dateFilter.endDate).length} color="orange" />
       </div>
 
       {/* Chart Section */}
-      <div className="bg-white rounded-2xl shadow-xl p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+      <div className="p-6 bg-white shadow-xl rounded-2xl">
+        <div className="flex flex-col justify-between mb-4 sm:flex-row sm:items-center">
           <h2 className="text-xl font-semibold text-gray-700"></h2>
           <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
             {[
@@ -149,7 +158,7 @@ function Dashboard() {
           </div>
         </div>
 
-        <h3 className="text-lg font-medium text-gray-800 mb-4">📈 Hoạt động theo thời gian</h3>
+        <h3 className="mb-4 text-lg font-medium text-gray-800">📈 Hoạt động theo thời gian</h3>
         <ResponsiveContainer width="100%" height={430}>
           <LineChart data={formatChartData()}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -175,7 +184,7 @@ function CardStat({ title, count, color }: { title: string; count: number; color
   };
   return (
     <div className={`rounded-2xl shadow-md p-6 flex flex-col items-center justify-center ${colorMap[color]}`}>
-      <p className="text-sm text-gray-600 mb-1">{title}</p>
+      <p className="mb-1 text-sm text-gray-600">{title}</p>
       <p className="text-3xl font-extrabold">{count}</p>
     </div>
   );

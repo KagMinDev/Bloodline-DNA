@@ -524,6 +524,21 @@ namespace ADNTester.API.Controllers
                 return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình lấy danh sách payment." });
             }
         }
+        [HttpGet("Get-Payment-Paid")]
+        public async Task<IActionResult> Getpaymentpaid()
+        {
+            try
+            {
+                var payment = await _paymentService.GetAllPaymentComple();
+                return Ok(payment);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi lấy danh sách payment Paid với sample received: {ex.Message}");
+                return StatusCode(500, new { error = "Đã xảy ra lỗi trong quá trình lấy danh sách payment." });
+            }
+        }
     }
 
     public class PaymentCallbackDto

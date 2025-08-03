@@ -24,8 +24,6 @@ export const getAllUserApi = async (): Promise<UserResponse[]> => {
   let attempts = 0;
   while (attempts < maxRetries) {
     try {
-      console.log(`Attempt ${attempts + 1} to fetch all users`);
-
       // rootApi sẽ tự động thêm Authorization header thông qua interceptor
       const response = await rootApi.get<UserResponse[]>("/user", {
         timeout, // Thêm timeout 10s cho mỗi request

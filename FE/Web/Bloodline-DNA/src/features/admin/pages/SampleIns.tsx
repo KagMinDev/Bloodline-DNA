@@ -1,14 +1,15 @@
+import { MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../staff/components/sample/ui/table";
-import { Button } from "../../staff/components/sample/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../staff/components/sample/ui/dialog";
+import { Loading } from "../../../components";
 import { Input } from "../../staff/components/booking/ui/input";
 import { Textarea } from "../../staff/components/booking/ui/textarea";
-import { MoreVertical } from "lucide-react";
-import type { SampleInsResponse, SampleInsUpdateRequest } from "../types/sample-ins";
-import { deleteSampleInsApi, getSampleInsListApi, updateSampleInsApi } from "../api/sample-insApi";
+import { Button } from "../../staff/components/sample/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../staff/components/sample/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../staff/components/sample/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../staff/components/sample/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../staff/components/sample/ui/table";
+import { deleteSampleInsApi, getSampleInsListApi, updateSampleInsApi } from "../api/sample-insApi";
+import type { SampleInsResponse, SampleInsUpdateRequest } from "../types/sample-ins";
 
 const getSampleTypeLabel = (type: number): string => {
   switch (type) {
@@ -45,10 +46,19 @@ const SampleIns = () => {
   const [editing, setEditing] = useState<SampleInsUpdateRequest | null>(null);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const fetchData = async () => {
-    const res = await getSampleInsListApi();
-    setList(res);
+    try {
+      setLoading(true);
+      const res = await getSampleInsListApi();
+      setList(res);
+    } catch (err) {
+      console.error("Fetch error", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -57,19 +67,17 @@ const SampleIns = () => {
 
   const handleSubmit = async () => {
     try {
+      setSubmitting(true);
       if (editing && "id" in editing) {
         const { id, sampleType, instructionText, mediaUrl } = editing;
-        await updateSampleInsApi({
-          id,
-          sampleType,
-          instructionText,
-          mediaUrl,
-        });
+        await updateSampleInsApi({ id, sampleType, instructionText, mediaUrl });
         setOpen(false);
         fetchData();
       }
     } catch (err) {
       console.error("Submit error", err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -81,102 +89,108 @@ const SampleIns = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 p-8">
+    <div className="min-h-screen p-8 bg-blue-50">
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="text-blue-600 text-2xl font-semibold">
+          <CardTitle className="text-2xl font-semibold text-blue-600">
             📋 Hướng dẫn lấy mẫu
           </CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center">Loại mẫu</TableHead>
-                <TableHead className="text-center">Hướng dẫn</TableHead>
-                <TableHead className="text-center">Media</TableHead>
-                <TableHead className="text-center">Hành động</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {list.map((item) => (
-                <TableRow key={item.id} className="text-center">
-                  <TableCell>
-                    <span className="inline-block px-2 py-1 text-sm font-bold">
-                      {getSampleTypeLabel(item.sampleType)}
-                    </span>
-                  </TableCell>
-                  <TableCell className="max-w-sm truncate text-center">
-                    {item.instructionText}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {item.mediaUrl?.includes("youtube") ? (
-                      <div
-                        className="w-32 h-20 mx-auto cursor-pointer relative group"
-                        onClick={() => {
-                          setVideoUrl(convertYouTubeUrlToEmbed(item.mediaUrl));
-                          setIsVideoOpen(true);
-                        }}
-                      >
-                        <iframe
-                          className="w-full h-full pointer-events-none rounded"
-                          src={convertYouTubeUrlToEmbed(item.mediaUrl)}
-                          title="Video hướng dẫn"
-                        />
-                        <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 flex items-center justify-center rounded">
-                          <span className="text-white text-xs font-semibold">
-                            Xem lớn
-                          </span>
-                        </div>
-                      </div>
-                    ) : item.mediaUrl ? (
-                      <img
-                        src={item.mediaUrl}
-                        alt="media"
-                        className="w-20 h-14 object-cover rounded mx-auto"
-                      />
-                    ) : (
-                      <span className="text-gray-400 italic">
-                        Không có media
+        <CardContent className="overflow-x-auto min-h-[200px] flex items-center justify-center">
+          {loading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loading message="Đang tải dữ liệu..." />
+            </div>
+            ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">Loại mẫu</TableHead>
+                  <TableHead className="text-center">Hướng dẫn</TableHead>
+                  <TableHead className="text-center">Media</TableHead>
+                  <TableHead className="text-center">Hành động</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {list.map((item) => (
+                  <TableRow key={item.id} className="text-center">
+                    <TableCell>
+                      <span className="inline-block px-2 py-1 text-sm font-bold">
+                        {getSampleTypeLabel(item.sampleType)}
                       </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
+                    </TableCell>
+                    <TableCell className="max-w-sm text-center truncate">
+                      {item.instructionText}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {item.mediaUrl?.includes("youtube") ? (
+                        <div
+                          className="relative w-32 h-20 mx-auto cursor-pointer group"
                           onClick={() => {
-                            const { id, sampleType, instructionText, mediaUrl } =
-                              item;
-                            setEditing({
-                              id,
-                              sampleType,
-                              instructionText,
-                              mediaUrl,
-                            });
-                            setOpen(true);
+                            setVideoUrl(convertYouTubeUrlToEmbed(item.mediaUrl));
+                            setIsVideoOpen(true);
                           }}
                         >
-                          ✏️ Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          🗑️ Xoá
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          <iframe
+                            className="w-full h-full rounded pointer-events-none"
+                            src={convertYouTubeUrlToEmbed(item.mediaUrl)}
+                            title="Video hướng dẫn"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center rounded bg-black/40 group-hover:bg-black/60">
+                            <span className="text-xs font-semibold text-white">
+                              Xem lớn
+                            </span>
+                          </div>
+                        </div>
+                      ) : item.mediaUrl ? (
+                        <img
+                          src={item.mediaUrl}
+                          alt="media"
+                          className="object-cover w-20 mx-auto rounded h-14"
+                        />
+                      ) : (
+                        <span className="italic text-gray-400">
+                          Không có media
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              const { id, sampleType, instructionText, mediaUrl } =
+                                item;
+                              setEditing({
+                                id,
+                                sampleType,
+                                instructionText,
+                                mediaUrl,
+                              });
+                              setOpen(true);
+                            }}
+                          >
+                            ✏️ Chỉnh sửa
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            🗑️ Xoá
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -184,7 +198,7 @@ const SampleIns = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle className="text-blue-700 font-semibold text-lg">
+            <DialogTitle className="text-lg font-semibold text-blue-700">
               🛠️ Chỉnh sửa hướng dẫn
             </DialogTitle>
           </DialogHeader>
@@ -203,7 +217,7 @@ const SampleIns = () => {
                 }
               />
               {editing?.sampleType !== undefined && (
-                <p className="text-sm text-gray-500 mt-1 italic">
+                <p className="mt-1 text-sm italic text-gray-500">
                   ➤ {getSampleTypeLabel(editing.sampleType)}
                 </p>
               )}
@@ -243,10 +257,12 @@ const SampleIns = () => {
             <div className="pt-2">
               <Button
                 onClick={handleSubmit}
-                className="w-full bg-blue-700 text-white hover:bg-blue-800"
+                disabled={submitting}
+                className="w-full text-white bg-blue-700 hover:bg-blue-800"
               >
-               <span className="text-white"> Cập nhật hướng dẫn</span>
+                {submitting ? "⏳ Đang cập nhật..." : "Cập nhật hướng dẫn"}
               </Button>
+
             </div>
           </div>
         </DialogContent>

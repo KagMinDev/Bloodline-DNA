@@ -133,7 +133,7 @@ namespace ADNTester.Service.Implementations
                 if (!IsValidEmail(booking.Client.Email))
                     throw new Exception($"Invalid email address format: {booking.Client.Email}");
 
-                string resultFileUrl = null;
+                string resultFileUrl = "";
                 if (dto.ResultFile != null)
                 {
                     resultFileUrl = await _cloudinaryService.UploadImageAsync(dto.ResultFile, "TestResults");
@@ -291,6 +291,11 @@ namespace ADNTester.Service.Implementations
             {
                 var fileUrl = await _cloudinaryService.UploadImageAsync(dto.ResultFile, "TestResults");
                 testResult.ResultFileUrl = fileUrl;
+            }
+            else
+            {
+                // Ensure ResultFileUrl is not null
+                testResult.ResultFileUrl = testResult.ResultFileUrl ?? "";
             }
 
             // Update other properties

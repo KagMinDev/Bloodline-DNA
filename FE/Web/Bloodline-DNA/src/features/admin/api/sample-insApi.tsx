@@ -23,8 +23,6 @@ export const updateSampleInsApi = async (
   if (!data.id) {
     throw new Error("Invalid request: Missing id");
   }
-  // Debug log để chắc chắn id tồn tại
-  console.log("Gửi update với data:", data);
 
   const response = await rootApi.put(`/sample-instruction`, data, {
     headers: { "Content-Type": "application/json" },

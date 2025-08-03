@@ -22,7 +22,7 @@ const BookingListPanel: React.FC<BookingListPanelProps> = ({
   return (
     <div className="flex flex-col w-full h-full bg-white shadow-lg rounded-xl">
       <div className="py-3 text-sm font-semibold text-center text-blue-600 border-b-2 border-blue-600 ">
-        Danh sách đặt lịch ngày {selectedDay}
+        Danh sách đặt lịch ngày  {selectedDay}
       </div>
       <div className="flex-1 h-full px-5 py-4 space-y-4 overflow-y-auto">
         {sortedBookings.length === 0 ? (

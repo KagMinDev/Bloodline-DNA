@@ -67,9 +67,11 @@ const DeliveryCard = ({ delivery, onClick, loadingId }: Props) => {
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-blue-800">
-              Đơn: #{delivery.id}
+              Đơn: #{delivery.id} – Khách hàng: {delivery.name || "Không rõ"}
             </h3>
-            <p className="text-sm text-gray-600">Nhân viên: {delivery.staff}</p>
+            {delivery.status === "PreparingKit" && (
+              <p className="text-sm text-gray-600">Nhân viên: {delivery.staff}</p>
+            )}
           </div>
           <span
             className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(

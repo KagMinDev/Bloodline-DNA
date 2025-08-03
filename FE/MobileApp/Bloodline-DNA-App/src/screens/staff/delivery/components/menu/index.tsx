@@ -17,7 +17,6 @@ const StaffMenuScreen: React.FC = () => {
   const closeMainMenu = () => setMainMenuVisible(false);
 
   const openDeliveryMenu = () => {
-    console.log("Opening delivery menu");
     closeMainMenu();
     setDeliveryMenuVisible(true);
   };

@@ -2,6 +2,7 @@ import { formatDate } from '@fullcalendar/core';
 import { useEffect, useState } from 'react';
 import { FaBell } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { Loading } from '../../../components';
 import { getTestBookingApi } from '../api/testBookingApi';
 import Calendar from '../components/common/Calendar';
 import type { TestBookingResponse } from '../types/testBooking';
@@ -15,7 +16,7 @@ function TestBooking() {
   const fetchBookings = async () => {
     try {
       const response = await getTestBookingApi();
-      console.log('API Response:', response);
+      console.log("fetchBookings 1 12", response)
 
       if (!Array.isArray(response)) {
         console.error('Dữ liệu không phải mảng:', response);
@@ -62,7 +63,6 @@ function TestBooking() {
   };
 
   const bookingsByDate = countBookingsByDate(bookings);
-  console.log('Bookings by date:', bookingsByDate);
 
   const handleUpdateStatus = (updatedBooking: TestBookingResponse) => {
     setBookings((prevBookings) =>
@@ -89,7 +89,7 @@ function TestBooking() {
           </div>
         ) : isLoading ? (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">Đang tải dữ liệu...</p>
+              <Loading message="Đang tải danh sách đơn xét nghiệm..." />
           </div>
         ) : (
           <Calendar

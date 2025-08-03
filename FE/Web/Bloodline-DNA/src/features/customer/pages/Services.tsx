@@ -11,12 +11,12 @@ import {
   PhoneIcon,
   SearchIcon,
   ShieldIcon,
-  StethoscopeIcon,
-  UserCheckIcon
+  StethoscopeIcon
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import { getServiceById, servicesApi, type TestService } from "../api/servicesApi";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
@@ -33,7 +33,7 @@ import { Card, CardContent } from "../components/ui/Card";
 interface Service {
   id: string;               // priceServiceId
   serviceId?: string;       // real testServiceId
-  testServiceInfo?: { id: string; [key:string]: any };
+  testServiceInfo?: { id: string;[key: string]: any };
   title: string;
   description: string;
   category: string;
@@ -62,14 +62,19 @@ interface ServiceCategory {
 }
 
 // ===== HELPER FUNCTIONS =====
+// Category mappings for backward compatibility (fallback only)
 const categoryMappings: { [key: string]: string } = {
   'Civil': 'civil',
-  'Legal': 'legal', 
+  'Legal': 'legal',
   'Emergency': 'civil',
   'Consultation': 'civil',
   'Checkup': 'civil',
   'Monitoring': 'civil'
 };
+
+// NOTE: Primary classification is now based on collectionMethod:
+// collectionMethod 0 = Dân Sự (Civil) 
+// collectionMethod 1 = Hành Chính (Legal)
 
 const categoryDurations: { [key: string]: string } = {
   'Civil': '45-60 phút',
@@ -101,7 +106,7 @@ const categoryFeatures: { [key: string]: string[] } = {
 const categoryDoctors: { [key: string]: string } = {
   'Civil': 'BS. Nguyễn Văn A',
   'Legal': 'BS.CK1 Phan Thị C',
-  'Emergency': 'BS.CK2 Trần Thị B', 
+  'Emergency': 'BS.CK2 Trần Thị B',
   'Consultation': 'BS.CK1 Lê Văn C',
   'Checkup': 'BS. Phạm Thị D',
   'Monitoring': 'BS. Hoàng Văn E'
@@ -118,33 +123,44 @@ const categoryLocations: { [key: string]: string } = {
 
 // Transform API data to UI format
 const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
-  // console.log('🔄 Transforming API data to UI format...');
-  
+  console.log('🔄 Transforming API data to UI format...');
+
   if (!Array.isArray(apiServices)) {
     console.warn('⚠️ API services is not an array, using empty array');
     return [];
   }
-  
+
   return apiServices.map((apiService, index) => {
-    // console.log(`🔄 Processing service ${index + 1}:`, apiService);
-    
+    console.log(`🔄 Processing service ${index + 1}:`, apiService);
+
     const serviceInfo = apiService.testServiceInfor;
     const title = serviceInfo?.name || `Service ${apiService.id}`;
     const description = serviceInfo?.description || 'Không có mô tả';
     const apiCategory = serviceInfo?.category || 'Civil';
     const isActive = apiService.isActive;
-    
-    // Map API category to UI category
-    const uiCategory = categoryMappings[apiCategory] || 'civil';
-    
-    /* console.log(`📝 Service ${index + 1} mapping:`, {
+
+    // Map API category to UI category based on collectionMethod
+    // collectionMethod 0 = Dân Sự (Civil)
+    // collectionMethod 1 = Hành Chính (Legal)
+    let uiCategory: string;
+    if (apiService.collectionMethod === 0) {
+      uiCategory = 'civil'; // Dân Sự
+    } else if (apiService.collectionMethod === 1) {
+      uiCategory = 'legal'; // Hành Chính  
+    } else {
+      // Fallback to original category mapping if collectionMethod is unexpected
+      uiCategory = categoryMappings[apiCategory] || 'civil';
+    }
+
+    console.log(`📝 Service ${index + 1} mapping:`, {
       id: apiService.id,
       title: title,
       apiCategory: apiCategory,
+      collectionMethod: apiService.collectionMethod,
       uiCategory: uiCategory,
       isActive: isActive
-    }); */
-    
+    });
+
     const transformedService = {
       id: apiService.id,
       serviceId: apiService.serviceId,
@@ -168,8 +184,8 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
       effectiveTo: apiService.effectiveTo,
       collectionMethod: apiService.collectionMethod
     };
-    
-    // console.log(`✅ Transformed service:`, transformedService);
+
+    console.log(`✅ Transformed service:`, transformedService);
     return transformedService;
   });
 };
@@ -181,7 +197,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-1",
       serviceId: "mock-service-1",
       price: 500000,
-      collectionMethod: 0,
+      collectionMethod: 0, // Dân Sự
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -200,10 +216,10 @@ const getMockServices = (): TestService[] => {
       }
     },
     {
-      id: "mock-2", 
+      id: "mock-2",
       serviceId: "mock-service-2",
       price: 2000000,
-      collectionMethod: 1,
+      collectionMethod: 1, // Hành Chính
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -223,9 +239,9 @@ const getMockServices = (): TestService[] => {
     },
     {
       id: "mock-3",
-      serviceId: "mock-service-3", 
+      serviceId: "mock-service-3",
       price: 800000,
-      collectionMethod: 0,
+      collectionMethod: 0, // Dân Sự
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -247,7 +263,7 @@ const getMockServices = (): TestService[] => {
       id: "mock-4",
       serviceId: "mock-service-4",
       price: 1500000,
-      collectionMethod: 1,
+      collectionMethod: 1, // Hành Chính
       currency: "VND",
       effectiveFrom: new Date().toISOString(),
       effectiveTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -271,7 +287,6 @@ const getMockServices = (): TestService[] => {
 // ===== MAIN COMPONENT =====
 export const Services = (): React.JSX.Element => {
   // State
-  const [isVisible, setIsVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredServices, setFilteredServices] = useState<Service[]>([]);
@@ -286,7 +301,7 @@ export const Services = (): React.JSX.Element => {
   const handleViewDetail = async (e: React.MouseEvent<HTMLButtonElement>, id: string) => {
     e.stopPropagation();
     setDetailLoading(id);
-    
+
     try {
       const serviceDetail = await getServiceById(id);
       navigate(`/services/${id}`, {
@@ -324,12 +339,12 @@ export const Services = (): React.JSX.Element => {
   useEffect(() => {
     const loadServices = async () => {
       try {
-        // console.log('🚀 Loading services...');
+        console.log('🚀 Loading services...');
         setLoading(true);
-        
+
         const apiResponse = await servicesApi();
-        // console.log('📦 API response:', apiResponse);
-        
+        console.log('📦 API response:', apiResponse);
+
         // Handle different response structures
         let apiServices: TestService[] = [];
         if (apiResponse?.data && Array.isArray(apiResponse.data)) {
@@ -337,20 +352,20 @@ export const Services = (): React.JSX.Element => {
         } else if (Array.isArray(apiResponse)) {
           apiServices = apiResponse;
         }
-        
+
         const transformedServices = transformAPIDataToUIFormat(apiServices);
         setServices(transformedServices);
         setError(null);
-        // console.log('✅ Services loaded successfully!');
-        
+        console.log('✅ Services loaded successfully!');
+
       } catch (err) {
         console.error('Error loading services:', err);
-        
+
         // Fallback to mock data
         const mockServices = getMockServices();
         const transformedServices = transformAPIDataToUIFormat(mockServices);
         setServices(transformedServices);
-        
+
         // Set user-friendly error message
         let errorMessage = 'API không khả dụng, đang hiển thị dữ liệu mẫu.';
         if (err instanceof Error) {
@@ -363,7 +378,7 @@ export const Services = (): React.JSX.Element => {
           }
         }
         setError(errorMessage);
-        
+
       } finally {
         setLoading(false);
       }
@@ -379,7 +394,6 @@ export const Services = (): React.JSX.Element => {
       name: "Tất Cả",
       icon: <StethoscopeIcon className="w-5 h-5" />,
       count: services.length
-      //sasasasas
     },
     {
       id: "civil",
@@ -395,53 +409,52 @@ export const Services = (): React.JSX.Element => {
     }
   ];
 
-  // Animation effect
+  // Log categories for debugging
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+    console.log('📊 Categories count:', categories.map(c => ({ name: c.name, count: c.count })));
+  }, [services]);
 
   // Filter services
   useEffect(() => {
-    // console.log('🔍 Starting filter process...');
-    // console.log('📊 Total services:', services.length);
-    // console.log('🏷️ Selected category:', selectedCategory);
-    // console.log('🔍 Search term:', searchTerm);
-    
-    // Log all services with their categories
-    // services.forEach((service, index) => {
-    //   console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
-    // });
-    
+    console.log('🔍 Starting filter process...');
+    console.log('📊 Total services:', services.length);
+    console.log('🏷️ Selected category:', selectedCategory);
+    console.log('🔍 Search term:', searchTerm);
+
+    // Log all services with their categories (based on collectionMethod)
+    services.forEach((service, index) => {
+      console.log(`📋 Service ${index + 1}: "${service.title}" - Category: "${service.category}" (CollectionMethod: ${service.collectionMethod})`);
+    });
+
     let filtered = services;
-    
+
     // Filter by category
     if (selectedCategory !== "all") {
-      // console.log(`🔽 Filtering by category: ${selectedCategory}`);
+      console.log(`🔽 Filtering by category: ${selectedCategory}`);
       const beforeCount = filtered.length;
       filtered = filtered.filter(service => service.category === selectedCategory);
-      // console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
-      
+      console.log(`📉 Filtered from ${beforeCount} to ${filtered.length} services`);
+
       // Log which services passed the filter
-      // filtered.forEach((service, index) => {
-      //   console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
-      // });
+      filtered.forEach((service, index) => {
+        console.log(`✅ Filtered service ${index + 1}: "${service.title}" - Category: "${service.category}"`);
+      });
     }
-    
+
     // Filter by search term
     if (searchTerm) {
-      // console.log(`🔍 Filtering by search term: ${searchTerm}`);
+      console.log(`🔍 Filtering by search term: ${searchTerm}`);
       const beforeCount = filtered.length;
-      filtered = filtered.filter(service => 
+      filtered = filtered.filter(service =>
         service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.features.some(feature => feature.toLowerCase().includes(searchTerm.toLowerCase())) ||
         service.doctor.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      // console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
+      console.log(`📉 Search filtered from ${beforeCount} to ${filtered.length} services`);
     }
-    
-    // console.log('🎯 Final filtered services count:', filtered.length);
+
+    console.log('🎯 Final filtered services count:', filtered.length);
     setFilteredServices(filtered);
   }, [selectedCategory, searchTerm, services]);
 
@@ -460,7 +473,7 @@ export const Services = (): React.JSX.Element => {
   const getCollectionMethodInfo = (collectionMethod: number) => {
     if (collectionMethod === 0) {
       return {
-        text: "Tự thu mẫu / Thu tại nhà",
+        text: "Dân Sự - Tự thu mẫu / Thu tại nhà",
         icon: <HomeIcon className="w-4 h-4 mr-1.5 text-green-600" />,
         bgColor: "bg-green-50",
         textColor: "text-green-700",
@@ -468,7 +481,7 @@ export const Services = (): React.JSX.Element => {
       };
     } else if (collectionMethod === 1) {
       return {
-        text: "Thu mẫu tại trung tâm",
+        text: "Hành Chính - Thu mẫu tại trung tâm",
         icon: <MapPinIcon className="w-4 h-4 mr-1.5 text-blue-600" />,
         bgColor: "bg-blue-50",
         textColor: "text-blue-700",
@@ -486,7 +499,7 @@ export const Services = (): React.JSX.Element => {
   };
 
   // ===== RENDER FUNCTIONS =====
-  
+
   // Loading State
   if (loading) {
     return (
@@ -495,10 +508,11 @@ export const Services = (): React.JSX.Element => {
           <Header />
         </div>
         <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-            <p className="text-lg text-gray-600">Đang tải danh sách dịch vụ...</p>
-          </div>
+          <Loading 
+            size="large" 
+            message="Đang tải danh sách dịch vụ..." 
+            color="blue" 
+          />
         </div>
       </div>
     );
@@ -542,7 +556,7 @@ export const Services = (): React.JSX.Element => {
         {/* Hero Section */}
         <section className="relative w-full py-20 overflow-hidden md:py-28 bg-blue-50">
           <div className="absolute inset-0 opacity-10">
-            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af"/></svg>
+            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,50 C25,80 75,20 100,50 L100,100 L0,100 Z" fill="#1e40af" /></svg>
           </div>
           <div className="container relative z-10 px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
             <div className="mb-6">
@@ -560,30 +574,16 @@ export const Services = (): React.JSX.Element => {
               </span>
             </h1>
             <p className="max-w-2xl text-base leading-relaxed text-gray-700 md:text-lg">
-              Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất. 
-              <span className="block mt-2 text-sm text-blue-600">
-                💡 Bạn có thể xem dịch vụ mà không cần đăng nhập. Đăng nhập để đặt lịch và xem thông tin chi tiết.
-              </span>
+              Cung cấp dịch vụ chăm sóc sức khỏe toàn diện với đội ngũ chuyên gia y tế hàng đầu và công nghệ hiện đại nhất.
             </p>
-            
-            {/* Stats */}
-            <div className="flex flex-wrap gap-4 mt-6">
-              <div className="px-4 py-2 border border-blue-200 rounded-lg bg-white/80 backdrop-blur-sm">
-                <span className="text-2xl font-bold text-blue-900">{services.length}</span>
-                <span className="block text-sm text-blue-600">Dịch vụ</span>
-              </div>
-              <div className="px-4 py-2 border border-blue-200 rounded-lg bg-white/80 backdrop-blur-sm">
-                <span className="text-2xl font-bold text-blue-900">{services.filter(s => s.isActive).length}</span>
-                <span className="block text-sm text-blue-600">Đang hoạt động</span>
-              </div>
-            </div>
+
           </div>
         </section>
 
         {/* Search and Filter Section */}
         <section className="py-8 bg-white">
           <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            
+
             {/* Section Header */}
             <div className="mb-8 text-center">
               <div className="inline-flex items-center bg-[#E8F4FD] px-4 py-2 rounded-full mb-4">
@@ -626,21 +626,19 @@ export const Services = (): React.JSX.Element => {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`group relative flex flex-col items-center p-6 rounded-2xl transition-all duration-300 border-2 hover:scale-105 ${
-                    selectedCategory === category.id
+                  className={`group relative flex flex-col items-center p-6 rounded-2xl transition-all duration-300 border-2 hover:scale-105 ${selectedCategory === category.id
                       ? 'bg-gradient-to-br from-[#0066CC] to-[#0052A3] border-[#0066CC] !text-white shadow-xl'
                       : 'bg-white border-gray-200 text-gray-700 hover:border-[#0066CC] hover:shadow-lg'
-                  }`}
+                    }`}
                   style={{
                     animationDelay: `${index * 100}ms`,
                   }}
                 >
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 ${
-                    selectedCategory === category.id
+                  <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 ${selectedCategory === category.id
                       ? 'bg-white/20'
                       : 'bg-gradient-to-br from-[#E8F4FD] to-[#B3D9F2] group-hover:from-[#0066CC]/10 group-hover:to-[#0066CC]/20'
-                  }`}>
+                    }`}>
                     <div className={`${selectedCategory === category.id ? 'text-white' : 'text-[#0066CC]'}`}>
                       {category.icon}
                     </div>
@@ -652,11 +650,10 @@ export const Services = (): React.JSX.Element => {
                   </span>
 
                   {/* Count */}
-                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                    selectedCategory === category.id
+                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${selectedCategory === category.id
                       ? 'bg-white/20 text-white'
                       : 'bg-[#E8F4FD] text-[#0066CC] group-hover:bg-[#0066CC]/10'
-                  }`}>
+                    }`}>
                     {category.count} dịch vụ
                   </span>
 
@@ -675,14 +672,14 @@ export const Services = (): React.JSX.Element => {
         {/* Services List Section */}
         <section className="py-20 bg-blue-50">
           <div className="container px-4 mx-auto md:px-6 lg:px-8 max-w-7xl">
-            
+
             {/* Section Header */}
             <div className="mb-16 text-center">
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#003875] mb-6">
                 Danh Sách Dịch Vụ Y Tế
               </h2>
               <p className="max-w-3xl mx-auto text-lg text-gray-600">
-                Tìm thấy <span className="font-semibold text-[#0066CC]">{filteredServices.length}</span> dịch vụ
+                Dịch vụ có sẵn: <span className="font-semibold text-[#0066CC]">{filteredServices.length}</span>
                 {selectedCategory !== "all" && (
                   <span> trong danh mục <span className="font-semibold text-[#0066CC]">{getCategoryName(selectedCategory)}</span></span>
                 )}
@@ -703,20 +700,20 @@ export const Services = (): React.JSX.Element => {
                 </div>
               </div>
             )}
-            
+
             {/* Services Grid */}
             {filteredServices.length > 0 ? (
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 xl:grid-cols-3">
-                {filteredServices.map((service, index) => (
-                  <Card 
-                    key={service.id} 
+                {filteredServices.map((service) => (
+                  <Card
+                    key={service.id}
                     className="relative overflow-hidden transition-all duration-300 bg-white border shadow-md group hover:shadow-xl hover:-translate-y-2 rounded-2xl"
                   >
                     {/* Background Gradient */}
                     <div className="absolute inset-0 transition-opacity duration-500 opacity-0 pointer-events-none group-hover:opacity-100">
                       <div className="absolute inset-0 bg-gradient-to-br from-[#0066CC]/5 via-[#00D4FF]/5 to-[#0052A3]/5"></div>
                     </div>
-                    
+
                     {/* Status Badge */}
                     <div className="absolute z-20 top-4 left-4">
                       <span className="px-3 py-1.5 rounded-full text-xs font-semibold shadow-md backdrop-blur-sm transition-all duration-300 bg-emerald-100/80 text-emerald-800 border border-emerald-200">
@@ -732,16 +729,16 @@ export const Services = (): React.JSX.Element => {
                         </span>
                       </div>
                     )}
-                    
+
                     {/* Image */}
                     <div className="relative overflow-hidden h-60 rounded-t-2xl">
-                      <img 
+                      <img
                         src={service.image}
                         alt={service.title}
                         className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                      
+
                       {/* Hover Info */}
                       <div className="absolute bottom-0 left-0 right-0 p-4 transition-transform duration-300 ease-in-out transform translate-y-full pointer-events-none group-hover:translate-y-0">
                         <div className="flex items-center justify-between text-sm">
@@ -750,7 +747,7 @@ export const Services = (): React.JSX.Element => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <CardContent className="p-5">
                       {/* Title & Description */}
                       <div className="mb-4">
@@ -770,11 +767,24 @@ export const Services = (): React.JSX.Element => {
                             <div className={`inline-flex items-center px-3 py-2 rounded-lg border text-sm font-medium ${methodInfo.bgColor} ${methodInfo.textColor} ${methodInfo.borderColor}`}>
                               {methodInfo.icon}
                               <span>{methodInfo.text}</span>
-                        </div>
+                            </div>
                           );
                         })()}
                       </div>
-                      
+
+                      {/* Sample Requirements */}
+                      <div className="mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                        <div className="flex items-center mb-2">
+                          <h4 className="text-sm font-medium text-amber-800">Yêu Cầu Mẫu Xét Nghiệm</h4>
+                        </div>
+                        <div className="text-sm text-amber-700 mb-2">
+                          <strong>Số Lượng:</strong> 2 mẫu bắt buộc
+                        </div>
+                        <div className="text-sm text-amber-700">
+                          <strong>Loại Mẫu:</strong> Máu, Tóc, Móng, Nước ối, Dịch ối
+                        </div>
+                      </div>
+
                       {/* Divider */}
                       <hr className="my-4 border-gray-100" />
 
@@ -787,7 +797,7 @@ export const Services = (): React.JSX.Element => {
 
                       {/* Action Buttons */}
                       <div className="flex gap-2">
-                        <Button 
+                        <Button
                           onClick={(e) => {
                             e.stopPropagation();
                             openBookingModal({
@@ -799,15 +809,15 @@ export const Services = (): React.JSX.Element => {
                               collectionMethod: Number(service.collectionMethod),
                               testServiceInfor: service.testServiceInfo ?? (service.serviceId ? { id: service.serviceId } : undefined)
                             });
-                          }} 
+                          }}
                           className="flex-1 font-semibold transition-all duration-300 transform rounded-lg shadow-md bg-blue-600 hover:bg-blue-700 !text-white hover:shadow-lg hover:scale-105"
                           title="Đăng nhập để đặt lịch"
                         >
                           <CalendarIcon className="w-4 h-4 mr-2" />
                           Đặt Lịch
                         </Button>
-                        <Button 
-                          onClick={(e) => handleViewDetail(e, service.id)} 
+                        <Button
+                          onClick={(e) => handleViewDetail(e, service.id)}
                           disabled={detailLoading === service.id}
                           variant="outline"
                           className="px-4 font-semibold transition-all duration-300 transform rounded-lg shadow-md border-slate-300 text-slate-600 hover:bg-slate-50 hover:shadow-lg hover:scale-105 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:transform-none"
@@ -815,7 +825,7 @@ export const Services = (): React.JSX.Element => {
                           {detailLoading === service.id ? (
                             <div className="w-4 h-4 border-2 rounded-full border-slate-400 border-t-transparent animate-spin"></div>
                           ) : (
-                            'Chi Tiết'
+                            'Quy trình'
                           )}
                         </Button>
                       </div>
@@ -834,21 +844,21 @@ export const Services = (): React.JSX.Element => {
                     <SearchIcon className="w-4 h-4 text-white" />
                   </div>
                 </div>
-                
+
                 <h3 className="mb-4 text-2xl font-bold text-gray-700">Không tìm thấy dịch vụ phù hợp</h3>
                 <p className="max-w-md mx-auto mb-8 leading-relaxed text-gray-500">
                   Hãy thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc để khám phá các dịch vụ y tế của chúng tôi
                 </p>
-                
+
                 <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                  <Button 
+                  <Button
                     onClick={handleResetFilters}
                     className="bg-gradient-to-r from-[#0066CC] to-[#0052A3] hover:from-[#0052A3] hover:to-[#003875] text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                   >
                     🔄 Đặt Lại Bộ Lọc
                   </Button>
-                  
-                  <Button 
+
+                  <Button
                     variant="outline"
                     onClick={() => setSearchTerm("")}
                     className="border-2 border-[#0066CC] text-[#0066CC] hover:bg-[#0066CC] hover:text-white px-8 py-4 rounded-xl font-semibold transition-all duration-300"
@@ -922,7 +932,7 @@ export const Services = (): React.JSX.Element => {
               💡 Đăng nhập để đặt lịch và xem thông tin chi tiết dịch vụ
             </p>
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
-              <Button
+              {/* <Button
                 onClick={() => openBookingModal()}
                 className="px-8 py-4 text-lg font-semibold text-blue-900 bg-white rounded-full hover:bg-blue-50 hover:text-blue-900"
                 title="Đăng nhập để đặt lịch"
@@ -930,14 +940,14 @@ export const Services = (): React.JSX.Element => {
                 <CalendarIcon className="w-5 h-5 mr-2" />
                 Đặt Lịch Ngay
               </Button>
-              <Button 
+              <Button
                 onClick={() => navigate('/auth/login')}
-                variant="outline" 
+                variant="outline"
                 className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900"
               >
                 <UserCheckIcon className="w-5 h-5 mr-2" />
                 Đăng Nhập
-              </Button>
+              </Button> */}
               <Button variant="outline" className="px-8 py-4 text-lg text-white border-white rounded-full hover:bg-white hover:text-blue-900">
                 <PhoneIcon className="w-5 h-5 mr-2" />
                 Hotline: 1900-xxxx

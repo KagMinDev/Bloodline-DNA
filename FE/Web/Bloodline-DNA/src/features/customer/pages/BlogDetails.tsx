@@ -7,13 +7,13 @@ function BlogDetail() {
   const { id } = useParams<{ id: string }>();
   const [blog, setBlog] = useState<BlogPost | null>(null);
   const [relatedBlogs, setRelatedBlogs] = useState<BlogPost[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBlogAndRelated = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         setError(null);
 
         if (id) {
@@ -36,23 +36,12 @@ function BlogDetail() {
         console.error(err);
         setError(err instanceof Error ? err.message : "Không thể tải bài viết");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchBlogAndRelated();
   }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <div className="text-center">
-          <div className="inline-block w-12 h-12 mb-4 border-b-2 border-blue-600 rounded-full animate-spin"></div>
-          <p className="text-lg text-gray-600">Đang tải bài viết...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -70,7 +59,8 @@ function BlogDetail() {
     );
   }
 
-  if (!blog) {
+  // Only show "not found" if we're not loading and there's no error but also no blog
+  if (!isLoading && !error && !blog) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="p-8 text-center bg-white shadow-lg rounded-xl">
@@ -98,6 +88,11 @@ function BlogDetail() {
         </div>
       </div>
     );
+  }
+
+  // Only render content if we have a blog (this ensures blog is not null)
+  if (!blog) {
+    return null;
   }
 
   return (

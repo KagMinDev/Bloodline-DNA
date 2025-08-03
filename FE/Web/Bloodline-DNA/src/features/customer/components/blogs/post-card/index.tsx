@@ -1,5 +1,8 @@
-import { CalendarIcon, ShareIcon } from "lucide-react";
+import { CalendarIcon, ShareIcon, CopyIcon, CheckIcon } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
+import Loading from "../../../../../components/Loading";
 import type { BlogPost } from "../../../types/blogs.types";
 
 interface PostCardProps {
@@ -14,11 +17,40 @@ export const PostCard: React.FC<PostCardProps> = ({
   isFeatured,
 }) => {
   const navigate = useNavigate();
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
-  const handleReadMore = () => {
+  const handleReadMore = async () => {
+    setIsNavigating(true);
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      const basePath = user?.role === "Client" ? "/customer" : "";
+      // Tăng delay để user thấy loading rõ hơn
+      await new Promise(resolve => setTimeout(resolve, 800));
+      navigate(`${basePath}/blogs/${post.id}`);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      setIsNavigating(false);
+    }
+  };
+
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const copyLink = async () => {
     const user = JSON.parse(localStorage.getItem("user") || "null");
     const basePath = user?.role === "Client" ? "/customer" : "";
-    navigate(`${basePath}/blogs/${post.id}`);
+    const blogUrl = `${window.location.origin}${basePath}/blogs/${post.id}`;
+    
+    try {
+      await navigator.clipboard.writeText(blogUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy link:", error);
+    }
   };
 
   return (
@@ -85,16 +117,25 @@ export const PostCard: React.FC<PostCardProps> = ({
             {/* Nút Đọc thêm */}
             <button
               onClick={handleReadMore}
+              disabled={isNavigating}
               style={{
                 color: "white",
               }}
-              className={`bg-blue-900 text-sm py-2 px-5 rounded-xl transition-all duration-200 hover:bg-blue-700`}
+              className={`bg-blue-900 text-sm py-2 px-5 rounded-xl transition-all duration-200 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
-              Đọc Thêm
+              {isNavigating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang tải...
+                </>
+              ) : (
+                "Đọc Thêm"
+              )}
             </button>
 
             {/* Nút Chia sẻ */}
             <button
+              onClick={handleShare}
               className={`group border border-blue-900 text-blue-900 text-sm py-2 px-5 rounded-xl flex items-center justify-center gap-1 transition-all duration-200 hover:bg-blue-700 hover:text-white`}
             >
               <ShareIcon className="w-4 h-4 transition-all duration-200 group-hover:text-white" />
@@ -105,6 +146,93 @@ export const PostCard: React.FC<PostCardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Share Modal - Sử dụng createPortal để render ở body level */}
+      {showShareModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-blue-900">Chia sẻ bài viết</h3>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Blog preview */}
+            <div className="flex items-start gap-4 mb-8 p-6 bg-gray-50 rounded-xl">
+              <img 
+                src={post.thumbnailURL} 
+                alt={post.title}
+                className="w-20 h-20 object-cover rounded-lg"
+              />
+              <div className="flex-1">
+                <h4 className="font-semibold text-blue-900 line-clamp-2 mb-2 text-lg">
+                  {post.title}
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Bởi {post.authorName}
+                </p>
+              </div>
+            </div>
+
+            {/* Link section */}
+            <div className="space-y-4">
+              <label className="block text-base font-medium text-gray-700">
+                Đường link bài viết:
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={(() => {
+                    const user = JSON.parse(localStorage.getItem("user") || "null");
+                    const basePath = user?.role === "Client" ? "/customer" : "";
+                    return `${window.location.origin}${basePath}/blogs/${post.id}`;
+                  })()}
+                  readOnly
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                />
+                <button
+                  onClick={copyLink}
+                  className={`px-6 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
+                    linkCopied 
+                      ? "bg-green-100 text-green-700 border border-green-300" 
+                      : "bg-blue-900 text-white hover:bg-blue-800"
+                  }`}
+                >
+                  {linkCopied ? (
+                    <>
+                      <CheckIcon className="w-4 h-4 !text-green-700" />
+                      <span className="text-green-700">Đã sao chép</span>
+                    </>
+                  ) : (
+                    <>
+                      <CopyIcon className="w-4 h-4 !text-white" />
+                      <span className="text-white">Sao chép</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Fullscreen Loading khi đang navigate */}
+      {isNavigating && createPortal(
+        <Loading
+          fullScreen={true}
+          message="Đang tải chi tiết bài viết..."
+          size="large"
+          color="blue"
+        />,
+        document.body
+      )}
     </div>
   );
 };
