@@ -12,7 +12,7 @@ namespace ADNTester.BO.DTOs.Payment
         public decimal Amount { get; set; }
         public decimal? DepositAmount { get; set; }
         public decimal? RemainingAmount { get; set; }
-        public PaymentStatus Status { get; set; }
+        public string Status { get; set; }
         public DateTime? PaidAt { get; set; }
         public string Description { get; set; }
         public string BookingId { get; set; }
