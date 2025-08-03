@@ -11,6 +11,8 @@ import { GrTestDesktop } from "react-icons/gr";
 import { MdDomainAdd } from "react-icons/md";
 import { TiStarHalfOutline } from "react-icons/ti";
 import { Link, useLocation } from "react-router-dom";
+import { FaMoneyBillTransfer } from "react-icons/fa6";
+
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -54,6 +56,11 @@ const SidebarData: SidebarDataType[] = [
     icon: TiStarHalfOutline,
     heading: "Các đánh giá",
     href: "/manager/feedback",
+  },
+  {
+    icon: FaMoneyBillTransfer,
+    heading: "Quản lí lịch sử thanh toán",
+    href: "/manager/list-payment",
   },
 ];
 

@@ -79,7 +79,7 @@ namespace ADNTester.Service.Implementations
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task CompleteLogisticsTaskAsync(string logisticsInfoId, string staffId)
+        public async Task CompleteLogisticsTaskAsync(string logisticsInfoId, string staffId, string evidenceImageUrl)
         {
             var logistics = await GetLogisticsOrThrowAsync(logisticsInfoId);
 
@@ -91,6 +91,7 @@ namespace ADNTester.Service.Implementations
 
             logistics.CompletedAt = DateTime.UtcNow;
             logistics.Status = GetCompletionStatus(logistics.Type);
+            logistics.EvidenceImageUrl = evidenceImageUrl;
             //update related booking when staff complete pick up task
             if (logistics.Type == LogisticsType.Pickup)
             {

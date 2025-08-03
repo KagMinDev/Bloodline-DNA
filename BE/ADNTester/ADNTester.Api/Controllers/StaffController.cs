@@ -1,6 +1,7 @@
 ﻿using ADNTester.BO.DTOs.Common;
 using ADNTester.BO.DTOs.Logistic;
 using ADNTester.BO.Enums;
+using ADNTester.Service.Implementations;
 using ADNTester.Service.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -17,14 +18,17 @@ namespace ADNTester.Api.Controllers
     {
         private readonly ILogisticService _logisticsService;
         private readonly ITestBookingService _testBookingService;
+        private readonly ICloudinaryService _cloudinaryService;
         private readonly IMapper _mapper;
 
         public StaffController(ILogisticService logisticsService, 
             ITestBookingService testBookingService,
+            ICloudinaryService cloudinaryService,
             IMapper mapper)
         {
             _logisticsService = logisticsService;
             _testBookingService = testBookingService;
+            _cloudinaryService = cloudinaryService;
             _mapper = mapper;
 
         }
@@ -52,17 +56,29 @@ namespace ADNTester.Api.Controllers
         /// Đánh dấu nhiệm vụ logistics là đã hoàn thành.
         /// </summary>
         /// <param name="id">ID nhiệm vụ logistics</param>
-        /// <returns>Trạng thái hoàn thành</returns>
+        /// <param name="evidence">Ảnh minh chứng</param>
+        /// <returns></returns>
         [HttpPut("/logistics/{id}/complete")]
-        public async Task<IActionResult> CompleteLogisticsTask(string id)
+        public async Task<IActionResult> CompleteLogisticsTask(
+            string id,
+            IFormFile evidence)
         {
             var staffId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(staffId))
                 return Unauthorized("Staff ID not found");
 
-            await _logisticsService.CompleteLogisticsTaskAsync(id, staffId);
+            if (evidence == null || evidence.Length == 0)
+                return BadRequest("Vui lòng tải lên ảnh minh chứng.");
+
+            // 📷 Upload image
+            var imageUrl = await _cloudinaryService.UploadImageAsync(evidence, "logistics");
+
+            // ✅ Mark complete with image URL
+            await _logisticsService.CompleteLogisticsTaskAsync(id, staffId, imageUrl);
+
             return NoContent();
         }
+
         #endregion
 
         #region Booking

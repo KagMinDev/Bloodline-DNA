@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.WebSockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -148,6 +149,37 @@ namespace ADNTester.Service.Implementations
                 _logger.LogError(ex, "Error getting deposited payments with sample received");
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<PaymentDetailDto>> GetAllPaymentComple()
+        {
+            try
+            {
+               var paymentpaid = await _unitOfWork.PaymentRepository.FindAsync(x => x.Status == PaymentStatus.Paid);
+                var result = new List<Payment>();
+                foreach (var payment in paymentpaid) {
+                    var booking = await _unitOfWork.TestBookingRepository.GetByIdAsync(payment.BookingId);
+                  var user =  await _unitOfWork.UserRepository.GetByIdAsync(booking.ClientId);
+                    if (user != null)
+                    {
+                        booking.Client = user;
+                    }
+                    var testService = await _unitOfWork.TestServiceRepository.GetByIdAsync(booking.TestServiceId);
+                    if (testService != null)
+                    {
+                        booking.TestService = testService;
+                    }
+
+                    payment.Booking = booking;
+                    result.Add(payment);
+                }
+                return _mapper.Map<IEnumerable<PaymentDetailDto>>(result);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Error getting  payments ");
+                throw;
+            }
+        
         }
     }
 }
