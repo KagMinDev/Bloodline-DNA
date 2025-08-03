@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Spin, message, Tag, Tooltip } from "antd";
-import {
-  getPaidPayments,
-  type Payment,
-} from "../api/payment";
+import { getPaidPayments, type Payment,} from "../api/payment";
 import {
   DollarOutlined,
   CalendarOutlined,
@@ -30,22 +27,27 @@ const formatCurrency = (amount?: number) =>
     currency: "VND",
   }) ?? "0 ₫";
 
-const getStatusTag = (status?: number) => {
+const getStatusTag = (status?: string) => {
   switch (status) {
-    case 1:
+    case "Paid":
       return (
         <Tag icon={<CheckCircleTwoTone twoToneColor="#52c41a" />} color="success">
           Đã thanh toán
         </Tag>
       );
-    case 0:
+    case "Failed":
       return (
         <Tag icon={<CloseCircleTwoTone twoToneColor="#ff4d4f" />} color="error">
           Thất bại
         </Tag>
       );
+    case "Pending":
     default:
-      return <Tag color="default">Chờ xử lý</Tag>;
+      return (
+        <Tag color="warning">
+          Chờ xử lý
+        </Tag>
+      );
   }
 };
 

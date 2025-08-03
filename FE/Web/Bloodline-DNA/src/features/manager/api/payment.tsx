@@ -1,12 +1,13 @@
 import rootApi from "../../../apis/rootApi";
 
+export type PaymentStatus = 'Paid' | 'Failed' | 'Pending';
 export interface Payment {
     id: string;
     orderCode: string | number;
     amount: number;
     depositAmount?: number;
     remainingAmount?: number;
-    status: number;
+    status: PaymentStatus;
     paidAt?: string | null;
     description?: string;
     bookingId?: string;
