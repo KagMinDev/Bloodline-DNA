@@ -176,10 +176,19 @@ export const confirmDeliveryApi = async (
 
   try {
     console.log("📤 Sending confirm delivery request for booking:", bookingId);
+    console.log("📤 Request URL:", `${API_BASE_URL}/TestBooking/${bookingId}/confirm-delivery`);
+    console.log("📤 Request headers:", {
+      Authorization: `Bearer ${token ? token.substring(0, 20) + '...' : 'null'}`,
+      "Content-Type": "application/json",
+    });
     
     const res = await axios.put(
-      `${API_BASE_URL}/TestBooking/${bookingId}/status?newStatus=${4}`,
-      {},
+      `${API_BASE_URL}/TestBooking/${bookingId}/confirm-delivery`,
+      {
+        // Thử thêm một số field có thể cần thiết
+        bookingId: bookingId,
+        status: "KitDelivered" // Có thể server expect status hiện tại
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
