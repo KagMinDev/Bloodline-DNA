@@ -7,6 +7,7 @@ import { getBlogsApi } from "../api/blogsApi";
 import { getFeedbacksApi } from "../api/feedbackApi";
 import type { BlogResponse } from "../types/blogs";
 import type { FeedbackResponse } from "../types/feedback";
+import { getPaidPayments, type Payment } from "../api/payment";
 
 function Dashboard() {
   const [blogs, setBlogs] = useState<BlogResponse[]>([]);
@@ -19,6 +20,8 @@ function Dashboard() {
     endDate: "",
     filterType: "custom" as "custom" | "today" | "week" | "month" | "year"
   });
+  const [payments, setPayments] = useState<Payment[]>([]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,15 +31,17 @@ function Dashboard() {
         const token = getAuthToken();
         if (!token) throw new Error("Không tìm thấy token xác thực. Vui lòng đăng nhập lại.");
 
-        const [blogsData, testsData, feedbacksData] = await Promise.all([
+        const [blogsData, testsData, feedbacksData, paymentsData] = await Promise.all([
           getBlogsApi(),
           getTestBookingApi(),
           getFeedbacksApi(),
+          getPaidPayments(token)
         ]);
 
         setBlogs(blogsData || []);
         setTests(testsData || []);
         setFeedbacks(feedbacksData || []);
+        setPayments(paymentsData || []);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Lỗi không xác định.";
         setError(errorMessage);
@@ -90,6 +95,7 @@ function Dashboard() {
     const blogsData = filterDataByDate(blogs, dateFilter.startDate, dateFilter.endDate);
     const testsData = filterDataByDate(tests, dateFilter.startDate, dateFilter.endDate);
     const feedbacksData = filterDataByDate(feedbacks, dateFilter.startDate, dateFilter.endDate);
+    const paymentsData = filterDataByDate(payments, dateFilter.startDate, dateFilter.endDate);
 
     const countByDate = (data: any[], field = "createdAt") => {
       const result: Record<string, number> = {};
@@ -103,13 +109,15 @@ function Dashboard() {
     const blogMap = countByDate(blogsData);
     const testMap = countByDate(testsData);
     const feedbackMap = countByDate(feedbacksData);
-    const allDates = Array.from(new Set([...Object.keys(blogMap), ...Object.keys(testMap), ...Object.keys(feedbackMap)])).sort();
+    const paymentMap = countByDate(paymentsData);
+    const allDates = Array.from(new Set([...Object.keys(blogMap), ...Object.keys(testMap), ...Object.keys(feedbackMap), ...Object.keys(paymentMap)])).sort();
 
     return allDates.map(date => ({
       date,
       "Bài viết": blogMap[date] || 0,
       "Lịch xét nghiệm": testMap[date] || 0,
       "Phản hồi": feedbackMap[date] || 0,
+      "Thanh toán": paymentMap[date] || 0,
     }));
   };
 
@@ -122,14 +130,15 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen p-6 overflow-auto bg-gray-50">
+    <div className="min-h-screen p-6 overflow-auto bg-blue-50">
       <h1 className="mb-6 text-3xl font-bold text-blue-800"> Thống kê tổng quan</h1>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 transition-all duration-300 ease-in-out hover:scale-[1.02]">
         <CardStat title="Bài viết" count={filterDataByDate(blogs, dateFilter.startDate, dateFilter.endDate).length} color="blue" />
         <CardStat title="Lịch xét nghiệm" count={filterDataByDate(tests, dateFilter.startDate, dateFilter.endDate).length} color="green" />
         <CardStat title="Phản hồi" count={filterDataByDate(feedbacks, dateFilter.startDate, dateFilter.endDate).length} color="orange" />
+        <CardStat title="Thanh toán" count={filterDataByDate(payments, dateFilter.startDate, dateFilter.endDate).length} color="red" />
       </div>
 
       {/* Chart Section */}
@@ -146,11 +155,10 @@ function Dashboard() {
               <button
                 key={key}
                 onClick={() => handlePresetFilter(key)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition duration-200 ${
-                  dateFilter.filterType === key
-                    ? "bg-blue-400 text-white shadow"
-                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                }`}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition duration-200 ${dateFilter.filterType === key
+                  ? "bg-blue-400 text-white shadow"
+                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                  }`}
               >
                 {label}
               </button>
@@ -169,6 +177,7 @@ function Dashboard() {
             <Line type="monotone" dataKey="Bài viết" stroke="#2563eb" strokeWidth={2} />
             <Line type="monotone" dataKey="Lịch xét nghiệm" stroke="#10b981" strokeWidth={2} />
             <Line type="monotone" dataKey="Phản hồi" stroke="#f97316" strokeWidth={2} />
+            <Line type="monotone" dataKey="Thanh toán" stroke="#dc2626" strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -178,9 +187,10 @@ function Dashboard() {
 
 function CardStat({ title, count, color }: { title: string; count: number; color: string }) {
   const colorMap: Record<string, string> = {
-    blue: "text-blue-600 bg-blue-100",
+    red: "text-red-600 bg-red-100",
     green: "text-green-600 bg-green-100",
-    orange: "text-orange-600 bg-orange-100"
+    orange: "text-orange-600 bg-orange-100",
+    blue: "text-blue-600 bg-blue-100",
   };
   return (
     <div className={`rounded-2xl shadow-md p-6 flex flex-col items-center justify-center ${colorMap[color]}`}>
