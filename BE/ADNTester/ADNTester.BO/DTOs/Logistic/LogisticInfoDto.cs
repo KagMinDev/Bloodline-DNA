@@ -10,11 +10,13 @@ namespace ADNTester.BO.DTOs.Logistic
     {
         public string Id { get; set; }
         public string? StaffId { get; set; }
+        public string Name { get; set; }
         public string Address { get; set; }
         public string Phone { get; set; }
         public DateTime? ScheduledAt { get; set; }
         public DateTime? CompletedAt { get; set; }
         public string? Note { get; set; }
+        public string? ImageUrl { get; set; }
 
         // Trả về tên Enum dưới dạng chuỗi
         public string Type { get; set; }

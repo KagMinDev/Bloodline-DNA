@@ -20,14 +20,17 @@ namespace ADNTester.Api.Controllers
     {
         private readonly ILogisticService _logisticService;
         private readonly IUserService _userService;
+        private readonly ICloudinaryService _cloudinaryService;
         private readonly IMapper _mapper;
 
         public LogisticController(ILogisticService logisticService,
             IUserService userService,
+            ICloudinaryService cloudinaryService,
             IMapper mapper)
         {
             _logisticService = logisticService;
             _userService = userService;
+            _cloudinaryService = cloudinaryService;
             _mapper = mapper;
         }
 
@@ -70,9 +73,18 @@ namespace ADNTester.Api.Controllers
         /// Đánh dấu nhiệm vụ logistics đã hoàn thành
         /// </summary>
         [HttpPut("complete/{logisticsInfoId}")]
-        public async Task<IActionResult> CompleteTask(string logisticsInfoId, [FromQuery] string staffId)
+        public async Task<IActionResult> CompleteTask(string logisticsInfoId, [FromQuery] string staffId, IFormFile evidence)
         {
-            await _logisticService.CompleteLogisticsTaskAsync(logisticsInfoId, staffId);
+            if (string.IsNullOrEmpty(staffId))
+                return BadRequest(new ApiResponse<object>(null, "Thiếu staffId", HttpCodes.BadRequest));
+
+            if (evidence == null || evidence.Length == 0)
+                return BadRequest(new ApiResponse<object>(null, "Vui lòng tải lên ảnh minh chứng.", HttpCodes.BadRequest));
+
+            var imageUrl = await _cloudinaryService.UploadImageAsync(evidence, "logistics");
+
+            await _logisticService.CompleteLogisticsTaskAsync(logisticsInfoId, staffId, imageUrl);
+
             return Ok(new ApiResponse<object>(null, "Hoàn thành nhiệm vụ thành công", HttpCodes.Ok));
         }
 
