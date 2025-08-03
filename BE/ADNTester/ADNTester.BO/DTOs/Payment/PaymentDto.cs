@@ -21,7 +21,7 @@ namespace ADNTester.BO.DTOs.Payment
 
         public decimal RemainingAmount { get; set; }
 
-        public PaymentStatus Status { get; set; }
+        public string Status { get; set; }
 
         public DateTime? PaidAt { get; set; }
 
