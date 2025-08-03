@@ -421,28 +421,26 @@ export const useBookingData = () => {
         // Update local state immediately
         setIsDeliveryConfirmed(true);
 
-        // Update booking status to WaitingForSample (newStatus=2)
+        // Ngay lập tức gọi updateBookingStatusApi với newStatus=4 (WaitingForSample)
         try {
+          console.log("🔄 Updating booking status to WaitingForSample (status 4)...");
           const statusUpdateResult = await updateBookingStatusApi(bookingId, 4);
 
           if (statusUpdateResult.success) {
-            console.log(
-              "✅ Booking status updated to WaitingForSample successfully"
-            );
+            console.log("✅ Booking status updated to WaitingForSample successfully");
+            
+            // Refresh booking data to get updated status
+            await fetchBookingData();
           } else {
-            console.warn(
-              "⚠️ Failed to update booking status:",
-              statusUpdateResult.message
-            );
+            console.warn("⚠️ Failed to update booking status:", statusUpdateResult.message);
+            // Vẫn hiển thị thành công cho user vì confirm delivery đã thành công
+            // Chỉ log warning để không làm user bối rối
           }
         } catch (statusError) {
           console.error("❌ Error updating booking status:", statusError);
-          // Don't throw error here as the main confirm delivery was successful
-          // Just log the error and continue
+          // Không throw error ở đây vì confirm delivery đã thành công
+          // Chỉ log error và tiếp tục
         }
-
-        // Refresh booking data to get updated status
-        await fetchBookingData();
       } else {
         throw new Error(result.message || "Failed to confirm delivery");
       }
