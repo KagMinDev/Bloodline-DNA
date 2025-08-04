@@ -281,11 +281,6 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
                 </option>
               )}
             </select>
-            {!isLoading && districts.length > 0 && (
-              <p className="text-xs text-green-600 mt-1">
-                ✅ Đã tải {districts.length} quận/huyện của TP. Hồ Chí Minh
-              </p>
-            )}
           </div>
 
           {/* Địa chỉ chi tiết */}

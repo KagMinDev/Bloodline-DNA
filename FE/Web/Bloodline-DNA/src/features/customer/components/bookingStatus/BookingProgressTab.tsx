@@ -5,6 +5,7 @@ import { Button } from "../ui/Button";
 import { Card, CardContent, CardHeader } from "../ui/Card";
 import { formatDate } from "../utils/bookingUtils";
 import { ProgressStepProps } from "./ProgressStep";
+import { useFeedbackDebug } from "../../hooks/useFeedbackDebug";
 
 interface BookingProgressTabProps {
   progressData: TestProgressData | null;
@@ -31,6 +32,9 @@ interface BookingProgressTabProps {
   isCheckingFeedbackFor: (userId: string, testServiceId: string) => boolean;
   userId: string | null;
   testServiceId: string | null;
+  isErrorModalOpen?: boolean;
+  setIsErrorModalOpen?: (open: boolean) => void;
+  errorModalMessage?: string;
 }
 
 export const BookingProgressTab = ({
@@ -57,14 +61,57 @@ export const BookingProgressTab = ({
   isCheckingFeedbackFor,
   userId,
   testServiceId,
+  isErrorModalOpen,
+  setIsErrorModalOpen,
+  errorModalMessage,
 }: BookingProgressTabProps) => {
 
 
   if (!progressData) return <p>Không có dữ liệu tiến trình.</p>;
 
-  // Get existing feedback data if available
+  // Get existing feedback data with strict validation
   const existingFeedback = userId && testServiceId ? getExistingFeedback(userId, testServiceId) : null;
   const isCheckingExistingFeedback = userId && testServiceId ? isCheckingFeedbackFor(userId, testServiceId) : false;
+
+  // Additional validation to ensure we have legitimate feedback data
+  const hasValidFeedback = existingFeedback && 
+    typeof existingFeedback === 'object' &&
+    existingFeedback.id &&
+    existingFeedback.userId &&
+    existingFeedback.testServiceId &&
+    typeof existingFeedback.rating === 'number' &&
+    existingFeedback.rating >= 1 && 
+    existingFeedback.rating <= 5 &&
+    // QUAN TRỌNG: Đảm bảo feedback thuộc về testServiceId hiện tại
+    existingFeedback.testServiceId === testServiceId &&
+    existingFeedback.userId === userId;
+
+  // Debug logging with comprehensive analysis
+  const { hasValidFeedback: debugValidFeedback, isPotentialAutoFeedback } = useFeedbackDebug({
+    userId,
+    testServiceId,
+    bookingStatus: booking.status,
+    existingFeedback,
+    isCheckingFeedback: isCheckingExistingFeedback
+  });
+
+  // Debug logging
+  if (booking.status === "Completed" && userId && testServiceId) {
+    console.log("🔍 BookingProgressTab feedback debug:", {
+      userId,
+      testServiceId,
+      existingFeedback: existingFeedback ? {
+        id: existingFeedback.id,
+        rating: existingFeedback.rating,
+        hasComment: !!existingFeedback.comment,
+        testServiceId: existingFeedback.testServiceId
+      } : null,
+      hasValidFeedback,
+      debugValidFeedback,
+      isPotentialAutoFeedback,
+      isCheckingExistingFeedback
+    });
+  }
 
   const completedSteps = progressData.steps.filter(
     (s) => s.status === "completed"
@@ -94,6 +141,9 @@ export const BookingProgressTab = ({
             isDeliveryConfirmed={isDeliveryConfirmed}
             isCollectionConfirmed={isCollectionConfirmed}
             userId={userId}
+            isErrorModalOpen={isErrorModalOpen}
+            setIsErrorModalOpen={setIsErrorModalOpen}
+            errorModalMessage={errorModalMessage}
           />
         ))}
       </div>
@@ -164,8 +214,8 @@ export const BookingProgressTab = ({
                       <span className="text-blue-700 font-medium">Đang kiểm tra đánh giá...</span>
                     </div>
                   </div>
-                ) : existingFeedback ? (
-                  /* Display existing feedback */
+                ) : hasValidFeedback ? (
+                  /* Display existing feedback - chỉ khi có feedback hợp lệ */
                   <div className="space-y-4">
                     <div>
                       <p className="font-bold text-slate-800 mb-3">
@@ -179,7 +229,7 @@ export const BookingProgressTab = ({
                             <StarIcon
                               key={star}
                               className={`w-6 h-6 ${
-                                existingFeedback.rating >= star
+                                existingFeedback!.rating >= star
                                   ? "text-yellow-400 fill-yellow-400 stroke-black"
                                   : "text-gray-300"
                               }`}
@@ -187,23 +237,23 @@ export const BookingProgressTab = ({
                           ))}
                         </div>
                         <span className="text-sm text-slate-600">
-                          ({existingFeedback.rating}/5 sao)
+                          ({existingFeedback!.rating}/5 sao)
                         </span>
                       </div>
                       
                       {/* Display existing comment */}
-                      {existingFeedback.comment && (
+                      {existingFeedback!.comment && (
                         <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
                           <p className="text-sm font-medium text-slate-600 mb-1">Bình luận:</p>
                           <p className="text-slate-700 leading-relaxed">
-                            {existingFeedback.comment}
+                            {existingFeedback!.comment}
                           </p>
                         </div>
                       )}
                       
                       {/* Display feedback date */}
                       <div className="mt-3 text-xs text-slate-500">
-                        Đánh giá vào: {new Date(existingFeedback.createdAt).toLocaleString('vi-VN', {
+                        Đánh giá vào: {new Date(existingFeedback!.createdAt).toLocaleString('vi-VN', {
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',

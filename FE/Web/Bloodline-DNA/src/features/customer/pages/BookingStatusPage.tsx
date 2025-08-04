@@ -42,6 +42,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
     isCollectionModalOpen,
     setIsCollectionModalOpen,
     collectionLoading,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    errorModalMessage,
     getExistingFeedback,
     isCheckingFeedbackFor,
     userId,
@@ -242,6 +245,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 isCheckingFeedbackFor={isCheckingFeedbackFor}
                 userId={userId}
                 testServiceId={testServiceId}
+                isErrorModalOpen={isErrorModalOpen}
+                setIsErrorModalOpen={setIsErrorModalOpen}
+                errorModalMessage={errorModalMessage}
               />
             )}
           </div>

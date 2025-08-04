@@ -14,10 +14,13 @@ export const getTestResultsByUserId = async (userId: string): Promise<TestResult
       throw new Error("Không có token xác thực. Vui lòng đăng nhập lại.");
     }
     
-    // console.log('🔍 Calling TestResult API with userId:', userId);
-    // console.log('🔑 Using token:', token.substring(0, 20) + '...');
+    console.log('🔍 Calling TestResult API with userId:', userId);
+    console.log('🔑 Using token:', token.substring(0, 20) + '...');
     
-    const response = await axios.get(`https://api.adntester.duckdns.org/api/TestResult/user/${userId}`, {
+    const apiUrl = `https://api.adntester.duckdns.org/api/TestResult/user/${userId}`;
+    console.log('📡 API URL:', apiUrl);
+    
+    const response = await axios.get(apiUrl, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -25,14 +28,46 @@ export const getTestResultsByUserId = async (userId: string): Promise<TestResult
       timeout: 10000,
     });
     
-    // console.log('✅ TestResult API response:', response.data);
+    console.log('✅ TestResult API response:', {
+      status: response.status,
+      statusText: response.statusText,
+      dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
+      dataLength: Array.isArray(response.data) ? response.data.length : 'not-array',
+      data: response.data
+    });
     
     if (Array.isArray(response.data)) {
-      // console.log('📊 Found', response.data.length, 'test results');
+      console.log('📊 Found', response.data.length, 'test results');
+      
+      // Log chi tiết từng kết quả để debug
+      response.data.forEach((result, index) => {
+        console.log(`📋 Result ${index + 1}:`, {
+          id: result.id,
+          testBookingId: result.testBookingId,
+          testBookingIdType: typeof result.testBookingId,
+          resultSummary: result.resultSummary?.substring(0, 50) + '...',
+          resultDate: result.resultDate,
+          hasResultFileUrl: !!result.resultFileUrl
+        });
+      });
+      
       return response.data;
     }
     
     console.warn('⚠️ Unexpected response format:', response.data);
+    
+    // Kiểm tra nếu data được wrap trong object
+    if (response.data?.data && Array.isArray(response.data.data)) {
+      console.log('📊 Found wrapped data with', response.data.data.length, 'test results');
+      return response.data.data;
+    }
+    
+    // Nếu là single object, wrap thành array
+    if (response.data && typeof response.data === 'object' && response.data.id) {
+      console.log('📊 Found single result, converting to array');
+      return [response.data];
+    }
+    
     return [];
   } catch (error: any) {
     console.error("❌ Lỗi khi lấy kết quả xét nghiệm:", error);
