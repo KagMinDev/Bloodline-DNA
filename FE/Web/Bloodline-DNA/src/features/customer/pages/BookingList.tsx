@@ -6,17 +6,18 @@ import {
   ClockIcon,
   EditIcon,
   EyeIcon,
+  FileTextIcon,
   FilterIcon,
   HomeIcon,
   MapPinIcon,
   PhoneIcon,
   SearchIcon,
-  StarIcon,
-  FileTextIcon
+  StarIcon
 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "../../../components";
+import Loading from "../../../components/Loading";
 import { useBookingModal } from "../components/BookingModalContext";
 import {
   Breadcrumb,
@@ -35,12 +36,12 @@ import {
   type BookingItem
 } from "../api/bookingListApi";
 // Import statusConfig từ BookingStatusPage để đồng bộ
+import { getTestResultsByUserId } from "../api/testResultApi";
 import { getUserInfoApi } from "../api/userApi";
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import { FeedbackModal } from "../components/FeedbackModal";
 import { useExistingFeedback } from "../hooks/useExistingFeedback";
 import type { DetailedBookingStatus } from "../types/bookingTypes";
-import { getTestResultsByUserId } from "../api/testResultApi";
 
 interface Booking {
   id: string;
@@ -57,7 +58,7 @@ interface Booking {
   notes?: string;
   bookingDate: string;
   price: string;
-  collectionMethod: string;
+  collectionMethod: string | number; // Support both string and number
 }
 
 export const BookingList = (): React.JSX.Element => {
@@ -65,6 +66,7 @@ export const BookingList = (): React.JSX.Element => {
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [collectionMethodFilter, setCollectionMethodFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
@@ -85,9 +87,17 @@ export const BookingList = (): React.JSX.Element => {
 
   const { openBookingModal } = useBookingModal();
   const navigate = useNavigate();
-  
+
   // Debouncing refs
   const hoverTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
+
+  // Ref to store checkExistingFeedback function to avoid dependency issues
+  const checkExistingFeedbackRef = useRef(checkExistingFeedback);
+
+  // Update ref when function changes
+  useEffect(() => {
+    checkExistingFeedbackRef.current = checkExistingFeedback;
+  }, [checkExistingFeedback]);
   
   // Debounced feedback check function
   const debouncedCheckFeedback = useCallback((bookingId: string, userId: string, testServiceId: string, delay = 300) => {
@@ -104,7 +114,6 @@ export const BookingList = (): React.JSX.Element => {
       
       // Only check if we haven't checked yet and not currently checking
       if (!existingFeedback && !isAlreadyChecking && !preloadedFeedbacks.has(feedbackKey)) {
-        console.log(`🔄 Debounced feedback check for booking: ${bookingId}`);
         checkExistingFeedback(userId, testServiceId);
         setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
       }
@@ -189,23 +198,23 @@ export const BookingList = (): React.JSX.Element => {
       try {
         setIsLoading(true);
         setError(null);
-        
+
         // Get user info first
         const userData = await getUserInfoApi().catch(() => null);
         if (userData?.id) {
           setUserId(userData.id);
         }
-        
+
         const apiData = await getBookingListApi();
         const formattedBookings = apiData.map(transformApiDataToBooking);
-        
+
         // Sort bookings by createdAt descending (newest first)
         const sortedBookings = formattedBookings.sort((a, b) => {
           const dateA = new Date(a.bookingDate);
           const dateB = new Date(b.bookingDate);
           return dateB.getTime() - dateA.getTime();
         });
-        
+
         setBookings(sortedBookings);
         setFilteredBookings(sortedBookings);
 
@@ -214,16 +223,15 @@ export const BookingList = (): React.JSX.Element => {
           const completedBookings = sortedBookings
             .filter(booking => booking.status === 'Completed')
             .slice(0, 3); // Only first 3 to avoid performance issues
-          
+
           if (completedBookings.length > 0) {
-            console.log(`🔄 Preloading feedback for top ${completedBookings.length} completed bookings`);
-            
+
             // Add small delays to avoid hitting API too hard
             completedBookings.forEach((booking, index) => {
               if (booking.testServiceId) {
                 setTimeout(() => {
                   const feedbackKey = `${userData.id}_${booking.testServiceId}`;
-                  checkExistingFeedback(userData.id, booking.testServiceId);
+                  checkExistingFeedbackRef.current(userData.id, booking.testServiceId);
                   setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
                 }, index * 100); // 100ms delay between each call
               }
@@ -242,7 +250,7 @@ export const BookingList = (): React.JSX.Element => {
     };
 
     fetchData();
-  }, [checkExistingFeedback]);
+  }, []); // Remove checkExistingFeedback dependency to prevent infinite loop
 
   useEffect(() => {
     let filtered = bookings;
@@ -261,8 +269,41 @@ export const BookingList = (): React.JSX.Element => {
       filtered = filtered.filter(booking => booking.status === statusFilter);
     }
 
+    // Filter by collectionMethod
+    if (collectionMethodFilter !== "all") {
+      filtered = filtered.filter(booking => {
+        const method = booking.collectionMethod;
+        if (collectionMethodFilter === "home") {
+          // Home: collectionMethod = 0 hoặc SelfSample
+          if (typeof method === 'number') {
+            return method === 0;
+          } else if (typeof method === 'string') {
+            const methodStr = method.toLowerCase();
+            return methodStr === "0" || 
+                   methodStr.includes("selfsample") || 
+                   methodStr.includes("home") || 
+                   methodStr.includes("nhà");
+          }
+          return false;
+        } else if (collectionMethodFilter === "facility") {
+          // Facility: collectionMethod = 1 hoặc AtFacility
+          if (typeof method === 'number') {
+            return method === 1;
+          } else if (typeof method === 'string') {
+            const methodStr = method.toLowerCase();
+            return methodStr === "1" || 
+                   methodStr.includes("atfacility") || 
+                   methodStr.includes("facility") || 
+                   methodStr.includes("cơ sở");
+          }
+          return false;
+        }
+        return true;
+      });
+    }
+
     setFilteredBookings(filtered);
-  }, [bookings, searchTerm, statusFilter]);
+  }, [bookings, searchTerm, statusFilter, collectionMethodFilter]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -284,20 +325,21 @@ export const BookingList = (): React.JSX.Element => {
   };
 
   const handleFeedbackClick = (booking: Booking) => {
-    console.log('🔄 Opening feedback modal for booking:', booking.id);
-    
-    // Check for existing feedback before opening modal to ensure latest data
+
+    // Only check for existing feedback if we haven't checked yet
     if (userId && booking.testServiceId) {
+      const feedbackKey = `${userId}_${booking.testServiceId}`;
       const existingFeedback = getExistingFeedback(userId, booking.testServiceId);
       const isAlreadyChecking = isCheckingFeedbackFor(userId, booking.testServiceId);
-      
-      // Refresh feedback check to ensure we have the latest data
-      if (!isAlreadyChecking) {
-        console.log(`🔄 Refreshing feedback check for booking: ${booking.id}`);
+      const hasPreloaded = preloadedFeedbacks.has(feedbackKey);
+
+      // Only refresh if we haven't preloaded and not currently checking
+      if (!hasPreloaded && !existingFeedback && !isAlreadyChecking) {
         checkExistingFeedback(userId, booking.testServiceId);
+        setPreloadedFeedbacks(prev => new Set(prev).add(feedbackKey));
       }
     }
-    
+
     setSelectedBookingForFeedback(booking);
     setFeedbackModalOpen(true);
   };
@@ -317,17 +359,17 @@ export const BookingList = (): React.JSX.Element => {
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
       
-      console.log('🔍 Debug info:', {
-        userId: userId,
-        bookingId: bookingId
-      });
+      // console.log('🔍 Debug info:', {
+      //   userId: userId,
+      //   bookingId: bookingId
+      // });
       
       const results = await getTestResultsByUserId(userId);
-      console.log('📊 All results:', results);
+      // console.log('📊 All results:', results);
       
-      // Debug: In ra tất cả testBookingId và bookingId
-      console.log('📋 bookingId:', bookingId, typeof bookingId);
-      console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
+      // // Debug: In ra tất cả testBookingId và bookingId
+      // console.log('📋 bookingId:', bookingId, typeof bookingId);
+      // console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
       
       // Chuẩn hóa để so sánh
       const normalize = (val: any) => String(val).replace(/\s+/g, '').toLowerCase();
@@ -434,6 +476,19 @@ export const BookingList = (): React.JSX.Element => {
                   <option value="Completed">Hoàn thành</option>
                   <option value="Cancelled">Đã hủy</option>
                 </select>
+                
+                <div className="flex items-center">
+                  <span className="text-sm font-medium text-gray-700">Phương thức:</span>
+                </div>
+                <select
+                  value={collectionMethodFilter}
+                  onChange={(e) => setCollectionMethodFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="all">Tất cả</option>
+                  <option value="home">Tại nhà</option>
+                  <option value="facility">Tại cơ sở</option>
+                </select>
               </div>
             </div>
           </div>
@@ -449,9 +504,12 @@ export const BookingList = (): React.JSX.Element => {
             </div>
 
             {isLoading ? (
-              <div className="py-16 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 border-4 border-blue-200 rounded-full border-t-blue-600 animate-spin"></div>
-                <p className="text-slate-600">Đang tải danh sách...</p>
+              <div className="flex items-center justify-center py-20">
+                <Loading 
+                  size="large" 
+                  message="Đang tải danh sách lịch hẹn..." 
+                  color="blue" 
+                />
               </div>
             ) : error ? (
               <div className="py-16 text-center">
@@ -560,14 +618,32 @@ export const BookingList = (): React.JSX.Element => {
 
                           <div className="flex flex-col gap-3 mt-4">
                             <div className="flex flex-col gap-3 sm:flex-row">
-                              <Button 
-                                variant="outline" 
-                                className="w-full sm:w-auto"
-                                onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
-                              >
-                                <EyeIcon className="w-4 h-4 mr-2" />
-                                Xem chi tiết
-                              </Button>
+                              {/* Ẩn nút "Xem chi tiết" cho booking có collectionMethod là "AtFacility" (giá trị 1) */}
+                              {(() => {
+                                // Kiểm tra collectionMethod: 1 = AtFacility, 0 = SelfSample
+                                const method = booking.collectionMethod;
+                                let isAtFacility = false;
+                                
+                                if (typeof method === 'number') {
+                                  isAtFacility = method === 1;
+                                } else if (typeof method === 'string') {
+                                  const methodStr = method.toLowerCase();
+                                  isAtFacility = methodStr === '1' || 
+                                                methodStr.includes('atfacility') ||
+                                                methodStr.includes('facility');
+                                }
+                                
+                                return !isAtFacility;
+                              })() && (
+                                <Button 
+                                  variant="outline" 
+                                  className="w-full sm:w-auto"
+                                  onClick={() => navigate(`/customer/booking-status/${booking.id}`)}
+                                >
+                                  <EyeIcon className="w-4 h-4 mr-2" />
+                                  Xem chi tiết
+                                </Button>
+                              )}
                               {(booking.status === 'Pending' || booking.status === 'PreparingKit') && (
                                 <Button 
                                   className="w-full bg-blue-600 sm:w-auto hover:bg-blue-700"
@@ -692,25 +768,25 @@ export const BookingList = (): React.JSX.Element => {
       {/* Modal hiển thị kết quả */}
       {showResultModal && resultData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setShowResultModal(false)}>&times;</button>
-            <h2 className="text-xl font-bold mb-4 text-green-700">Kết Quả Xét Nghiệm</h2>
+          <div className="relative w-full max-w-lg p-6 bg-white rounded-lg shadow-lg">
+            <button className="absolute text-gray-500 top-2 right-2 hover:text-red-600" onClick={() => setShowResultModal(false)}>&times;</button>
+            <h2 className="mb-4 text-xl font-bold text-green-700">Kết Quả Xét Nghiệm</h2>
             {resultData.list ? (
               <>
-                <div className="mb-2 text-blue-700 font-semibold">Chọn kết quả muốn xem:</div>
+                <div className="mb-2 font-semibold text-blue-700">Chọn kết quả muốn xem:</div>
                 <ul className="mb-4 space-y-2">
-                  {resultData.list.map((r: any, idx: number) => (
-                    <li key={r.id} className="border rounded p-2 flex flex-col gap-1">
+                  {resultData.list.map((r: any) => (
+                    <li key={r.id} className="flex flex-col gap-1 p-2 border rounded">
                       <div><b>Mã booking:</b> {r.testBookingId}</div>
                       <div><b>Kết luận:</b> {r.resultSummary}</div>
                       <div><b>Ngày trả kết quả:</b> {new Date(r.resultDate).toLocaleDateString('vi-VN')}</div>
-                      <Button className="mt-1 bg-green-600 text-white" onClick={() => { setResultData(r); }}>
+                      <Button className="mt-1 text-white bg-green-600" onClick={() => { setResultData(r); }}>
                         Xem chi tiết kết quả này
                       </Button>
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => setShowResultModal(false)} className="w-full bg-gray-600 text-white mt-2">Đóng</Button>
+                <Button onClick={() => setShowResultModal(false)} className="w-full mt-2 text-white bg-gray-600">Đóng</Button>
               </>
             ) : (
               <>
@@ -721,9 +797,9 @@ export const BookingList = (): React.JSX.Element => {
                 <div className="mb-2"><b>Địa chỉ:</b> {resultData.client?.address}</div>
                 <div className="mb-4">
                   <b>File kết quả:</b><br />
-                  <img src={resultData.resultFileUrl} alt="Kết quả" className="max-w-full max-h-60 border rounded mt-2" />
+                  <img src={resultData.resultFileUrl} alt="Kết quả" className="max-w-full mt-2 border rounded max-h-60" />
                 </div>
-                <Button onClick={() => setShowResultModal(false)} className="w-full bg-green-600 text-white mt-2">Đóng</Button>
+                <Button onClick={() => setShowResultModal(false)} className="w-full mt-2 text-white bg-green-600">Đóng</Button>
               </>
             )}
           </div>
@@ -733,22 +809,22 @@ export const BookingList = (): React.JSX.Element => {
       {/* Error Modal */}
       {resultError && !showResultModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-red-600" onClick={() => setResultError(null)}>&times;</button>
-            <h2 className="text-xl font-bold mb-4 text-red-700">Lỗi</h2>
+          <div className="relative w-full max-w-md p-6 bg-white rounded-lg shadow-lg">
+            <button className="absolute text-gray-500 top-2 right-2 hover:text-red-600" onClick={() => setResultError(null)}>&times;</button>
+            <h2 className="mb-4 text-xl font-bold text-red-700">Lỗi</h2>
             <p className="mb-4 text-red-600">{resultError}</p>
             {resultError.includes("đăng nhập") && (
               <Button 
                 onClick={() => window.location.href = '/auth/login'} 
-                className="w-full bg-red-600 hover:bg-red-700 text-white"
+                className="w-full text-white bg-red-600 hover:bg-red-700"
               >
                 Đăng nhập ngay
               </Button>
             )}
-            <Button onClick={() => setResultError(null)} className="w-full bg-gray-600 text-white mt-2">Đóng</Button>
+            <Button onClick={() => setResultError(null)} className="w-full mt-2 text-white bg-gray-600">Đóng</Button>
           </div>
         </div>
       )}
     </div>
   );
-}; 
+};

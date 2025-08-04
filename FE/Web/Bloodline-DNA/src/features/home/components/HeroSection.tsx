@@ -5,8 +5,23 @@ const HeroSection: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBookNow = () => {
-    navigate("/services");
-  };
+  const storedUser = localStorage.getItem("user");
+
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      if (user?.role === "Client") {
+        navigate("/customer/services");
+        return;
+      }
+    } catch (e) {
+      console.error("Lỗi parse user từ localStorage", e);
+    }
+  }
+
+  navigate("/services");
+};
+
   return (
     <section className="relative py-20 overflow-hidden md:py-24">
       <div className="flex flex-col items-center px-4 mx-auto md:flex-row max-w-7xl sm:px-6 lg:px-8">

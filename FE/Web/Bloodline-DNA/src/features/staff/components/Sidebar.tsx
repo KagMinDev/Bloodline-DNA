@@ -44,7 +44,9 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('accountId');
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (

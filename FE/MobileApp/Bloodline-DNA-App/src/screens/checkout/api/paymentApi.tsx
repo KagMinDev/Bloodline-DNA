@@ -1,5 +1,5 @@
 import rootApi from "@/api/rootApi";
-import type { CallbackRequest, CallbackResponse, CheckoutResponse,} from "../types/checkout";
+import type { CallbackRequest, CallbackResponse, CheckoutResponse, } from "../types/checkout";
 
 /**
  * Khởi tạo thanh toán (đặt cọc) cho Booking.
@@ -11,8 +11,6 @@ export const checkoutApi = async ( bookingId: string, token: string): Promise<Ch
         headers: { Authorization: `Bearer ${token}` },
       }
     );
-
-    console.log("📦 API response:", res.data); // 👈 LOG THỰC TẾ
 
     // Nếu res.data đã là object CheckoutResponse
     if (res.data && res.data.checkoutUrl) {
@@ -37,7 +35,6 @@ export const checkoutApi = async ( bookingId: string, token: string): Promise<Ch
  * Thanh toán phần còn lại.
  */
 export const remainingPaymentApi = async ( bookingId: string, token: string): Promise<CheckoutResponse> => {
-  console.log('remainingPaymentApi da duoc goi', bookingId);
   
   try {
     const res = await rootApi.post(`/Payment/mobile/${bookingId}/remaining-payment`, {}, {
@@ -45,8 +42,6 @@ export const remainingPaymentApi = async ( bookingId: string, token: string): Pr
         Authorization: `Bearer ${token}`,
       },
     });
-
-    console.log("📦 remainingPaymentApi response:", res.data);
 
     if (res.data && res.data.checkoutUrl) {
       return res.data;
@@ -67,7 +62,6 @@ export const remainingPaymentApi = async ( bookingId: string, token: string): Pr
  * Gửi callback sau khi thanh toán đặt cọc.
  */
 export const callbackApi = async ( payload: CallbackRequest, token: string): Promise<CallbackResponse> => {
-  console.log("callbackApi da dc goi", payload);
   
   try {
     const res = await rootApi.post<{ data: CallbackResponse }>("/Payment/callback", payload,
@@ -85,7 +79,6 @@ export const callbackApi = async ( payload: CallbackRequest, token: string): Pro
         }
       }],
     });
-    console.log("📥 Server response:", res.data);
     return res.data.data;
   } catch (err: any) {
     console.error("callbackApi error:", err?.response?.data || err.message);
@@ -97,7 +90,6 @@ export const callbackApi = async ( payload: CallbackRequest, token: string): Pro
  * Gửi callback sau khi thanh toán phần còn lại.
  */
 export const remainingCallbackApi = async (payload: CallbackRequest,token: string): Promise<CallbackResponse> => {
-  console.log("reaminingCallbackApi da dc goi", payload);
   
   try {
     const res = await rootApi.post<{ data: CallbackResponse }>(`/Payment/remaining-callback`,payload,

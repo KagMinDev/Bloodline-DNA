@@ -43,6 +43,7 @@ export const statusMapNumberToKey: Record<number, DeliveryStatus> = {
 export interface DeliveryLogistic {
   id: string;
   staffId: string | null;
+  name: string;
   staff: { fullName?: string } | null;
   address: string;
   phone: string;

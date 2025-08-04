@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
-import { getTestsApi, createTestApi, updateTestApi, deleteTestApi, getTestByIdApi } from '../api/testApi';
-import type { PriceServiceRequest, TestRequest, TestResponse, TestUpdateRequest } from '../types/testService';
-import ModalTest from '../components/testManagement/ModalTest';
-import ModalDetail from '../components/testManagement/ModalDetail';
-import TestList from '../components/testManagement/TestList';
-import { Button } from '../../staff/components/sample/ui/button';
 import { FaPlus } from 'react-icons/fa';
+import { Loading } from '../../../components';
+import { Button } from '../../staff/components/sample/ui/button';
+import { createTestApi, deleteTestApi, getTestByIdApi, getTestsApi, updateTestApi } from '../api/testApi';
+import ModalDetail from '../components/testManagement/ModalDetail';
 import ModalEdit from '../components/testManagement/ModalEdit';
+import ModalTest from '../components/testManagement/ModalTest';
+import TestList from '../components/testManagement/TestList';
+import type { PriceServiceRequest, TestRequest, TestResponse, TestUpdateRequest } from '../types/testService';
 
 export default function TestManagement() {
   const [tests, setTests] = useState<TestResponse[]>([]);
   const [showAddTest, setShowAddTest] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [detailTest, setDetailTest] = useState<TestResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Sửa dịch vụ
   const [showEditTest, setShowEditTest] = useState(false);
@@ -21,12 +23,21 @@ export default function TestManagement() {
   const token = localStorage.getItem('token') || '';
 
   useEffect(() => {
-    getTestsApi(token)
-      .then((res) => {
-        const sortedTests = [...res].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const res = await getTestsApi(token);
+        const sortedTests = [...res].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
         setTests(sortedTests);
-      })
-      .catch(() => { });
+      } catch {
+        setTests([]);
+      }
+      setIsLoading(false);
+    };
+
+    fetchData();
   }, [token]);
 
   // Thêm dịch vụ mới (POST)
@@ -73,14 +84,13 @@ export default function TestManagement() {
   // Sửa dịch vụ (PUT)
   const handleUpdateTest = async (data: TestUpdateRequest) => {
     try {
-      console.log('Update request:', data);
       await updateTestApi(data, token);
       setShowEditTest(false);
       const newTests = await getTestsApi(token);
       const sortedTests = [...newTests].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setTests(sortedTests);
       alert('Cập nhật dịch vụ thành công!');
-    } catch (err) {
+    } catch {
       alert('Có lỗi xảy ra khi cập nhật dịch vụ!');
     }
   };
@@ -91,7 +101,7 @@ export default function TestManagement() {
       await deleteTestApi(id, token);
       setTests(tests.filter((t) => t.id !== id));
       alert('Đã xóa dịch vụ!');
-    } catch (err) {
+    } catch {
       alert('Có lỗi xảy ra khi xóa dịch vụ!');
     }
   };
@@ -103,7 +113,7 @@ export default function TestManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 p-8">
+    <div className="min-h-screen p-8 bg-blue-50">
       {/* Modal thêm dịch vụ */}
       <ModalTest
         open={showAddTest}
@@ -140,12 +150,20 @@ export default function TestManagement() {
 
       {/* Danh sách dịch vụ */}
       <div className="overflow-x-auto max-h-[80vh]">
-        <TestList
-          tests={tests}
-          onShowDetail={handleShowDetail}
-          onEditTest={handleEditTest}
-          onDeleteTest={handleDeleteTest}
-        />
+        {isLoading ? (
+          <div className="flex items-center justify-center h-full">
+            <Loading message="Đang tải danh sách dịch vụ..." />
+          </div>
+        ) : tests.length > 0 ? (
+          <TestList
+            tests={tests}
+            onShowDetail={handleShowDetail}
+            onEditTest={handleEditTest}
+            onDeleteTest={handleDeleteTest}
+          />
+        ) : (
+          <p className="py-8 text-center text-gray-500">Không có dịch vụ nào để hiển thị.</p>
+        )}
       </div>
     </div>
   );

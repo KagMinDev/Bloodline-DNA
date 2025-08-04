@@ -190,10 +190,10 @@ function BlogsManager() {
 
   return (
     <>
-      <div className="h-screen flex flex-col items-center bg-blue-50 p-6 relative overflow-auto">
-        <div className="max-w-7xl mx-auto w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-blue-800">Quản lý bài viết</h1>
+      <div className="relative flex flex-col items-center h-screen p-6 overflow-auto bg-blue-50">
+        <div className="w-full mx-auto max-w-7xl">
+          <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-bold text-blue-800 md:text-3xl">Quản lý bài viết</h1>
             <Button
               onClick={handleAddNewBlog}
               className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 px-4 py-2 rounded-lg shadow"
@@ -204,8 +204,12 @@ function BlogsManager() {
             </Button>
           </div>
 
-          {blogs.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loading message="Đang tải danh sách bài viết..." />
+            </div>
+          ) : blogs.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {blogs.map((blog) => (
                 <BlogCard
                   key={blog.id}
@@ -231,7 +235,6 @@ function BlogsManager() {
           tags={tags} // truyền thêm prop này
         />
       </div>
-      {isLoading && <Loading message="Đang tải..." fullScreen={true} />}
     </>
   );
 }

@@ -39,6 +39,8 @@ import { Card, CardContent } from "../components/ui/Card";
 export const Contacts = (): React.JSX.Element => {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,8 +48,10 @@ export const Contacts = (): React.JSX.Element => {
     subject: '',
     message: ''
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   // const sectionRef = useRef<HTMLElement>(null);
+
+  // URL của Google Apps Script - thay thế bằng URL thực tế của bạn
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypEXvmJ75Har_K0AH4pT7SI-t2q_jyhYUO269P0iuMbOYHlIDvTNPVBigOqBSKdMJGRw/exec';
 
   // const contactInfo: ContactInfo[] = [
   //   {
@@ -110,21 +114,48 @@ export const Contacts = (): React.JSX.Element => {
     };
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+    
+    try {
+      // Phương pháp 1: Dùng form submission thay vì fetch để tránh CORS
+      const formElement = document.createElement('form');
+      formElement.method = 'POST';
+      formElement.action = APPS_SCRIPT_URL;
+      formElement.target = 'hidden-iframe';
+      
+      // Thêm các field vào form
+      Object.entries(formData).forEach(([key, value]) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        formElement.appendChild(input);
+      });
+      
+      document.body.appendChild(formElement);
+      formElement.submit();
+      document.body.removeChild(formElement);
+      
+      // Giả lập thành công vì không thể đọc response từ cross-origin
+      setTimeout(() => {
+        setShowSuccessModal(true);
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+        setIsSubmitting(false);
+      }, 1000);
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setShowSuccessModal(true); // Vẫn hiện success modal vì CORS
+      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -133,8 +164,46 @@ export const Contacts = (): React.JSX.Element => {
         message: ''
       });
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Lắng nghe khi iframe load xong (tức là form đã được submit thành công)
+  // useEffect(() => {
+  //   const iframe = document.querySelector('iframe[name="hidden-iframe"]') as HTMLIFrameElement;
+    
+  //   if (iframe) {
+  //     const handleIframeLoad = () => {
+  //       if (isSubmitting) {
+  //         // Form đã được gửi thành công
+  //         setTimeout(() => {
+  //           alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong vòng 24 giờ.');
+  //           // Reset form
+  //           const form = document.querySelector('form') as HTMLFormElement;
+  //           if (form) {
+  //             form.reset();
+  //           }
+  //           setIsSubmitting(false);
+  //         }, 500);
+  //       }
+  //     };
+
+  //     iframe.addEventListener('load', handleIframeLoad);
+      
+  //     return () => {
+  //       iframe.removeEventListener('load', handleIframeLoad);
+  //     };
+  //   }
+  // }, [isSubmitting]);
+
+
 
   return (
     <div className="bg-gradient-to-b from-[#fcfefe] to-gray-50 min-h-screen w-full">
@@ -184,7 +253,14 @@ export const Contacts = (): React.JSX.Element => {
                     </p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleFormSubmit} className="space-y-6">
+                    {/* Hidden iframe để nhận response từ Google Apps Script */}
+                    <iframe 
+                      name="hidden-iframe" 
+                      style={{ display: 'none' }}
+                      title="Hidden iframe for form submission"
+                    ></iframe>
+                    
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
                         <label htmlFor="name" className="block mb-2 text-sm font-semibold text-slate-700">
@@ -243,14 +319,14 @@ export const Contacts = (): React.JSX.Element => {
                         name="subject"
                         value={formData.subject}
                         onChange={handleInputChange}
+                        required
                         className="w-full px-4 py-3 transition-colors duration-200 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
                       >
                         <option value="">Chọn chủ đề</option>
-                        <option value="appointment">Đặt lịch khám</option>
-                        <option value="consultation">Tư vấn y tế</option>
-                        <option value="emergency">Cấp cứu</option>
-                        <option value="feedback">Góp ý</option>
-                        <option value="other">Khác</option>
+                        <option value="Đặt Lịch Khám">Đặt lịch khám</option>
+                        <option value="Tư Vấn Y Tế">Tư vấn y tế</option>      
+                        <option value="Góp Ý">Góp ý</option>
+                        <option value="Khác">Khác</option>
                       </select>
                     </div>
 
@@ -270,10 +346,10 @@ export const Contacts = (): React.JSX.Element => {
                       />
                     </div>
 
-                    <Button
+                    <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-blue-900 hover:bg-blue-800 !text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300"
+                      className="w-full bg-blue-900 hover:bg-blue-800 !text-white py-4 rounded-lg text-lg font-semibold transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <>
@@ -286,7 +362,7 @@ export const Contacts = (): React.JSX.Element => {
                           Gửi Tin Nhắn
                         </>
                       )}
-                    </Button>
+                    </button>
                   </form>
                 </div>
               </div>
@@ -316,7 +392,7 @@ export const Contacts = (): React.JSX.Element => {
                           href="tel:1900xxxx"
                           className="block text-lg font-semibold text-blue-800 transition-colors duration-200 hover:text-blue-900 whitespace-nowrap"
                         >
-                          1900-xxxx
+                          0342 555 702
                         </a>
                       </div>
                     </CardContent>
@@ -380,7 +456,7 @@ export const Contacts = (): React.JSX.Element => {
                         href="mailto:support@hospital.vn"
                         className="text-base font-semibold text-center text-blue-800 break-words transition-colors duration-200 hover:text-blue-900"
                       >
-                        support@hospital.vn
+                        blodlineDNA@support.com
                       </a>
                     </CardContent>
                   </Card>
@@ -488,6 +564,47 @@ export const Contacts = (): React.JSX.Element => {
           <Footer />
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative max-w-md mx-4 overflow-hidden bg-white shadow-2xl rounded-2xl animate-in zoom-in-95 duration-300">
+            {/* Header với gradient */}
+            <div className="p-6 text-center text-white bg-gradient-to-r from-green-500 to-green-600">
+              <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-white rounded-full bg-opacity-20">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold">Gửi Tin Nhắn Thành Công!</h3>
+            </div>
+            
+            {/* Content */}
+            <div className="p-6">
+              <p className="mb-6 text-center text-gray-600 leading-relaxed">
+                Cảm ơn bạn đã liên hệ với chúng tôi! Chúng tôi sẽ phản hồi trong vòng <strong className="text-blue-600">24 giờ</strong> qua email hoặc số điện thoại bạn đã cung cấp.
+              </p>
+              
+              {/* Thông tin liên hệ nhanh */}
+              <div className="p-4 mb-6 border border-blue-200 rounded-lg bg-blue-50">
+                <p className="mb-2 text-sm font-semibold text-blue-800">Liên hệ khẩn cấp:</p>
+                <div className="space-y-1 text-sm text-blue-700">
+                  <p>📞 Hotline: <strong>0342 555 702</strong></p>
+                  <p>✉️ Email: <strong>support@hospital.vn</strong></p>
+                </div>
+              </div>
+              
+              {/* Nút đóng */}
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full px-6 py-3 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }; 

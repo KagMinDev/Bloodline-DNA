@@ -32,7 +32,6 @@ export const statusToNumber = (status: string | number | null | undefined): numb
     console.warn(`Unknown status received: "${status}"`);
   }
 
-  console.log(`Status: ${status}, Normalized: ${normalizedStatus}, Numeric: ${numericStatus}`);
   return numericStatus;
 };
 

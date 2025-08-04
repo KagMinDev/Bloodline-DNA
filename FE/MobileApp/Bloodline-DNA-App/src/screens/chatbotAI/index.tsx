@@ -145,7 +145,7 @@ const ChatbotAI: React.FC = () => {
                 <View style={styles.messageLeft}>
                   <View style={styles.botBubble}>
                     <ActivityIndicator size="small" color="#000" />
-                    <Text style={styles.botText}> Đang trả lời...</Text>
+                    <Text style={styles.botText}>Đang trả lời...</Text>
                   </View>
                 </View>
               )}

@@ -12,6 +12,7 @@ interface Props {
   onClose: () => void;
   delivery: DeliveryOrder | null;
   onRefresh?: () => void;
+  canAssignStaff?: boolean;
 }
 
 // Định nghĩa trạng thái với text & màu
@@ -40,6 +41,7 @@ const DeliveryDetailModal = ({
   onClose,
   delivery,
   onRefresh,
+  canAssignStaff = false,
 }: Props) => {
   const [staffList, setStaffList] = useState<ActiveStaff[]>([]);
   const [loading, setLoading] = useState(false);
@@ -56,6 +58,7 @@ const DeliveryDetailModal = ({
       try {
         setLoading(true);
         const staff = await getActiveStaff(token);
+        console.log("getActiveStaff",staff )
         setStaffList(staff);
       } catch (err) {
         message.error((err as Error).message);
@@ -76,7 +79,6 @@ const DeliveryDetailModal = ({
   }, [delivery]);
 
   const handleStaffChange = async (value: string | undefined) => {
-    console.log("selected", value);
     if (!delivery) return;
 
     const token = localStorage.getItem("token");
@@ -91,8 +93,13 @@ const DeliveryDetailModal = ({
       setAssignLoading(true);
       await assignDeliveryStaff(delivery.id, value, token);
       setSelectedStaff(value);
+
+      // Cập nhật delivery object với staff mới
+      const updatedDelivery = { ...delivery, staff: value };
+
       message.success("Phân công nhân viên thành công");
 
+      // Gọi onRefresh để cập nhật data từ server
       if (onRefresh) {
         onRefresh();
       }
@@ -105,7 +112,7 @@ const DeliveryDetailModal = ({
   };
 
   const handleClose = () => {
-    setSelectedStaff(undefined);
+    // Không reset selectedStaff khi đóng modal
     onClose();
   };
 
@@ -134,22 +141,34 @@ const DeliveryDetailModal = ({
           labelStyle={{ fontWeight: 600, width: "200px" }}
           contentStyle={{ fontSize: 14 }}
         >
-          <Descriptions.Item label="Nhân viên">
-            <Select
-              style={{ width: "100%" }}
-              placeholder="Chọn nhân viên để phân công"
-              value={selectedStaff}
-              onChange={handleStaffChange}
-              allowClear
-              loading={assignLoading}
-              disabled={assignLoading}
-            >
-              {staffList.map((staff) => (
-                <Select.Option key={staff.id} value={staff.id}>
-                  {staff.fullName} ({staff.email})
-                </Select.Option>
-              ))}
-            </Select>
+          {delivery.status === "PreparingKit" && (
+            <Descriptions.Item label="Nhân viên">
+              <Select
+                style={{ width: "100%" }}
+                placeholder="Chọn nhân viên để phân công"
+                value={selectedStaff}
+                onChange={handleStaffChange}
+                allowClear
+                loading={assignLoading}
+                disabled={assignLoading || !canAssignStaff}
+              >
+                {staffList.map((staff) => (
+                  <Select.Option key={staff.id} value={staff.id}>
+                    {staff.fullName} ({staff.email})
+                  </Select.Option>
+                ))}
+              </Select>
+              {/* {selectedStaff && (
+                <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
+                  Đã phân công:{" "}
+                  {staffList.find((s) => s.id === selectedStaff)?.fullName ||
+                    "Đang tải..."}
+                </div>
+              )} */}
+            </Descriptions.Item>
+          )}
+          <Descriptions.Item label="Khách hàng">
+            {delivery.name}
           </Descriptions.Item>
           <Descriptions.Item label="Địa chỉ">
             {delivery.address}

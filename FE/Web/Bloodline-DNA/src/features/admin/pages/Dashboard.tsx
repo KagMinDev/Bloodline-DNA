@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts";
-import { getBlogsApi } from "../../manager/api/blogsApi";
-import { getTestsApi } from "../../manager/api/testApi";
-import { getFeedbacksApi } from "../../manager/api/feedbackApi";
-import { getAllUserApi } from "../api/userApi";
-import { getTestBookingApi } from "../../staff/api/testBookingApi";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { getAuthToken } from "../../../apis/rootApi";
+import { Loading } from "../../../components";
+import { getBlogsApi } from "../../manager/api/blogsApi";
+import { getFeedbacksApi } from "../../manager/api/feedbackApi";
+import { getTestsApi } from "../../manager/api/testApi";
 import type { BlogResponse } from "../../manager/types/blogs";
-import type { TestResponse } from "../../manager/types/testService";
 import type { FeedbackResponse } from "../../manager/types/feedback";
+import type { TestResponse } from "../../manager/types/testService";
+import { getTestBookingApi } from "../../staff/api/testBookingApi";
+import { getAllUserApi } from "../api/userApi";
 import type { UserResponse } from "../types/User";
 
 function CardStat({ title, count, color }: { title: string; count: number; color: string }) {
@@ -21,7 +22,7 @@ function CardStat({ title, count, color }: { title: string; count: number; color
   };
   return (
     <div className={`rounded-2xl shadow-md p-6 flex flex-col items-center justify-center ${colorMap[color]}`}>
-      <p className="text-sm text-gray-600 mb-1">{title}</p>
+      <p className="mb-1 text-sm text-gray-600">{title}</p>
       <p className="text-3xl font-extrabold">{count}</p>
     </div>
   );
@@ -145,15 +146,17 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-6 overflow-auto min-h-screen bg-gray-50">
-      <h1 className="text-3xl font-bold text-blue-800 mb-6">📊 Thống kê quản trị</h1>
+    <div className="min-h-screen p-6 overflow-auto bg-gray-50">
+      <h1 className="mb-6 text-3xl font-bold text-blue-800">📊 Thống kê quản trị</h1>
       {loading ? (
-        <div className="text-center py-10">Đang tải dữ liệu...</div>
-      ) : error ? (
-        <div className="text-center text-red-600 py-10">{error}</div>
-      ) : (
+        <div className="flex items-center justify-center py-10">
+          <Loading message="Đang tải dữ liệu..." />
+        </div>
+        ) : error ? (
+          <div className="py-10 text-center text-red-600">{error}</div>
+        ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 lg:grid-cols-5">
             <CardStat title="👥 Người dùng" count={users.length} color="purple" />
             <CardStat title="📝 Bài viết" count={blogs.length} color="blue" />
             <CardStat title="📅 Lịch hẹn" count={bookings.length} color="green" />
@@ -161,8 +164,8 @@ export default function Dashboard() {
             <CardStat title="💬 Phản hồi" count={feedbacks.length} color="orange" />
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+          <div className="p-6 bg-white shadow-xl rounded-2xl">
+            <div className="flex flex-col justify-between mb-4 sm:flex-row sm:items-center">
               <h2 className="text-xl font-semibold text-gray-700"></h2>
               <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
                 {["today", "week", "month", "year"].map(type => (
@@ -170,8 +173,8 @@ export default function Dashboard() {
                     key={type}
                     onClick={() => handlePresetFilter(type)}
                     className={`px-4 py-1.5 rounded-lg text-sm font-medium transition duration-200 ${dateFilter.filterType === type
-                        ? "bg-blue-400 text-white shadow"
-                        : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                      ? "bg-blue-400 text-white shadow"
+                      : "bg-gray-100 text-gray-700 hover:bg-blue-100"
                       }`}
                   >
                     {({ today: "Hôm nay", week: "Tuần này", month: "Tháng này", year: "Năm nay" } as any)[type]}
@@ -179,7 +182,7 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">📈 Hoạt động theo thời gian</h2>
+            <h2 className="mb-4 text-xl font-semibold text-gray-800">📈 Hoạt động theo thời gian</h2>
             <ResponsiveContainer width="100%" height={430}>
               <LineChart data={formatChartData()}>
                 <CartesianGrid strokeDasharray="3 3" />

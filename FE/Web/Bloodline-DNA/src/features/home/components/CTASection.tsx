@@ -5,8 +5,22 @@ const CTASection: React.FC = () => {
   const navigate = useNavigate();
 
   const handleBookNow = () => {
-    navigate("/services");
-  };
+  const storedUser = localStorage.getItem("user");
+
+  if (storedUser) {
+    try {
+      const user = JSON.parse(storedUser);
+      if (user?.role === "Client") {
+        navigate("/customer/services");
+        return;
+      }
+    } catch (e) {
+      console.error("Lỗi parse user từ localStorage", e);
+    }
+  }
+
+  navigate("/services");
+};
 
   return (
     <section className="py-12 bg-white md:py-16">

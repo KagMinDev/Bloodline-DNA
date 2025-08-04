@@ -33,6 +33,7 @@ function Delivery() {
     setIsLoading(true);
     try {
       const data = await getDeliveryLogistics();
+      console.log("getDeliveryLogistics 123", data)
       setDeliveries(data);
     } catch (error) {
       console.error("Lỗi khi tải danh sách logistics:", error);
@@ -88,28 +89,36 @@ function Delivery() {
           </li>
 
           {/* Thống kê */}
-          <div className="grid grid-cols-2 gap-4 mb-6 md:grid-cols-4 lg:grid-cols-8">
-            <StatCard
-              label="Tổng đơn"
-              count={stats.total}
-              color="text-blue-600"
-            />
-            <StatCard
-              label="Chuẩn bị Kit"
-              count={stats.preparingKit}
-              color="text-orange-600"
-            />
-            <StatCard
-              label="Giao Kit"
-              count={stats.deliveringKit}
-              color="text-blue-600"
-            />
-            <StatCard
-              label="Đã nhận Kit"
-              count={stats.kitDelivered}
-              color="text-green-600"
-            />
-            <StatCard
+          <div className="flex flex-wrap justify-between mb-6 gap-y-4">
+            <div className="basis-[23%] grow-0 shrink-0">
+              <StatCard
+                label="Tổng đơn"
+                count={stats.total}
+                color="text-blue-600"
+              />
+            </div>
+            <div className="basis-[23%] grow-0 shrink-0">
+              <StatCard
+                label="Chuẩn bị Kit"
+                count={stats.preparingKit}
+                color="text-orange-600"
+              />
+            </div>
+            <div className="basis-[23%] grow-0 shrink-0">
+              <StatCard
+                label="Giao Kit"
+                count={stats.deliveringKit}
+                color="text-blue-600"
+              />
+            </div>
+            <div className="basis-[23%] grow-0 shrink-0">
+              <StatCard
+                label="Đã nhận Kit"
+                count={stats.kitDelivered}
+                color="text-green-600"
+              />
+            </div>
+            {/* <StatCard
               label="Đợi lấy mẫu"
               count={stats.waitingForPickup}
               color="text-yellow-600"
@@ -128,7 +137,7 @@ function Delivery() {
               label="Đã hủy"
               count={stats.cancelled}
               color="text-red-600"
-            />
+            /> */}
           </div>
 
           {/* Bộ lọc */}
@@ -138,10 +147,10 @@ function Delivery() {
               "PreparingKit",
               "DeliveringKit",
               "KitDelivered",
-              "WaitingForPickup",
-              "PickingUpSample",
-              "SampleReceived",
-              "Cancelled",
+              // "WaitingForPickup",
+              // "PickingUpSample",
+              // "SampleReceived",
+              // "Cancelled",
             ].map((status) => {
               const isActive = filterStatus === status;
 
@@ -164,22 +173,29 @@ function Delivery() {
           </div>
 
           {/* Danh sách đơn */}
-          {filteredDeliveries.length > 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[550px]">
+              <Loading message="Đang tải danh sách giao hàng..." />
+            </div>
+          ) : filteredDeliveries.length > 0 ? (
             <div className="h-[550px] overflow-y-auto space-y-4 pr-2">
-              {filteredDeliveries.map((delivery) => (
-                <DeliveryCard
-                  key={delivery.id}
-                  delivery={delivery}
-                  onClick={handleOpenModal}
-                  loadingId={loadingId}
-                />
-              ))}
+              {[...filteredDeliveries]
+                .sort((a, b) => new Date(b.scheduleAt).getTime() - new Date(a.scheduleAt).getTime())
+                .map((delivery) => (
+                  <DeliveryCard
+                    key={delivery.id}
+                    delivery={delivery}
+                    onClick={handleOpenModal}
+                    loadingId={loadingId}
+                  />
+                ))}
             </div>
           ) : (
             <div className="py-8 text-center text-gray-500">
               Không có đơn giao hàng nào để hiển thị.
             </div>
           )}
+
         </div>
       </div>
 
@@ -190,11 +206,9 @@ function Delivery() {
           setIsModalVisible(false);
           setSelectedDelivery(null);
         }}
+        onRefresh={fetchDeliveries}
+        canAssignStaff={selectedDelivery?.status === "PreparingKit"}
       />
-
-      {isLoading && (
-        <Loading message="Đang tải danh sách giao hàng..." fullScreen />
-      )}
     </>
   );
 }

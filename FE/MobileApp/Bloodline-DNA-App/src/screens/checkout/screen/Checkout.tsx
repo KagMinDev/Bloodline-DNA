@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
+import { getTestBookingByIdApi } from "@/screens/appoiment/api/testbookingApi";
+import type { TestBookingResponse } from "@/screens/appoiment/types/testBooking";
+import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
+import { RootStackParamList } from "@/types/root-stack/stack.types";
+import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { getTestBookingByIdApi } from "@/screens/appoiment/api/testbookingApi";
-import { getUserInfoApi } from "@/screens/auth/apis/loginApi";
-import { checkoutApi, remainingPaymentApi } from "../api/paymentApi";
-import { confirmCollectionApi, confirmDeliveryApi, updateBookingStatusApi } from "../api/confirmDeliveryApi";
-import type { TestBookingResponse } from "@/screens/appoiment/types/testBooking";
-import type { ProgressStep, TestProgressData } from "../types/checkout";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/types/root-stack/stack.types";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { confirmCollectionApi, confirmDeliveryApi, updateBookingStatusApi } from "../api/confirmDeliveryApi";
+import { checkoutApi, remainingPaymentApi } from "../api/paymentApi";
 import BookingStatus from "../components/BookingStatus";
-import ProgressStepsContainer from "../components/ProgressStepsContainer";
 import DepositButton from "../components/DepositButton";
-import RemainingPaymentButton from "../components/RemainingPaymentButton";
+import ProgressStepsContainer from "../components/ProgressStepsContainer";
 import SampleInfoModalApp from "../components/SampleInfoModal";
+import type { ProgressStep, TestProgressData } from "../types/checkout";
 
 const CheckoutScreen: React.FC = () => {
   const route = useRoute<any>();
@@ -187,8 +186,6 @@ const CheckoutScreen: React.FC = () => {
           navigation.navigate("WebViewScreen", { url: urlWithType });
         }
       } else if (payload.type === "remaining") {
-        console.log("remainingPaymentApi da dc oi tu checkout", payload.type);
-
         const result = await remainingPaymentApi(payload.bookingId, token);
         if (result.checkoutUrl) {
           const urlWithType = appendPaymentType(result.checkoutUrl, "remaining");

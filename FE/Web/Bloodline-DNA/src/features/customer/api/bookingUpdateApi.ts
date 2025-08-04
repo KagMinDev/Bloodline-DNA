@@ -178,7 +178,7 @@ export const confirmDeliveryApi = async (
     console.log("📤 Sending confirm delivery request for booking:", bookingId);
     
     const res = await axios.put(
-      `${API_BASE_URL}/TestBooking/${bookingId}/confirm-delivery`,
+      `${API_BASE_URL}/TestBooking/${bookingId}/status?newStatus=${4}`,
       {},
       {
         headers: {

@@ -1,5 +1,5 @@
 // DeliveriesStaffTabs.tsx
-import { DeliveriesStaffScreen, ResultSent, SampleReceived } from "@/screens";
+import { DeliveriesStaffScreen, SampleReceived } from "@/screens";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -49,11 +49,11 @@ const DeliveriesStaffTabs: React.FC = () => {
         component={SampleReceived}
         options={{ tabBarLabel: "Nhận mẫu" }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="ResultSent"
         component={ResultSent}
         options={{ tabBarLabel: "Gửi kết quả" }}
-      />
+      /> */}
     </Tab.Navigator>
   );
 };

@@ -28,7 +28,7 @@ const SidebarData: SidebarDataType[] = [
   {
     icon: GrTestDesktop,
     heading: "Quản lí đơn xét nghiệm",
-    href: "/staff/test-booking",
+    href: "/manager/test-booking",
   },
   {
     icon: MdDomainAdd,
@@ -72,7 +72,9 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem('accountId');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (

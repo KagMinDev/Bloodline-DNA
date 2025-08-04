@@ -15,7 +15,6 @@ export const getBlogsApi = async (): Promise<BlogPost[]> => {
     }
     throw new Error("Dữ liệu không hợp lệ");
   }
-  console.log("getBlogsApi", response);
     return response.data;
   } catch (error: unknown) {
     console.error("Error fetching blogs:", error);

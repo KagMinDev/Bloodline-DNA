@@ -29,7 +29,6 @@ export const getDeliveryLogistics = async (): Promise<DeliveryOrder[]> => {
       "Content-Type": "application/json",
     },
   });
-  console.log("getDeliveryLogistics", response)
 
   if (response.data.success && Array.isArray(response.data.data)) {
     return response.data.data.map((item: DeliveryLogistic) => {
@@ -37,6 +36,7 @@ export const getDeliveryLogistics = async (): Promise<DeliveryOrder[]> => {
 
       return {
         id: item.id,
+        name: item.name,
         staff: item.staff?.fullName || "Chưa phân công",
         address: item.address,
         phone: item.phone,
@@ -67,6 +67,7 @@ export const getDeliveryLogisticById = async (
     return {
       id: item.id,
       staff: item.staff?.fullName || "Chưa phân công",
+      name: item.name,
       address: item.address,
       phone: item.phone,
       scheduleAt: item.scheduledAt,

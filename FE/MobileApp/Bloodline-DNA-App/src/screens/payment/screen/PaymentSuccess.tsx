@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Animated, ActivityIndicator } from "react-native";
-import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/types/root-stack/stack.types";
 import { useAuth } from "@/context/auth/AuthContext";
 import { callbackApi, remainingCallbackApi } from "@/screens/checkout/api/paymentApi";
+import { RootStackParamList } from "@/types/root-stack/stack.types";
+import { Feather } from "@expo/vector-icons";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type PaymentSuccessRouteProp = RouteProp<RootStackParamList, "PaymentSuccess">;
 type PaymentSuccessNavigationProp = NativeStackNavigationProp<RootStackParamList, "PaymentSuccess">;
@@ -16,8 +16,6 @@ const PaymentSuccess: React.FC = () => {
   const { token } = useAuth();
 
   const { bookingId, orderCode, amount, paymentType } = route.params || {};
-
-  console.log("PaymentSuccess params received from WebViewScreen:", { bookingId, orderCode, amount, paymentType });
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -47,7 +45,6 @@ const PaymentSuccess: React.FC = () => {
     }
 
     const paymentTypeSafe: "deposit" | "remaining" = paymentType === "remaining" ? "remaining" : "deposit";
-    console.log("Using paymentTypeSafe for callback:", paymentTypeSafe);
 
     const payload = {
       bookingId,
@@ -55,13 +52,9 @@ const PaymentSuccess: React.FC = () => {
       status: "PAID",
     };
 
-    console.log("📦 Gửi callback với payload:", payload);
-    console.log("🔐 Token:", token);
-
     try {
       const api = paymentTypeSafe === "remaining" ? remainingCallbackApi : callbackApi;
       await api(payload, token);
-      console.log(`✅ Successfully sent callback for ${paymentTypeSafe}`);
       setCallbackSuccess(true);
     } catch (err: any) {
       const errorData = err?.response || err.message || "Lỗi không xác định";
