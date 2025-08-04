@@ -31,5 +31,11 @@ namespace ADNTester.Repository.Implementations
 
             return await query.ToListAsync();
         }
+        public async Task<IEnumerable<TestBooking>> GetAllTestBookingsAsync()
+        {
+            return await _dbSet
+                .Include(tb => tb.Kit) // ✅ Eager load Kit
+                .ToListAsync();
+        }
     }
 }
