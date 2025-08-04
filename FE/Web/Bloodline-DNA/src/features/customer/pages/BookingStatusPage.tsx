@@ -92,7 +92,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 : "Lịch hẹn không tồn tại hoặc đã bị xóa."}
             </p>
             <Button
-              onClick={() => navigate("/booking-list")}
+              onClick={() => navigate("/customer/booking-list")}
               className="text-white bg-blue-900 hover:bg-blue-800"
             >
               Về Danh Sách

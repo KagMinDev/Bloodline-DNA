@@ -328,7 +328,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
       name: selectedService.name || 'Dịch vụ xét nghiệm',
       price: selectedService.price ? `${selectedService.price.toLocaleString('vi-VN')}đ` : 'Liên hệ',
       time: "3-7 ngày", // Default time, có thể customize
-      category: selectedService.category === 'civil' ? 'Dân sự' : 'Hành chính'
+      category: selectedService.category === 'civil' ? 'Dân sự' : 'Hình sự'
     };
 
     return testType;
@@ -706,7 +706,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                             Nhận bộ kit ADN hoặc nhân viên đến tận nhà thu mẫu
                           </p>
                           <div className="mt-3 text-sm font-medium text-blue-600">
-                            🧬 {selectedService?.category === 'civil' ? 'Phù hợp cho ADN Dân sự' : 'Phù hợp cho ADN Hành chính'}
+                            🧬 {selectedService?.category === 'civil' ? 'Phù hợp cho ADN Dân sự' : 'Phù hợp cho ADN Hình sự'}
                           </div>
                         </div>
                       </label>
@@ -828,7 +828,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                 {isLoadingUserInfo && (
                   <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
                     <div className="flex items-center">
-                      <div className="w-5 h-5 mr-2 border-2 rounded-full border-blue-300 border-t-blue-900 animate-spin"></div>
+                      <div className="w-5 h-5 mr-2 border-2 border-blue-300 rounded-full border-t-blue-900 animate-spin"></div>
                       <p className="text-sm text-blue-800">
                         Đang tự động điền thông tin của bạn...
                       </p>
@@ -921,7 +921,7 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                   <div className="space-y-2">
                     <label className="flex items-center text-sm font-semibold text-blue-900">
                       <CalendarIcon className="w-4 h-4 mr-2" />
-                      Ngày mong muốn *
+                      Ngày hẹn gặp *
                     </label>
                     <Input
                       type="date"

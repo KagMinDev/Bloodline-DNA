@@ -1,4 +1,4 @@
-import { AlertCircleIcon, CalendarIcon, CheckCircleIcon, CreditCardIcon, EyeIcon, FilePenIcon, TruckIcon } from 'lucide-react';
+import { AlertCircleIcon, CalendarIcon, CheckCircleIcon, CreditCardIcon, EyeIcon, FilePenIcon } from 'lucide-react';
 import { useState } from 'react';
 import { getTestResultsByUserId } from '../../api/testResultApi';
 import type { ProgressStep } from '../../types/bookingTypes';
@@ -22,13 +22,13 @@ interface ProgressStepProps {
   userId?: string | null;
 }
 
-export const ProgressStepProps = ({ 
-  step, 
-  isLast, 
-  paymentLoading, 
-  paymentError, 
-  handleStepAction, 
-  bookingStatus, 
+export const ProgressStepProps = ({
+  step,
+  isLast,
+  paymentLoading,
+  paymentError,
+  handleStepAction,
+  bookingStatus,
   setIsSampleModalOpen,
   handleConfirmDelivery,
   confirmDeliveryLoading = false,
@@ -53,22 +53,22 @@ export const ProgressStepProps = ({
       if (!userId) {
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
-      
+
       // console.log('🔍 Debug info:', {
       //   userId: userId,
       //   bookingId: bookingId,
       //   stepId: step.id
       // });
-      
+
       const results = await getTestResultsByUserId(userId);
-      
+
       const matched = results.find(r => r.testBookingId === bookingId);
-      
+
       if (!matched) {
         console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));
         throw new Error("Không tìm thấy kết quả cho lịch này. Có thể kết quả chưa được cập nhật.");
       }
-      
+
       setResultData(matched);
       setShowResultModal(true);
     } catch (e: any) {
@@ -82,11 +82,10 @@ export const ProgressStepProps = ({
   return (
     <div className="flex items-start gap-4">
       <div className="relative z-10 flex flex-col items-center">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-          step.status === 'completed' ? 'bg-green-500 shadow-lg' :
-          step.status === 'current' ? 'bg-blue-500 shadow-lg ring-4 ring-blue-200' :
-          'bg-gray-300'
-        }`}>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${step.status === 'completed' ? 'bg-green-500 shadow-lg' :
+            step.status === 'current' ? 'bg-blue-500 shadow-lg ring-4 ring-blue-200' :
+              'bg-gray-300'
+          }`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
         {!isLast && (
@@ -136,7 +135,7 @@ export const ProgressStepProps = ({
                 </div>
               ) : (
                 <>
-                  {step.actionPayload?.type === 'fill_sample_info' ? 
+                  {step.actionPayload?.type === 'fill_sample_info' ?
                     <FilePenIcon className="w-4 h-4 mr-2" /> :
                     <CreditCardIcon className="w-4 h-4 mr-2" />
                   }
@@ -232,13 +231,13 @@ export const ProgressStepProps = ({
             )}
           </div>
         )}
-        
+
         {/* Nút XEM KẾT QUẢ cho step Trả Kết Quả (id = 7) */}
         {step.id === 7 && bookingStatus.toLowerCase() === 'completed' && (
           <div className="mt-4">
-            <Button 
-              onClick={handleViewResult} 
-              disabled={loadingResult} 
+            <Button
+              onClick={handleViewResult}
+              disabled={loadingResult}
               className="flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 !text-white font-semibold"
             >
               <EyeIcon className="w-4 h-4 !text-white" />
@@ -249,8 +248,8 @@ export const ProgressStepProps = ({
                 {resultError}
                 {resultError.includes("đăng nhập") && (
                   <div className="mt-1">
-                    <Button 
-                      onClick={() => window.location.href = '/auth/login'} 
+                    <Button
+                      onClick={() => window.location.href = '/auth/login'}
                       className="px-2 py-1 text-xs text-white bg-red-600 hover:bg-red-700"
                     >
                       Đăng nhập ngay
@@ -262,7 +261,7 @@ export const ProgressStepProps = ({
           </div>
         )}
       </div>
-      
+
       {/* Modal hiển thị kết quả */}
       {showResultModal && resultData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

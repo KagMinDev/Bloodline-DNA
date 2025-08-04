@@ -146,7 +146,7 @@ const transformAPIDataToUIFormat = (apiServices: TestService[]): Service[] => {
     if (apiService.collectionMethod === 0) {
       uiCategory = 'civil'; // Dân Sự
     } else if (apiService.collectionMethod === 1) {
-      uiCategory = 'legal'; // Hành Chính  
+      uiCategory = 'legal'; // Hành Chính
     } else {
       // Fallback to original category mapping if collectionMethod is unexpected
       uiCategory = categoryMappings[apiCategory] || 'civil';
@@ -403,7 +403,7 @@ export const Services = (): React.JSX.Element => {
     },
     {
       id: "legal",
-      name: "Hành Chính",
+      name: "Hình Sự",
       icon: <ShieldIcon className="w-5 h-5" />,
       count: services.filter(s => s.category === 'legal').length
     }
@@ -481,7 +481,7 @@ export const Services = (): React.JSX.Element => {
       };
     } else if (collectionMethod === 1) {
       return {
-        text: "Hành Chính - Thu mẫu tại trung tâm",
+        text: "Hình Sự - Thu mẫu tại trung tâm",
         icon: <MapPinIcon className="w-4 h-4 mr-1.5 text-blue-600" />,
         bgColor: "bg-blue-50",
         textColor: "text-blue-700",
@@ -773,11 +773,11 @@ export const Services = (): React.JSX.Element => {
                       </div>
 
                       {/* Sample Requirements */}
-                      <div className="mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                      <div className="p-4 mb-4 border rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200">
                         <div className="flex items-center mb-2">
                           <h4 className="text-sm font-medium text-amber-800">Yêu Cầu Mẫu Xét Nghiệm</h4>
                         </div>
-                        <div className="text-sm text-amber-700 mb-2">
+                        <div className="mb-2 text-sm text-amber-700">
                           <strong>Số Lượng:</strong> 2 mẫu bắt buộc
                         </div>
                         <div className="text-sm text-amber-700">

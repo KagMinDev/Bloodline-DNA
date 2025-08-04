@@ -191,21 +191,21 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
         
         <div className="space-y-4">
           {apiError && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-md flex items-center gap-2">
+            <div className="flex items-center gap-2 p-3 text-red-700 rounded-md bg-red-50">
               <AlertCircleIcon className="w-4 h-4" />
               <span>{apiError}</span>
             </div>
           )}
 
           {isLoadingKit && (
-            <div className="bg-blue-50 text-blue-700 p-3 rounded-md flex items-center gap-2">
+            <div className="flex items-center gap-2 p-3 text-blue-700 rounded-md bg-blue-50">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span>Đang tải thông tin TestKit...</span>
             </div>
           )}
 
           {kitId && (
-            <div className="bg-green-50 text-green-700 p-3 rounded-md flex items-center gap-2">
+            <div className="flex items-center gap-2 p-3 text-green-700 rounded-md bg-green-50">
               <CheckCircle className="w-4 h-4" />
               <span>TestKit đã được tìm thấy: <strong>{kitId}</strong></span>
             </div>
@@ -224,11 +224,11 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
               style={clientName ? { backgroundColor: '#f8f9fa', color: '#6c757d' } : {}}
             />
             {clientName && (
-              <p className="text-xs text-blue-600 mt-1">
+              <p className="mt-1 text-xs text-blue-600">
                 <strong>Lưu ý:</strong> Tên được tự động điền từ thông tin đặt lịch
               </p>
             )}
-            {errors.donorName && <p className="text-sm text-red-600 mt-1">{errors.donorName}</p>}
+            {errors.donorName && <p className="mt-1 text-sm text-red-600">{errors.donorName}</p>}
           </div>
 
           <div>
@@ -239,7 +239,7 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
               placeholder="Họ và tên người cung cấp mẫu thứ 2"
               className="mt-1"
             />
-            {errors.donorName2 && <p className="text-sm text-red-600 mt-1">{errors.donorName2}</p>}
+            {errors.donorName2 && <p className="mt-1 text-sm text-red-600">{errors.donorName2}</p>}
           </div>
           
           <div>
@@ -254,7 +254,7 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
                   ))}
               </SelectContent>
             </Select>
-            {errors.relationshipToSubject && <p className="text-sm text-red-600 mt-1">{errors.relationshipToSubject}</p>}
+            {errors.relationshipToSubject && <p className="mt-1 text-sm text-red-600">{errors.relationshipToSubject}</p>}
           </div>
           <div>
             <label className="text-sm font-medium">Loại mẫu *</label>
@@ -268,7 +268,7 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
                   ))}
               </SelectContent>
             </Select>
-            {errors.sampleType && <p className="text-sm text-red-600 mt-1">{errors.sampleType}</p>}
+            {errors.sampleType && <p className="mt-1 text-sm text-red-600">{errors.sampleType}</p>}
           </div>
         </div>
         
@@ -277,10 +277,10 @@ export const SampleInfoModal: React.FC<SampleInfoModalProps> = ({
             <Button variant="outline" onClick={onClose}>Hủy</Button>
           </DialogClose>
           <Button className="!text-white !bg-blue-900"
-            onClick={handleSubmit} 
+            onClick={handleSubmit}
             disabled={isSubmitting || isLoadingKit || !kitId}
           >
-            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin text-white" /> : <CheckCircle className="mr-2 h-4 w-4 text-white" />}
+            {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 text-white animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2 text-white" />}
             Lưu thông tin
           </Button>
         </DialogFooter>
