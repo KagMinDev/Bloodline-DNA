@@ -16,6 +16,7 @@ export interface DeliveryLogistic {
   scheduledAt: string;
   completedAt: string | null;
   note: string;
+  imageUrl?: string;
   type: number;
   status: string;
 }
@@ -28,6 +29,7 @@ export interface DeliveryOrder {
   scheduleAt: string;
   completeAt: string | null;
   note: string;
+  imageUrl?: string;
   status: DeliveryStatus;
 }
 export interface RawStaffResponse {
