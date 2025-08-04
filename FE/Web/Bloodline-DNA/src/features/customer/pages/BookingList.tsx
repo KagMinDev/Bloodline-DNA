@@ -359,43 +359,73 @@ export const BookingList = (): React.JSX.Element => {
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
       
-      // console.log('🔍 Debug info:', {
-      //   userId: userId,
-      //   bookingId: bookingId
-      // });
+      console.log('🔍 Debug info for BookingList ViewResult:', {
+        userId: userId,
+        bookingId: bookingId,
+        bookingIdType: typeof bookingId,
+        bookingIdLength: bookingId?.length
+      });
       
       const results = await getTestResultsByUserId(userId);
-      // console.log('📊 All results:', results);
       
-      // // Debug: In ra tất cả testBookingId và bookingId
-      // console.log('📋 bookingId:', bookingId, typeof bookingId);
-      // console.log('📋 testBookingIds:', results.map(r => r.testBookingId), results.map(r => typeof r.testBookingId));
+      console.log('📊 All results from API:', {
+        totalResults: results.length,
+        results: results.map(r => ({
+          id: r.id,
+          testBookingId: r.testBookingId,
+          testBookingIdType: typeof r.testBookingId,
+          resultSummary: r.resultSummary?.substring(0, 50) + '...'
+        }))
+      });
       
-      // Chuẩn hóa để so sánh
-      const normalize = (val: any) => String(val).replace(/\s+/g, '').toLowerCase();
+      // Chuẩn hóa để so sánh chính xác - chỉ trim, không toLowerCase để tránh lỗi so sánh ID
+      const normalize = (val: any) => {
+        if (val === null || val === undefined) return '';
+        return String(val).trim();
+      };
       const normBookingId = normalize(bookingId);
       
-      // Tìm kết quả khớp
-      let matched = results.find(r => normalize(r.testBookingId) === normBookingId);
+      console.log('🎯 Looking for exact testBookingId match:', {
+        originalBookingId: bookingId,
+        normalizedBookingId: normBookingId,
+        bookingIdLength: normBookingId.length
+      });
       
-      if (!matched && results.length === 1) {
-        // Nếu chỉ có 1 kết quả, tự động chọn
-        matched = results[0];
-        console.warn('⚠️ Không khớp bookingId, nhưng chỉ có 1 kết quả. Sẽ hiển thị kết quả này.');
-      }
-      
-      if (!matched && results.length > 1) {
-        // Nếu có nhiều kết quả, cho phép user chọn
-        setResultData({ list: results });
-        setShowResultModal(true);
-        setLoadingResult(false);
-        return;
-      }
+      // Tìm kết quả khớp chính xác với testBookingId
+      let matched = results.find(r => {
+        const normalizedTestBookingId = normalize(r.testBookingId);
+        const isExactMatch = normalizedTestBookingId === normBookingId;
+        console.log('🔍 Comparing BookingList:', {
+          targetBookingId: normBookingId,
+          testBookingId: r.testBookingId,
+          normalizedTestBookingId,
+          isExactMatch,
+          lengthMatch: normalizedTestBookingId.length === normBookingId.length
+        });
+        return isExactMatch;
+      });
       
       if (!matched) {
-        console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));
-        throw new Error("Không tìm thấy kết quả cho lịch này. Có thể kết quả chưa được cập nhật.");
+        console.warn('⚠️ No exact match found for bookingId. Details:', {
+          searchedBookingId: normBookingId,
+          totalResultsAvailable: results.length,
+          availableTestBookingIds: results.map(r => ({
+            original: r.testBookingId,
+            normalized: normalize(r.testBookingId),
+            type: typeof r.testBookingId
+          })),
+          recommendedAction: 'Check if testBookingId in database matches the booking ID exactly'
+        });
+        throw new Error(`Không tìm thấy kết quả cho booking "${bookingId}". Vui lòng kiểm tra lại mã booking hoặc liên hệ hỗ trợ.`);
       }
+      
+      console.log('✅ Found exact matching result in BookingList:', {
+        resultId: matched.id,
+        testBookingId: matched.testBookingId,
+        resultSummary: matched.resultSummary?.substring(0, 100),
+        resultDate: matched.resultDate,
+        matchConfirmed: normalize(matched.testBookingId) === normBookingId
+      });
       
       setResultData(matched);
       setShowResultModal(true);
@@ -672,6 +702,28 @@ export const BookingList = (): React.JSX.Element => {
                               const feedbackKey = userId && booking.testServiceId ? `${userId}_${booking.testServiceId}` : '';
                               const hasPreloaded = preloadedFeedbacks.has(feedbackKey);
 
+                              // Strict validation để đảm bảo feedback hợp lệ
+                              const hasValidFeedback = existingFeedback && 
+                                typeof existingFeedback === 'object' &&
+                                existingFeedback.id &&
+                                existingFeedback.userId &&
+                                existingFeedback.testServiceId &&
+                                typeof existingFeedback.rating === 'number' &&
+                                existingFeedback.rating >= 1 && 
+                                existingFeedback.rating <= 5;
+
+                              // Debug logging for BookingList
+                              if (existingFeedback && !hasValidFeedback) {
+                                console.warn("🚨 BookingList: Invalid feedback data detected:", {
+                                  bookingId: booking.id,
+                                  feedbackId: existingFeedback.id,
+                                  rating: existingFeedback.rating,
+                                  hasUserId: !!existingFeedback.userId,
+                                  hasTestServiceId: !!existingFeedback.testServiceId,
+                                  ratingType: typeof existingFeedback.rating
+                                });
+                              }
+
                               // Show loading if checking feedback or if we're in the preloading phase
                               if (isCheckingFeedback) {
                                 return (
@@ -684,8 +736,8 @@ export const BookingList = (): React.JSX.Element => {
                                 );
                               }
 
-                              // Show existing feedback if found
-                              if (existingFeedback) {
+                              // Chỉ hiển thị feedback khi đã validated đầy đủ
+                              if (hasValidFeedback) {
                                 return (
                                   <div className="w-full p-3 border border-green-200 rounded-lg bg-green-50">
                                     <div className="text-center">
@@ -694,24 +746,24 @@ export const BookingList = (): React.JSX.Element => {
                                           <StarIcon
                                             key={star}
                                             className={`w-4 h-4 ${
-                                              existingFeedback.rating >= star
+                                              existingFeedback!.rating >= star
                                                 ? "text-yellow-400 fill-yellow-400"
                                                 : "text-gray-300"
                                             }`}
                                           />
                                         ))}
                                         <span className="ml-2 text-sm text-gray-600">
-                                          ({existingFeedback.rating}/5)
+                                          ({existingFeedback!.rating}/5)
                                         </span>
                                       </div>
                                       <p className="text-sm font-medium text-green-700">
                                         ✓ Đã đánh giá
                                       </p>
-                                      {existingFeedback.comment && (
+                                      {existingFeedback!.comment && (
                                         <p className="mt-1 text-xs italic text-gray-600">
-                                          "{existingFeedback.comment.length > 50 
-                                            ? `${existingFeedback.comment.substring(0, 50)}...` 
-                                            : existingFeedback.comment}"
+                                          "{existingFeedback!.comment.length > 50 
+                                            ? `${existingFeedback!.comment.substring(0, 50)}...` 
+                                            : existingFeedback!.comment}"
                                         </p>
                                       )}
                                     </div>

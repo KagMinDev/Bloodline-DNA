@@ -48,6 +48,7 @@ export interface DeliveryLogistic {
   scheduledAt: string;
   completedAt: string | null;
   note: string;
+  imageUrl?: string;
   type: number;
   status: string;
 }
@@ -62,6 +63,7 @@ export interface DeliveryOrder {
   completeAt: string | null;
   note: string;
   type: number;
+  imageUrl?: string;
   status: DeliveryStatus;
 }
 export interface TestBookingStatusRequest {

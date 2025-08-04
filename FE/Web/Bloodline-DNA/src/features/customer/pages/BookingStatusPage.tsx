@@ -42,6 +42,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
     isCollectionModalOpen,
     setIsCollectionModalOpen,
     collectionLoading,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    errorModalMessage,
     getExistingFeedback,
     isCheckingFeedbackFor,
     userId,
@@ -92,7 +95,7 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 : "Lịch hẹn không tồn tại hoặc đã bị xóa."}
             </p>
             <Button
-              onClick={() => navigate("/booking-list")}
+              onClick={() => navigate("/customer/booking-list")}
               className="text-white bg-blue-900 hover:bg-blue-800"
             >
               Về Danh Sách
@@ -242,6 +245,9 @@ export const BookingStatusPage = (): React.JSX.Element => {
                 isCheckingFeedbackFor={isCheckingFeedbackFor}
                 userId={userId}
                 testServiceId={testServiceId}
+                isErrorModalOpen={isErrorModalOpen}
+                setIsErrorModalOpen={setIsErrorModalOpen}
+                errorModalMessage={errorModalMessage}
               />
             )}
           </div>

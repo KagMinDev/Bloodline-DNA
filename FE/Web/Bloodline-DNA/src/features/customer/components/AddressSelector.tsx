@@ -39,26 +39,34 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [currentDetailedAddress, setCurrentDetailedAddress] = useState('');
 
-  // Parse địa chỉ từ value để set selectedProvince và selectedDistrict
+  // Auto-enable district selection when TP.HCM is loaded
   useEffect(() => {
-    if (value && provinces.length > 0 && districts.length > 0 && !isTyping) {
+    if (selectedProvince && districts.length > 0 && !value.includes('Thành phố Hồ Chí Minh')) {
+      // Nếu đã có selectedProvince và districts, nhưng value chưa có TP.HCM
+      // thì cập nhật value để bao gồm TP.HCM
+      const currentAddress = getDetailedAddress();
+      const newAddress = currentAddress ? `${currentAddress}, ${selectedProvince}` : selectedProvince;
+      onChange(newAddress);
+    }
+  }, [selectedProvince, districts.length]);
+
+  // Parse địa chỉ từ value để set selectedDistrict
+  useEffect(() => {
+    if (value && districts.length > 0 && !isTyping) {
       const addressParts = value.split(',').map(part => part.trim());
       
-      // Tìm tỉnh/thành phố (thường là phần cuối)
-      const provincePart = addressParts[addressParts.length - 1];
-      if (provincePart && provinces.some(p => p.name === provincePart)) {
-        setSelectedProvince(provincePart);
-        
-        // Tìm quận/huyện (thường là phần thứ 2 từ cuối)
-        if (addressParts.length >= 2) {
-          const districtPart = addressParts[addressParts.length - 2];
-          if (districtPart && districts.some(d => d.name === districtPart && d.province === provincePart)) {
-            setSelectedDistrict(districtPart);
-          }
-        }
+      // Tìm quận/huyện trong địa chỉ
+      const districtPart = addressParts.find(part => 
+        districts.some(d => d.name === part)
+      );
+      
+      if (districtPart) {
+        setSelectedDistrict(districtPart);
       }
+      
+      console.log('📍 Parsed address:', { addressParts, districtPart, selectedDistrict: districtPart || 'not found' });
     }
-  }, [value, provinces, districts, isTyping]);
+  }, [value, districts, isTyping]);
 
   // Clear error when data loads successfully
   useEffect(() => {
@@ -90,19 +98,42 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
       setIsLoading(true);
       try {
         const response = await axios.get("https://provinces.open-api.vn/api/?depth=2");
-        setProvinces(response.data);
         
-        // Tạo danh sách tất cả quận/huyện
-        let allDistricts: District[] = [];
-        response.data.forEach((province: Province) => {
-          province.districts.forEach((district: any) => {
-            allDistricts.push({
+        // Chỉ lấy thành phố Hồ Chí Minh
+        const hcmCity = response.data.find((province: Province) => 
+          province.name.toLowerCase().includes('hồ chí minh') || 
+          province.name.toLowerCase().includes('tp.hcm') ||
+          province.name.toLowerCase().includes('tp hcm') ||
+          province.code === '79' // Mã code của TP.HCM
+        );
+        
+        if (hcmCity) {
+          // Chỉ set TP.HCM làm province duy nhất
+          setProvinces([hcmCity]);
+          
+          // Tự động chọn TP.HCM làm selectedProvince
+          setSelectedProvince(hcmCity.name);
+          
+          // Lấy tất cả quận/huyện của TP.HCM
+          const hcmDistricts: District[] = [];
+          hcmCity.districts.forEach((district: any) => {
+            hcmDistricts.push({
               name: district.name,
-              province: province.name,
+              province: hcmCity.name,
             });
           });
-        });
-        setDistricts(allDistricts);
+          setDistricts(hcmDistricts);
+          
+          console.log('📍 Loaded TP.HCM with districts:', hcmDistricts.length);
+          console.log('📍 Auto-selected province:', hcmCity.name);
+          
+          // Nếu chưa có địa chỉ nào và không phải clinic address, tự động set TP.HCM vào value
+          if (!value || value === '') {
+            onChange(hcmCity.name);
+          }
+        } else {
+          throw new Error('Không tìm thấy thành phố Hồ Chí Minh trong dữ liệu');
+        }
       } catch (error) {
         console.error("Error fetching address data:", error);
         setError("Không thể tải danh sách địa chỉ. Vui lòng thử lại sau.");
@@ -114,38 +145,40 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
     fetchAddressData();
   }, []);
 
-  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const provinceName = e.target.value;
-    setSelectedProvince(provinceName);
-    setSelectedDistrict('');
-    
-    // Cập nhật địa chỉ với tỉnh mới
-    const currentAddress = getDetailedAddress();
-    const newAddress = currentAddress ? `${currentAddress}, ${provinceName}` : provinceName;
-    onChange(newAddress);
-  };
-
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const districtName = e.target.value;
     setSelectedDistrict(districtName);
     
-    // Cập nhật địa chỉ với quận/huyện mới
+    // Cập nhật địa chỉ với quận/huyện mới - luôn sử dụng TP.HCM làm tỉnh
     const currentAddress = getDetailedAddress();
-    const newAddress = currentAddress ? `${currentAddress}, ${districtName}, ${selectedProvince}` : `${districtName}, ${selectedProvince}`;
-    onChange(newAddress);
+    const provinceName = selectedProvince || 'Thành phố Hồ Chí Minh';
+    
+    if (districtName) {
+      const newAddress = currentAddress ? `${currentAddress}, ${districtName}, ${provinceName}` : `${districtName}, ${provinceName}`;
+      onChange(newAddress);
+    } else {
+      // Nếu bỏ chọn quận/huyện, chỉ giữ lại địa chỉ chi tiết + TP.HCM
+      const newAddress = currentAddress ? `${currentAddress}, ${provinceName}` : provinceName;
+      onChange(newAddress);
+    }
   };
 
   const handleAddressInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const addressValue = e.target.value;
     setCurrentDetailedAddress(addressValue);
     
-    let fullAddress = addressValue;
+    let fullAddress = '';
+    const provinceName = selectedProvince || 'Thành phố Hồ Chí Minh';
     
-    // Thêm quận/huyện và tỉnh nếu đã chọn
-    if (selectedDistrict && selectedProvince) {
-      fullAddress = `${addressValue}, ${selectedDistrict}, ${selectedProvince}`;
-    } else if (selectedProvince) {
-      fullAddress = `${addressValue}, ${selectedProvince}`;
+    // Xây dựng địa chỉ đầy đủ
+    if (addressValue && selectedDistrict) {
+      fullAddress = `${addressValue}, ${selectedDistrict}, ${provinceName}`;
+    } else if (addressValue) {
+      fullAddress = `${addressValue}, ${provinceName}`;
+    } else if (selectedDistrict) {
+      fullAddress = `${selectedDistrict}, ${provinceName}`;
+    } else {
+      fullAddress = provinceName;
     }
     
     onChange(fullAddress);
@@ -163,28 +196,21 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
   const getDetailedAddress = () => {
     if (!value) return '';
     
-    // Nếu địa chỉ chứa quận/huyện và tỉnh (ít nhất 2 dấu phẩy)
-    const commaCount = (value.match(/,/g) || []).length;
+    const parts = value.split(',').map(part => part.trim());
     
-    if (commaCount >= 2) {
-      // Tìm vị trí của dấu phẩy thứ 2 từ cuối
-      const parts = value.split(',');
-      const detailedParts = parts.slice(0, -2);
-      return detailedParts.join(',').trim();
-    } else if (commaCount === 1) {
-      // Chỉ có 1 dấu phẩy (địa chỉ, tỉnh)
-      return value.split(',')[0].trim();
-    } else {
-      // Không có dấu phẩy, trả về toàn bộ
-      return value.trim();
-    }
-  };
-
-  // Kiểm tra xem địa chỉ có hợp lệ không
-  const isValidAddress = () => {
-    if (!value) return false;
-    const commaCount = (value.match(/,/g) || []).length;
-    return commaCount >= 1 && selectedProvince;
+    // Loại bỏ các phần là tên quận/huyện và TP.HCM
+    const filteredParts = parts.filter(part => {
+      // Kiểm tra xem có phải là tên quận/huyện không
+      const isDistrict = districts.some(d => d.name === part);
+      // Kiểm tra xem có phải là TP.HCM không
+      const isHCM = part.toLowerCase().includes('hồ chí minh') || 
+                   part.toLowerCase().includes('tp.hcm') ||
+                   part.toLowerCase().includes('tp hcm');
+      
+      return !isDistrict && !isHCM;
+    });
+    
+    return filteredParts.join(', ').trim();
   };
 
   return (
@@ -208,33 +234,22 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
         </div>
       ) : (
         <>
-          {/* Tỉnh/Thành phố */}
+          {/* Tỉnh/Thành phố - Hiển thị thông tin TP.HCM */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Tỉnh/Thành phố {required && <span className="text-red-500">*</span>}
             </label>
-            <select
-              value={selectedProvince}
-              onChange={handleProvinceChange}
-              disabled={disabled || isLoading}
-              required={required}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-            >
-              <option value="">
-                {isLoading ? "Đang tải..." : "Chọn tỉnh/thành phố"}
-              </option>
-              {provinces.length > 0 ? (
-                provinces.map((province) => (
-                  <option key={province.code} value={province.name}>
-                    {province.name}
-                  </option>
-                ))
-              ) : (
-                <option value="" disabled>
-                  Không có dữ liệu
-                </option>
-              )}
-            </select>
+            <div className="w-full p-3 border border-gray-200 rounded-lg bg-blue-50">
+              <div className="flex items-center">
+                <MapPinIcon className="w-5 h-5 text-blue-600 mr-2" />
+                <span className="text-blue-800 font-medium">
+                  {selectedProvince || 'Thành phố Hồ Chí Minh'}
+                </span>
+              </div>
+              <p className="text-xs text-blue-600 mt-1">
+                Dịch vụ hiện chỉ khả dụng tại TP. Hồ Chí Minh
+              </p>
+            </div>
           </div>
 
           {/* Quận/Huyện */}
@@ -245,23 +260,24 @@ export const AddressSelector: React.FC<AddressSelectorProps> = ({
             <select
               value={selectedDistrict}
               onChange={handleDistrictChange}
-              disabled={disabled || isLoading || !selectedProvince}
+              disabled={disabled || isLoading || districts.length === 0}
               required={required}
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
             >
-              <option value="">
-                {!selectedProvince ? "Vui lòng chọn tỉnh/thành phố trước" : "Chọn quận/huyện"}
-              </option>
-              {districts
-                .filter((district) => district.province === selectedProvince)
-                .map((district) => (
-                  <option key={district.name} value={district.name}>
-                    {district.name}
-                  </option>
-                ))}
-              {districts.filter((district) => district.province === selectedProvince).length === 0 && selectedProvince && (
+              <option value="">Chọn quận/huyện</option>
+              {districts.map((district) => (
+                <option key={district.name} value={district.name}>
+                  {district.name}
+                </option>
+              ))}
+              {isLoading && (
                 <option value="" disabled>
-                  Không có quận/huyện cho tỉnh này
+                  Đang tải dữ liệu...
+                </option>
+              )}
+              {districts.length === 0 && !isLoading && (
+                <option value="" disabled>
+                  Không có dữ liệu quận/huyện
                 </option>
               )}
             </select>

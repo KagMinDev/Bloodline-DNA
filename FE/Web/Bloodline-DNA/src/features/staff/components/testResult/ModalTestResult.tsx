@@ -18,10 +18,13 @@ interface ModalTestResultProps {
     ResultDate: string;
     ResultFile: File | null;
   };
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => void;
   onFileChange: (file: File | null) => void;
   bookingOptions: BookingOption[];
   isLoadingBookings: boolean;
+  isSubmitting?: boolean;
 }
 
 const ModalTestResult: React.FC<ModalTestResultProps> = ({
@@ -33,8 +36,24 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
   onFileChange,
   bookingOptions,
   isLoadingBookings,
+  isSubmitting = false,
 }) => {
   useEffect(() => {
+    if (!form.ResultSummary) {
+      const defaultSummary = `Khách hàng:
+
+Đánh giá:
+
+Nhận xét thêm: `;
+      const fakeEvent = {
+        target: {
+          name: "ResultSummary",
+          value: defaultSummary,
+        },
+      } as React.ChangeEvent<HTMLTextAreaElement>;
+      onChange(fakeEvent);
+    }
+
     if (!form.ResultDate) {
       const today = new Date().toISOString().split("T")[0];
       const fakeEvent = {
@@ -43,10 +62,9 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
           value: today,
         },
       } as React.ChangeEvent<HTMLInputElement>;
-
       onChange(fakeEvent);
     }
-  }, [form.ResultDate, onChange]);
+  }, [form.ResultSummary, form.ResultDate, onChange]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -82,10 +100,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               <select
                 name="TestBookingId"
                 value={form.TestBookingId}
-                onChange={(e) => {
-                  console.log("User chọn booking ID:", e.target.value);
-                  onChange(e);
-                }}
+                onChange={onChange}
                 required
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
@@ -110,11 +125,23 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               name="ResultSummary"
               value={form.ResultSummary}
               onChange={onChange}
-              placeholder="Mô tả ngắn gọn kết quả xét nghiệm"
-              rows={4}
+              placeholder={`Khách hàng:
+
+Đánh giá:
+
+Nhận xét thêm: `}
+              rows={8}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 leading-relaxed whitespace-pre-wrap border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+            <div className="mt-1 text-xs text-gray-500">
+              Vui lòng nhập theo định dạng (mỗi phần trên một dòng riêng):
+              <div className="p-2 mt-1 text-xs rounded bg-gray-50">
+                <div className="mb-2"><strong>Khách hàng:</strong> [Thông tin khách hàng]</div>
+                <div className="mb-2"><strong>Đánh giá:</strong> [Kết quả đánh giá]</div>
+                <div><strong>Nhận xét thêm:</strong> [Ghi chú bổ sung]</div>
+              </div>
+            </div>
           </div>
 
           {/* Result Date */}
@@ -140,7 +167,7 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
               File kết quả xét nghiệm
             </label>
             <input
-              placeholder="Tải file kết quả"
+              placeholder="Chọn file kết quả"
               type="file"
               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
               onChange={handleFileChange}
@@ -165,15 +192,34 @@ const ModalTestResult: React.FC<ModalTestResultProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              disabled={isSubmitting}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span className="text-white">Tạo và gửi kết quả</span>
+              {isSubmitting && (
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              )}
+              <div className="text-white">{isSubmitting ? 'Đang xử lý...' : 'Tạo và gửi kết quả'}</div>
             </button>
           </div>
         </form>

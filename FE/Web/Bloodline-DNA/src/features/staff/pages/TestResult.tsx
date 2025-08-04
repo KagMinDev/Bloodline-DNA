@@ -36,10 +36,10 @@ interface BookingOption {
   status: string;
 }
 interface FormState {
-  testBookingId: string;
-  resultSummary: string;
-  resultDate: string;
-  resultFile: File | null;
+  TestBookingId: string;
+  ResultSummary: string;
+  ResultDate: string;
+  ResultFile: File | null;
 }
 
 function TestResultPage() {
@@ -48,12 +48,18 @@ function TestResultPage() {
   const [bookings, setBookings] = useState<BookingOption[]>([]);
   const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
   const [form, setForm] = useState<FormState>({
-    testBookingId: "",
-    resultSummary: "",
-    resultDate: "",
-    resultFile: null,
+    TestBookingId: "",
+    ResultSummary: "",
+    ResultDate: "",
+    ResultFile: null,
   });
 
   const token = localStorage.getItem("token") || "";
@@ -101,10 +107,10 @@ function TestResultPage() {
 
   const openCreateModal = () => {
     setForm({
-      testBookingId: "",
-      resultSummary: "",
-      resultDate: "",
-      resultFile: null,
+      TestBookingId: "",
+      ResultSummary: "",
+      ResultDate: "",
+      ResultFile: null,
     });
     setShowModal(true);
   };
@@ -118,51 +124,55 @@ function TestResultPage() {
   };
 
   const handleFileChange = (file: File | null) => {
-    setForm({ ...form, resultFile: file });
+    setForm({ ...form, ResultFile: file });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) {
-      alert("Không tìm thấy token xác thực!");
+      setNotification({ type: "error", message: "Không tìm thấy token xác thực!" });
       return;
     }
 
-    if (!form.resultFile) {
-      alert("Vui lòng chọn file kết quả!");
+    if (!form.ResultFile) {
+      setNotification({ type: "error", message: "Vui lòng chọn file kết quả!" });
       return;
     }
 
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-    if (form.resultFile.size > maxSize) {
-      alert("File quá lớn! Vui lòng chọn file dưới 10MB.");
+    const maxSize = 10 * 1024 * 1024;
+    if (form.ResultFile.size > maxSize) {
+      setNotification({ type: "error", message: "File quá lớn! Vui lòng chọn file dưới 10MB." });
       return;
     }
 
     const req: TestResultRequest = {
-      TestBookingId: form.testBookingId,
-      ResultSummary: form.resultSummary,
-      ResultDate: new Date(form.resultDate),
-      ResultFile: form.resultFile,
+      TestBookingId: form.TestBookingId,
+      ResultSummary: form.ResultSummary,
+      ResultDate: new Date(form.ResultDate),
+      ResultFile: form.ResultFile,
     };
 
+    setIsSubmitting(true);
     try {
       await createTestResultApi(req, token);
       const updatedResults = await getAllTestResultApi(token);
-      console.log("All kq:", getAllTestResultApi);
       setResults(updatedResults);
       setShowModal(false);
       setForm({
-        testBookingId: "",
-        resultSummary: "",
-        resultDate: "",
-        resultFile: null,
+        TestBookingId: "",
+        ResultSummary: "",
+        ResultDate: "",
+        ResultFile: null,
       });
-      alert("Tạo kết quả thành công!");
+      setNotification({ type: "success", message: "Tạo kết quả thành công!" });
     } catch (error) {
       console.error("Lỗi tạo kết quả:", error);
-      alert("Có lỗi xảy ra khi tạo kết quả!");
+      setNotification({
+        type: "error",
+        message: "Có lỗi xảy ra khi tạo kết quả!",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -196,9 +206,7 @@ function TestResultPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center">
-                    Mã đặt xét nghiệm
-                  </TableHead>
+                  <TableHead className="text-center">Mã đặt xét nghiệm</TableHead>
                   <TableHead className="text-center">Tóm tắt kết quả</TableHead>
                   <TableHead className="text-center">Ngày trả</TableHead>
                   <TableHead className="text-center">File kết quả</TableHead>
@@ -237,9 +245,7 @@ function TestResultPage() {
                       </TableCell>
                       <TableCell className="text-sm text-center">
                         {result.resultDate
-                          ? new Date(result.resultDate).toLocaleDateString(
-                            "vi-VN"
-                          )
+                          ? new Date(result.resultDate).toLocaleDateString("vi-VN")
                           : "-"}
                       </TableCell>
                       <TableCell className="text-center">
@@ -253,9 +259,7 @@ function TestResultPage() {
                             Xem file
                           </a>
                         ) : (
-                          <span className="text-xs text-gray-400">
-                            Chưa có file
-                          </span>
+                          <span className="text-xs text-gray-400">Chưa có file</span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-center">
@@ -279,6 +283,7 @@ function TestResultPage() {
         onFileChange={handleFileChange}
         bookingOptions={bookings}
         isLoadingBookings={isLoadingBookings}
+        isSubmitting={isSubmitting}
       />
 
       <ModalTestResultDetail
@@ -287,6 +292,31 @@ function TestResultPage() {
         onClose={() => setSelectedResult(null)}
       />
 
+      {/* ✅ Notification Modal */}
+      {notification && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md p-6 bg-white border border-gray-200 rounded-lg shadow-lg">
+            <h2
+              className={`text-lg font-semibold mb-4 ${notification.type === "success" ? "text-green-700" : "text-red-700"
+                }`}
+            >
+              {notification.type === "success" ? "Thành công" : "Lỗi"}
+            </h2>
+            <p className="text-sm text-gray-700 whitespace-pre-wrap">
+              {notification.message}
+            </p>
+            <div className="flex justify-end mt-6">
+              <button
+                style={{ color: "white" }}
+                onClick={() => setNotification(null)}
+                className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
