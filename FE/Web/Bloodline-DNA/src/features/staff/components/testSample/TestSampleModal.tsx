@@ -6,7 +6,6 @@ import { Input, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import {
-  createTestSampleApi,
   createTestSampleFromStaffApi,
   getKitAllApi
 } from "../../api/testSampleApi";
@@ -29,25 +28,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../booking/ui/select";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../booking/ui/tabs";
 
-// Định nghĩa schema
-const commonSchema = z.object({
+// Schema chỉ cho “Tại cơ sở”
+const atFacilitySchema = z.object({
   kitId: z.string().min(1, "Vui lòng chọn Kit"),
   donorName: z.string().min(1, "Vui lòng nhập tên người cho mẫu"),
   relationshipToSubject: z.string().min(1, "Chọn mối quan hệ"),
   sampleType: z.string().min(1, "Chọn loại mẫu"),
-});
-
-const atFacilitySchema = commonSchema.extend({
   collectedById: z.string().min(1, "Nhập người thu mẫu"),
   collectedAt: z.date({ required_error: "Chọn ngày thu mẫu" }),
-  labReceivedAt: z.date({ required_error: "Chọn ngày nhận tại lab" }),
 });
 
 type Props = {
@@ -57,9 +46,6 @@ type Props = {
 
 export default function TestSampleModal({ open, onClose }: Props) {
   const [kits, setKits] = useState<TestKitResponse[]>([]);
-  const [tab, setTab] = useState<"home" | "facility">("home");
-
-  const isFacility = tab === "facility";
 
   const {
     control,
@@ -67,7 +53,7 @@ export default function TestSampleModal({ open, onClose }: Props) {
     reset,
     formState: { errors },
   } = useForm<any>({
-    resolver: zodResolver(isFacility ? atFacilitySchema : commonSchema),
+    resolver: zodResolver(atFacilitySchema),
   });
 
   useEffect(() => {
@@ -85,31 +71,27 @@ export default function TestSampleModal({ open, onClose }: Props) {
   }, [open]);
 
   const onSubmit = async (data: any) => {
-  const token = localStorage.getItem("token") || "";
-  if (!token) return;
+    const token = localStorage.getItem("token") || "";
+    if (!token) return;
 
-  try {
-    const payload = {
-      ...data,
-      relationshipToSubject: Number(data.relationshipToSubject),
-      sampleType: Number(data.sampleType),
-    };
+    try {
+      const payload = {
+        ...data,
+        relationshipToSubject: Number(data.relationshipToSubject),
+        sampleType: Number(data.sampleType),
+        labReceivedAt: new Date(), // ➤ Tự động dùng ngày hiện tại
+      };
 
-    if (isFacility) {
       await createTestSampleFromStaffApi(payload, token);
-    } else {
-      await createTestSampleApi(payload, token);
+
+      toast.success("Tạo mẫu thành công");
+      reset();
+      onClose();
+    } catch (error) {
+      console.error("❌ Lỗi:", error);
+      toast.error("Tạo mẫu thất bại");
     }
-
-    toast.success("Tạo mẫu thành công");
-    reset();
-    onClose();
-  } catch (error) {
-    console.error("❌ Lỗi:", error);
-    toast.error("Tạo mẫu thất bại");
-  }
-};
-
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -118,76 +100,43 @@ export default function TestSampleModal({ open, onClose }: Props) {
           <DialogTitle className="text-xl font-bold">Thêm Mẫu Xét Nghiệm</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={tab} onValueChange={(v: any) => setTab(v)} className="mt-4">
-          <TabsList className="grid grid-cols-2 w-full mb-4">
-            <TabsTrigger value="home">Tại nhà</TabsTrigger>
-            <TabsTrigger value="facility">Tại cơ sở</TabsTrigger>
-          </TabsList>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-4">
+          <FormFields kits={kits} control={control} errors={errors} />
 
-          <TabsContent value="home">
-            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-              <FormFields kits={kits} control={control} errors={errors} />
-              <Button type="submit" className="w-full mt-2 bg-[#1F2B6C] hover:bg-blue-800">
-                <span className="text-white">Thêm mẫu</span>
-              </Button>
-            </form>
-          </TabsContent>
+          {/* Người thu mẫu */}
+          <div>
+            <Controller
+              name="collectedById"
+              control={control}
+              render={({ field }) => (
+                <Input {...field} placeholder="Người thu mẫu" className="h-10" />
+              )}
+            />
+          </div>
 
-          <TabsContent value="facility">
-            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
-              <FormFields kits={kits} control={control} errors={errors} />
-
-              {/* Người thu mẫu */}
-              <div>
-                <Controller
-                  name="collectedById"
-                  control={control}
-                  render={({ field }) => (
-                    <Input {...field} placeholder="Người thu mẫu" className="h-10" />
-                  )}
+          {/* Ngày thu mẫu */}
+          <div>
+            <label className="block mb-1 text-sm">Ngày thu mẫu</label>
+            <Controller
+              name="collectedAt"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  className="w-full"
+                  value={field.value ? dayjs(field.value) : null}
+                  format="YYYY-MM-DD"
+                  onChange={(date) => field.onChange(date?.toDate())}
                 />
-              </div>
+              )}
+            />
+          </div>
 
-              {/* Ngày thu mẫu */}
-              <div>
-                <label className="block mb-1 text-sm">Ngày thu mẫu</label>
-                <Controller
-                  name="collectedAt"
-                  control={control}
-                  render={({ field }) => (
-                    <DatePicker
-                      className="w-full"
-                      value={field.value ? dayjs(field.value) : null}
-                      format="YYYY-MM-DD"
-                      onChange={(date) => field.onChange(date?.toDate())}
-                    />
-                  )}
-                />
-              </div>
+          {/* Không còn ngày nhận tại lab */}
 
-              {/* Ngày nhận tại Lab */}
-              <div>
-                <label className="block mb-1 text-sm">Ngày nhận tại Lab</label>
-                <Controller
-                  name="labReceivedAt"
-                  control={control}
-                  render={({ field }) => (
-                    <DatePicker
-                      className="w-full"
-                      value={field.value ? dayjs(field.value) : null}
-                      format="YYYY-MM-DD"
-                      onChange={(date) => field.onChange(date?.toDate())}
-                    />
-                  )}
-                />
-              </div>
-
-              <Button type="submit" className="w-full mt-2 bg-[#1F2B6C] hover:bg-blue-800">
-                <span className="text-white">Thêm mẫu</span>
-              </Button>
-            </form>
-          </TabsContent>
-        </Tabs>
+          <Button type="submit" className="w-full mt-2 bg-[#1F2B6C] hover:bg-blue-800">
+            <span className="text-white">Thêm mẫu</span>
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );
