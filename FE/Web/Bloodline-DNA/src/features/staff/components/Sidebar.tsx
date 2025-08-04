@@ -29,6 +29,11 @@ const SidebarData: SidebarDataType[] = [
     heading: 'Quản lí giao - nhận TestKit',
     href: '/staff/delivery',
   },
+  {
+    icon: TbTestPipe,
+    heading: 'Quản lí mẫu xét nghiệm tại cơ sở',
+    href: '/staff/test-sample-at-facility',
+  },
 ];
 
 const Sidebar = () => {
