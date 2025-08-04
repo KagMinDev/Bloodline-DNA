@@ -36,10 +36,10 @@ interface BookingOption {
   status: string;
 }
 interface FormState {
-  testBookingId: string;
-  resultSummary: string;
-  resultDate: string;
-  resultFile: File | null;
+  TestBookingId: string;
+  ResultSummary: string;
+  ResultDate: string;
+  ResultFile: File | null;
 }
 
 function TestResultPage() {
@@ -50,10 +50,10 @@ function TestResultPage() {
   const [isLoadingResults, setIsLoadingResults] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState<FormState>({
-    testBookingId: "",
-    resultSummary: "",
-    resultDate: "",
-    resultFile: null,
+    TestBookingId: "",
+    ResultSummary: "",
+    ResultDate: "",
+    ResultFile: null,
   });
 
   const token = localStorage.getItem("token") || "";
@@ -101,10 +101,10 @@ function TestResultPage() {
 
   const openCreateModal = () => {
     setForm({
-      testBookingId: "",
-      resultSummary: "",
-      resultDate: "",
-      resultFile: null,
+      TestBookingId: "",
+      ResultSummary: "",
+      ResultDate: "",
+      ResultFile: null,
     });
     setShowModal(true);
   };
@@ -118,7 +118,7 @@ function TestResultPage() {
   };
 
   const handleFileChange = (file: File | null) => {
-    setForm({ ...form, resultFile: file });
+    setForm({ ...form, ResultFile: file });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -128,23 +128,23 @@ function TestResultPage() {
       return;
     }
 
-    if (!form.resultFile) {
+    if (!form.ResultFile) {
       alert("Vui lòng chọn file kết quả!");
       return;
     }
 
     // Validate file size (10MB limit)
     const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-    if (form.resultFile.size > maxSize) {
+    if (form.ResultFile.size > maxSize) {
       alert("File quá lớn! Vui lòng chọn file dưới 10MB.");
       return;
     }
 
     const req: TestResultRequest = {
-      TestBookingId: form.testBookingId,
-      ResultSummary: form.resultSummary,
-      ResultDate: new Date(form.resultDate),
-      ResultFile: form.resultFile,
+      TestBookingId: form.TestBookingId,
+      ResultSummary: form.ResultSummary,
+      ResultDate: new Date(form.ResultDate), // Convert string to Date
+      ResultFile: form.ResultFile,
     };
 
     try {
@@ -154,10 +154,10 @@ function TestResultPage() {
       setResults(updatedResults);
       setShowModal(false);
       setForm({
-        testBookingId: "",
-        resultSummary: "",
-        resultDate: "",
-        resultFile: null,
+        TestBookingId: "",
+        ResultSummary: "",
+        ResultDate: "",
+        ResultFile: null,
       });
       alert("Tạo kết quả thành công!");
     } catch (error) {
