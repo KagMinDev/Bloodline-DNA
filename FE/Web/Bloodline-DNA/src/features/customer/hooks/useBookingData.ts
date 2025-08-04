@@ -77,13 +77,23 @@ export const useBookingData = () => {
   const [isCollectionConfirmed, setIsCollectionConfirmed] = useState(false);
   const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
   const [collectionLoading, setCollectionLoading] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState<string>("");
   // Use existing feedback hook
-  const { checkExistingFeedback, getExistingFeedback, isCheckingFeedbackFor } =
+  const { checkExistingFeedback, getExistingFeedback, isCheckingFeedbackFor, clearFeedbackCache } =
     useExistingFeedback();
 
   const { id: bookingId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const hasProcessedCallback = useRef(false);
+
+  // Clear feedback cache khi bookingId thay đổi để tránh hiển thị feedback sai
+  useEffect(() => {
+    if (bookingId) {
+      console.log(`🧹 Clearing feedback cache for new bookingId: ${bookingId}`);
+      clearFeedbackCache();
+    }
+  }, [bookingId, clearFeedbackCache]);
 
   const checkSampleInfoStatus = useCallback(async (bookingId: string) => {
     try {
@@ -206,13 +216,21 @@ export const useBookingData = () => {
   // Check existing feedback after testServiceId and userId are set
   useEffect(() => {
     if (booking?.status === "Completed" && userId && testServiceId) {
-      // console.log("🔄 Checking existing feedback for:", {
-      //   userId,
-      //   testServiceId,
-      // });
-      checkExistingFeedback(userId, testServiceId);
+      console.log("🔄 Checking existing feedback for:", {
+        userId,
+        testServiceId,
+        bookingId,
+        bookingStatus: booking?.status
+      });
+      
+      // Validation: Đảm bảo testServiceId thuộc về booking hiện tại
+      if (testServiceId && bookingId) {
+        checkExistingFeedback(userId, testServiceId);
+      } else {
+        console.warn("⚠️ Missing testServiceId or bookingId for feedback check");
+      }
     }
-  }, [booking?.status, userId, testServiceId, checkExistingFeedback]);
+  }, [booking?.status, userId, testServiceId, bookingId, checkExistingFeedback]);
 
   const handlePayment = async (payload?: any) => {
     if (!booking?.id) {
@@ -446,10 +464,45 @@ export const useBookingData = () => {
       }
     } catch (err) {
       console.error("❌ Error confirming delivery:", err);
-      const errorMessage =
-        err instanceof Error ? err.message : "Lỗi xác nhận nhận kit";
-      setError(errorMessage);
-      // Could also set a specific error state if needed
+      
+      // Hiển thị thông báo thân thiện cho user
+      let userFriendlyMessage = "Hệ thống chưa được cập nhật, vui lòng thử lại sau ít phút";
+      
+      // Kiểm tra các loại lỗi cụ thể
+      if (err instanceof Error) {
+        const errorMessage = err.message.toLowerCase();
+        
+        // Lỗi 400 Bad Request
+        if (errorMessage.includes("400") || errorMessage.includes("bad request")) {
+          userFriendlyMessage = "Hệ thống chưa được cập nhật, vui lòng thử lại sau ít phút";
+        }
+        // Lỗi 401 Unauthorized
+        else if (errorMessage.includes("401") || errorMessage.includes("unauthorized")) {
+          userFriendlyMessage = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại";
+        }
+        // Lỗi 403 Forbidden
+        else if (errorMessage.includes("403") || errorMessage.includes("forbidden")) {
+          userFriendlyMessage = "Bạn không có quyền thực hiện thao tác này";
+        }
+        // Lỗi 404 Not Found
+        else if (errorMessage.includes("404") || errorMessage.includes("not found")) {
+          userFriendlyMessage = "Không tìm thấy thông tin đơn hàng";
+        }
+        // Lỗi 500 Server Error
+        else if (errorMessage.includes("500") || errorMessage.includes("server error")) {
+          userFriendlyMessage = "Hệ thống đang bảo trì, vui lòng thử lại sau";
+        }
+        // Lỗi network
+        else if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+          userFriendlyMessage = "Lỗi kết nối mạng, vui lòng kiểm tra internet và thử lại";
+        }
+      }
+      
+      // Không set error state chính để tránh trigger error boundary
+      // Chỉ set error modal để hiển thị popup
+      console.log('🚨 Setting error modal:', userFriendlyMessage);
+      setErrorModalMessage(userFriendlyMessage);
+      setIsErrorModalOpen(true);
     } finally {
       setConfirmDeliveryLoading(false);
     }
@@ -545,6 +598,9 @@ export const useBookingData = () => {
     isCollectionModalOpen,
     setIsCollectionModalOpen,
     collectionLoading,
+    isErrorModalOpen,
+    setIsErrorModalOpen,
+    errorModalMessage,
     getExistingFeedback,
     isCheckingFeedbackFor,
     handlePayment,

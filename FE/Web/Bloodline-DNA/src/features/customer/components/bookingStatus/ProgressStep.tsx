@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { getTestResultsByUserId } from '../../api/testResultApi';
 import type { ProgressStep } from '../../types/bookingTypes';
 import { Button } from '../ui/Button';
+import ErrorModal from '../ErrorModal';
 
 interface ProgressStepProps {
   step: ProgressStep;
@@ -20,6 +21,9 @@ interface ProgressStepProps {
   isDeliveryConfirmed: boolean;
   isCollectionConfirmed: boolean;
   userId?: string | null;
+  isErrorModalOpen?: boolean; // Add error modal state
+  setIsErrorModalOpen?: (open: boolean) => void; // Add error modal setter
+  errorModalMessage?: string; // Add error modal message
 }
 
 export const ProgressStepProps = ({
@@ -36,7 +40,10 @@ export const ProgressStepProps = ({
   shouldShowSampleButton,
   isDeliveryConfirmed,
   isCollectionConfirmed,
-  userId
+  userId,
+  isErrorModalOpen = false,
+  setIsErrorModalOpen,
+  errorModalMessage = "",
 }: ProgressStepProps) => {
   const Icon = step.icon;
   const [showResultModal, setShowResultModal] = useState(false);
@@ -44,7 +51,7 @@ export const ProgressStepProps = ({
   const [loadingResult, setLoadingResult] = useState(false);
   const [resultError, setResultError] = useState<string | null>(null);
 
-  // Hàm lấy kết quả xét nghiệm
+  // Hàm lấy kết quả xét nghiệm chỉ cho booking hiện tại
   const handleViewResult = async () => {
     setLoadingResult(true);
     setResultError(null);
@@ -54,20 +61,91 @@ export const ProgressStepProps = ({
         throw new Error("Không tìm thấy userId. Vui lòng đăng nhập lại.");
       }
 
-      // console.log('🔍 Debug info:', {
-      //   userId: userId,
-      //   bookingId: bookingId,
-      //   stepId: step.id
-      // });
+      if (!bookingId) {
+        throw new Error("Không tìm thấy mã booking. Vui lòng thử lại.");
+      }
+
+      console.log('🔍 Debug info for ViewResult:', {
+        userId: userId,
+        bookingId: bookingId,
+        stepId: step.id,
+        bookingIdType: typeof bookingId,
+        bookingIdLength: bookingId?.length,
+        bookingIdTrimmed: bookingId?.trim()
+      });
 
       const results = await getTestResultsByUserId(userId);
+      
+      console.log('📊 All results from API:', {
+        totalResults: results.length,
+        targetBookingId: bookingId,
+        results: results.map(r => ({
+          id: r.id,
+          testBookingId: r.testBookingId,
+          testBookingIdType: typeof r.testBookingId,
+          testBookingIdTrimmed: String(r.testBookingId).trim(),
+          resultSummary: r.resultSummary?.substring(0, 50) + '...'
+        }))
+      });
 
-      const matched = results.find(r => r.testBookingId === bookingId);
+      if (results.length === 0) {
+        throw new Error(`Không tìm thấy kết quả xét nghiệm nào cho người dùng này.`);
+      }
+
+      // Chuẩn hóa để so sánh chính xác - loại bỏ khoảng trắng và chuyển về string
+      const normalizeId = (id: any) => {
+        if (id === null || id === undefined) return '';
+        return String(id).trim();
+      };
+      
+      const targetBookingId = normalizeId(bookingId);
+      
+      console.log('🎯 Looking for exact match with bookingId:', {
+        originalBookingId: bookingId,
+        normalizedTargetId: targetBookingId,
+        targetIdLength: targetBookingId.length
+      });
+
+      // Tìm kết quả có testBookingId khớp chính xác với bookingId hiện tại
+      const matched = results.find(r => {
+        const normalizedTestBookingId = normalizeId(r.testBookingId);
+        const isExactMatch = normalizedTestBookingId === targetBookingId;
+        
+        console.log('🔍 Comparing booking IDs:', {
+          targetBookingId: targetBookingId,
+          testBookingId: r.testBookingId,
+          normalizedTestBookingId: normalizedTestBookingId,
+          isExactMatch: isExactMatch,
+          lengthMatch: normalizedTestBookingId.length === targetBookingId.length
+        });
+        
+        return isExactMatch;
+      });
 
       if (!matched) {
-        console.warn('⚠️ No matching result found. Available testBookingIds:', results.map(r => r.testBookingId));
-        throw new Error("Không tìm thấy kết quả cho lịch này. Có thể kết quả chưa được cập nhật.");
+        console.warn('⚠️ No exact match found. Debugging info:', {
+          searchedBookingId: targetBookingId,
+          availableTestBookingIds: results.map(r => ({
+            original: r.testBookingId,
+            normalized: normalizeId(r.testBookingId),
+            type: typeof r.testBookingId
+          })),
+          possibleIssues: [
+            'testBookingId format mismatch',
+            'booking ID not saved correctly in test result', 
+            'case sensitivity issue',
+            'extra whitespace in data'
+          ]
+        });
+        throw new Error(`Không tìm thấy kết quả cho booking "${bookingId}". Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.`);
       }
+
+      console.log('✅ Found exact matching result:', {
+        resultId: matched.id,
+        testBookingId: matched.testBookingId,
+        resultSummary: matched.resultSummary?.substring(0, 100),
+        resultDate: matched.resultDate
+      });
 
       setResultData(matched);
       setShowResultModal(true);
@@ -188,6 +266,7 @@ export const ProgressStepProps = ({
                 <p className="mt-2 text-xs text-slate-500">
                   Xác nhận bạn đã nhận được kit xét nghiệm.
                 </p>
+                {/* Error sẽ được hiển thị trong popup modal thay vì inline */}
               </>
             )}
           </div>
@@ -281,6 +360,14 @@ export const ProgressStepProps = ({
           </div>
         </div>
       )}
+
+      {/* Error Modal for delivery confirmation errors */}
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onClose={() => setIsErrorModalOpen?.(false)}
+        errorMessage={errorModalMessage || "Đã xảy ra lỗi"}
+        title="Lỗi xác nhận nhận Kit"
+      />
     </div>
   );
 };
