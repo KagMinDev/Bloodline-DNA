@@ -101,7 +101,7 @@ namespace ADNTester.Service
             #region TestBooking Mapping
             CreateMap<TestBooking, TestBookingDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
-                .ForMember(dest => dest.TestKitId, opt => opt.MapFrom(src => src.Kit.Id));
+                .ForMember(dest => dest.KitId, opt => opt.MapFrom(src => src.Kit.Id));
             CreateMap<TestBooking, TestBookingDetailDto>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(dest => dest.Client, opt => opt.MapFrom(src => src.Client))
