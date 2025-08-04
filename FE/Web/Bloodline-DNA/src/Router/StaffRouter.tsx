@@ -5,6 +5,7 @@ import DeliveriesStaff from '../features/staff/pages/Delivery';
 import TestBooking from '../features/staff/pages/TestBooking';
 import TestResult from '../features/staff/pages/TestResult';
 import TestSample from '../features/staff/pages/TestSample';
+import TestSampleAtFacility from '../features/staff/pages/TestSampleAtFacility';
 
 export default function StaffRouter() {
     return (
@@ -17,6 +18,8 @@ export default function StaffRouter() {
                     <Route path="test-booking" element={<TestBooking />} />
                     <Route path="test-result" element={<TestResult />} />
                     <Route path="delivery" element={<DeliveriesStaff />} />
+                    <Route path="test-sample-at-facility" element={<TestSampleAtFacility />} />
+                    {/* Thêm các route khác nếu cần */}
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </div>

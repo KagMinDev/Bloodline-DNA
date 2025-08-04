@@ -1,34 +1,14 @@
-import { Button } from "antd";
 import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 import { Loading } from "../../../components";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../staff/components/sample/ui/card";
+import { Card, CardContent} from "../../staff/components/sample/ui/card";
 import { getAllTestSampleApi } from "../api/testSampleApi";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/sample/ui/table";
-import TestSampleModal from "../components/testSample/TestSampleModal";
-import {
-  getRelationshipLabelViByKey,
-  getSampleTypeLabelViByKey,
-  type SampleTestResponse,
-} from "../types/sampleTest";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow,} from "../components/sample/ui/table";
+import { getRelationshipLabelViByKey, getSampleTypeLabelViByKey, type SampleTestResponse,} from "../types/sampleTest";
 
 export default function TestSamplePage() {
   const [data, setData] = useState<SampleTestResponse[]>([]);
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const token = localStorage.getItem("token") || "";
 
   const fetchData = useCallback(async () => {
@@ -56,14 +36,6 @@ export default function TestSamplePage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-blue-50">
-      <TestSampleModal
-        open={open}
-        onClose={() => {
-          setOpen(false);
-          fetchData();
-        }}
-      />
-
       {/* Header cố định */}
       <div className="flex items-center justify-between flex-shrink-0">
         <li className="text-lg w-full bg-white p-5 text-[#1F2B6C]">
@@ -73,22 +45,6 @@ export default function TestSamplePage() {
 
       <div className="flex-1 p-2 overflow-hidden" style={{ height: 'calc(100vh - 80px)' }}>
         <Card className="flex flex-col h-full shadow-lg">
-          <div className="flex flex-row justify-between flex-shrink-0 border-b">
-            <CardHeader className="w-full pb-4">
-              <CardTitle className="text-[#1F2B6C]">
-                Danh sách mẫu xét nghiệm
-              </CardTitle>
-            </CardHeader>
-            <div className="flex items-center pr-6">
-              <Button
-                className="flex items-center gap-2 text-white bottom-2 hover:bg-blue-800"
-                onClick={() => setOpen(true)}
-              >
-                + Thêm mẫu
-              </Button>
-            </div>
-          </div>
-
           <CardContent className="flex-1 p-0 overflow-hidden">
             <div className="h-full overflow-auto">
               <Table>
