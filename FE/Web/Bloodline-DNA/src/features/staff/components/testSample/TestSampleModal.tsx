@@ -6,28 +6,43 @@ import { Input, DatePicker } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { createTestSampleFromStaffApi } from "../../api/testSampleApi";
-import { getTestBookingByIdApi } from "../../api/testBookingApi";
-import type { TestBookingResponse } from "../../types/testBooking";
-import { RelationshipToSubjectLabelVi, SampleTypeLabelVi, } from "../../types/sampleTest";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, } from "../sample/ui/dialog";
+import { getTestBookingApi } from "../../api/testBookingApi";
+import { RelationshipToSubjectLabelVi, SampleTypeLabelVi } from "../../types/sampleTest";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../sample/ui/dialog";
 import { Button } from "../sample/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "../booking/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../booking/ui/select";
 import { getUserInfoApi } from "../../../auth/api/loginApi";
+import type { TestKitResponse } from "../../types/testKit";
+import type { TestBookingResponse } from "../../types/testBooking";
 
-const atFacilitySchema = z.object({
-  donorName: z.string().min(1, "Vui lòng nhập tên người cho mẫu"),
-  relationshipToSubject: z.string().min(1, "Chọn mối quan hệ"),
-  sampleType: z.string().min(1, "Chọn loại mẫu"),
-  collectedById: z.string().min(1, "Nhập người thu mẫu"),
-  collectedAt: z.date({ required_error: "Chọn ngày thu mẫu" }),
-});
+const createAtFacilitySchema = (existingDonorNames: string[]) => {
+  return z.object({
+    bookingId: z.string().min(1, "Vui lòng chọn Booking"),
+    donorName: z.string()
+      .min(1, "Vui lòng nhập tên người cho mẫu")
+      .refine((val) => !existingDonorNames.includes(val), {
+        message: "Tên người cho mẫu đã tồn tại",
+      }),
+    relationshipToSubject: z.string().min(1, "Chọn mối quan hệ"),
+    sampleType: z.string().min(1, "Chọn loại mẫu"),
+    collectedById: z.string().min(1, "Nhập người thu mẫu"),
+    collectedAt: z.date({ required_error: "Chọn ngày thu mẫu" }),
+  });
+};
 
-type Props = { open: boolean; onClose: () => void; bookingId?: string | null };
+type Props = { 
+  open: boolean; 
+  onClose: () => void; 
+  bookingId?: string | null;
+  onSampleCreated?: () => void;
+  existingDonorNames: string[];
+};
 
-export default function TestSampleModal({ open, onClose, bookingId }: Props) {
-  const [booking, setBooking] = useState<TestBookingResponse | null>(null);
+export default function TestSampleModal({ open, onClose, bookingId, onSampleCreated, existingDonorNames }: Props) {
+  const [kits] = useState<TestKitResponse[]>([]);
+  const [bookings, setBookings] = useState<TestBookingResponse[]>([]);
   const [collectedById, setCollectedById] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
@@ -36,8 +51,9 @@ export default function TestSampleModal({ open, onClose, bookingId }: Props) {
     setValue,
     formState: { errors },
   } = useForm<any>({
-    resolver: zodResolver(atFacilitySchema),
+    resolver: zodResolver(createAtFacilitySchema(existingDonorNames)),
     defaultValues: {
+      bookingId: bookingId || "",
       collectedAt: new Date(),
     },
   });
@@ -45,69 +61,84 @@ export default function TestSampleModal({ open, onClose, bookingId }: Props) {
   useEffect(() => {
     if (open) {
       reset({
+        bookingId: bookingId || "",
         collectedAt: new Date(),
       });
-      // Lấy user info để điền collectedById
+      
       const fetchUser = async () => {
         const token = localStorage.getItem("token") || "";
         if (!token) return;
         try {
           const user = await getUserInfoApi(token);
-          setCollectedById(user.fullName); // Lấy tên người dùng
-          setValue("collectedById", user.fullName); // Điền vào form
+          setCollectedById(user.id);
+          setValue("collectedById", user.id);
         } catch {
           toast.error("Không lấy được thông tin người dùng!");
         }
       };
       fetchUser();
-      if (bookingId) {
-        const fetchBooking = async () => {
-          try {
-            const res = await getTestBookingByIdApi(bookingId);
-            setBooking(res);
-          } catch {
-            toast.error("Không tìm thấy thông tin booking!");
-          }
-        };
-        fetchBooking();
-      }
     }
+
+    const fetchBookings = async () => {
+      try {
+        const res = await getTestBookingApi();
+        setBookings(res);
+      } catch {
+        toast.error("Lỗi khi tải danh sách booking");
+      }
+    };
+    
+    if (open) fetchBookings();
   }, [open, reset, bookingId, setValue]);
 
   const onSubmit = async (data: any) => {
-    if (loading) return;
-    setLoading(true);
+    setIsSubmitting(true);
     const token = localStorage.getItem("token") || "";
-    if (!token) {
-      setLoading(false);
+    if (!token) return;
+
+    // Đếm số mẫu đã tạo cho booking này
+    const currentBookingId = bookingId || data.bookingId;
+    const countForBooking = existingDonorNames.length;
+    if (countForBooking >= 2) {
+      toast.error("Bạn đã tạo 2 mẫu, không thể tạo thêm nữa");
+      setIsSubmitting(false);
       return;
     }
-    if (!booking) {
-      toast.error("Không tìm thấy thông tin booking!");
-      setLoading(false);
+
+    const selectedBooking = bookings.find(b => b.id === currentBookingId);
+    if (!selectedBooking) {
+      toast.error("Không tìm thấy booking đã chọn!");
+      setIsSubmitting(false);
       return;
     }
+
+    if (!selectedBooking.kitId) {
+      toast.error("Booking không có KitId được chỉ định!");
+      setIsSubmitting(false);
+      return;
+    }
+
     const payload = {
-      ...data,
-      bookingId: booking.id,
-      kitId: booking.testKitId,
-      donorName: data.donorName,
+      kitId: selectedBooking.kitId,
+      donorName: data.donorName.trim(),
       relationshipToSubject: Number(data.relationshipToSubject),
       sampleType: Number(data.sampleType),
       labReceivedAt: new Date(),
+      collectedAt: data.collectedAt,
       collectedById: collectedById || data.collectedById,
     };
-    console.log("[DEBUG] Gọi API tạo mẫu với payload:", payload);
+
     try {
       await createTestSampleFromStaffApi(payload, token);
       toast.success("Tạo mẫu thành công");
       reset();
       onClose();
-    } catch (error) {
+      if (onSampleCreated) onSampleCreated();
+    } catch (error: any) {
       console.error("❌ Lỗi:", error);
-      toast.error("Tạo mẫu thất bại");
+      toast.error(error.response?.data?.message || "Tạo mẫu thất bại");
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -117,6 +148,7 @@ export default function TestSampleModal({ open, onClose, bookingId }: Props) {
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Thêm Mẫu Xét Nghiệm</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-4">
           {/* Người thu mẫu */}
           <div>
@@ -124,7 +156,7 @@ export default function TestSampleModal({ open, onClose, bookingId }: Props) {
             <Input value={collectedById} readOnly className="h-10 bg-gray-100" />
           </div>
 
-          <FormFields control={control} errors={errors} />
+          <FormFields control={control} errors={errors} existingDonorNames={existingDonorNames} />
 
           {/* Ngày thu mẫu */}
           <div>
@@ -143,9 +175,21 @@ export default function TestSampleModal({ open, onClose, bookingId }: Props) {
             />
           </div>
 
-          <Button type="submit" className="w-full mt-2 bg-[#1F2B6C] hover:bg-blue-800" disabled={loading}>
-            <span className="text-white">{loading ? "Đang xử lý..." : "Thêm mẫu"}</span>
+          <Button 
+            type="submit" 
+            className="w-full mt-2 bg-[#1F2B6C] hover:bg-blue-800"
+            disabled={isSubmitting || Object.keys(errors).length > 0}
+          >
+            <span className="text-white">
+              {isSubmitting ? "Đang xử lý..." : "Thêm mẫu"}
+            </span>
           </Button>
+
+          {Object.keys(errors).length > 0 && (
+            <div className="text-red-500 text-sm p-2 border border-red-200 rounded bg-red-50">
+              Vui lòng kiểm tra lại các thông tin bắt buộc
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
@@ -155,9 +199,10 @@ export default function TestSampleModal({ open, onClose, bookingId }: Props) {
 type FieldProps = {
   control: any;
   errors: any;
+  existingDonorNames: string[];
 };
 
-function FormFields({ control, errors }: FieldProps) {
+function FormFields({ control, errors, existingDonorNames }: FieldProps) {
   return (
     <>
       {/* Người cho mẫu */}
@@ -166,12 +211,24 @@ function FormFields({ control, errors }: FieldProps) {
           name="donorName"
           control={control}
           render={({ field }) => (
-            <Input {...field} placeholder="Người cho mẫu" className="h-10" />
+            <>
+              <Input 
+                {...field} 
+                placeholder="Người cho mẫu" 
+                className="h-10"
+                status={errors.donorName ? "error" : undefined}
+              />
+              {errors.donorName && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.donorName.message}
+                  {errors.donorName.type === "refine" && (
+                    <span className="block">Các tên đã tồn tại: {existingDonorNames.join(", ")}</span>
+                  )}
+                </p>
+              )}
+            </>
           )}
         />
-        {errors.donorName && (
-          <p className="text-sm text-red-500 mt-1">{errors.donorName.message}</p>
-        )}
       </div>
 
       {/* Mối quan hệ */}

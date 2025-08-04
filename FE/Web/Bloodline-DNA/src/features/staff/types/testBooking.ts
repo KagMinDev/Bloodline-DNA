@@ -11,7 +11,7 @@ export interface TestBookingResponse {
   note: string;
   createdAt: string;
   updatedAt: string;
-  testKitId?: string;
+  kitId?: string;
 }
 
 export interface TestBookingResponseStaff {
