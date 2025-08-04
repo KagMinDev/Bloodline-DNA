@@ -58,7 +58,6 @@ const DeliveryDetailModal = ({
       try {
         setLoading(true);
         const staff = await getActiveStaff(token);
-        console.log("getActiveStaff",staff )
         setStaffList(staff);
       } catch (err) {
         message.error((err as Error).message);
@@ -117,6 +116,9 @@ const DeliveryDetailModal = ({
   };
 
   if (!delivery) return null;
+
+  // Debug để kiểm tra imageUrl
+  console.log('Delivery imageUrl:', delivery.imageUrl);
 
   // Lấy status info an toàn
   const statusInfo = statusMap[delivery.status] ?? {
@@ -186,6 +188,17 @@ const DeliveryDetailModal = ({
           )}
           <Descriptions.Item label="Ghi chú">
             {delivery.note || "Không có"}
+          </Descriptions.Item>
+          <Descriptions.Item label="Ảnh xác nhận">
+            {delivery.imageUrl ? (
+              <img
+                src={delivery.imageUrl}
+                alt="Ảnh xác nhận"
+                style={{ maxWidth: '200px', maxHeight: '150px', objectFit: 'cover' }}
+              />
+            ) : (
+              "Chưa có ảnh xác nhận"
+            )}
           </Descriptions.Item>
           <Descriptions.Item label="Trạng thái">
             <Badge color={statusInfo.color} text={statusInfo.text} />

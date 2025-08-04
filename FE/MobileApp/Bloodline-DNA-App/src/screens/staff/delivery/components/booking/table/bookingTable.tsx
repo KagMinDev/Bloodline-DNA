@@ -66,12 +66,9 @@ const BookingTable: React.FC<BookingTableProps> = ({
     currentStatus: string
   ): string[] => {
     const facilityStatusLabels = [
-      'Chờ xử lý',
-      'Đã nhận mẫu',
-      'Nhân viên đang lấy mẫu',
+      'Đã check-in',
       'Đang xét nghiệm',
       'Hoàn tất',
-      'Đã huỷ',
     ];
 
     const fullLabels = statusOptions.map((s) => s.label);

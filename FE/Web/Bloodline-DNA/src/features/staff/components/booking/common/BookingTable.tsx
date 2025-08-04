@@ -78,6 +78,18 @@ const BookingTable: React.FC<BookingTableProps> = ({
       }));
     }
 
+    if (collectionMethod === "AtFacility") {
+      // Chỉ cho phép 3 status cho phương thức "Tại cơ sở":
+      // 11: Đã check-in
+      // 7: Đang xét nghiệm
+      // 8: Hoàn tất
+      const allowedStatuses = [11, 7, 8];
+      return STATUS_MAPPING.map((option) => ({
+        ...option,
+        disabled: !allowedStatuses.includes(option.value),
+      }));
+    }
+
     // default: không disable gì cả
     return STATUS_MAPPING.map((option) => ({
       ...option,
