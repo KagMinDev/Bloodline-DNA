@@ -95,14 +95,14 @@ namespace ADNTester.Api.Controllers
         }
 
         [HttpGet("kit/{kitId}")]
-        public async Task<ActionResult<TestSampleDto>> GetTestSampleByKitId(string kitId)
+        public async Task<ActionResult<IEnumerable<TestSampleDetailDto>>> GetTestSampleByKitId(string kitId)
         {
-            var sample = await _testSampleService.GetTestSampleByKitId(kitId);
-            if (sample == null)
+            var samples = await _testSampleService.GetTestSampleByKitId(kitId);
+            if (samples == null || !samples.Any())
             {
-                return NotFound("Test sample not found");
+                return NotFound("No test samples found for this kit");
             }
-            return Ok(sample);
+            return Ok(samples);
         }
     }
 } 
