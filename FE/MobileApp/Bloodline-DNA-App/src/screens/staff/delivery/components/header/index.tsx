@@ -64,19 +64,6 @@ const HeaderStaff: React.FC = () => {
             <View style={styles.modalMenu}>
               <Text style={styles.modalTitle}>Chọn chức năng</Text>
 
-              {/* Quản lý đơn xét nghiệm */}
-              <TouchableOpacity
-                style={styles.modalMenuItem}
-                onPress={() => {
-                  setMenuVisible(false);
-                  navigation.navigate("Calendar");
-                }}
-              >
-                <Icon name="calendar-check" size={20} color="#2563EB" />
-                <Text style={styles.modalMenuText}>
-                  Quản lý đơn xét nghiệm
-                </Text>
-              </TouchableOpacity>
 
               {/* Quản lý giao nhận Kit */}
               <TouchableOpacity
@@ -120,17 +107,6 @@ const HeaderStaff: React.FC = () => {
                     }}
                   >
                     <Text style={styles.modalMenuText}>• Nhận mẫu Kit</Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.modalMenuItem}
-                    onPress={() => {
-                      setMenuVisible(false);
-                      setShowDeliverySubmenu(false);
-                      navigation.navigate("ResultSent");
-                    }}
-                  >
-                    <Text style={styles.modalMenuText}>• Gửi kết quả</Text>
                   </TouchableOpacity>
                 </View>
               )}

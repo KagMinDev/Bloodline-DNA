@@ -18,9 +18,20 @@ export const getAssignedDeliveries = async (): Promise<DeliveryOrder[]> => {
   return res.data.data;
 };
 
-export const completeDelivery = async (id: string): Promise<void> => {
-  const headers = await getAuthHeaders();
-  await axios.put(`${STAFF_BASE_URL}/logistics/${id}/complete`, {}, headers);
+export const completeDelivery = async (
+  id: string,
+  formData: FormData
+): Promise<void> => {
+  const token =
+    (await AsyncStorage.getItem("token")) ||
+    (await AsyncStorage.getItem("accessToken"));
+
+  await axios.put(`${STAFF_BASE_URL}/logistics/${id}/complete`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 // export const getDeliveryLogisticById = async (id: string): Promise<DeliveryOrder> => {

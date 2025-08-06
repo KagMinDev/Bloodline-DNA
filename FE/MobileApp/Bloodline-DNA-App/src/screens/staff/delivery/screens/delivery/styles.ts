@@ -3,126 +3,99 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#F0F9FF",
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    backgroundColor: "#f9f9f9",
   },
   title: {
     fontSize: 15,
-    fontWeight: "bold",
-    color: "#1e3a8a",
-    fontStyle: "italic",
-    marginBottom: 16,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#333",
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
     elevation: 2,
   },
   code: {
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 16,
-    color: "#2563eb",
-    marginBottom: 4,
+    marginBottom: 10,
   },
   text: {
     fontSize: 14,
-    color: "#374151",
-    marginBottom: 2,
+    marginBottom: 10,
+    color: "#444",
   },
   note: {
     fontStyle: "italic",
     fontSize: 13,
-    color: "#6b7280",
-    marginTop: 4,
+    color: "#666",
+    marginBottom: 15,
   },
   footer: {
-    marginTop: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   status: {
-    fontWeight: "600",
+    fontWeight: "700",
+    backgroundColor: "#D0E4FF",
+    padding: 5,
+    fontSize: 14,
   },
   button: {
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     borderRadius: 6,
+    alignItems: "center",
   },
   activeBtn: {
-    backgroundColor: "#10b981",
+    backgroundColor: "#007bff",
   },
   disabledBtn: {
-    backgroundColor: "#d1d5db",
+    backgroundColor: "#ccc",
   },
   buttonText: {
     color: "#fff",
-    fontSize: 13,
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 14,
   },
 
-  // Thêm các styles này vào file styles.ts
-
-tabContainer: {
-  backgroundColor: '#FFFFFF',
-  borderBottomWidth: 1,
-  borderBottomColor: '#E5E7EB',
-  paddingVertical: 8,
-  elevation: 2,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-},
-
-tabScrollContent: {
-  paddingHorizontal: 16,
-  alignItems: 'center',
-},
-
-tabButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingHorizontal: 16,
-  paddingVertical: 10,
-  marginHorizontal: 4,
-  borderRadius: 20,
-  backgroundColor: '#F3F4F6',
-  borderWidth: 1,
-  borderColor: '#E5E7EB',
-},
-
-activeTabButton: {
-  backgroundColor: '#3B82F6',
-  borderColor: '#3B82F6',
-},
-
-tabButtonText: {
-  marginLeft: 8,
-  fontSize: 14,
-  fontWeight: '600',
-  color: '#6B7280',
-},
-
-activeTabButtonText: {
-  color: '#FFFFFF',
-},
-
-emptyContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingVertical: 64,
-},
-
-emptyText: {
-  marginTop: 16,
-  fontSize: 16,
-  color: '#6B7280',
-  textAlign: 'center',
-},
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  modalContent: {
+    width: "100%",
+    maxHeight: "85%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 20,
+    color: "#222",
+    textAlign: "center",
+  },
+  modalText: {
+    fontSize: 14,
+    marginBottom: 12,
+    color: "#333",
+  },
 });
 
 export default styles;
