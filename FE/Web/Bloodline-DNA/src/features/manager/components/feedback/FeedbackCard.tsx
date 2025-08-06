@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react';
-import type { FeedbackResponse } from '../../types/feedback';
 import { Card, CardContent } from '../../../staff/components/sample/ui/card';
+import type { FeedbackResponse } from '../../types/feedback';
 
 type Props = {
   feedback: FeedbackResponse;
@@ -10,10 +10,10 @@ const FeedbackCard: React.FC<Props> = ({ feedback }) => {
   const formattedDate = new Date(feedback.createdAt).toLocaleString();
 
   return (
-    <Card className="shadow-md rounded-xl overflow-hidden border border-gray-200 bg-white">
+    <Card className="overflow-hidden bg-white border border-gray-200 shadow-md rounded-xl">
       <CardContent className="p-4 space-y-2">
         {/* Top Row: User & Service */}
-        <div className="flex justify-between text-sm text-gray-700 font-semibold">
+        <div className="flex justify-between text-sm font-semibold text-gray-700">
           <p>👤 Người dùng: {feedback.userId}</p>
           <p>🧪 Dịch vụ: {feedback.testServiceId}</p>
         </div>
@@ -32,7 +32,7 @@ const FeedbackCard: React.FC<Props> = ({ feedback }) => {
         </div>
 
         {/* Comment Row */}
-        <p className="text-gray-800 text-base">{feedback.comment}</p>
+        <p className="text-base text-gray-800">{feedback.comment}</p>
 
         {/* Metadata Row */}
         <div className="flex justify-between text-xs text-gray-500">

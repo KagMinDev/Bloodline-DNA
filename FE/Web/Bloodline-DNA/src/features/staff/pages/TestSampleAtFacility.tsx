@@ -3,12 +3,12 @@ import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Loading } from "../../../components";
-import { Card, CardContent } from "../components/sample/ui/card";
 import { getTestBookingApi } from "../api/testBookingApi";
+import { STATUS_COLOR_AtFacility, STATUS_LABEL_MAP } from "../components/booking/utils/statusmapping";
+import { statusToNumber } from "../components/booking/utils/statusUtils";
+import { Card, CardContent } from "../components/sample/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/sample/ui/table";
 import TestSampleModal from "../components/testSample/TestSampleModal";
-import { STATUS_LABEL_MAP } from "../components/booking/utils/statusmapping";
-import { statusToNumber } from "../components/booking/utils/statusUtils";
 
 export default function TestSampleAtFacility() {
   const [bookings, setBookings] = useState<any[]>([]);
@@ -35,7 +35,7 @@ export default function TestSampleAtFacility() {
       setBookings(filtered);
 
       // Lấy danh sách tên người cho mẫu đã tồn tại
-      const donorNames = filtered.flatMap((b: any) => 
+      const donorNames = filtered.flatMap((b: any) =>
         b.samples?.map((s: any) => s.donorName) || []
       );
       setExistingDonorNames(donorNames.filter(Boolean));
@@ -69,13 +69,13 @@ export default function TestSampleAtFacility() {
         onSampleCreated={handleSampleCreated}
         existingDonorNames={existingDonorNames}
       />
-      
+
       <div className="flex items-center justify-between flex-shrink-0">
         <li className="text-lg w-full bg-white p-5 text-[#1F2B6C]">
-          Quản lý booking lấy mẫu tại cơ sở
+          Quản lý booking lấy mẫu tại Cơ sở
         </li>
       </div>
-      
+
       <div className="flex-1 p-2 overflow-hidden" style={{ height: 'calc(100vh - 80px)' }}>
         <Card className="flex flex-col h-full shadow-lg">
           <CardContent className="flex-1 p-0 overflow-hidden">
@@ -83,7 +83,7 @@ export default function TestSampleAtFacility() {
               <Table>
                 <TableHeader className="sticky top-0 z-10 bg-white shadow-sm">
                   <TableRow className="[&_th]:font-bold [&_th]:py-3">
-                    <TableHead className="text-center">Mã Booking</TableHead>
+                    <TableHead className="text-center">Mã Booking #</TableHead>
                     <TableHead className="text-center">Khách hàng</TableHead>
                     <TableHead className="text-center">Số điện thoại</TableHead>
                     <TableHead className="text-center">Địa chỉ</TableHead>
@@ -112,17 +112,26 @@ export default function TestSampleAtFacility() {
                   ) : (
                     bookings.map((item) => (
                       <TableRow key={item.id} className="hover:bg-gray-50">
-                        <TableCell className="text-center">{item.id}</TableCell>
-                        <TableCell className="text-center">{item.clientName}</TableCell>
-                        <TableCell className="text-center">{item.phone || "-"}</TableCell>
-                        <TableCell className="text-center">{item.address || "-"}</TableCell>
-                        <TableCell className="text-center">{format(new Date(item.appointmentDate), "dd/MM/yyyy")}</TableCell>
-                        <TableCell className="text-center">{item.price?.toLocaleString("vi-VN")}</TableCell>
-                        <TableCell className="text-center">{STATUS_LABEL_MAP[statusToNumber(item.status)] || item.status}</TableCell>
-                        <TableCell className="text-center">{item.note || "-"}</TableCell>
+                        <TableCell className="text-xs text-center">{item.id}</TableCell>
+                        <TableCell className="text-xs text-center">{item.clientName}</TableCell>
+                        <TableCell className="text-xs text-center">{item.phone || "-"}</TableCell>
+                        <TableCell className="text-xs text-center">{item.address || "-"}</TableCell>
+                        <TableCell className="text-xs text-center">{format(new Date(item.appointmentDate), "dd/MM/yyyy")}</TableCell>
+                        <TableCell className="text-xs text-center">{item.price?.toLocaleString("vi-VN")}</TableCell>
+                        <TableCell className="text-xs text-center">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-medium inline-block 
+                              ${STATUS_COLOR_AtFacility[item.status] || "bg-gray-100 text-gray-700"}`}
+                          >
+                            {STATUS_LABEL_MAP[statusToNumber(item.status)] || item.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-xs text-center">{item.note || "-"}</TableCell>
                         <TableCell className="text-center">
                           <Button
-                            className="bg-blue-600 text-white hover:bg-blue-800"
+                            style={{ fontSize: "12px", padding: "2px 8px" }}
+                            size="small"
+                            className="text-[10px] text-white bg-blue-600 hover:bg-blue-800"
                             onClick={() => {
                               if (maxSamplesReached) {
                                 toast.error("Bạn đã tạo đủ 2 mẫu, không thể tạo thêm");
@@ -133,7 +142,7 @@ export default function TestSampleAtFacility() {
                             }}
                             disabled={maxSamplesReached}
                           >
-                            Thêm mẫu
+                            Thêm mẫu +
                             {maxSamplesReached && " (Đạt giới hạn)"}
                           </Button>
                         </TableCell>
