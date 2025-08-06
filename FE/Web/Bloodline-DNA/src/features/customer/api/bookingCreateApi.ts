@@ -22,7 +22,7 @@ export interface CreateBookingResponse {
 import { getUserInfoApi } from './userApi';
 
 // Base API URL
-const API_BASE_URL = "http://173.208.142.11:8084/api";
+const API_BASE_URL = "https://api.adntester.duckdns.org/api";
 
 // Cache for user ID to avoid multiple API calls
 let cachedUserId: string | null = null;
