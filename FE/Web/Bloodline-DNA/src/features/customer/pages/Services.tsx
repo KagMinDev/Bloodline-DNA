@@ -781,7 +781,7 @@ export const Services = (): React.JSX.Element => {
                           <strong>Số Lượng:</strong> 2 mẫu bắt buộc
                         </div>
                         <div className="text-sm text-amber-700">
-                          <strong>Loại Mẫu:</strong> Máu, Tóc, Móng, Nước ối, Dịch ối
+                          <strong>Loại Mẫu:</strong> Tăm bông miệng, Máu, Tóc có chân tóc, Móng tay, Nước bọt 
                         </div>
                       </div>
 
