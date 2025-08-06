@@ -2,7 +2,7 @@ import type { AxiosError } from "axios";
 import axios from "axios";
 
 // Base API URL
-const API_BASE_URL = "http://173.208.142.11:8084/api";
+const API_BASE_URL = "https://api.adntester.duckdns.org/api";
 
 // Function để lấy auth token
 const getAuthToken = (): string | null => {
