@@ -113,7 +113,7 @@ export default function TestManagement() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-blue-50">
+    <div className="min-h-screen bg-blue-50">
       {/* Modal thêm dịch vụ */}
       <ModalTest
         open={showAddTest}
@@ -137,23 +137,25 @@ export default function TestManagement() {
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">Quản lý dịch vụ xét nghiệm</h1>
+      <div className="fixed z-50 flex flex-col gap-4 p-4 px-5 bg-white w-296 sm:flex-row sm:items-center sm:justify-between">
+        <li className="text-lg text-[#1F2B6C] md:text-lg">
+          Quản lý dịch vụ xét nghiệm</li>
         <Button
+          size={'sm'}
           onClick={() => setShowAddTest(true)}
           className="flex items-center gap-2 bg-[#1F2B6C] hover:bg-blue-800 px-4 py-2 rounded-lg shadow"
         >
-          <FaPlus className="text-lg text-white" />
-          <span className="text-white">Thêm dịch vụ</span>
+          <FaPlus className="text-sm text-white" />
+          <span className="text-sm text-white">Thêm dịch vụ</span>
         </Button>
       </div>
 
       {/* Danh sách dịch vụ */}
-      <div className="overflow-x-auto max-h-[80vh]">
+      <div className="overflow-x-auto p-2 pt-18 max-h-[100vh]">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loading message="Đang tải danh sách dịch vụ..." />
-          </div>
+            <div className="flex items-center justify-center h-[550px]">
+              <Loading message="Đang tải danh sách dịch vụ xét nghiệm..." />
+            </div>
         ) : tests.length > 0 ? (
           <TestList
             tests={tests}

@@ -5,9 +5,9 @@ import { Loading } from "../../../components";
 import { getTestBookingApi } from "../../staff/api/testBookingApi";
 import { getBlogsApi } from "../api/blogsApi";
 import { getFeedbacksApi } from "../api/feedbackApi";
+import { getPaidPayments, type Payment } from "../api/payment";
 import type { BlogResponse } from "../types/blogs";
 import type { FeedbackResponse } from "../types/feedback";
-import { getPaidPayments, type Payment } from "../api/payment";
 
 function Dashboard() {
   const [blogs, setBlogs] = useState<BlogResponse[]>([]);
@@ -130,56 +130,60 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen p-6 overflow-auto bg-blue-50">
-      <h1 className="mb-6 text-3xl font-bold text-blue-800"> Thống kê tổng quan</h1>
-
-      {/* Cards */}
-      <div className="grid grid-cols-1 gap-6 mb-6 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 transition-all duration-300 ease-in-out hover:scale-[1.02]">
-        <CardStat title="Bài viết" count={filterDataByDate(blogs, dateFilter.startDate, dateFilter.endDate).length} color="blue" />
-        <CardStat title="Lịch xét nghiệm" count={filterDataByDate(tests, dateFilter.startDate, dateFilter.endDate).length} color="green" />
-        <CardStat title="Phản hồi" count={filterDataByDate(feedbacks, dateFilter.startDate, dateFilter.endDate).length} color="orange" />
-        <CardStat title="Thanh toán" count={filterDataByDate(payments, dateFilter.startDate, dateFilter.endDate).length} color="red" />
+    <div className="min-h-screen overflow-auto bg-blue-50">
+      <div className="fixed z-50 flex flex-col gap-4 p-4.5 px-5 bg-white w-296 sm:flex-row sm:items-center sm:justify-between">
+        <li className="text-2xl text-blue-800"> Thống kê tổng quan</li>
       </div>
 
-      {/* Chart Section */}
-      <div className="p-6 bg-white shadow-xl rounded-2xl">
-        <div className="flex flex-col justify-between mb-4 sm:flex-row sm:items-center">
-          <h2 className="text-xl font-semibold text-gray-700"></h2>
-          <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
-            {[
-              { key: "today", label: "Hôm nay" },
-              { key: "week", label: "Tuần này" },
-              { key: "month", label: "Tháng này" },
-              { key: "year", label: "Năm nay" },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => handlePresetFilter(key)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition duration-200 ${dateFilter.filterType === key
-                  ? "bg-blue-400 text-white shadow"
-                  : "bg-gray-100 text-gray-700 hover:bg-blue-100"
-                  }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+      {/* Cards */}
+      <div className="p-2.5 mt-17">
+        <div className="grid grid-cols-1 gap-6 mb-3 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4 transition-all duration-300 ease-in-out hover:scale-[1.02]">
+          <CardStat title="Bài viết" count={filterDataByDate(blogs, dateFilter.startDate, dateFilter.endDate).length} color="blue" />
+          <CardStat title="Lịch xét nghiệm" count={filterDataByDate(tests, dateFilter.startDate, dateFilter.endDate).length} color="green" />
+          <CardStat title="Phản hồi" count={filterDataByDate(feedbacks, dateFilter.startDate, dateFilter.endDate).length} color="orange" />
+          <CardStat title="Thanh toán" count={filterDataByDate(payments, dateFilter.startDate, dateFilter.endDate).length} color="red" />
         </div>
 
-        <h3 className="mb-4 text-lg font-medium text-gray-800">📈 Hoạt động theo thời gian</h3>
-        <ResponsiveContainer width="100%" height={430}>
-          <LineChart data={formatChartData()}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis allowDecimals={false} />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="Bài viết" stroke="#2563eb" strokeWidth={2} />
-            <Line type="monotone" dataKey="Lịch xét nghiệm" stroke="#10b981" strokeWidth={2} />
-            <Line type="monotone" dataKey="Phản hồi" stroke="#f97316" strokeWidth={2} />
-            <Line type="monotone" dataKey="Thanh toán" stroke="#dc2626" strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
+        {/* Chart Section */}
+        <div className="p-6 bg-white shadow-xl rounded-2xl">
+          <div className="flex flex-col justify-between mb-4 sm:flex-row sm:items-center">
+            <h2 className="text-xl font-semibold text-gray-700"></h2>
+            <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+              {[
+                { key: "today", label: "Hôm nay" },
+                { key: "week", label: "Tuần này" },
+                { key: "month", label: "Tháng này" },
+                { key: "year", label: "Năm nay" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => handlePresetFilter(key)}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-medium transition duration-200 ${dateFilter.filterType === key
+                    ? "bg-blue-400 text-white shadow"
+                    : "bg-gray-100 text-gray-700 hover:bg-blue-100"
+                    }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <h3 className="mb-4 text-lg font-medium text-gray-800">📈 Hoạt động theo thời gian</h3>
+          <ResponsiveContainer width="100%" height={430}>
+            <LineChart data={formatChartData()}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="Bài viết" stroke="#2563eb" strokeWidth={2} />
+              <Line type="monotone" dataKey="Lịch xét nghiệm" stroke="#10b981" strokeWidth={2} />
+              <Line type="monotone" dataKey="Phản hồi" stroke="#f97316" strokeWidth={2} />
+              <Line type="monotone" dataKey="Thanh toán" stroke="#dc2626" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

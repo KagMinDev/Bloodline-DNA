@@ -1,8 +1,8 @@
 import axios from "axios";
 import rootApi, { STAFF_BASE_URL } from "../../../apis/rootApi";
 import type {
-  DeliveryOrder,
-  TestBookingStatusRequest,
+    DeliveryOrder,
+    TestBookingStatusRequest,
 } from "../types/delivery";
 import type { TestBookingResponse } from "../types/testBooking";
 

@@ -2,7 +2,7 @@ export const statusColorMap: Record<string, string> = {
   PreparingKit: "orange",
   DeliveringKit: "blue",
   KitDelivered: "green",
-  WaitingForPickup: "gold",
+  WaitingForPickup: "white",
   ReturningSample: "gold",
   PickingUpSample: "purple",
   SampleReceived: "cyan",
@@ -49,6 +49,7 @@ export interface DeliveryLogistic {
   phone: string;
   scheduledAt: string;
   completedAt: string | null;
+  imageUrl: string;
   note: string;
   type: number;
   status: number;
@@ -56,6 +57,7 @@ export interface DeliveryLogistic {
 
 export interface DeliveryOrder {
   id: string;
+  name: string;
   staffId: string | null;
   staff: { fullName?: string } | null;
   address: string;
@@ -64,6 +66,7 @@ export interface DeliveryOrder {
   completeAt: string | null;
   note: string;
   type: number;
+  imageUrl: string;
   status: DeliveryStatus;
 }
 

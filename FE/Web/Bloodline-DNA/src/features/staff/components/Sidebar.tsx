@@ -20,11 +20,16 @@ const SidebarData: SidebarDataType[] = [
     href: '/staff/test-sample',
   },
   {
+    icon: TbTestPipe,
+    heading: 'Quản lí mẫu xét nghiệm tại cơ sở',
+    href: '/staff/test-sample-at-facility',
+  },
+  {
     icon: SiTestcafe,
     heading: 'Quản lí kết quả xét nghiệm',
     href: '/staff/test-result',
   },
-    {
+  {
     icon: FaShippingFast,
     heading: 'Quản lí giao - nhận TestKit',
     href: '/staff/delivery',
@@ -66,8 +71,8 @@ const Sidebar = () => {
                   <div
                     onClick={() => toggleDropdown(item.heading)}
                     className={`flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 text-sm font-medium ${pathname.startsWith(item.href)
-                        ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
-                        : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
+                      ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
+                      : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
                       }`}
                   >
                     <div className='flex items-center'>
@@ -89,8 +94,8 @@ const Sidebar = () => {
                           <Link to={child.href}>
                             <div
                               className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${pathname === child.href
-                                  ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
-                                  : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
+                                ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
+                                : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
                                 }`}
                             >
                               <div className='mr-3 text-lg'>
@@ -108,8 +113,8 @@ const Sidebar = () => {
                 <Link to={item.href}>
                   <div
                     className={`flex cursor-pointer items-center rounded-lg px-4 py-2 text-sm font-medium ${pathname === item.href
-                        ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
-                        : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
+                      ? 'bg-[#FCFEFE] font-bold text-[#1F2B6C]'
+                      : 'text-white hover:bg-[#FCFEFE] hover:text-[#1F2B6C]'
                       }`}
                   >
                     <div className='mr-3 text-lg'>

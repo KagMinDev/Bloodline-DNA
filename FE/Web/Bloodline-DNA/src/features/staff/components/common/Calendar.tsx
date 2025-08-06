@@ -89,7 +89,7 @@ const Calendar: React.FC<CalendarComponentProps> = ({
   };
 
   return (
-    <div className="relative flex items-start justify-start w-full h-full py-2 bg-blue-50">
+    <div className="relative flex items-start justify-start w-full h-full px-2 py-2 bg-blue-50">
       <ToastContainer />
       <div className="flex flex-col w-2/3 h-full p-5 mr-2 text-xs bg-white rounded-lg shadow-lg">
         <div className="mb-6">
@@ -158,7 +158,7 @@ const Calendar: React.FC<CalendarComponentProps> = ({
         />
 
       </div>
-      <div className="flex flex-col w-1/3 h-full ml-8 bg-white rounded-lg shadow-lg">
+      <div className="flex flex-col w-1/3 h-full bg-white rounded-lg shadow-lg">
         <BookingListPanel
           selectedDay={selectedDay}
           bookings={filteredBookings}

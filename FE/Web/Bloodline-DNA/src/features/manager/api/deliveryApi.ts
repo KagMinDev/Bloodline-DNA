@@ -4,7 +4,7 @@ import type {
   ActiveStaff,
   DeliveryLogistic,
   DeliveryOrder,
-  DeliveryStatus
+  DeliveryStatus,
 } from "../types/delivery";
 
 const validStatuses: DeliveryStatus[] = [
@@ -43,6 +43,7 @@ export const getDeliveryLogistics = async (): Promise<DeliveryOrder[]> => {
         scheduleAt: item.scheduledAt,
         completeAt: item.completedAt,
         note: item.note,
+        imageUrl: item.imageUrl,
         status,
       };
     });
@@ -72,6 +73,7 @@ export const getDeliveryLogisticById = async (
       phone: item.phone,
       scheduleAt: item.scheduledAt,
       completeAt: item.completedAt,
+      imageUrl: item.imageUrl,
       note: item.note,
       status,
     };
@@ -120,6 +122,8 @@ export const assignDeliveryStaff = async (
     );
   } catch (error) {
     const axiosError = error as AxiosError<{ message: string }>;
-    throw new Error(axiosError.response?.data?.message || "Lỗi phân công nhân viên");
+    throw new Error(
+      axiosError.response?.data?.message || "Lỗi phân công nhân viên"
+    );
   }
 };

@@ -58,7 +58,7 @@ rootApi.interceptors.response.use(
 );
 
 export default rootApi;
-export { getAuthToken, clearAuthAndRedirect };
+export { clearAuthAndRedirect, getAuthToken };
 
 export const BASE_URL = "http://173.208.142.11:8084/api";
 

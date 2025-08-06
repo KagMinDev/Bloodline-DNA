@@ -36,3 +36,8 @@ export const STATUS_LABEL_MAP: Record<number, string> = STATUS_MAPPING.reduce(
   },
   {} as Record<number, string>
 );
+
+export const STATUS_COLOR_AtFacility: Record<string, string> = {
+  CheckIn: "bg-yellow-100 text-yellow-800",
+  StaffGettingSample: "bg-green-100 text-green-800",
+};

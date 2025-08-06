@@ -42,18 +42,13 @@ const DeliveriesStaffTabs: React.FC = () => {
       <Tab.Screen
         name="DeliveriesStaff"
         component={DeliveriesStaffScreen}
-        options={{ tabBarLabel: "Danh sách" }}
+        options={{ tabBarLabel: "Giao Kit" }}
       />
       <Tab.Screen
         name="SampleReceived"
         component={SampleReceived}
-        options={{ tabBarLabel: "Nhận mẫu" }}
+        options={{ tabBarLabel: "Nhận mẫu Kit" }}
       />
-      {/* <Tab.Screen
-        name="ResultSent"
-        component={ResultSent}
-        options={{ tabBarLabel: "Gửi kết quả" }}
-      /> */}
     </Tab.Navigator>
   );
 };

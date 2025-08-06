@@ -1,63 +1,45 @@
-import { RootStackParamList } from "@/types/root-stack/stack.types";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
+  Image,
   Modal,
-  Pressable,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { updateTestBookingStatusStaff } from "../../../api/delivery";
-import { getTestBookingApi } from "../../../api/testBookingApi";
+import { completeDelivery, getAssignedDeliveries } from "../../../api/delivery";
 import HeaderStaff from "../../../components/header";
 import {
+  DeliveryOrder,
   statusColorMap,
   statusTextMap,
-  TestBookingResponse,
 } from "../../../types/delivery";
-import { styles } from "./styles";
+import styles from "./styles";
 
-const SampleReceived: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [data, setData] = useState<TestBookingResponse[]>([]);
+const SampleReceived = () => {
+  const [data, setData] = useState<DeliveryOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<DeliveryOrder | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
-
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [infoModalContent, setInfoModalContent] = useState<{
-    title: string;
-    message: string;
-  }>({
-    title: "",
-    message: "",
-  });
-
-  const showInfoModal = (title: string, message: string) => {
-    setInfoModalContent({ title, message });
-    setInfoModalVisible(true);
-  };
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = (await AsyncStorage.getItem("token")) ?? "";
-      const result = await getTestBookingApi(token);
-      const filtered = result.filter(
-        (item) => item.status === "ReturningSample"
-      );
+      const result = await getAssignedDeliveries();
+      const filtered = result
+        .filter((item) => item.status === "WaitingForPickup")
+        .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
       setData(filtered);
-    } catch (err) {
-      console.error("Fetch error:", err);
-      showInfoModal("Lỗi", "Không thể lấy danh sách đơn.");
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách đơn:", error);
+      Alert.alert("Lỗi", "Không thể lấy danh sách đơn.");
     } finally {
       setLoading(false);
     }
@@ -67,153 +49,194 @@ const SampleReceived: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  const openConfirmModal = (id: string) => {
-    setSelectedId(id);
+  const openModal = (order: DeliveryOrder) => {
+    setSelectedOrder(order);
     setModalVisible(true);
   };
 
+  const selectImage = async () => {
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (cameraStatus !== "granted" || mediaStatus !== "granted") {
+      Alert.alert("Lỗi", "Ứng dụng cần quyền truy cập camera và thư viện ảnh.");
+      return;
+    }
+
+    Alert.alert(
+      "Chọn ảnh",
+      "Bạn muốn sử dụng ảnh từ đâu?",
+      [
+        {
+          text: "Chụp ảnh mới",
+          onPress: async () => {
+            try {
+              const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.4,
+              });
+              if (!result.canceled && result.assets.length > 0) {
+                setImageUri(result.assets[0].uri);
+              }
+            } catch (error) {
+              console.error("Lỗi khi chụp ảnh:", error);
+              Alert.alert("Lỗi", "Không thể chụp ảnh.");
+            }
+          },
+        },
+        {
+          text: "Chọn từ thư viện",
+          onPress: async () => {
+            try {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [4, 3],
+                quality: 0.8,
+              });
+              if (!result.canceled && result.assets.length > 0) {
+                setImageUri(result.assets[0].uri);
+              }
+            } catch (error) {
+              console.error("Lỗi khi chọn ảnh:", error);
+              Alert.alert("Lỗi", "Không thể chọn ảnh.");
+            }
+          },
+        },
+        {
+          text: "Hủy",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const handleConfirm = async () => {
-    if (!selectedId) return;
+    if (!selectedOrder || !imageUri) return;
+
     setConfirmLoading(true);
     try {
-      const token = (await AsyncStorage.getItem("token")) ?? "";
-      await updateTestBookingStatusStaff(
-        { bookingId: selectedId, status: 6 },
-        token
-      );
-      showInfoModal("Thành công", "Đã xác nhận nhận mẫu Kit.");
+      const formData = new FormData();
+      formData.append("evidence", {
+        uri: imageUri,
+        name: "evidence.jpg",
+        type: "image/jpeg",
+      } as any);
+
+      await completeDelivery(selectedOrder.id, formData);
+      Alert.alert("Thành công", "Đã xác nhận nhận mẫu Kit.");
       setModalVisible(false);
-      setSelectedId(null);
-      fetchData(); // refetch lại dữ liệu
-    } catch (err) {
-      console.error("Update error:", err);
-      showInfoModal("Lỗi", "Không thể cập nhật trạng thái.");
+      setSelectedOrder(null);
+      setImageUri(null);
+      fetchData();
+    } catch (error) {
+      console.error("Lỗi khi xác nhận:", error);
+      Alert.alert("Lỗi", "Không thể xác nhận đơn hàng.");
     } finally {
       setConfirmLoading(false);
     }
   };
 
-  const handleRowPress = (id: string) => {
-    navigation.navigate("BlogDetail", { id }); // hoặc thay bằng screen phù hợp
-  };
-
-  const renderItem = ({ item }: { item: TestBookingResponse }) => (
-    <Pressable style={styles.row} onPress={() => handleRowPress(item.id)}>
-      <View style={styles.rowInfo}>
-        <Text style={styles.code}>Mã đơn: #{item.id}</Text>
-        <Text style={styles.client}>Khách hàng: {item.clientName}</Text>
-        <Text style={styles.phone}>Số điện thoại: {item.phone}</Text>
-        <Text style={styles.address}>
-          Địa chỉ:{" "}
-          {item.address || (
-            <Text style={{ fontStyle: "italic" }}>Chưa cập nhật</Text>
-          )}
+  const renderItem = ({ item }: { item: DeliveryOrder }) => (
+    <TouchableOpacity style={styles.card} onPress={() => openModal(item)}>
+      <Text style={styles.code}>Mã đơn: #{item.id}</Text>
+      <Text style={styles.text}>📍 {item.address || "Chưa cập nhật"}</Text>
+      <Text style={styles.text}>📞 {item.phone}</Text>
+      <Text style={styles.text}>
+        🕒 {new Date(item.scheduledAt).toLocaleString("vi-VN")}
+      </Text>
+      <Text style={styles.note}>📝 {item.note || "Không có ghi chú"}</Text>
+      <View style={styles.footer}>
+        <Text style={[styles.status, { color: statusColorMap[item.status] }]}>
+          {statusTextMap[item.status] || item.status}
         </Text>
-      </View>
-      <View style={styles.rowRight}>
-        <View
-          style={[
-            styles.tag,
-            { backgroundColor: statusColorMap[item.status] ?? "#6b7280" },
-          ]}
-        >
-          <Text style={styles.tagText}>
-            {statusTextMap[item.status] || item.status}
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={[
-            styles.actionBtn,
-            item.status !== "ReturningSample" && styles.btnDisabled,
-          ]}
-          disabled={item.status !== "ReturningSample"}
-          onPress={() => openConfirmModal(item.id)}
-        >
+        <View style={styles.right}>
           <Icon name="check" size={16} color="#fff" />
-          <Text style={styles.btnText}>Đã nhận mẫu</Text>
-        </TouchableOpacity>
+          <Text style={styles.confirmText}>Đã nhận mẫu</Text>
+        </View>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <HeaderStaff />
-      {loading ? (
-        <ActivityIndicator size="large" />
-      ) : data.length === 0 ? (
-        <Text style={styles.empty}>Không có đơn ReturningSample nào.</Text>
-      ) : (
-        <FlatList
-          data={data}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={{
-            marginTop: 10,
-            paddingBottom: 16,
-            paddingHorizontal: 10,
-          }}
-        />
-      )}
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          Danh sách yêu cầu nhận lại mẫu Kit: {data.length} đơn
+        </Text>
+        {loading ? (
+          <ActivityIndicator size="large" />
+        ) : data.length === 0 ? (
+          <Text style={styles.empty}>Không có đơn WaitingForPickup nào.</Text>
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ paddingBottom: 80 }}
+          />
+        )}
+      </View>
 
       {/* Modal xác nhận */}
-      <Modal
-        transparent
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-        animationType="fade"
-      >
+      <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Xác nhận đã nhận mẫu Kit</Text>
             <Text style={styles.modalText}>
-              Bạn có chắc muốn xác nhận đã nhận mẫu từ đơn #{selectedId}?
+              Bạn có chắc muốn xác nhận đã nhận mẫu từ đơn <Text style={{ fontWeight: "bold" }}>#{selectedOrder?.id}</Text>?
             </Text>
+            <View style={styles.modalDetail}>
+              <Text>Mã đơn: #{selectedOrder?.id}</Text>
+              <Text>Khách hàng: {selectedOrder?.name}</Text>
+              <Text>Điện thoại: {selectedOrder?.phone}</Text>
+              <Text>Địa chỉ: {selectedOrder?.address}</Text>
+              <Text>Ghi chú: {selectedOrder?.note || "Không có"}</Text>
+            </View>
+
+            <TouchableOpacity onPress={selectImage} style={styles.imagePicker}>
+              <MaterialIcons name="add-a-photo" size={24} color="#007bff" />
+              <Text style={{ color: "#007bff" }}>
+                {imageUri ? "Đã tải ảnh ✅" : "Chụp ảnh xác nhận"}
+              </Text>
+            </TouchableOpacity>
+
+            {imageUri && <Image source={{ uri: imageUri }} style={styles.preview} />}
+
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalBtn, styles.cancelBtn]}
-                onPress={() => setModalVisible(false)}
+                onPress={() => {
+                  setModalVisible(false);
+                  setImageUri(null);
+                }}
                 disabled={confirmLoading}
               >
                 <Text style={styles.cancelText}>Hủy</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalBtn, styles.okBtn]}
+                style={[
+                  styles.modalBtn,
+                  {
+                    backgroundColor: imageUri ? "#28a745" : "#6c757d",
+                    opacity: confirmLoading ? 0.6 : 1,
+                  },
+                ]}
                 onPress={handleConfirm}
-                disabled={confirmLoading}
+                disabled={confirmLoading || !imageUri}
               >
                 {confirmLoading ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.okText}>Xác nhận</Text>
+                  <Text style={styles.okText}>Xác nhận đã nhận lại Mẫu Kit</Text>
                 )}
               </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
-      {/* Modal thông báo */}
-      <Modal
-        transparent
-        visible={infoModalVisible}
-        onRequestClose={() => setInfoModalVisible(false)}
-        animationType="fade"
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{infoModalContent.title}</Text>
-            <Text style={styles.modalText}>{infoModalContent.message}</Text>
-            <TouchableOpacity
-              style={[
-                styles.modalBtn,
-                styles.okBtn,
-                { alignSelf: "flex-end", marginTop: 20 },
-              ]}
-              onPress={() => setInfoModalVisible(false)}
-            >
-              <Text style={styles.okText}>Đóng</Text>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
