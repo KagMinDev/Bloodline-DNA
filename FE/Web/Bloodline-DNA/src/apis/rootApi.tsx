@@ -26,7 +26,7 @@ const clearAuthAndRedirect = () => {
 };
 
 const rootApi = axios.create({
-  baseURL: 'http://173.208.142.11:8084/api',
+  baseURL: 'https://api.adntester.duckdns.org/api',
 });
 
 // Request interceptor để tự động thêm Authorization header
@@ -60,6 +60,6 @@ rootApi.interceptors.response.use(
 export default rootApi;
 export { clearAuthAndRedirect, getAuthToken };
 
-export const BASE_URL = "http://173.208.142.11:8084/api";
+export const BASE_URL = "https://api.adntester.duckdns.org/api";
 
 export const STAFF_BASE_URL = "https://api.adntester.duckdns.org";

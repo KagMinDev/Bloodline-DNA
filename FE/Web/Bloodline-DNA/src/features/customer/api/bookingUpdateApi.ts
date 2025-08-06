@@ -2,7 +2,7 @@ import type { AxiosError } from "axios";
 import axios from "axios";
 
 // Cập nhật URL API mới
-const API_BASE_URL = "http://173.208.142.11:8084/api";
+const API_BASE_URL = "https://api.adntester.duckdns.org/api";
 
 // Interface cho Update Booking request body theo yêu cầu mới
 export interface UpdateBookingRequest {

@@ -44,7 +44,7 @@ export const completeDelivery = async (
 };
 
 // Hàm PUT: Cập nhật trạng thái đặt lịch xét nghiệm
-// http://173.208.142.11:8084/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
+// https://api.adntester.duckdns.org/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
 export const updateTestBookingStatusStaff = async (
   request: TestBookingStatusRequest
 ): Promise<TestBookingResponse> => {
