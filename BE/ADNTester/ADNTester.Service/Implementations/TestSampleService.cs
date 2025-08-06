@@ -49,17 +49,20 @@ namespace ADNTester.Service.Implementations
                 throw new Exception("Không tìm thấy thông tin đặt lịch");
 
             // Kiểm tra trạng thái booking
-            // Nếu đang ở trạng thái CheckIn thì tự động chuyển sang StaffGettingSample
             if (booking.Status == BookingStatus.CheckIn)
             {
                 booking.Status = BookingStatus.StaffGettingSample;
                 booking.UpdatedAt = DateTime.UtcNow;
                 _unitOfWork.TestBookingRepository.Update(booking);
             }
+
             if (booking.Status != BookingStatus.StaffGettingSample)
             {
                 throw new Exception($"Không thể tạo sample. Trạng thái đặt lịch hiện tại là {booking.Status}, yêu cầu phải ở trạng thái CheckIn hoặc StaffGettingSample.");
             }
+
+            // Normalize donor name
+            var newDonor = dto.DonorName?.Trim().ToLower() ?? "";
 
             // Lấy toàn bộ sample của kit này
             var existingSamples = (await _unitOfWork.TestSampleRepository.GetAllAsync())
@@ -71,14 +74,26 @@ namespace ADNTester.Service.Implementations
                 throw new Exception($"Kit này chỉ cho phép tối đa {kit.SampleCount} sample. Hiện tại đã có {existingSamples.Count}.");
 
             // Kiểm tra 1 người tối đa 2 mẫu
-            var donorSampleCount = existingSamples.Count(s => s.DonorName == dto.DonorName);
+            var donorSampleCount = existingSamples
+                .Count(s => (s.DonorName?.Trim().ToLower() ?? "") == newDonor);
+
             if (donorSampleCount >= 2)
                 throw new Exception($"Người có tên \"{dto.DonorName}\" đã có {donorSampleCount} mẫu. Mỗi người chỉ được tối đa 2 mẫu.");
 
             // Nếu đã có n - 1 sample rồi, đảm bảo có ít nhất 2 người khác nhau
-            var currentUniqueDonors = existingSamples.Select(s => s.DonorName).Distinct().ToList();
-            if (existingSamples.Count == kit.SampleCount - 1 && !currentUniqueDonors.Contains(dto.DonorName) && currentUniqueDonors.Count == 1)
-                throw new Exception("Cần ít nhất 2 người cho mẫu thử. Hãy thêm mẫu từ người khác.");
+            if (existingSamples.Count == kit.SampleCount - 1)
+            {
+                var uniqueDonors = existingSamples
+                    .Select(s => s.DonorName?.Trim().ToLower() ?? "")
+                    .Distinct()
+                    .ToList();
+
+                if (!uniqueDonors.Contains(newDonor))
+                    uniqueDonors.Add(newDonor);
+
+                if (uniqueDonors.Count < 2)
+                    throw new Exception("Cần ít nhất 2 người cho mẫu thử. Hãy thêm mẫu từ người khác.");
+            }
 
             // Sinh SampleCode không trùng
             string generatedCode;
