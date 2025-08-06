@@ -153,7 +153,7 @@ export const CollectionTimeModal = ({
             ) : (
               <div className="flex items-center justify-center">
                 <CalendarIcon className="w-4 h-4 mr-2 text-white" />
-                <span className="text-white">Gửi mẫu</span>
+                <span className="text-white">Gửi Lịch Hẹn</span>
               </div>
             )}
           </Button>

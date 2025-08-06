@@ -108,12 +108,20 @@ export const useBookingData = () => {
       const kitId = testKitResponse.data.id;
 
       // Check if TestSample exists for this kit
-      const testSampleResponse = await getTestSampleByKitIdApi(kitId);
-      if (testSampleResponse.success && testSampleResponse.data) {
-        setShouldShowSampleButton(false);
-        setHasSampleInfo(true);
+      const testSamples = await getTestSampleByKitIdApi(kitId);
+      if (Array.isArray(testSamples)) {
+        const sampleCount = testKitResponse.data.sampleCount || 1;
+        
+        // Check if we have enough samples (equal to required sample count)
+        if (testSamples.length >= sampleCount) {
+          setShouldShowSampleButton(false); // Đã điền đủ mẫu
+          setHasSampleInfo(true);
+        } else {
+          setShouldShowSampleButton(true); // Chưa điền đủ mẫu
+          setHasSampleInfo(false);
+        }
       } else {
-        setShouldShowSampleButton(true);
+        setShouldShowSampleButton(true); // Chưa có mẫu nào
         setHasSampleInfo(false);
       }
     } catch (error) {
@@ -179,9 +187,13 @@ export const useBookingData = () => {
         localStorage.getItem(collectionConfirmKey) === "true";
       setIsCollectionConfirmed(isCollectionConfirmed);
 
-      // Check if sample info has been submitted for WaitingForSample status
+      // Check if sample info has been submitted for different statuses
       if (normalizedStatus === "WaitingForSample") {
         await checkSampleInfoStatus(bookingId);
+      } else if (["ReturningSample", "SampleReceived", "Testing", "Completed"].includes(normalizedStatus || "")) {
+        // For these statuses, we should show view mode (samples should exist)
+        setShouldShowSampleButton(false); // Set to false to show view mode
+        setHasSampleInfo(true);
       } else {
         setShouldShowSampleButton(true); // Show button for other statuses
         setHasSampleInfo(undefined); // Reset for other statuses

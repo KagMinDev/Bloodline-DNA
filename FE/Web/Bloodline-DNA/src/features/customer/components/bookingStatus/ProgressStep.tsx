@@ -271,44 +271,88 @@ export const ProgressStepProps = ({
             )}
           </div>
         )}
-        {step.id === 4 && bookingStatus.toLowerCase() === 'waitingforsample' && shouldShowSampleButton && (
-          <div className="mt-4">
-            <Button
-              onClick={() => setIsSampleModalOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
-            >
-              <FilePenIcon className="w-4 h-4 mr-2 text-white" />
-              Điền thông tin mẫu
-            </Button>
-            <p className="mt-2 text-xs text-slate-500">
-              Sau khi điền thông tin, bạn có thể gửi mẫu cho chúng tôi.
-            </p>
-          </div>
-        )}
-        {step.id === 4 && bookingStatus.toLowerCase() === 'waitingforsample' && !shouldShowSampleButton && (
-          <div className="mt-4">
-            {isCollectionConfirmed ? (
-              <div className="p-3 border border-green-200 rounded-lg bg-green-50">
-                <div className="flex items-center text-green-700">
-                  <CheckCircleIcon className="w-5 h-5 mr-2" />
-                  <span className="font-medium">Đã Xác Nhận Ngày Nhân Viên Đến Lấy Mẫu</span>
+        {/* Logic hiển thị nút cho step Sample Information (id = 4) */}
+        {step.id === 4 && (
+          (() => {
+            const status = bookingStatus.toLowerCase();
+            const isWaitingForSample = status === 'waitingforsample';
+            const isAfterSample = ['returningsample', 'samplereceived', 'testing', 'completed'].includes(status);
+            
+            console.log('🔍 ProgressStep Debug:', { 
+              bookingStatus, 
+              status, 
+              isWaitingForSample, 
+              isAfterSample, 
+              shouldShowSampleButton,
+              stepId: step.id 
+            });
+            
+            // Nếu đang chờ mẫu và chưa điền đủ thông tin
+            if (isWaitingForSample && shouldShowSampleButton) {
+              return (
+                <div className="mt-4">
+                  <Button
+                    onClick={() => setIsSampleModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
+                  >
+                    <FilePenIcon className="w-4 h-4 mr-2 text-white" />
+                    Điền thông tin mẫu
+                  </Button>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Sau khi điền thông tin, bạn có thể gửi mẫu cho chúng tôi.
+                  </p>
                 </div>
-              </div>
-            ) : (
-              <>
-                <Button
-                  onClick={() => handleStepAction({ type: 'schedule_collection' })}
-                  className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
-                >
-                  <CalendarIcon className="w-4 h-4 mr-2 text-white" />
-                  Gửi mẫu
-                </Button>
-                <p className="mt-2 text-xs text-slate-500">
-                  Đặt lịch hẹn để nhân viên đến tận nơi lấy mẫu xét nghiệm.
-                </p>
-              </>
-            )}
-          </div>
+              );
+            }
+            
+            // Nếu đã điền đủ thông tin mẫu hoặc ở các trạng thái sau
+            if ((isWaitingForSample && !shouldShowSampleButton) || isAfterSample) {
+              return (
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <Button
+                      onClick={() => setIsSampleModalOpen(true)}
+                      variant="outline"
+                      className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
+                    >
+                      <EyeIcon className="w-4 h-4 mr-2" />
+                      XEM LẠI THÔNG TIN MẪU
+                    </Button>
+                    <p className="mt-2 text-xs text-slate-500">
+                      Xem lại thông tin mẫu bạn đã điền trước đó.
+                    </p>
+                  </div>
+                  
+                  {/* Chỉ hiển thị nút Gửi mẫu nếu đang trong trạng thái WaitingForSample */}
+                  {isWaitingForSample && (
+                    isCollectionConfirmed ? (
+                      <div className="p-3 border border-green-200 rounded-lg bg-green-50">
+                        <div className="flex items-center text-green-700">
+                          <CheckCircleIcon className="w-5 h-5 mr-2" />
+                          <span className="font-medium">Đã Xác Nhận Ngày Nhân Viên Đến Lấy Mẫu</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={() => handleStepAction({ type: 'schedule_collection' })}
+                          className="bg-blue-600 hover:bg-blue-700 !text-white font-semibold"
+                        >
+                          <CalendarIcon className="w-4 h-4 mr-2 text-white" />
+                          Gửi Lịch Lấy Mẫu
+                        </Button>
+                        <p className="mt-2 text-xs text-slate-500">
+                          Đặt lịch hẹn để nhân viên đến tận nơi lấy mẫu xét nghiệm.
+                        </p>
+                      </>
+                    )
+                  )}
+                </div>
+              );
+            }
+            
+            return null;
+          })()
         )}
 
         {/* Nút XEM KẾT QUẢ cho step Trả Kết Quả (id = 7) */}

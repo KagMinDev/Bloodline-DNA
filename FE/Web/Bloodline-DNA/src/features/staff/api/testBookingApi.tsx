@@ -54,7 +54,7 @@ export const getTestBookingByIdApi = async (id: string): Promise<TestBookingResp
 };
 
 // Hàm PUT: Cập nhật trạng thái đặt lịch xét nghiệm
-// https://api.adntester.duckdns.org/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
+// http://173.208.142.11:8084/api/TestBooking/31DBB33BABCE4237/status?newStatus=6
 export const updateTestBookingStatusApi = async (request: TestBookingStatusRequest): Promise<TestBookingResponse> => {
   try {
     // rootApi sẽ tự động thêm Authorization header thông qua interceptor

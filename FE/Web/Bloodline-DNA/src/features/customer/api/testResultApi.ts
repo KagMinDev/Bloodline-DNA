@@ -17,7 +17,7 @@ export const getTestResultsByUserId = async (userId: string): Promise<TestResult
     console.log('🔍 Calling TestResult API with userId:', userId);
     console.log('🔑 Using token:', token.substring(0, 20) + '...');
     
-    const apiUrl = `https://api.adntester.duckdns.org/api/TestResult/user/${userId}`;
+    const apiUrl = `http://173.208.142.11:8084/api/TestResult/user/${userId}`;
     console.log('📡 API URL:', apiUrl);
     
     const response = await axios.get(apiUrl, {

@@ -25,7 +25,7 @@ export interface BookingListResponse {
 }
 
 // Base API URL
-const API_BASE_URL = "https://api.adntester.duckdns.org/api";
+const API_BASE_URL = "http://173.208.142.11:8084/api";
 
 // Function để lấy auth token
 const getAuthToken = (): string | null => {

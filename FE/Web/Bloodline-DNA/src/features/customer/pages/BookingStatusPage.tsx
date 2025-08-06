@@ -7,7 +7,7 @@ import { BookingDetailTab } from "../components/bookingStatus/BookingDetailTab";
 import { BookingProgressTab } from "../components/bookingStatus/BookingProgressTab";
 import { getStatusConfigByDetailedStatus } from "../components/bookingStatus/StatusConfig";
 import { CollectionTimeModal } from "../components/CollectionTimeModal";
-import { SampleInfoModal } from "../components/SampleInfoModal";
+import { SampleInfoModalImproved } from "../components/SampleInfoModalImproved";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -271,11 +271,16 @@ export const BookingStatusPage = (): React.JSX.Element => {
         </div>
         <Footer />
       </div>
-      <SampleInfoModal
+      <SampleInfoModalImproved
         isOpen={isSampleModalOpen}
         onClose={() => setIsSampleModalOpen(false)}
         bookingId={booking.id}
         onSubmitSuccess={handleSampleSubmitSuccess}
+        mode={
+          booking.status === 'WaitingForSample' && shouldShowSampleButton 
+            ? 'create' 
+            : 'view'
+        }
       />
 
       <CollectionTimeModal
