@@ -37,7 +37,7 @@ namespace ADNTester.Service.Implementations
 
         public async Task<IEnumerable<TestBookingDto>> GetAllAsync()
         {
-            var bookings = await _unitOfWork.TestBookingRepository.GetAllAsync();
+            var bookings = await _unitOfWork.TestBookingRepository.GetAllTestBookingsAsync();
             return _mapper.Map<IEnumerable<TestBookingDto>>(bookings);
         }
         public async Task<IEnumerable<TestBookingDetailDto>> GetBookingByUserId(string userId)

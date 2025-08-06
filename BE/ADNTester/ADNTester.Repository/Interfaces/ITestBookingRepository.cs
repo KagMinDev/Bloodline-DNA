@@ -11,5 +11,6 @@ namespace ADNTester.Repository.Interfaces
     public interface ITestBookingRepository : IGenericRepository<TestBooking>
     {
         Task<IEnumerable<TestBooking>> GetFilteredBookingsAsync(SampleCollectionMethod? method, DateTime? appointDate);
+        Task<IEnumerable<TestBooking>> GetAllTestBookingsAsync();
     }
 }

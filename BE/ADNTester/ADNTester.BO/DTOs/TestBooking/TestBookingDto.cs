@@ -6,6 +6,7 @@ namespace ADNTester.BO.DTOs.TestBooking
     {
         public string Id { get; set; }
         public string TestServiceId { get; set; }
+        public string? KitId { get; set; }
         public string ClientId { get; set; }
         public string Email { get; set; }
         public DateTime AppointmentDate { get; set; }
