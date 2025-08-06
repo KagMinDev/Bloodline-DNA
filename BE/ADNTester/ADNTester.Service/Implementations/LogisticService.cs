@@ -113,7 +113,15 @@ namespace ADNTester.Service.Implementations
 
             await _unitOfWork.SaveChangesAsync();
         }
+        public async Task<string?> GetKitIdByLogisticsIdAsync(string logisticsInfoId)
+        {
+            var kits = await _unitOfWork.TestKitRepository.GetAllAsync();
 
+            var kit = kits.FirstOrDefault(k =>
+                k.DeliveryInfoId == logisticsInfoId || k.PickupInfoId == logisticsInfoId);
+
+            return kit?.Id;
+        }
         #region Helper methods
 
         private static LogisticStatus GetInitialStatus(LogisticsType type)

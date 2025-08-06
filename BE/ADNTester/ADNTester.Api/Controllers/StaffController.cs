@@ -78,6 +78,23 @@ namespace ADNTester.Api.Controllers
 
             return NoContent();
         }
+        /// <summary>
+        /// Lấy KitId tương ứng với nhiệm vụ logistics (pickup hoặc delivery).
+        /// </summary>
+        /// <param name="id">ID của nhiệm vụ logistics</param>
+        /// <returns>KitId nếu tồn tại</returns>
+        [HttpGet("/logistics/{id}/kit-id")]
+        public async Task<IActionResult> GetKitIdByLogisticsId([FromRoute] string id)
+        {
+            // 🧪 Gọi service để lấy KitId
+            var kitId = await _logisticsService.GetKitIdByLogisticsIdAsync(id);
+
+            if (string.IsNullOrEmpty(kitId))
+                return NotFound($"Không tìm thấy Kit nào tương ứng với logistics ID: {id}");
+
+            return Ok(new { KitId = kitId });
+        }
+
 
         #endregion
 
