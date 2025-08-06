@@ -37,9 +37,13 @@ export interface TestKitResponse {
 export interface TestSampleInfo {
   id: string;
   kitId: string;
+  sampleCode: string;
   donorName: string;
   relationshipToSubject: number;
   sampleType: number;
+  collectedById: string;
+  collectedAt: string;
+  labReceivedAt: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -48,6 +52,17 @@ export interface TestSampleResponse {
   success: boolean;
   message: string;
   data?: TestSampleInfo;
+}
+
+export interface TestSampleUpdatePayload {
+  id: string;
+  sampleCode: string;
+  donorName: string;
+  relationshipToSubject: number;
+  sampleType: number;
+  collectedById: string;
+  collectedAt: string;
+  labReceivedAt: string;
 }
 
 /**
@@ -129,7 +144,7 @@ export const getTestKitByBookingIdApi = async (
  */
 export const getTestSampleByKitIdApi = async (
   kitId: string
-): Promise<TestSampleResponse> => {
+): Promise<TestSampleInfo[]> => {
   try {
     // Get authentication token
     const token =
@@ -141,10 +156,7 @@ export const getTestSampleByKitIdApi = async (
 
     if (!token) {
       console.warn("⚠️ No authentication token found");
-      return {
-        success: false,
-        message: "Yêu cầu đăng nhập để truy cập thông tin TestSample.",
-      };
+      return [];
     }
 
     const response = await rootApi.get(`/TestSample/kit/${kitId}`, {
@@ -155,11 +167,9 @@ export const getTestSampleByKitIdApi = async (
     });
 
     if (response.status >= 200 && response.status < 300) {
-      return {
-        success: true,
-        message: "Lấy thông tin TestSample thành công!",
-        data: response.data?.data || response.data,
-      };
+      // Return array of samples or empty array
+      const samples = response.data?.data || response.data || [];
+      return Array.isArray(samples) ? samples : [samples].filter(Boolean);
     }
     throw new Error(response.data?.message || "Lỗi không xác định từ máy chủ.");
   } catch (error: any) {
@@ -167,33 +177,17 @@ export const getTestSampleByKitIdApi = async (
 
     // Handle specific error cases
     if (error.response?.status === 401) {
-      return {
-        success: false,
-        message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
-      };
+      console.warn("⚠️ Authentication required");
+      return [];
     } else if (error.response?.status === 403) {
-      return {
-        success: false,
-        message: "Không có quyền truy cập thông tin TestSample.",
-      };
+      console.warn("⚠️ Access forbidden");
+      return [];
     } else if (error.response?.status === 404) {
-      console.log(
-        "📝 No TestSample found for kit - sample info not submitted yet"
-      );
-      return {
-        success: false,
-        message: "Chưa có thông tin mẫu cho kit này.",
-      };
+      console.log("ℹ️ No samples found for this kit");
+      return [];
     }
 
-    const errorMessage =
-      error.response?.data?.message ||
-      error.message ||
-      "Không thể lấy thông tin TestSample.";
-    return {
-      success: false,
-      message: errorMessage,
-    };
+    return [];
   }
 };
 
@@ -262,6 +256,114 @@ export const submitSampleInfoApi = async (
       error.response?.data?.message ||
       error.message ||
       "Không thể gửi thông tin mẫu.";
+    return {
+      success: false,
+      message: errorMessage,
+    };
+  }
+};
+
+/**
+ * Gets TestSample information by ID.
+ * @param sampleId - The sample ID to get TestSample for.
+ * @returns A promise that resolves to TestSample information.
+ */
+export const getTestSampleByIdApi = async (
+  sampleId: string
+): Promise<TestSampleResponse> => {
+  try {
+    // Get authentication token
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      sessionStorage.getItem("token") ||
+      sessionStorage.getItem("authToken") ||
+      null;
+
+    if (!token) {
+      console.warn("⚠️ No authentication token found");
+      return {
+        success: false,
+        message: "Yêu cầu đăng nhập để lấy thông tin mẫu.",
+      };
+    }
+
+    const response = await rootApi.get(`/TestSample/${sampleId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status >= 200 && response.status < 300) {
+      return {
+        success: true,
+        message: "Lấy thông tin mẫu thành công!",
+        data: response.data.data || response.data,
+      };
+    }
+    throw new Error(response.data?.message || "Lỗi không xác định từ máy chủ.");
+  } catch (error: any) {
+    console.error("❌ API Error: getTestSampleByIdApi failed", error);
+
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Không thể lấy thông tin mẫu.";
+    return {
+      success: false,
+      message: errorMessage,
+    };
+  }
+};
+
+/**
+ * Updates TestSample information.
+ * @param payload - The updated sample information.
+ * @returns A promise that resolves to a success or error message.
+ */
+export const updateTestSampleApi = async (
+  payload: TestSampleUpdatePayload
+): Promise<SampleInfoResponse> => {
+  try {
+    // Get authentication token
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("authToken") ||
+      sessionStorage.getItem("token") ||
+      sessionStorage.getItem("authToken") ||
+      null;
+
+    if (!token) {
+      console.warn("⚠️ No authentication token found");
+      return {
+        success: false,
+        message: "Yêu cầu đăng nhập để cập nhật thông tin mẫu.",
+      };
+    }
+
+    const response = await rootApi.put(`/TestSample/${payload.id}`, payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status >= 200 && response.status < 300) {
+      return {
+        success: true,
+        message: "Cập nhật thông tin mẫu thành công!",
+        data: response.data,
+      };
+    }
+    throw new Error(response.data?.message || "Lỗi không xác định từ máy chủ.");
+  } catch (error: any) {
+    console.error("❌ API Error: updateTestSampleApi failed", error);
+
+    const errorMessage =
+      error.response?.data?.message ||
+      error.message ||
+      "Không thể cập nhật thông tin mẫu.";
     return {
       success: false,
       message: errorMessage,
