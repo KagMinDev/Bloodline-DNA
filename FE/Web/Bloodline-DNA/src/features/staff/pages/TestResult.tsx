@@ -179,11 +179,11 @@ function TestResultPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="flex items-center justify-between">
-        <div className="w-full h-17 mb-2 px-5 bg-white flex items-center text-lg text-[#1F2B6C] before:content-['•'] before:mr-4">
+        <div className="w-full h-17 px-5 bg-white flex items-center text-lg text-[#1F2B6C] before:content-['•'] before:mr-4">
           Quản lý kết quả xét nghiệm
         </div>
       </div>
-      <div className="mx-auto max-w-7xl">
+      <div className="p-2 mx-auto max-w-7xl">
         <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
           <div className="flex flex-row justify-between">
             <div className="w-full">

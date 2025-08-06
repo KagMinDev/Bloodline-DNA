@@ -26,18 +26,20 @@ function Feedbacks() {
 
   return (
     <>
-      <div className="relative flex flex-col items-center h-screen p-6 overflow-auto bg-blue-50">
-        <div className="w-full mx-auto max-w-7xl">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-blue-800 md:text-3xl">Quản lý phản hồi</h1>
+      <div className="relative flex flex-col items-center h-screen overflow-auto bg-blue-50">
+        <div className="w-full">
+          <div className="fixed flex items-center justify-between w-full p-5 px-5 bg-white">
+            <li className="text-lg text-[#1F2B6C]">
+              Quản lí đánh giá phản hồi
+            </li>
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-10">
-              <Loading message="Đang tải phản hồi..." />
+            <div className="flex items-center justify-center h-[550px]">
+              <Loading message="Đang tải danh sách đánh giá..." />
             </div>
           ) : feedbacks.length > 0 ? (
-            <div className="space-y-4">
+            <div className="p-2 space-y-4 mt-17">
               {feedbacks.map((fb) => (
                 <FeedbackCard key={fb.id} feedback={fb} />
               ))}
