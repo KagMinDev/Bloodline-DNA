@@ -1,19 +1,19 @@
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "react-toastify";
-import { Input, DatePicker } from "antd";
+import { DatePicker, Input } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { createTestSampleFromStaffApi } from "../../api/testSampleApi";
-import { getTestBookingApi } from "../../api/testBookingApi";
-import { RelationshipToSubjectLabelVi, SampleTypeLabelVi } from "../../types/sampleTest";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../sample/ui/dialog";
-import { Button } from "../sample/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../booking/ui/select";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { z } from "zod";
 import { getUserInfoApi } from "../../../auth/api/loginApi";
-import type { TestKitResponse } from "../../types/testKit";
+import { getTestBookingApi } from "../../api/testBookingApi";
+import { createTestSampleFromStaffApi } from "../../api/testSampleApi";
+import { RelationshipToSubjectLabelVi, SampleTypeLabelVi } from "../../types/sampleTest";
 import type { TestBookingResponse } from "../../types/testBooking";
+import type { TestKitResponse } from "../../types/testKit";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../booking/ui/select";
+import { Button } from "../sample/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../sample/ui/dialog";
 
 const createAtFacilitySchema = (existingDonorNames: string[]) => {
   return z.object({
@@ -30,9 +30,9 @@ const createAtFacilitySchema = (existingDonorNames: string[]) => {
   });
 };
 
-type Props = { 
-  open: boolean; 
-  onClose: () => void; 
+type Props = {
+  open: boolean;
+  onClose: () => void;
   bookingId?: string | null;
   onSampleCreated?: () => void;
   existingDonorNames: string[];
@@ -64,7 +64,7 @@ export default function TestSampleModal({ open, onClose, bookingId, onSampleCrea
         bookingId: bookingId || "",
         collectedAt: new Date(),
       });
-      
+
       const fetchUser = async () => {
         const token = localStorage.getItem("token") || "";
         if (!token) return;
@@ -87,7 +87,7 @@ export default function TestSampleModal({ open, onClose, bookingId, onSampleCrea
         toast.error("Lỗi khi tải danh sách booking");
       }
     };
-    
+
     if (open) fetchBookings();
   }, [open, reset, bookingId, setValue]);
 
@@ -152,7 +152,7 @@ export default function TestSampleModal({ open, onClose, bookingId, onSampleCrea
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-4">
           {/* Người thu mẫu */}
           <div>
-            <label className="block text-sm mb-1">Người thu mẫu</label>
+            <label className="block mb-1 text-sm">Người thu mẫu</label>
             <Input value={collectedById} readOnly className="h-10 bg-gray-100" />
           </div>
 
@@ -175,8 +175,8 @@ export default function TestSampleModal({ open, onClose, bookingId, onSampleCrea
             />
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full mt-2 bg-[#1F2B6C] hover:bg-blue-800"
             disabled={isSubmitting || Object.keys(errors).length > 0}
           >
@@ -186,7 +186,7 @@ export default function TestSampleModal({ open, onClose, bookingId, onSampleCrea
           </Button>
 
           {Object.keys(errors).length > 0 && (
-            <div className="text-red-500 text-sm p-2 border border-red-200 rounded bg-red-50">
+            <div className="p-2 text-sm text-red-500 border border-red-200 rounded bg-red-50">
               Vui lòng kiểm tra lại các thông tin bắt buộc
             </div>
           )}
@@ -207,19 +207,20 @@ function FormFields({ control, errors, existingDonorNames }: FieldProps) {
     <>
       {/* Người cho mẫu */}
       <div>
+        <label className="block mb-1 text-sm">Người cho mẫu</label>
         <Controller
           name="donorName"
           control={control}
           render={({ field }) => (
             <>
-              <Input 
-                {...field} 
-                placeholder="Người cho mẫu" 
+              <Input
+                {...field}
+                placeholder="Người cho mẫu"
                 className="h-10"
                 status={errors.donorName ? "error" : undefined}
               />
               {errors.donorName && (
-                <p className="text-sm text-red-500 mt-1">
+                <p className="mt-1 text-sm text-red-500">
                   {errors.donorName.message}
                   {errors.donorName.type === "refine" && (
                     <span className="block">Các tên đã tồn tại: {existingDonorNames.join(", ")}</span>
@@ -233,7 +234,7 @@ function FormFields({ control, errors, existingDonorNames }: FieldProps) {
 
       {/* Mối quan hệ */}
       <div>
-        <label className="block text-sm mb-1">Mối quan hệ</label>
+        <label className="block mb-1 text-sm">Mối quan hệ</label>
         <Controller
           name="relationshipToSubject"
           control={control}
@@ -251,13 +252,13 @@ function FormFields({ control, errors, existingDonorNames }: FieldProps) {
           )}
         />
         {errors.relationshipToSubject && (
-          <p className="text-sm text-red-500 mt-1">{errors.relationshipToSubject.message}</p>
+          <p className="mt-1 text-sm text-red-500">{errors.relationshipToSubject.message}</p>
         )}
       </div>
 
       {/* Loại mẫu */}
       <div>
-        <label className="block text-sm mb-1">Loại mẫu</label>
+        <label className="block mb-1 text-sm">Loại mẫu</label>
         <Controller
           name="sampleType"
           control={control}
@@ -275,7 +276,7 @@ function FormFields({ control, errors, existingDonorNames }: FieldProps) {
           )}
         />
         {errors.sampleType && (
-          <p className="text-sm text-red-500 mt-1">{errors.sampleType.message}</p>
+          <p className="mt-1 text-sm text-red-500">{errors.sampleType.message}</p>
         )}
       </div>
     </>
