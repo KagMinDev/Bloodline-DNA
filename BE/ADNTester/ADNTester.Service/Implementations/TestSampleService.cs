@@ -179,17 +179,17 @@ namespace ADNTester.Service.Implementations
             return _mapper.Map<IEnumerable<TestSampleDetailDto>>(userSamples);
         }
 
-        public async Task<TestSampleDetailDto> GetTestSampleByKitId(string kitId)
+        public async Task<IEnumerable<TestSampleDetailDto>> GetTestSampleByKitId(string kitId)
         {
             // Lấy thông tin kit trước
             var kit = await _unitOfWork.TestKitRepository.GetByIdAsync(kitId);
             if (kit == null)
                 return null;
 
-            var sample = await _unitOfWork.TestSampleRepository.GetAllAsync();
-            var targetSample = sample.FirstOrDefault(s => s.KitId == kitId);
+            var samples = await _unitOfWork.TestSampleRepository.GetAllAsync();
+            var targetSamples = samples.Where(s => s.KitId == kitId).ToList();
 
-            if (targetSample == null)
+            if (!targetSamples.Any())
                 return null;
 
             // Lấy thông tin booking từ kit
@@ -204,10 +204,13 @@ namespace ADNTester.Service.Implementations
                 kit.Booking = booking;
             }
 
-            // Gán thông tin kit vào sample
-            targetSample.Kit = kit;
+            // Gán thông tin kit vào từng sample
+            foreach (var sample in targetSamples)
+            {
+                sample.Kit = kit;
+            }
 
-            return _mapper.Map<TestSampleDetailDto>(targetSample);
+            return _mapper.Map<IEnumerable<TestSampleDetailDto>>(targetSamples);
         }
 
         public async Task<string> CreateSampleFromClientAsync(CreateTestSampleFromClientDto dto)
