@@ -598,11 +598,33 @@ export const BookingModal: React.FC<BookingModalProps> = ({
   };
 
   const handleClose = () => {
-    // If we're on step 3 (success step) and have booking response, navigate to booking status
+    // If we're on step 3 (success step) and have booking response, navigate based on collectionMethod
     const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
     if (step === 3 && bookingId) {
-      // Navigate first, then close modal to avoid any interference
-      navigate(`/customer/booking-status/${bookingId}`);
+      // Check collectionMethod to determine navigation target
+      const serviceToUse = enhancedSelectedService || selectedService;
+      const collectionMethod = serviceToUse?.collectionMethod;
+      
+      console.log('🚀 BookingModal Close Navigation Logic:', {
+        bookingId,
+        collectionMethod,
+        serviceToUse: serviceToUse ? {
+          id: serviceToUse.id,
+          name: serviceToUse.name,
+          collectionMethod: serviceToUse.collectionMethod
+        } : null
+      });
+      
+      // If collectionMethod is 1 (AtFacility), navigate to booking list
+      // Otherwise, navigate to booking status
+      if (collectionMethod === 1) {
+        console.log('📍 Navigating to booking list (AtFacility)');
+        navigate('/customer/booking-list');
+      } else {
+        console.log('📍 Navigating to booking status (SelfSample)');
+        navigate(`/customer/booking-status/${bookingId}`);
+      }
+      
       // Close modal after a brief delay to ensure navigation completes
       setTimeout(() => {
         resetForm();
@@ -1038,7 +1060,30 @@ export const BookingModal: React.FC<BookingModalProps> = ({
                     // Check both possible locations for booking ID
                     const bookingId = (bookingResponse as any)?.data || bookingResponse?.id;
                     if (bookingId) {
-                      navigate(`/customer/booking-status/${bookingId}`);
+                      // Check collectionMethod to determine navigation target
+                      const serviceToUse = enhancedSelectedService || selectedService;
+                      const collectionMethod = serviceToUse?.collectionMethod;
+                      
+                      console.log('🚀 BookingModal Button Close Navigation Logic:', {
+                        bookingId,
+                        collectionMethod,
+                        serviceToUse: serviceToUse ? {
+                          id: serviceToUse.id,
+                          name: serviceToUse.name,
+                          collectionMethod: serviceToUse.collectionMethod
+                        } : null
+                      });
+                      
+                      // If collectionMethod is 1 (AtFacility), navigate to booking list
+                      // Otherwise, navigate to booking status
+                      if (collectionMethod === 1) {
+                        console.log('📍 Button: Navigating to booking list (AtFacility)');
+                        navigate('/customer/booking-list');
+                      } else {
+                        console.log('📍 Button: Navigating to booking status (SelfSample)');
+                        navigate(`/customer/booking-status/${bookingId}`);
+                      }
+                      
                       // Close modal after navigation
                       setTimeout(() => {
                         resetForm();
