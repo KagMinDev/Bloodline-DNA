@@ -8,4 +8,4 @@ export default rootApi;
 
 export const BASE_URL = "https://api.adntester.duckdns.org/api";
 
-export const STAFF_BASE_URL = "https://api.adntester.duckdns.org";
+export const STAFF_BASE_URL = "http://173.208.142.11:8084";

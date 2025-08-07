@@ -1,3 +1,4 @@
+import { STAFF_BASE_URL } from "@/api/rootApi";
 import axios from "axios";
 import { BASE_URL } from "./rootApi";
 
@@ -12,7 +13,7 @@ export const loginApi = async (
   password: string
 ): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(`${BASE_URL}/auth/login`, { email, password });
+    const response = await axios.post(`${STAFF_BASE_URL}/api/auth/login`, { email, password });
     if (response.data.success) {
       const { token, userName, role } = response.data.data;
       return { token, userName, role };
