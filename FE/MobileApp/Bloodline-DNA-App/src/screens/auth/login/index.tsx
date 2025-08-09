@@ -74,8 +74,7 @@ const LoginScreen: React.FC = () => {
   try {
     const response = await loginApi(data.email, data.password);
     const { token, role, userName } = response;
-
-    await login(token, userName);
+    await login(token, userName, role);
 
     const userInfo = await getUserInfoApi(token);
 

@@ -1,4 +1,3 @@
-// AppRouter.tsx
 import { useAuth } from "@/context/auth/AuthContext";
 import AppointmentScreen from "@/screens/appoiment/screen/Appoiments";
 import BlogsScreen from "@/screens/blogs";
@@ -27,7 +26,6 @@ import { MainTabParamList, RootStackParamList, } from "../types/root-stack/stack
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Bottom Tabs Navigator
 const MainTabs: React.FC = () => {
   return (
     <Tab.Navigator
@@ -75,7 +73,7 @@ const MainTabs: React.FC = () => {
 };
 
 const AppRouter: React.FC = () => {
-  const { isLoggedIn, loading } = useAuth();
+  const { isLoggedIn, loading, role } = useAuth(); // ⬅️ Lấy thêm role
 
   if (loading) {
     return (
@@ -88,32 +86,35 @@ const AppRouter: React.FC = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {isLoggedIn ? (
-        <>
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen name="Doctors" component={DoctorsScreen} />
-          <Stack.Screen name="Blogs" component={BlogsScreen} />
-          <Stack.Screen name="Services" component={Services} />
-          <Stack.Screen name="BlogDetailsScreen" component={BlogDetailsScreen} />
-          <Stack.Screen name="Contact" component={ContactScreen} />
-          <Stack.Screen name="DeliveriesStaffTabs" component={DeliveriesStaffTabs} />
-          <Stack.Screen name="Profile" component={ProfileScreen} />
-
-
-          <Stack.Screen name="AllService" component={AllServiceScreen} />
-          <Stack.Screen name="DetailsService" component={DetailService} />
-          <Stack.Screen  name="AppointmentScreen" component={AppointmentScreen} />
-
-          <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
-          <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
-          <Stack.Screen name="PaymentError" component={PaymentError} />
-          <Stack.Screen name="BookingHistory" component={BookingHistory} />
-          <Stack.Screen name="WebViewScreen" component={WebViewScreen} options={{ title: "Thanh toán" }} />
-        </>
+        role === "Staff" ? (
+          <>
+            <Stack.Screen name="DeliveriesStaffTabs" component={DeliveriesStaffTabs} />
+            {/* Add extra screens for staff if needed */}
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="Doctors" component={DoctorsScreen} />
+            <Stack.Screen name="Blogs" component={BlogsScreen} />
+            <Stack.Screen name="Services" component={Services} />
+            <Stack.Screen name="BlogDetailsScreen" component={BlogDetailsScreen} />
+            <Stack.Screen name="Contact" component={ContactScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="AllService" component={AllServiceScreen} />
+            <Stack.Screen name="DetailsService" component={DetailService} />
+            <Stack.Screen name="AppointmentScreen" component={AppointmentScreen} />
+            <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
+            <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
+            <Stack.Screen name="PaymentError" component={PaymentError} />
+            <Stack.Screen name="BookingHistory" component={BookingHistory} />
+            <Stack.Screen name="WebViewScreen" component={WebViewScreen} options={{ title: "Thanh toán" }} />
+          </>
+        )
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="ForgotPassword"  component={ForgotPasswordScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         </>
       )}
     </Stack.Navigator>
